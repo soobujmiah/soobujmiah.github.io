@@ -327,7 +327,7 @@
       "Office Administrator & Operations Support",
       "Virtual Assistant & Data Entry Specialist",
       "Linux & Termux Systems Builder",
-      "On-Device AI / Local LLM Engineer",
+      "On-Device AI / Local LLM Developer",
       "Social Media & SEO Content Manager"
     ];
     var ROLES = ROLES_EN, gen = 0, ri = 0, ci = 0, del = false;
