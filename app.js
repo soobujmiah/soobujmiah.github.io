@@ -36,7 +36,7 @@
 
   function build(){
     var short = Math.min(window.innerWidth, window.innerHeight);
-    var step = short < 420 ? 88 : short < 620 ? 80 : short < 900 ? 84 : 96;
+    var step = short < 420 ? 104 : short < 620 ? 96 : short < 900 ? 100 : 112;
     var cols = Math.ceil(W / step) + 1, rows = Math.ceil(H / step) + 1;
     nodes = []; links = []; pulses = [];
     var grid = [];
@@ -53,17 +53,17 @@
       for (var c2 = 0; c2 <= cols; c2++){
         var a = grid[r2][c2];
         if (c2 < cols && Math.random() < .82) links.push({ a: a, b: grid[r2][c2 + 1], bend: Math.random() < .5 ? 0 : 1 });
-        if (r2 < rows && Math.random() < .58) links.push({ a: a, b: grid[r2 + 1][c2], bend: Math.random() < .5 ? 0 : 1 });
+        if (r2 < rows && Math.random() < .48) links.push({ a: a, b: grid[r2 + 1][c2], bend: Math.random() < .5 ? 0 : 1 });
       }
     }
-    var count = Math.min(26, Math.max(9, Math.round(links.length / 42)));
+    var count = Math.min(14, Math.max(6, Math.round(links.length / 70)));
     for (var i = 0; i < count; i++) pulses.push(newPulse());
   }
   function newPulse(){
     return { li: (Math.random() * links.length) | 0, t: Math.random(), sp: 0.0022 + Math.random() * 0.0042, cyan: Math.random() < .28 };
   }
   function size(){
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    DPR = Math.min(window.devicePixelRatio || 1, 1.25);
     W = window.innerWidth;
     H = Math.min(window.innerHeight, 1100);
     cv.width  = Math.floor(W * DPR);
@@ -184,16 +184,18 @@
      ========================================================== */
   var cur = document.getElementById("cur"), curd = document.getElementById("curd");
   if (cur && window.matchMedia("(hover:hover) and (pointer:fine)").matches && !RM){
-    var cx = -100, cy = -100, tx = -100, ty = -100;
+    var cx = -100, cy = -100, tx = -100, ty = -100, curRaf = 0;
+    function curLoop(){
+      cx += (tx - cx) * 0.22; cy += (ty - cy) * 0.22;
+      cur.style.transform = "translate(" + cx + "px," + cy + "px)";
+      if (Math.abs(tx - cx) + Math.abs(ty - cy) > 0.15) curRaf = requestAnimationFrame(curLoop);
+      else curRaf = 0;
+    }
     window.addEventListener("pointermove", function(e){
       tx = e.clientX; ty = e.clientY;
       curd.style.transform = "translate(" + tx + "px," + ty + "px)";
+      if (!curRaf) curRaf = requestAnimationFrame(curLoop);
     }, { passive: true });
-    (function loop(){
-      cx += (tx - cx) * 0.18; cy += (ty - cy) * 0.18;
-      cur.style.transform = "translate(" + cx + "px," + cy + "px)";
-      requestAnimationFrame(loop);
-    })();
     document.addEventListener("pointerover", function(e){
       var t = e.target.closest ? e.target.closest("a,button,.spot,.tag") : null;
       cur.classList.toggle("hot", !!t);

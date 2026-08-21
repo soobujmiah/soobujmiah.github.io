@@ -147,10 +147,13 @@ html.tswap *,html.tswap *::before,html.tswap *::after{
   background:radial-gradient(130% 105% at 50% 42%, transparent 40%, rgba(var(--bg-rgb),.78) 100%);
 }
 .bg-grain{
-  position:fixed;inset:-120%;z-index:3;pointer-events:none;
+  position:fixed;inset:-20%;z-index:3;pointer-events:none;
   opacity:var(--grain-op);mix-blend-mode:var(--grain-blend);
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
-  animation:grain 6s steps(6) infinite;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  animation:grain 8s steps(4) infinite;
+}
+@media (max-width:760px),(prefers-reduced-data:reduce){
+  .bg-grain{animation:none;inset:0}
 }
 @keyframes grain{
   0%{transform:translate(0,0)}20%{transform:translate(-4%,3%)}40%{transform:translate(3%,-4%)}
@@ -168,19 +171,33 @@ html.tswap *,html.tswap *::before,html.tswap *::after{
 @keyframes bootBar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @keyframes bootOut{to{opacity:0;visibility:hidden}}
 
-.cur,.curd{position:fixed;top:0;left:0;z-index:190;pointer-events:none;border-radius:50%;display:none}
+.cur,.curd{position:fixed;top:0;left:0;z-index:190;pointer-events:none;display:none}
 .cur{
-  width:34px;height:34px;margin:-17px 0 0 -17px;border:1px solid var(--cur-b);
-  transition:width .3s var(--ease),height .3s var(--ease),margin .3s var(--ease),
-             background-color .3s var(--ease),border-color .3s var(--ease),opacity .3s;
+  width:38px;height:38px;margin:-19px 0 0 -19px;border:0;border-radius:0;background:none;color:#fff;
+  mix-blend-mode:difference;
+  transition:width .28s var(--ease),height .28s var(--ease),margin .28s var(--ease),
+             border-radius .28s var(--ease),opacity .28s;
 }
-.curd{width:5px;height:5px;margin:-2.5px 0 0 -2.5px;background:var(--acc)}
-.cur.hot{width:56px;height:56px;margin:-28px 0 0 -28px;background:var(--acc-soft);border-color:var(--acc)}
-.cur.tap{width:22px;height:22px;margin:-11px 0 0 -11px}
+.cur::before,.cur::after{content:"";position:absolute;background:currentColor;opacity:.92;transition:opacity .2s}
+.cur::before{left:50%;top:5px;bottom:5px;width:1px;transform:translateX(-50%)}
+.cur::after{top:50%;left:5px;right:5px;height:1px;transform:translateY(-50%)}
+.cur.hot{
+  width:52px;height:52px;margin:-26px 0 0 -26px;border:1.5px solid currentColor;border-radius:50%;
+}
+.cur.hot::before,.cur.hot::after{opacity:0}
+.cur.tap{width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;border:1.5px solid currentColor}
+.curd{width:0;height:0;background:none}
+.curd::after{
+  content:"";position:absolute;left:-3.5px;top:-3.5px;width:7px;height:7px;
+  background:var(--acc);transform:rotate(45deg);border-radius:1px;
+  box-shadow:0 0 10px var(--acc-glow);
+  transition:transform .28s var(--ease),width .28s var(--ease),height .28s var(--ease),left .28s,top .28s;
+}
+.cur.hot ~ .curd::after{left:-2.5px;top:-2.5px;width:5px;height:5px}
 @media (hover:hover) and (pointer:fine){
   .cur,.curd{display:block}
   body{cursor:none}
-  a,button,.spot,.dock a{cursor:none}
+  a,button,.spot,.dock a,.dock .dctl{cursor:none}
 }
 
 .hero-in{text-align:center}
