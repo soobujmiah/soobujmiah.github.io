@@ -587,6 +587,12 @@
     if (window.__reglitch) window.__reglitch();
     if (window.__reglyph) window.__reglyph();
     if (window.__setRoles) window.__setRoles(bn ? I18.roles : null);
+    var motto = document.querySelector(".motto span");
+    if (motto){
+      motto.textContent = bn
+        ? (I18.html && I18.html[".motto span"]) || I18.text["As long as I learn, I live."] || "শেখা যতক্ষণ, বাঁচা ততক্ষণ।"
+        : "As long as I learn, I live.";
+    }
     if (hero){ hero.classList.add("go"); hero.classList.add("done"); }
     document.querySelectorAll("[data-count]").forEach(function(el){
       var t = el.getAttribute("data-count"), sfx = el.getAttribute("data-suffix") || "";
