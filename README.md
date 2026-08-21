@@ -2,18 +2,35 @@
 
 Personal site for **Sobuj Miah** — office administrator, virtual assistant, and self-taught Linux / on-device AI engineer in Savar, Dhaka.
 
-Live locally from this folder. Designed for GitHub Pages at `https://soobujmiah.github.io/`.
+Live at `https://soobujmiah.github.io/`.
 
 ## What’s here
 
 | File | Role |
 |---|---|
-| `index.html` | Page structure |
+| `index.html` | Page structure and public presentation |
 | `styles.css` | Theme, layout, motion |
 | `i18n.js` | English ↔ Bangla dictionary |
 | `app.js` | Mesh background, dock, language, theme |
-| `fonts.css` + `fonts/` | Self-hosted Sora, Inter, JetBrains Mono, Hind Siliguri, Anek Bangla |
+| `PORTFOLIO_CONTENT.md` | SKB-aligned public content policy and positioning |
+| `fonts.css` + `fonts/` | Self-hosted fonts |
 | `assets/Sobuj_Miah_CV.pdf` | Downloadable CV |
+
+## Public knowledge architecture
+
+The private repository `soobujmiah/skb` is the source/context layer. This repository is the curated public presentation layer.
+
+`PORTFOLIO_CONTENT.md` records the approved positioning and claim boundaries so future portfolio updates can be checked against the SKB rather than drifting independently.
+
+Public claims must distinguish between:
+
+- vision/specification
+- implemented code
+- tested behavior
+- device-validated evidence
+- production readiness
+
+Private context, credentials, tokens, private datasets, and unnecessary sensitive details do not belong here.
 
 ## Features
 
@@ -27,7 +44,6 @@ Live locally from this folder. Designed for GitHub Pages at `https://soobujmiah.
 ## Run locally
 
 ```bash
-cd portfolio
 python3 -m http.server 8080 --bind 0.0.0.0
 ```
 
@@ -35,26 +51,6 @@ Then open `http://localhost:8080`.
 
 ## Publish to GitHub Pages
 
-1. Create a public repo named **`soobujmiah.github.io`**
-2. Push this folder to the `main` branch (the files must sit at the repo root)
-3. In repo **Settings → Pages**, set Source to `main` / root
-4. Site will be at `https://soobujmiah.github.io/`
+Push this repository's `main` branch and configure GitHub Pages to serve the repository root.
 
-```bash
-git init
-git add .
-git commit -m "Publish portfolio"
-git branch -M main
-git remote add origin https://github.com/soobujmiah/soobujmiah.github.io.git
-git push -u origin main
-```
-
-Do **not** put a personal access token in the remote URL or in chat.
-
-## Security
-
-If a GitHub token (`ghp_…`) was pasted in chat, revoke it immediately:
-
-https://github.com/settings/tokens
-
-Then create a new token only if you still need one, and never share it.
+Do **not** put a personal access token in a remote URL or in chat.
