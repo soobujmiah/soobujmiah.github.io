@@ -67,6 +67,7 @@ window.I18N = {
     "05 — Capabilities": "০৫ — দক্ষতা",
     "06 — Contact": "০৬ — যোগাযোগ",
     "Someone who can run your back office reliably — and also build the tooling that makes it faster.": "এমন একজন যিনি আপনার দাপ্তরিক কাজ নির্ভরযোগ্যভাবে সামলাতে পারেন — আবার সেই কাজ দ্রুত করার প্রযুক্তিও তৈরি করতে পারেন।",
+    "As long as I learn, I live.": "শেখা যতক্ষণ, বাঁচা ততক্ষণ।",
     "Practical, dependable support for businesses that need things handled properly the first time — remote-ready across flexible hours.": "যেসব প্রতিষ্ঠান প্রথমবারেই কাজ ঠিকভাবে সম্পন্ন করতে চায়, তাদের জন্য বাস্তবসম্মত ও নির্ভরযোগ্য সহায়তা — নমনীয় সময়ে দূর থেকে কাজের জন্য প্রস্তুত।",
     "From industrial project sites in Saudi Arabia to administrative operations in Dhaka.": "সৌদি আরবের শিল্প প্রকল্প থেকে ঢাকার প্রশাসনিক কার্যক্রম পর্যন্ত।",
     "Self-directed projects built to solve real constraints — most of them written, compiled and shipped on Android.": "বাস্তব সীমাবদ্ধতা সমাধানের জন্য নিজ উদ্যোগে তৈরি প্রকল্প — যার বেশিরভাগই অ্যান্ড্রয়েডেই লেখা, কম্পাইল ও প্রকাশ করা।",
