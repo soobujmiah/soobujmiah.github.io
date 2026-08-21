@@ -377,19 +377,18 @@ html[data-theme="light"] .tgl .moon{opacity:1;transform:none}
   color:var(--text-2);font-size:clamp(.95rem,.9rem + .22vw,1.08rem);
   line-height:1.75;max-width:62ch;margin-top:1.1rem;
 }
-.motto{
-  margin:1.35rem 0 0;
-  max-width:28ch;
-  border-left:2px solid var(--acc);
-  padding:.15rem 0 .15rem 1rem;
+.hero-in > .motto{
+  max-width:min(100%,860px);margin:.7rem auto 0;
+  display:flex;align-items:center;justify-content:center;gap:.75rem;
+  font-family:var(--display);font-weight:500;letter-spacing:.01em;line-height:1.3;
+  font-size:clamp(.92rem,.82rem + .35vw,1.08rem);color:var(--text-3);
+  text-align:center;text-align-last:center;
 }
-.motto p{
-  font-family:var(--display);font-weight:600;letter-spacing:-.03em;line-height:1.25;
-  font-size:clamp(1.2rem,1rem + 1.1vw,1.65rem);color:var(--text);
-  text-align:left;text-align-last:start;margin:0;
+.hero-in > .motto::before,
+.hero-in > .motto::after{
+  content:"";width:28px;height:1px;background:var(--acc);opacity:.55;flex:none;
 }
-html[lang="bn"] .motto{max-width:22ch}
-html[lang="bn"] .motto p{letter-spacing:0;line-height:1.45}
+html[lang="bn"] .hero-in > .motto{letter-spacing:0;line-height:1.5;font-size:clamp(.95rem,.85rem + .3vw,1.12rem)}
 .sec-head{margin-bottom:clamp(1.3rem,2.8vw,2rem)}
 
 .btn{
