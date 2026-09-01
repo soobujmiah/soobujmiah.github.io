@@ -165,16 +165,6 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
   background-size:24px 24px;
 }
 
-/* Boot animation */
-#boot{
-  position:fixed;inset:0;z-index:999;background:var(--bg);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;
-  transition:opacity .45s var(--ease),visibility .45s;pointer-events:none;opacity:0;visibility:hidden;
-}
-.boot-bar{width:min(210px,54vw);height:2px;background:var(--line-2);overflow:hidden}
-.boot-bar i{display:block;height:100%;width:100%;background:var(--acc);transform-origin:0 50%;animation:bootBar 1.15s var(--ease-2) forwards}
-@keyframes bootBar{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
-
 /* Custom cursor */
 .cur,.curd{position:fixed;top:0;left:0;z-index:190;pointer-events:none;display:none}
 @media (hover:hover) and (pointer:fine){
@@ -757,5 +747,5 @@ html[data-theme="light"] .dock .tgl .moon{display:block;opacity:1}
   *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
   .rv,.stg > *{opacity:1 !important;transform:none !important;filter:none !important}
   .name .ln > i{transform:none !important;opacity:1 !important}
-  #boot,#bg,.bg-grain{display:none !important}
+  #bg,.bg-grain{display:none !important}
 }

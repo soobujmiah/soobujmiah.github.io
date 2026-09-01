@@ -456,7 +456,7 @@
         if (!p) return NodeFilter.FILTER_REJECT;
         var tag = p.tagName;
         if (tag === "SCRIPT" || tag === "STYLE") return NodeFilter.FILTER_REJECT;
-        if (p.closest("#boot") || p.closest("#role") || p.closest("#lang") || p.closest("#tgl")) return NodeFilter.FILTER_REJECT;
+        if (p.closest("#role") || p.closest("#lang") || p.closest("#tgl")) return NodeFilter.FILTER_REJECT;
         return NodeFilter.FILTER_ACCEPT;
       }
     });
@@ -486,7 +486,7 @@
           if (!p) return NodeFilter.FILTER_REJECT;
           var tag = p.tagName;
           if (tag === "SCRIPT" || tag === "STYLE") return NodeFilter.FILTER_REJECT;
-          if (p.closest("#boot") || p.closest("#role") || p.closest("#lang") || p.closest("#tgl")) return NodeFilter.FILTER_REJECT;
+          if (p.closest("#role") || p.closest("#lang") || p.closest("#tgl")) return NodeFilter.FILTER_REJECT;
           return NodeFilter.FILTER_ACCEPT;
         }
       });
