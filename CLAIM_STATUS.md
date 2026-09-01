@@ -1,47 +1,38 @@
-# Public Claim Status
+# Public Claim Status & Evidence Model
 
-This document defines how technical claims are presented publicly in the portfolio.
+This document defines how technical claims are categorized and presented publicly in the portfolio.
 
-## Verified
+## 1. Verified
 
-Claims supported by current repository evidence, repeatable device/runtime testing, or established professional experience.
+Claims supported by current repository evidence, automated test suites, repeatable physical device validation, or established professional track record.
 
-- Operations and office administration experience.
-- Linux/Android workstation work using Termux, PRoot/Debian and X11 tooling.
-- Local LLM experimentation and deployment using llama.cpp/GGUF workflows.
-- Git/GitHub-based software development and technical documentation.
-- LAI CPU-side local inference and the documented Android automation/runtime architecture.
-- Device-specific diagnostics and runtime investigation.
+- **ARM64 Native Toolchain (ADT):** Native aarch64 `aapt2` resource linking with Android 35 platform APIs, JVM `d8` bytecode compilation (`classes.dex`), and host `apksigner` v1/v2/v3 verification.
+- **GGEN Pure-Dart Engine Core:** 143 passing unit tests in `packages/ggen_core` (237 app tests); deterministic `TextFlowEngine` with conservation invariant `rendered + overflow == story.length`; transactional `.ggen` persistence with SHA-256 state receipts.
+- **LAI On-Device CPU Inference:** Real ARM64 llama.cpp CPU adapter with Qwen 2.5 1.5B GGUF; verified 12–20 tok/s decode; 0.5–0.7s TTFT with KV-prefix caching; SHA-256 model checksum verification.
+- **Ternux Linux Workstation on Android:** Turnkey no-root PRoot Debian ARM64 environment; X11 desktop via Termux-X11; TCP PulseAudio routing; direct acceleration on `/dev/kgsl-3d0`.
+- **Songjog Business Ledger:** 74/74 passing CI tests; SQLite local persistence; deterministic minor-unit BDT integer arithmetic (no floats); persistent JSONL telemetry surviving process restarts.
+- **DataKhoj Android Core:** Kotlin/Jsoup extraction engine with pure-JVM `:core`; Room database backed by 85 contract assertions.
+- **Technical Operations & Administration:** 8+ years across industrial progress reporting (Saudi Aramco / PCMC gas-plant projects) and institutional administrative operations (Rabeya Education Family).
 
-## Experimental
+## 2. Experimental / Research
 
-Capabilities under active development, dependent on device/runtime constraints, or not yet suitable to describe as stable production features.
+Capabilities under active development, dependent on device/driver constraints, or undergoing qualification before production status.
 
-- Vulkan acceleration paths on the Redmi Turbo 4 Pro / Adreno 825 environment.
-- GPU-accelerated llama.cpp execution where the proprietary Qualcomm Vulkan driver remains a limiting factor.
-- NPU/QNN acceleration and related backend work that has not yet passed the project's qualification gates.
-- Experimental AI-agent, RAG/OCR, and automation integrations when the specific implementation is still evolving.
+- **Adreno Vulkan Acceleration:** Symbolized `SIGSEGV` in `vkCmdBindPipeline+0x4` in vendor `vulkan.adreno.so` on Snapdragon 8s Gen 4 / Adreno 825 during matrix multiplication (`MUL_MAT`). Contained by fail-closed CPU-default routing.
+- **NPU / Hexagon / QNN / LiteRT:** Abstraction interfaces and fallback logic defined in NpuHub and DataKhoj; native NPU kernel execution remains in qualification.
+- **Multi-Step Autonomous Agent Loops:** High-privilege tool execution gated by explicit user proposals and Shizuku allowlists; autonomous multi-step loops remain under active research.
+- **Bangla Vision OCR:** Model boundary defined; custom Bangla printed/handwritten OCR model integration in progress.
 
-Experimental claims should use language such as "investigating", "prototype", "experimental", or "under development".
+## 3. Historical Benchmark
 
-## Historical benchmark
+Measurements observed during specific test configurations on defined hardware — not universal production guarantees.
 
-Measurements that were genuinely observed during a particular test/configuration but should not be interpreted as current production capability.
+- **465 FPS:** Peak frame rate recorded in `glmark2-es2` via Mesa Turnip + Zink translation on Redmi Turbo 4 Pro (Adreno 825).
+- **12–20 tok/s:** Observed decode rate running Qwen 2.5 1.5B Q4_K_M on 8-core arm64-v8a CPU with 4 threads.
+- **0.5–0.7s TTFT:** Time-to-first-token recorded on prompt evaluation with warm KV cache on physical hardware.
 
-- Historical graphics/runtime benchmark figures such as **465 FPS**.
-- Historical **8K context** test/configuration claims.
-- Other one-off performance numbers tied to a specific device, driver, model, build, resolution, or runtime configuration.
+## Public Presentation Axioms
 
-Historical benchmark figures must include enough context to prevent readers from interpreting them as guaranteed current performance.
-
-## Public presentation rule
-
-A benchmark is evidence of what happened in a defined test; it is not automatically a product capability. A project vision is not automatically an implemented feature. A working experiment is not automatically production-ready.
-
-The portfolio therefore uses this hierarchy:
-
-**Verified → current public capability**  
-**Experimental → active/limited development**  
-**Historical benchmark → observed past measurement**
-
-Private SKB context, credentials, secrets, and unsupported claims are never promoted to the public portfolio merely for completeness.
+> **Evidence over assumptions.**  
+> **Root cause over symptoms.**  
+> **Verification over claims.**

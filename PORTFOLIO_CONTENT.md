@@ -1,124 +1,71 @@
-# Portfolio Content — Public Curation Layer
+# Portfolio Content & Positioning Policy
 
-This file defines the public-facing content direction for the portfolio.
+This document defines the professional positioning and curation standards for the public portfolio.
 
-## Source-of-truth model
+## Primary Positioning
 
-`soobujmiah/skb` is the private knowledge/source layer. This repository is the public presentation layer.
+> **Self-Taught Technology Builder**  
+> **Android • ARM64 Linux • AI Systems • Developer Tooling • Real-Device Engineering**
 
-Before publishing a new claim here:
+Core identity statement:
+> A self-taught technology builder focused on Android, ARM64 Linux, AI systems, developer tooling, and real-device engineering. Backed by an 8+ year operational foundation in industrial safety, progress reporting, and institutional systems, building and validating software systems from first principles.
 
-1. Prefer verified repository/device evidence over assumptions.
-2. Distinguish vision, implemented code, tested behavior, and production readiness.
-3. Keep private context, credentials, secrets, and unnecessary personal data out.
-4. Prefer concise public claims over exhaustive technical detail.
+## Core Specializations & Disciplines
 
-## Positioning
+### 1. ARM64 Toolchain & Developer Tooling
+- Native ARM64 Linux and Android development environments
+- Compilers: Clang, LLVM, GCC
+- Build systems: CMake, Ninja, Make, Gradle
+- Tooling: Android SDK/NDK, AAPT2, D8/R8, apksigner, Flutter/Dart, Python, Git
+- Capability statement: *Building and validating development toolchains for ARM64 Android/Linux environments, including compilers, build systems, SDK/NDK tooling, native dependencies, and real-device workflows.*
 
-**Operations Support · Linux Systems · On-Device AI**
+### 2. On-Device AI Systems & Inference
+- Local LLM deployment using llama.cpp and GGUF quantization
+- KV-cache prefix reuse and multithreaded CPU tuning
+- Model checksum verification (SHA-256) and offline lifecycle management
+- RAG, OCR, and AI agent workflow boundaries
 
-Core message:
+### 3. Linux Userspace on Android & Graphics Virtualization
+- PRoot Debian ARM64 on Android without root
+- Termux-X11 desktop integration and Xfce4
+- Mesa Turnip (Vulkan) + Zink (OpenGL-on-Vulkan) translation layers
+- D-Bus system services and TCP-routed PulseAudio
 
-> An operations professional who can also build, automate, document, and troubleshoot the technology that removes friction from real-world work.
+### 4. Android Native & System Automation
+- Kotlin and Flutter development with strict user-consent models
+- Accessibility service integration and Shizuku (UID 2000) privileged execution
+- Replay-protected audit hash chains and Scoped Storage / SAF
 
-## Public capability pillars
+### 5. Real-Device Engineering & Root-Cause Debugging
+- Execution model: *Device → Environment → Toolchain → Build → Deploy → Validate → Diagnose → Document*
+- Debugging loop: *Symptom → Reproduce → Evidence → Localize → Hypothesis → Experiment → Root Cause → Fix → Verify → Document*
+- Physical hardware: Redmi Turbo 4 Pro (`25053RT47C`, Snapdragon 8s Gen 4 / `SM8735`, Adreno 825, 12 GB RAM, Android 16 API 36)
 
-### Operations & Administration
-- Office administration
-- Records and document management
-- Data entry and processing
-- Registration workflows
-- Progress reporting
-- Logistics and coordination
-- Back-office support
+### 6. Operations & Data Pipelines
+- 8+ years across industrial reporting (Saudi Aramco / PCMC gas plants) and educational administration (Rabeya Education Family)
+- Deterministic document generation and Jsoup data extraction
+- Core rule: *Document everything, verify before reporting, own the outcome.*
 
-### Digital Operations
-- Social media management
-- Website SEO and content updates
-- Email marketing
-- Graphics and promotional video
-- Digital workflow support
+## Project Hierarchy
 
-### Linux & Android Systems
-- Termux and PRoot Linux
-- Debian userspace
-- Termux:X11 and desktop environments
-- Shell automation
-- Linux troubleshooting
-- Android-as-Linux-workstation engineering
-- Mesa / Zink / Turnip / Vulkan investigation
+### Flagship Projects
+- **GGEN:** AI Creative & Document Studio (Pure Dart core, 143 unit tests, deterministic `TextFlowEngine`, `.ggen` persistence with SHA-256 receipts).
+- **LAI:** Bangla-First Local AI & Automation Runtime (llama.cpp CPU inference 12–20 tok/s, Shizuku consent gates, symbolized driver diagnostics).
 
-### Local AI & LLM Systems
-- llama.cpp and GGUF workflows
-- Offline/local LLM deployment
-- Model lifecycle and integrity
-- AI-agent workflows
-- RAG/OCR/agent architecture
-- Android automation boundaries
+### Systems, Toolchains & Research
+- **Ternux:** No-Root Linux Workstation on Android (PRoot Debian + Mesa Turnip/Zink on Adreno 825).
+- **ADT:** Android Development Toolchain for ARM64 Linux (AAPT2 + D8 + apksigner pipeline).
+- **NpuHub:** On-Device AI Architecture Blueprint & Reference Platform.
 
-### Software & Engineering
-- Kotlin / Android / Compose
-- C++ / JNI
-- Python
-- HTML / CSS / JavaScript
-- Git / GitHub / CI
-- Technical documentation
+### Supporting Work
+- **DataKhoj:** Universal structured data extractor (Kotlin + Jsoup, Room DB with 85 contract assertions).
+- **Songjog:** Owner-facing Flutter business ledger (SQLite, deterministic integer minor-unit BDT, 74 tests).
+- **RGEN:** Document automation engine (Dual Python & Dart PDF rendering).
+- **Sobkichu:** Hyperlocal Bangladesh super-app architecture specification.
 
-## Signature story
+## Excluded Content
 
-A defining differentiator is building and testing Linux and local-AI tooling primarily from an Android phone rather than relying on a conventional PC.
-
-Public framing:
-
-> **I turned an Android phone into my Linux development workstation.**
-
-This should emphasize the engineering process and evidence, not imply that every acceleration path is production-ready.
-
-## Selected work
-
-### LAI
-Bangla-first local AI and Android automation runtime. Public claims should emphasize local CPU inference, model integrity, diagnostics, and consent-driven automation. Vendor Vulkan acceleration should not be presented as a stable production feature while the device-driver crash remains unresolved.
-
-### NpuHub
-Vendor-neutral local-AI platform/reference architecture covering backend abstraction, RAG, OCR, model/runtime boundaries, and agent foundations.
-
-### Ternux
-Android-to-Linux workstation project covering Termux/PRoot Debian, X11 desktop integration, graphics-stack investigation, automation, and technical evidence.
-
-### RGEN
-Document automation connected directly to real education/administrative workflows.
-
-### DataKhoj
-Cross-platform data-collection architecture spanning Android/Kotlin and Python extraction workflows.
-
-### GGEN
-Documentation-first AI Creative & Document Studio foundation with optional local, cloud, or custom AI.
-
-### Sobkichu
-Bangladesh-first hyperlocal super-app architecture/prototype. Present as a product/architecture vision and tested slices, not as a finished production platform.
-
-## Professional narrative
-
-Sobuj's differentiator is the combination of real-world operations experience and self-directed systems engineering:
-
-> **I understand the process — and I can build the technology that makes the process better.**
-
-## Working principles
-
-- Document everything.
-- Verify before reporting.
-- Own the outcome.
-- Privacy/local-first where appropriate.
-- Evidence over claims.
-- Failed experiments are useful when they are documented honestly.
-
-## Claims to avoid
-
-Do not publish:
-
-- unverified production-readiness claims
-- stable GPU/NPU acceleration claims where runtime evidence contradicts them
-- formal engineering credentials that do not exist
-- private SKB context
-- credentials, tokens, private keys, or private datasets
-- inflated project maturity or user/customer numbers
+- Personal family roles ("Father") or family-centric biographies
+- Personal relationship or non-professional life stories
+- Unverified production claims or fabricated benchmarks
+- Private credentials, tokens, or unredacted internal datasets

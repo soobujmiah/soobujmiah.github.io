@@ -59,91 +59,91 @@
     var count = Math.min(14, Math.max(6, Math.round(links.length / 70)));
     for (var i = 0; i < count; i++) pulses.push(newPulse());
   }
+
   function newPulse(){
-    return { li: (Math.random() * links.length) | 0, t: Math.random(), sp: 0.0022 + Math.random() * 0.0042, cyan: Math.random() < .28 };
+    return { li: Math.floor(Math.random() * (links.length || 1)), t: Math.random(), sp: 0.0022 + Math.random() * 0.0042, cyan: Math.random() < .45 };
   }
+
   function size(){
-    DPR = Math.min(window.devicePixelRatio || 1, 1.25);
-    W = window.innerWidth;
-    H = Math.min(window.innerHeight, 1100);
-    cv.width  = Math.floor(W * DPR);
-    cv.height = Math.floor(H * DPR);
-    cv.style.width = W + "px";
-    cv.style.height = H + "px";
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    if (!cv) return;
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = W * DPR; cv.height = H * DPR;
+    cv.style.width = W + "px"; cv.style.height = H + "px";
+    if (ctx) ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
-  function pathPoint(l, t){
-    var a = l.a, b = l.b, mx, my;
-    if (l.bend === 0){ mx = b.x; my = a.y; } else { mx = a.x; my = b.y; }
-    var d1 = Math.hypot(mx - a.x, my - a.y), d2 = Math.hypot(b.x - mx, b.y - my), tot = d1 + d2 || 1, cut = d1 / tot;
-    if (t <= cut){
-      var k = cut === 0 ? 0 : t / cut;
-      return [a.x + (mx - a.x) * k, a.y + (my - a.y) * k];
-    }
-    var k2 = cut === 1 ? 0 : (t - cut) / (1 - cut);
-    return [mx + (b.x - mx) * k2, my + (b.y - my) * k2];
-  }
+
   function draw(){
+    if (!ctx) return;
     ctx.clearRect(0, 0, W, H);
+    var mx = ptr.x, my = ptr.y, mOn = ptr.on;
     for (var i = 0; i < nodes.length; i++){
       var n = nodes[i];
-      var dx = n.x - ptr.x, dy = n.y - ptr.y, d2 = dx * dx + dy * dy;
-      if (ptr.on && d2 < RAD2){
-        var d = Math.sqrt(d2) || 1, f = (1 - d / RAD);
-        n.vx += (dx / d) * f * 1.15;
-        n.vy += (dy / d) * f * 1.15;
-        n.lit = Math.max(n.lit, f);
+      if (mOn){
+        var dx = n.x - mx, dy = n.y - my, d2 = dx * dx + dy * dy;
+        if (d2 < RAD2 && d2 > 0.01){
+          var d = Math.sqrt(d2), f = (1 - d / RAD) * 36;
+          n.vx += (dx / d) * f * 0.08; n.vy += (dy / d) * f * 0.08;
+          n.lit = Math.max(n.lit, 1 - d / RAD);
+        }
       }
-      n.vx += (n.hx - n.x) * 0.045;
-      n.vy += (n.hy - n.y) * 0.045;
+      n.vx += (n.hx - n.x) * 0.045; n.vy += (n.hy - n.y) * 0.045;
       n.vx *= 0.86; n.vy *= 0.86;
       n.x += n.vx; n.y += n.vy;
       n.lit *= 0.94;
     }
+
     ctx.lineWidth = 1;
     for (var j = 0; j < links.length; j++){
-      var l = links[j], a = l.a, b = l.b;
-      var lit = Math.max(a.lit, b.lit);
-      ctx.strokeStyle = lit < 0.02 ? PAL.trace : PAL.traceLit(lit);
-      var mx, my;
-      if (l.bend === 0){ mx = b.x; my = a.y; } else { mx = a.x; my = b.y; }
-      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(mx, my); ctx.lineTo(b.x, b.y); ctx.stroke();
+      var l = links[j], a = l.a, b = l.b, lit = Math.max(a.lit, b.lit);
+      ctx.strokeStyle = lit > 0.02 ? PAL.traceLit(lit) : PAL.trace;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      if (l.bend === 0){ ctx.lineTo(b.x, a.y); ctx.lineTo(b.x, b.y); }
+      else { ctx.lineTo(a.x, b.y); ctx.lineTo(b.x, b.y); }
+      ctx.stroke();
     }
-    for (var k = 0; k < nodes.length; k++){
-      var p = nodes[k];
-      if (p.x < -30 || p.x > W + 30 || p.y < -30 || p.y > H + 30) continue;
-      var s = p.hub ? 1.9 : 1.15;
-      if (p.lit > 0.04){
-        ctx.fillStyle = PAL.nodeLit(p.lit);
-        ctx.beginPath(); ctx.arc(p.x, p.y, s + p.lit * 2.6, 0, 6.2832); ctx.fill();
-        if (p.lit > 0.45){
-          ctx.strokeStyle = PAL.ring(p.lit);
-          ctx.beginPath(); ctx.arc(p.x, p.y, 7 + p.lit * 11, 0, 6.2832); ctx.stroke();
-        }
+
+    for (var p = 0; p < pulses.length; p++){
+      var pl = pulses[p];
+      if (!links[pl.li]) { pulses[p] = newPulse(); continue; }
+      pl.t += pl.sp;
+      if (pl.t >= 1){ pulses[p] = newPulse(); continue; }
+      var lk = links[pl.li], n1 = lk.a, n2 = lk.b, px, py;
+      if (lk.bend === 0){
+        if (pl.t < 0.5){ var u = pl.t * 2; px = n1.x + (n2.x - n1.x) * u; py = n1.y; }
+        else { var v = (pl.t - 0.5) * 2; px = n2.x; py = n1.y + (n2.y - n1.y) * v; }
       } else {
-        ctx.fillStyle = p.hub ? PAL.hub : PAL.dot;
-        ctx.beginPath(); ctx.arc(p.x, p.y, s, 0, 6.2832); ctx.fill();
+        if (pl.t < 0.5){ var u2 = pl.t * 2; px = n1.x; py = n1.y + (n2.y - n1.y) * u2; }
+        else { var v2 = (pl.t - 0.5) * 2; px = n1.x + (n2.x - n1.x) * v2; py = n2.y; }
       }
+      var cstr = pl.cyan ? PAL.p2 : PAL.p1;
+      var g = ctx.createLinearGradient(px - 14, py, px + 14, py);
+      g.addColorStop(0, "rgba(" + cstr + ",0)");
+      g.addColorStop(0.5, "rgba(" + cstr + ",0.95)");
+      g.addColorStop(1, "rgba(" + cstr + ",0)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(px, py, 2.4, 0, Math.PI * 2);
+      ctx.fill();
     }
-    for (var q = 0; q < pulses.length; q++){
-      var pu = pulses[q], ln = links[pu.li];
-      if (!ln){ pulses[q] = newPulse(); continue; }
-      pu.t += pu.sp;
-      if (pu.t >= 1){ pulses[q] = newPulse(); continue; }
-      var pt = pathPoint(ln, pu.t);
-      var fade = Math.sin(pu.t * Math.PI);
-      var col = pu.cyan ? PAL.p2 : PAL.p1;
-      var tt = Math.max(0, pu.t - 0.075), tp = pathPoint(ln, tt);
-      var g = ctx.createLinearGradient(tp[0], tp[1], pt[0], pt[1]);
-      g.addColorStop(0, "rgba(" + col + ",0)");
-      g.addColorStop(1, "rgba(" + col + "," + (0.5 * fade).toFixed(3) + ")");
-      ctx.strokeStyle = g; ctx.lineWidth = 1.6;
-      ctx.beginPath(); ctx.moveTo(tp[0], tp[1]); ctx.lineTo(pt[0], pt[1]); ctx.stroke();
-      ctx.lineWidth = 1;
-      ctx.fillStyle = "rgba(" + col + "," + (0.9 * fade).toFixed(3) + ")";
-      ctx.beginPath(); ctx.arc(pt[0], pt[1], 1.9, 0, 6.2832); ctx.fill();
-      ctx.fillStyle = "rgba(" + col + "," + (0.16 * fade).toFixed(3) + ")";
-      ctx.beginPath(); ctx.arc(pt[0], pt[1], 6.5, 0, 6.2832); ctx.fill();
+
+    for (var k = 0; k < nodes.length; k++){
+      var nd = nodes[k];
+      if (nd.hub){
+        ctx.fillStyle = PAL.hub;
+        ctx.beginPath(); ctx.arc(nd.x, nd.y, 2.2, 0, Math.PI * 2); ctx.fill();
+        if (nd.lit > 0.05){
+          ctx.strokeStyle = PAL.ring(nd.lit); ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(nd.x, nd.y, 6 + nd.lit * 5, 0, Math.PI * 2); ctx.stroke();
+        }
+      } else if (nd.lit > 0.08){
+        ctx.fillStyle = PAL.nodeLit(nd.lit);
+        ctx.beginPath(); ctx.arc(nd.x, nd.y, 1.8 + nd.lit * 1.5, 0, Math.PI * 2); ctx.fill();
+      } else {
+        ctx.fillStyle = PAL.dot;
+        ctx.beginPath(); ctx.arc(nd.x, nd.y, 1.2, 0, Math.PI * 2); ctx.fill();
+      }
     }
     rafId = requestAnimationFrame(draw);
   }
@@ -197,7 +197,7 @@
       if (!curRaf) curRaf = requestAnimationFrame(curLoop);
     }, { passive: true });
     document.addEventListener("pointerover", function(e){
-      var t = e.target.closest ? e.target.closest("a,button,.spot,.tag") : null;
+      var t = e.target.closest ? e.target.closest("a,button,.spot,.tag,.case-card,.focus-card") : null;
       cur.classList.toggle("hot", !!t);
     });
     document.addEventListener("pointerdown", function(){ cur.classList.add("tap"); });
@@ -298,37 +298,17 @@
   }
   initGlitch();
 
-  if (!RM && window.matchMedia("(hover:hover) and (pointer:fine) and (min-width:900px)").matches){
-    var chars = [].slice.call(document.querySelectorAll(".name .gl"));
-    window.__reglyph = function(){ chars = [].slice.call(document.querySelectorAll(".name .gl")); };
-    window.addEventListener("pointermove", function(e){
-      for (var i = 0; i < chars.length; i++){
-        var c = chars[i], r = c.getBoundingClientRect();
-        if (r.bottom < -50 || r.top > window.innerHeight + 50){ continue; }
-        var dx = (r.left + r.width / 2) - e.clientX,
-            dy = (r.top + r.height / 2) - e.clientY,
-            d  = Math.hypot(dx, dy);
-        if (d < 130){
-          var f = (1 - d / 130) * 17;
-          c.style.transform = "translate(" + (dx / d * f).toFixed(2) + "px," + (dy / d * f).toFixed(2) + "px)";
-        } else if (c.style.transform){
-          c.style.transform = "";
-        }
-      }
-    }, { passive: true });
-  }
-
   /* ==========================================================
      4. TYPEWRITER
      ========================================================== */
   var roleEl = document.getElementById("role");
   if (roleEl){
     var ROLES_EN = [
-      "Office Administrator & Operations Support",
-      "Virtual Assistant & Data Entry Specialist",
-      "Linux & Termux Systems Builder",
-      "On-Device AI / Local LLM Developer",
-      "Social Media & SEO Content Manager"
+      "Android & ARM64 Linux Systems Builder",
+      "On-Device AI & llama.cpp Systems",
+      "Developer Toolchains & Native Builds",
+      "Real-Device Validation & Root-Cause Debugging",
+      "Technical Systems & Process Automation"
     ];
     var ROLES = ROLES_EN, gen = 0, ri = 0, ci = 0, del = false;
     window.__setRoles = function(list){
@@ -373,26 +353,7 @@
   }
 
   /* ==========================================================
-     6. SERVICES ACCORDION (event delegation)
-     ========================================================== */
-  var svc = document.querySelector(".svc");
-  if (svc){
-    svc.addEventListener("click", function(ev){
-      var btn = ev.target.closest ? ev.target.closest(".shead") : null;
-      if (!btn) return;
-      var card = btn.closest(".scard");
-      if (!card) return;
-      var open = card.classList.contains("open");
-      svc.querySelectorAll(".scard.open").forEach(function(c){
-        c.classList.remove("open");
-        var h = c.querySelector(".shead"); if (h) h.setAttribute("aria-expanded", "false");
-      });
-      if (!open){ card.classList.add("open"); btn.setAttribute("aria-expanded", "true"); }
-    });
-  }
-
-  /* ==========================================================
-     7. REVEALS + COUNT-UP
+     6. REVEALS + COUNT-UP
      ========================================================== */
   var revealables = document.querySelectorAll(".rv, .stg");
   if (RM || !("IntersectionObserver" in window)){
@@ -400,7 +361,7 @@
   } else {
     var io = new IntersectionObserver(function(en){
       en.forEach(function(x){ if (x.isIntersecting){ x.target.classList.add("in"); io.unobserve(x.target); } });
-    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.04 });
+    }, { rootMargin: "0px 0px -10% 0px", threshold: 0.04 });
     for (var r1 = 0; r1 < revealables.length; r1++) io.observe(revealables[r1]);
   }
 
@@ -410,7 +371,6 @@
     function fmt(v){
       var bn = document.documentElement.lang === "bn", sx = suffix;
       if (bn && window.I18N && I18N.suffix && I18N.suffix[sx] !== undefined) sx = I18N.suffix[sx];
-      if (bn && sx === "h") sx = " ঘণ্টা";
       return (bn ? toBn(v) : v) + sx;
     }
     if (RM){ el.textContent = fmt(target); return; }
@@ -435,12 +395,11 @@
   }
 
   /* ==========================================================
-     8. DOCK — scrollspy + progress border + timeline highlight
+     7. DOCK — scrollspy + progress border
      ========================================================== */
   var dock = document.getElementById("dock"),
       dockLinks = [].slice.call(document.querySelectorAll(".dock a[data-sec]")),
       secs = [].slice.call(document.querySelectorAll("section[id], header[id]")),
-      tnodes = [].slice.call(document.querySelectorAll(".tnode")),
       tick = false;
 
   function onScroll(){
@@ -454,15 +413,6 @@
     for (var j = 0; j < dockLinks.length; j++){
       dockLinks[j].classList.toggle("on", dockLinks[j].getAttribute("data-sec") === cur2);
     }
-    var mid = window.innerHeight * 0.42, best = null, bestD = 1e9;
-    for (var k = 0; k < tnodes.length; k++){
-      var rr = tnodes[k].getBoundingClientRect();
-      if (rr.bottom < 0 || rr.top > window.innerHeight) { tnodes[k].classList.remove("hot"); continue; }
-      var d = Math.abs(rr.top - mid);
-      if (d < bestD){ bestD = d; best = tnodes[k]; }
-      tnodes[k].classList.remove("hot");
-    }
-    if (best) best.classList.add("hot");
     tick = false;
   }
   window.addEventListener("scroll", function(){ if (!tick){ tick = true; requestAnimationFrame(onScroll); } }, { passive: true });
@@ -470,7 +420,7 @@
   onScroll();
 
   /* ==========================================================
-     9. SMOOTH ANCHORS + YEAR
+     8. SMOOTH ANCHORS + YEAR
      ========================================================== */
   document.addEventListener("click", function(e){
     var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
@@ -488,30 +438,7 @@
   if (yr) yr.textContent = new Date().getFullYear();
 
   /* ==========================================================
-     9a. NAME AUTOFIT
-     ========================================================== */
-  var nameEl = document.querySelector(".name");
-  function fitName(){
-    if (!nameEl) return;
-    nameEl.style.fontSize = "";
-    var line = nameEl.querySelector(".ln");
-    if (!line) return;
-    var avail = nameEl.clientWidth;
-    if (!avail) return;
-    var rng = document.createRange(); rng.selectNodeContents(line);
-    var need = rng.getBoundingClientRect().width;
-    if (need > avail){
-      var base = parseFloat(getComputedStyle(nameEl).fontSize);
-      nameEl.style.fontSize = Math.floor(base * (avail / need) * 0.99) + "px";
-    }
-  }
-  window.__fitName = fitName;
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitName);
-  window.addEventListener("resize", fitName);
-  window.addEventListener("orientationchange", fitName);
-
-  /* ==========================================================
-     9b. LANGUAGE — English / Bangla
+     9. LANGUAGE — English / Bangla
      ========================================================== */
   var langBtn = document.getElementById("lang"),
       langLbl = document.getElementById("lang-lbl"),
@@ -548,7 +475,7 @@
     snapshot.html.forEach(function(pair){ pair[0].innerHTML = pair[1]; });
     snapshot.text.forEach(function(pair){ pair[0].nodeValue = pair[1]; });
     if (bn){
-      Object.keys(I18.html).forEach(function(sel){
+      Object.keys(I18.html || {}).forEach(function(sel){
         var el = document.querySelector(sel);
         if (el) el.innerHTML = I18.html[sel];
       });
@@ -567,7 +494,7 @@
       while ((node = walker.nextNode())) hits.push(node);
       hits.forEach(function(n){
         var raw = n.nodeValue, key = raw.trim();
-        if (I18.text[key]){
+        if (I18.text && I18.text[key]){
           n.nodeValue = raw.replace(key, I18.text[key]);
         } else if (/^[0-9]+$/.test(key)){
           n.nodeValue = raw.replace(key, toBn(key));
@@ -576,32 +503,21 @@
       document.querySelectorAll(".st b, .fmi b").forEach(function(b){
         b.textContent = toBn(b.textContent);
       });
-      document.title = I18.meta.title;
+      if (I18.meta && I18.meta.title) document.title = I18.meta.title;
       var md = document.querySelector('meta[name="description"]');
-      if (md) md.content = I18.meta.desc;
+      if (md && I18.meta && I18.meta.desc) md.content = I18.meta.desc;
     } else {
       document.title = snapshot.title;
       var md2 = document.querySelector('meta[name="description"]');
       if (md2 && snapshot.desc) md2.content = snapshot.desc;
     }
     if (window.__splitName) window.__splitName();
-    if (window.__fitName) window.__fitName();
     if (window.__reglitch) window.__reglitch();
-    if (window.__reglyph) window.__reglyph();
     if (window.__setRoles) window.__setRoles(bn ? I18.roles : null);
-    var motto = document.querySelector(".motto span");
-    if (motto){
-      motto.textContent = bn
-        ? (I18.html && I18.html[".motto span"]) || I18.text["As long as I learn, I live."] || "শেখা যতক্ষণ, বাঁচা ততক্ষণ।"
-        : "As long as I learn, I live.";
-    }
     if (hero){ hero.classList.add("go"); hero.classList.add("done"); }
     document.querySelectorAll("[data-count]").forEach(function(el){
       var t = el.getAttribute("data-count"), sfx = el.getAttribute("data-suffix") || "";
-      if (bn){
-        if (sfx === "h") sfx = " ঘণ্টা";
-        else if (I18.suffix && I18.suffix[sfx] !== undefined) sfx = I18.suffix[sfx];
-      }
+      if (bn && I18.suffix && I18.suffix[sfx] !== undefined) sfx = I18.suffix[sfx];
       el.textContent = (bn ? toBn(t) : t) + sfx;
     });
     if (langBtn){
@@ -681,7 +597,7 @@
   }
 
   /* ==========================================================
-     POLISH — typed terminal · magnetic CTAs · 3D tilt
+     11. POLISH — terminal typing
      ========================================================== */
   if (!RM){
     var tb = document.querySelector(".term-b");
@@ -709,31 +625,6 @@
         });
       }, { threshold: 0.18 });
       tio.observe(tb);
-    }
-    if (window.matchMedia("(hover:hover) and (pointer:fine)").matches){
-      document.querySelectorAll(".btn, .dock .cta").forEach(function(b){
-        b.classList.add("magnetic");
-        b.addEventListener("mousemove", function(ev){
-          var r = b.getBoundingClientRect();
-          var x = (ev.clientX - r.left - r.width / 2) / r.width;
-          var y = (ev.clientY - r.top - r.height / 2) / r.height;
-          b.style.transform = "translate3d(" + (x * 4).toFixed(1) + "px," + (y * 3).toFixed(1) + "px,0) translateY(-2px)";
-        }, { passive: true });
-        b.addEventListener("mouseleave", function(){ b.style.transform = ""; });
-      });
-      var projCardContainer = document.querySelector(".projs");
-      if (projCardContainer){
-        projCardContainer.classList.add("rot-tilt");
-        projCardContainer.querySelectorAll(".spot.proj").forEach(function(card){
-          card.addEventListener("mousemove", function(ev){
-            var r = card.getBoundingClientRect();
-            var x = (ev.clientX - r.left) / r.width - 0.5;
-            var y = (ev.clientY - r.top) / r.height - 0.5;
-            card.style.transform = "translateY(-6px) scale(1.012) rotateX(" + (-y * 4).toFixed(2) + "deg) rotateY(" + (x * 5).toFixed(2) + "deg) translateZ(0)";
-          }, { passive: true });
-          card.addEventListener("mouseleave", function(){ card.style.transform = ""; });
-        });
-      }
     }
   }
 })();

@@ -1,57 +1,39 @@
-# Sobuj Miah — Portfolio
+# Sobuj Miah — Engineering Portfolio
 
-Personal site for **Sobuj Miah** — office administrator, virtual assistant, and self-taught Linux / on-device AI developer in Savar, Dhaka.
+Public developer portfolio for **Sobuj Miah** — Self-Taught Technology Builder focused on Android, ARM64 Linux, AI Systems, Developer Tooling, and Real-Device Engineering.
 
-Live at `https://soobujmiah.github.io/`.
+Live at: `https://soobujmiah.github.io/`
 
-## What's here
+## Core Architecture
 
 | File | Role |
 |---|---|
-| `index.html` | Complete single-page portfolio (static, no build step) |
-| `styles.css` | Theme, layout, motion |
-| `i18n.js` | English ↔ বাংলা dictionary |
-| `app.js` | Mesh background, dock, language, theme |
-| `claims.html` + `CLAIM_STATUS.md` | Public evidence model: verified / experimental / historical benchmark |
-| `PORTFOLIO_CONTENT.md` | SKB-aligned public content policy and positioning |
-| `fonts.css` + `fonts/` | Self-hosted fonts |
-| `assets/Sobuj_Miah_CV.pdf` | Curated public CV (no phone/street address) |
+| `index.html` | Complete semantic single-page portfolio (static, zero build step) |
+| `styles.css` | Design system, layout, dark/light themes, responsive grids, and case study components |
+| `i18n.js` | High-fidelity English ↔ বাংলা bilingual dictionary |
+| `app.js` | Interactive canvas circuit mesh background, floating dock scrollspy, theme toggles, and typewriter |
+| `claims.html` + `CLAIM_STATUS.md` | Public evidence grading model (Verified / Experimental / Historical Benchmark) |
+| `PORTFOLIO_CONTENT.md` | Positioning, specialization pillars, and claim boundaries |
+| `fonts.css` + `fonts/` | Self-hosted web fonts (`Inter`, `JetBrains Mono`, `Sora`, `Anek Bangla`, `Hind Siliguri`) |
+| `assets/Sobuj_Miah_CV.pdf` | Curated public engineering CV |
 
-## Public knowledge architecture
+## Engineering Specializations
 
-The private repository `soobujmiah/skb` is the source/context layer. This repository is the curated public presentation layer.
+1. **ARM64 Toolchain & Developer Tooling:** Native aarch64 build pipelines, AAPT2, D8/R8, Clang, CMake, Ninja, and SDK/NDK integration.
+2. **On-Device AI Systems & Inference:** Local LLM execution via llama.cpp, GGUF quantization, KV-cache prefix reuse, and model integrity verification.
+3. **Linux Userspace on Android:** PRoot Debian, Termux-X11, and Mesa Turnip/Zink GPU virtualization on Adreno 825 hardware.
+4. **Android Native & Systems Automation:** Kotlin, Flutter, Shizuku (UID 2000) privileged execution, and Accessibility consent boundaries.
+5. **Real-Device Validation & Root-Cause Debugging:** Systematic investigation from symbolized crash dumps (`SIGSEGV` in `vulkan.adreno.so`) to verified CPU fallbacks.
+6. **Operations & Systems Support:** 8+ years of high-consequence operational discipline from Saudi Aramco industrial sites to educational administration in Dhaka.
 
-`PORTFOLIO_CONTENT.md` records the approved positioning and claim boundaries so future portfolio updates can be checked against the SKB rather than drifting independently.
-
-Public claims must distinguish between:
-
-- vision/specification
-- implemented code
-- tested behavior
-- device-validated evidence
-- production readiness
-
-Private context, credentials, tokens, private datasets, and unnecessary sensitive details do not belong here. Personal contact surface is intentionally limited: email, Telegram, LinkedIn and GitHub are published; phone number, WhatsApp and street address are not.
-
-## Features
-
-- Dark / light theme (saved in `localStorage`)
-- English / বাংলা toggle
-- Floating dock with scroll progress
-- Circuit-mesh background, typewriter role line, service accordion
-- Flagship Termux AI Workstation + selected GitHub work, graded against `claims.html`
-- Contact: email, Telegram, LinkedIn, GitHub
-
-## Run locally
+## Run Locally
 
 ```bash
 python3 -m http.server 8080 --bind 0.0.0.0
 ```
 
-Then open `http://localhost:8080`.
+Open `http://localhost:8080` in your browser.
 
 ## Publishing
 
-The site is fully static. GitHub Pages serves the repository root from `main` (legacy mode) — pushing to `main` republishes. There is deliberately **no build pipeline**: the page works identically from the branch, which prevents deploy/content drift.
-
-Do **not** put a personal access token in a remote URL or in chat.
+The site is served directly by GitHub Pages from `main` root. Pushing to `main` updates the live site immediately with zero deployment drift.
