@@ -118,6 +118,8 @@ jobs = [
         "Manage students&rsquo; online registration, data records, documents and filing system.",
         "Manage social media pages and groups; handle website SEO and content updates.",
         "Create promotional media &mdash; graphics and video.",
+        "Built an internal document-automation engine (certificates, testimonials, routine paperwork) to speed up "
+        "record processing &mdash; private tooling, not published, built for internal institutional use.",
     ]),
     ("Computer Operator", "Sep 2022 – Feb 2023", "Monika Enterprise &middot; Savar, Dhaka", [
         "Managed the company&rsquo;s online activities and digital presence.",
@@ -170,8 +172,8 @@ story.append(bullets([
 
 story.append(Paragraph(
     "<b>Other public work.</b> Ternux (Android-to-Linux workstation), "
-    "GGEN (AI creative &amp; document studio foundation), DataKhoj (cross-platform data collection), RGEN (document "
-    "automation). Public claim grading: soobujmiah.github.io/claims.html.",
+    "GGEN (AI creative &amp; document studio foundation), DataKhoj (cross-platform data collection). "
+    "Public claim grading: soobujmiah.github.io/claims.html.",
     styles["techlead"]))
 
 story += section_header("SKILLS")
