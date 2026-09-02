@@ -1,6 +1,6 @@
 # Sobuj Miah — Engineering Portfolio
 
-Public developer portfolio for **Sobuj Miah** — Self-Taught Technology Builder focused on Android, ARM64 Linux, AI Systems, Developer Tooling, and Real-Device Engineering.
+Public developer portfolio for **Sobuj Miah** — Independent Software & AI Systems Engineer focused on On-Device AI, Android, Linux, ARM64, and GPU/NPU acceleration.
 
 Live at: `https://soobujmiah.github.io/`
 

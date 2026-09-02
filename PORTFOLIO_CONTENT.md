@@ -4,11 +4,11 @@ This document defines the professional positioning and curation standards for th
 
 ## Primary Positioning
 
-> **Self-Taught Technology Builder**  
-> **Android • ARM64 Linux • AI Systems • Developer Tooling • Real-Device Engineering**
+> **Independent Software & AI Systems Engineer**  
+> **On-Device AI • Android • Linux • ARM64 • GPU/NPU**
 
 Core identity statement:
-> A self-taught technology builder focused on Android, ARM64 Linux, AI systems, developer tooling, and real-device engineering. Backed by an 8+ year operational foundation in industrial safety, progress reporting, and institutional systems, building and validating software systems from first principles.
+> An independent software and AI systems engineer focused on on-device AI, Android, Linux, ARM64, and GPU/NPU acceleration. Self-taught and evidence-driven, backed by an 8+ year operational foundation in industrial safety, progress reporting, and institutional systems, building and validating software systems from first principles.
 
 ## Core Specializations & Disciplines
 
