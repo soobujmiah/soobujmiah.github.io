@@ -113,7 +113,13 @@ story.append(Paragraph(
 story += section_header("WORK EXPERIENCE")
 
 jobs = [
-    ("Office Administrator", "Mar 2023 – Present", "Rabeya Education Family &middot; Savar, Dhaka", [
+    ("Independent Software Builder", "Apr 2026 – Present", "Self-Employed", [
+        "Build and maintain independent, open-source software across Android, Linux/ARM, and on-device AI &mdash; "
+        "including local LLM inference, native ARM64 toolchains, and offline-first tooling.",
+        "Design, test, and document developer tooling and real-device experimentation workflows entirely from an "
+        "Android phone.",
+    ]),
+    ("Office Admin", "Mar 20, 2025 – Present", "Rabeya Education Family &middot; Savar, Dhaka", [
         "Oversee daily operations as administrator across the organisation.",
         "Manage students&rsquo; online registration, data records, documents and filing system.",
         "Manage social media pages and groups; handle website SEO and content updates.",
@@ -121,27 +127,32 @@ jobs = [
         "Built an internal document-automation engine (certificates, testimonials, routine paperwork) to speed up "
         "record processing &mdash; private tooling, not published, built for internal institutional use.",
     ]),
-    ("Computer Operator", "Sep 2022 – Feb 2023", "Monika Enterprise &middot; Savar, Dhaka", [
-        "Managed the company&rsquo;s online activities and digital presence.",
-        "Processed office documents and maintained the filing system.",
-    ]),
-    ("Coordinator", "2021 – 2022", "Abdullah Trading Pvt Ltd &middot; Jubail, Saudi Arabia", [
+    ("Coordinator", "Sep 2020 – May 2022", "Abdullah Trading Pvt Ltd &middot; Jubail, Saudi Arabia", [
         "Coordinated site operations, logistics and team communication.",
     ]),
-    ("Electrician", "2020 – 2021", "Saudi Electricity Company &amp; Khaled Juffali Company &middot; Jeddah, Saudi Arabia", [
+    ("Electrician", "Jun 2020 – Aug 2020", "Shapoorji Pallonji Engineering &amp; Construction (SPEC) &middot; Saudi Arabia", [
         "Performed electrical installation and maintenance in industrial and residential settings.",
     ]),
-    ("Progress Reporter", "2018 – 2020", "Fadhli Gas Plant Project &mdash; PCMC &middot; Saudi Arabia", [
+    ("Electrician", "Oct 2019 – Jun 2020", "Sky Packing Material Trd: LLC &middot; Saudi Arabia", [
+        "Performed electrical installation and maintenance in industrial and residential settings.",
+    ]),
+    ("Electrician", "Apr 2019 – Oct 2019", "Khaled Juffali Company &middot; Saudi Arabia", [
+        "Performed electrical installation and maintenance in industrial and residential settings.",
+    ]),
+    ("Electrician", "May 2018 – Feb 2019", "Saudi Electricity Company &middot; Saudi Arabia", [
+        "Performed electrical installation and maintenance in industrial and residential settings.",
+    ]),
+    ("Progress Reporter", "Dec 2017 – May 2018", "Petroleum, Chemical &amp; Mining Company (PCMC) &middot; Al-Jubail, Saudi Arabia", [
         "Collected daily project progress data directly from site.",
         "Digitised and systematised field information into structured records.",
         "Submitted validated reports to project management authority.",
     ]),
-    ("Fire Watcher", "2017 – 2018", "Fadhli Gas Plant Project — Saudi Aramco &middot; Saudi Arabia", [
+    ("Firewatcher", "Apr 2017 – Dec 2017", "Saudi Aramco Fadhili Gas Project &middot; Saudi Arabia", [
         "Ensured work sites remained free of fire hazards.",
         "Monitored super-hot environments and equipment for fire risk.",
     ]),
-    ("Email Marketing Specialist", "2015 – 2017", "Freelance &middot; Independent / Remote", [
-        "Executed targeted email campaigns and managed subscriber lists.",
+    ("Web Designer, Graphics Designer, Email Marketer", "Feb 2015 – Feb 2017", "Fiverr &middot; Independent / Remote", [
+        "Delivered web design, graphics design, and email marketing projects for clients via Fiverr.",
     ]),
 ]
 
@@ -172,7 +183,8 @@ story.append(bullets([
 
 story.append(Paragraph(
     "<b>Other public work.</b> Ternux (Android-to-Linux workstation), "
-    "GGEN (AI creative &amp; document studio foundation), DataKhoj (cross-platform data collection). "
+    "GGEN (AI creative &amp; document studio foundation), DataKhoj (cross-platform data collection), "
+    "DocDr (mobile-first document workspace, early development). "
     "Public claim grading: soobujmiah.github.io/claims.html.",
     styles["techlead"]))
 
