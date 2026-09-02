@@ -127,6 +127,9 @@ jobs = [
         "Built an internal document-automation engine (certificates, testimonials, routine paperwork) to speed up "
         "record processing &mdash; private tooling, not published, built for internal institutional use.",
     ]),
+    ("Unemployed", "May 2022 – Mar 2025", "&mdash;", [
+        "No formal employment during this period.",
+    ]),
     ("Coordinator", "Sep 2020 – May 2022", "Abdullah Trading Pvt Ltd &middot; Jubail, Saudi Arabia", [
         "Coordinated site operations, logistics and team communication.",
     ]),
