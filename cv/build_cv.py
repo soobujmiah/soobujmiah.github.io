@@ -94,7 +94,7 @@ story = []
 
 story.append(Paragraph("SOBUJ MIAH", styles["name"]))
 story.append(Paragraph(
-    "Office Administration &middot; Operations Support &middot; Self-Taught Linux &amp; On-Device AI Developer",
+    "Office Administration &middot; Operations Support &middot; Independent Software &amp; AI Systems Engineer",
     styles["subtitle"]))
 story.append(Paragraph(
     "Savar, Dhaka, Bangladesh &middot; GMT+6 (flexible hours) &middot; soobujmiah@gmail.com<br/>"
