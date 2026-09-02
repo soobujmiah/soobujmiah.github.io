@@ -55,7 +55,6 @@ Core identity statement:
 ### Systems, Toolchains & Research
 - **Ternux:** No-Root Linux Workstation on Android (PRoot Debian + Mesa Turnip/Zink on Adreno 825).
 - **ADT:** Android Development Toolchain for ARM64 Linux (AAPT2 + D8 + apksigner pipeline).
-- **NpuHub:** On-Device AI Architecture Blueprint & Reference Platform.
 
 ### Supporting Work
 - **DataKhoj:** Universal structured data extractor (Kotlin + Jsoup, Room DB with 85 contract assertions).

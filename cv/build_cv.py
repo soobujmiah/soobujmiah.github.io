@@ -169,7 +169,7 @@ story.append(bullets([
 ]))
 
 story.append(Paragraph(
-    "<b>Other public work.</b> Ternux (Android-to-Linux workstation), NpuHub (vendor-neutral local-AI architecture), "
+    "<b>Other public work.</b> Ternux (Android-to-Linux workstation), "
     "GGEN (AI creative &amp; document studio foundation), DataKhoj (cross-platform data collection), RGEN (document "
     "automation). Public claim grading: soobujmiah.github.io/claims.html.",
     styles["techlead"]))
