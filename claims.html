@@ -8,11 +8,18 @@
 <style>
 :root{color-scheme:dark;--bg:#020306;--panel:#060810;--line:rgba(255,255,255,.08);--text:#edf2f7;--muted:#9ba7b4;--green:#cdff57;--blue:#57e8ff;--amber:#ffc857;--max:1040px}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0%,#09120a 0,#020306 45%);color:var(--text);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.wrap{max-width:var(--max);margin:auto;padding:64px 22px 90px}a{color:var(--green);text-decoration:none}.eyebrow{color:var(--green);font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase}.back{display:inline-flex;align-items:center;gap:6px;margin-bottom:48px;font-weight:600}.hero{max-width:820px}.hero h1{font-size:clamp(2.2rem,5vw,3.8rem);line-height:1.08;margin:14px 0}.hero p{color:var(--muted);font-size:1.06rem;line-height:1.7}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:42px}.card{background:rgba(8,12,18,.88);border:1px solid var(--line);border-radius:18px;padding:24px}.card h2{margin:0 0 10px;font-size:1.2rem}.card.verified{border-top:3px solid var(--green)}.card.experimental{border-top:3px solid var(--amber)}.card.historical{border-top:3px solid var(--blue)}ul{padding-left:20px;color:var(--muted);font-size:.9rem}li+li{margin-top:10px}code{font-family:ui-monospace,monospace;font-size:.9em;color:var(--text);background:rgba(255,255,255,.06);padding:2px 5px;border-radius:4px}.note{margin-top:32px;padding:22px 24px;border:1px solid var(--line);border-radius:16px;color:var(--muted);background:rgba(8,12,18,.5);font-size:.92rem;line-height:1.7}strong{color:var(--text)}@media(max-width:860px){.grid{grid-template-columns:1fr}.wrap{padding-top:38px}}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:48px}
+.topbar .back{margin-bottom:0}
+.langbtn{display:inline-flex;align-items:center;gap:6px;padding:.4rem .85rem;border-radius:99px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);font-size:.8rem;font-weight:600;cursor:pointer}
+.langbtn:hover{border-color:var(--green)}
 </style>
 </head>
 <body>
 <main class="wrap">
+<div class="topbar">
 <a class="back" href="./">← Back to Portfolio</a>
+<button class="langbtn" id="cl-lang" type="button" aria-label="বাংলায় দেখুন">বাংলা</button>
+</div>
 <header class="hero">
 <span class="eyebrow">Public Evidence Model</span>
 <h1>What is Verified, Experimental, and Historical?</h1>
@@ -23,7 +30,7 @@
 <h2>✓ Verified</h2>
 <p style="color:var(--green);font-weight:600;font-size:.85rem;margin-bottom:12px">Current Public Capability</p>
 <p>Capabilities confirmed by automated test suites, CI artifacts, symbolized diagnostics, or established professional track record.</p>
-<ul>
+<ul id="cl-verified-list">
 <li><strong>ARM64 APK Toolchain (ADT):</strong> Native aarch64 <code>aapt2</code> resource linking (SDK 35), JVM <code>d8</code> compilation to <code>classes.dex</code>, and Debian host <code>apksigner</code> v1/v2/v3 verification.</li>
 <li><strong>GGEN Pure-Dart Core:</strong> 143 passing unit tests in <code>packages/ggen_core</code>; deterministic <code>TextFlowEngine</code>; atomic <code>FileProjectStore</code> writes with SHA-256 receipts.</li>
 <li><strong>LAI CPU Local Inference:</strong> llama.cpp ARM64 CPU adapter with Qwen 2.5 1.5B GGUF; verified 12–20 tok/s decode with KV-prefix reuse; SHA-256 model integrity verification.</li>
@@ -38,7 +45,7 @@
 <h2>△ Experimental</h2>
 <p style="color:var(--amber);font-weight:600;font-size:.85rem;margin-bottom:12px">Active Qualification / Research</p>
 <p>Active research, device-dependent implementations, or features undergoing qualification.</p>
-<ul>
+<ul id="cl-experimental-list">
 <li><strong>Adreno Vulkan Acceleration:</strong> Symbolized <code>SIGSEGV</code> in <code>vkCmdBindPipeline+0x4</code> inside <code>vulkan.adreno.so</code> on Snapdragon 8s Gen 4. Contained by fail-closed CPU-default routing while vendor driver fixes are tracked.</li>
 <li><strong>NPU / Hexagon / QNN:</strong> Interface contracts and fallback definitions in place (DataKhoj); native NPU kernel execution remains in qualification.</li>
 <li><strong>Autonomous Multi-Step Agents:</strong> High-risk tool proposals gated by explicit user consent; full loop automation under active research.</li>
@@ -50,7 +57,7 @@
 <h2>◷ Historical Benchmark</h2>
 <p style="color:var(--blue);font-weight:600;font-size:.85rem;margin-bottom:12px">Defined Test Setup Records</p>
 <p>Observed measurements from specific past test configurations — not universal guarantees.</p>
-<ul>
+<ul id="cl-historical-list">
 <li><strong>465 FPS:</strong> Peak off-screen frame rate recorded in <code>glmark2-es2</code> via Mesa Turnip + Zink translation on Redmi Turbo 4 Pro (Adreno 825).</li>
 <li><strong>12–20 tok/s:</strong> Observed local decode rate running Qwen 2.5 1.5B Q4_K_M on 8-core arm64-v8a CPU with 4 threads and KV-cache reuse.</li>
 <li><strong>0.5–0.7s TTFT:</strong> Time-to-first-token recorded on prompt evaluation with warm KV cache on physical hardware.</li>
@@ -59,9 +66,87 @@
 </article>
 </section>
 
-<div class="note">
+<div class="note" id="cl-note">
 <strong>The Evidence Rule:</strong> "Verified" means current tested capability. "Experimental" means actively investigated or device-dependent. "Historical benchmark" means an observed past measurement with recorded parameters. Private keys, personal data, and unproven claims are never published.
 </div>
 </main>
+<script src="i18n.js"></script>
+<script>
+(function(){
+  "use strict";
+  var I18 = window.I18N || { text:{}, html:{} };
+  var btn = document.getElementById("cl-lang");
+  var snapshot = null;
+  var CL_META = {
+    title: "কারিগরি দাবির অবস্থা ও প্রমাণ — সবুজ মিয়া",
+    desc: "সবুজ মিয়ার কারিগরি পোর্টফোলিওর পাবলিক প্রমাণ মডেল: যাচাইকৃত সক্ষমতা, পরীক্ষামূলক/গবেষণাধীন কাজ, এবং ঐতিহাসিক বেঞ্চমার্ক।"
+  };
+
+  function takeSnapshot(){
+    if (snapshot) return;
+    snapshot = { text: [], html: [], title: document.title,
+                 desc: (document.querySelector('meta[name="description"]')||{}).content };
+    var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(n){
+        if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        var p = n.parentElement;
+        if (!p || p.tagName === "SCRIPT" || p.tagName === "STYLE" || p.closest("#cl-lang")) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var n;
+    while ((n = walker.nextNode())) snapshot.text.push([n, n.nodeValue]);
+    ["cl-verified-list","cl-experimental-list","cl-historical-list","cl-note"].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) snapshot.html.push([el, el.innerHTML]);
+    });
+  }
+
+  function applyLang(lang, save){
+    takeSnapshot();
+    var bn = lang === "bn";
+    document.documentElement.lang = bn ? "bn" : "en";
+    snapshot.html.forEach(function(pair){ pair[0].innerHTML = pair[1]; });
+    snapshot.text.forEach(function(pair){ pair[0].nodeValue = pair[1]; });
+    if (bn){
+      ["cl-verified-list","cl-experimental-list","cl-historical-list","cl-note"].forEach(function(id){
+        var el = document.getElementById(id), key = "#" + id;
+        if (el && I18.html && I18.html[key]) el.innerHTML = I18.html[key];
+      });
+      var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+        acceptNode: function(n){
+          if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+          var p = n.parentElement;
+          if (!p || p.tagName === "SCRIPT" || p.tagName === "STYLE" || p.closest("#cl-lang")) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      });
+      var node, hits = [];
+      while ((node = walker.nextNode())) hits.push(node);
+      hits.forEach(function(n){
+        var raw = n.nodeValue, key = raw.trim();
+        if (I18.text && I18.text[key]) n.nodeValue = raw.replace(key, I18.text[key]);
+      });
+      document.title = CL_META.title;
+      var md = document.querySelector('meta[name="description"]');
+      if (md) md.content = CL_META.desc;
+    } else {
+      document.title = snapshot.title;
+      var md2 = document.querySelector('meta[name="description"]');
+      if (md2 && snapshot.desc) md2.content = snapshot.desc;
+    }
+    if (btn) btn.setAttribute("aria-label", bn ? "ইংরেজিতে দেখুন" : "বাংলায় দেখুন");
+    if (btn) btn.textContent = bn ? "English" : "বাংলা";
+    if (save){ try { localStorage.setItem("sm-lang", lang); } catch (e) {} }
+  }
+
+  var savedLang = null;
+  try { savedLang = localStorage.getItem("sm-lang"); } catch (e) {}
+  if (savedLang === "bn") applyLang("bn", false);
+  if (btn) btn.addEventListener("click", function(){
+    applyLang(document.documentElement.lang === "bn" ? "en" : "bn", true);
+  });
+})();
+</script>
 </body>
 </html>
