@@ -691,18 +691,21 @@ html[data-theme="light"] .dock .tgl .moon{display:block;opacity:1}
   border:1px solid var(--line) !important;border-radius:12px;
 }
 
-/* Reveal Animations */
+/* Reveal Animations — opacity/transform only (no filter:blur): blur is a
+   compositor-heavy property, and staggered multi-element reveals (.stg > *)
+   could animate several blurred elements at once, costing real frames on
+   mid-range/mobile GPUs. Dropping it keeps the same motion, cheaper. */
 .rv{
-  opacity:0;transform:translate3d(0,22px,0) scale(.988);filter:blur(6px);
-  transition:opacity 1.05s var(--ease-out),transform 1.05s var(--ease-out),filter .8s var(--ease-out);
+  opacity:0;transform:translate3d(0,22px,0) scale(.988);
+  transition:opacity .8s var(--ease-out),transform .8s var(--ease-out);
   will-change:transform,opacity;
 }
-.rv.in{opacity:1;transform:none;filter:blur(0);will-change:auto}
+.rv.in{opacity:1;transform:none;will-change:auto}
 .stg > *{
-  opacity:0;transform:translate3d(0,20px,0) scale(.99);filter:blur(5px);
-  transition:opacity .95s var(--ease-out),transform .95s var(--ease-out),filter .7s var(--ease-out);
+  opacity:0;transform:translate3d(0,20px,0) scale(.99);
+  transition:opacity .7s var(--ease-out),transform .7s var(--ease-out);
 }
-.stg.in > *{opacity:1;transform:none;filter:blur(0)}
+.stg.in > *{opacity:1;transform:none}
 .stg.in > *:nth-child(1){transition-delay:.05s}
 .stg.in > *:nth-child(2){transition-delay:.12s}
 .stg.in > *:nth-child(3){transition-delay:.19s}
