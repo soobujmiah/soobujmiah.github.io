@@ -648,8 +648,8 @@
           <p id="env-host"><strong>PRoot Debian ARM64</strong> + Termux-X11 · Clang, GCC, CMake, Ninja, Python 3, Git, Zsh. Direct acceleration via Mesa Turnip/Zink on <code>/dev/kgsl-3d0</code>.</p>
         </div>
         <div class="env-spec-item">
-          <h4>Hybrid Compute Model</h4>
-          <p id="env-hybrid">Brain planning and local code authoring on-device; multi-architecture builds offloaded to <strong>GitHub Actions CI</strong>; physical runtime tests verified on real silicon.</p>
+          <h4>Closed-Loop Device Control</h4>
+          <p id="env-hybrid">Only the heavy build runs remotely, on <strong>GitHub Actions CI</strong>. Everything else — writing the code, pulling the built artifact back, installing it over ADB, launching it, and debugging what goes wrong — happens on this same phone against the same physical Redmi Turbo 4 Pro. One person holds the entire loop: no separate build machine, test lab, or handoff between roles.</p>
         </div>
       </div>
     </div>
