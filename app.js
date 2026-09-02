@@ -183,7 +183,7 @@
      2. CUSTOM CURSOR
      ========================================================== */
   var cur = document.getElementById("cur"), curd = document.getElementById("curd");
-  if (cur && window.matchMedia("(hover:hover) and (pointer:fine)").matches && !RM){
+  if (cur && window.matchMedia && window.matchMedia("(hover:hover) and (pointer:fine)").matches && !RM){
     var cx = -100, cy = -100, tx = -100, ty = -100, curRaf = 0;
     function curLoop(){
       cx += (tx - cx) * 0.22; cy += (ty - cy) * 0.22;
