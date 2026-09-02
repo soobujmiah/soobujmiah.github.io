@@ -219,26 +219,26 @@
         </div>
         <span class="pbadge pbadge-active"><span class="pbadge-dot"></span> Active Development · Apache-2.0</span>
       </div>
-      <p class="flag-summary">
+      <p class="flag-summary" id="ggen-summary">
         An Android-first, platform-neutral Creative &amp; Document Studio engine built from first principles. Features a pure-Dart core with mathematically bounded reversible history, transactional <code>.ggen</code> file storage with SHA-256 receipts, and a deterministic multi-column linked text-flow engine. Designed for computer-grade document tools with mobile-first responsive interactions.
       </p>
 
       <div class="fg">
         <div class="fc">
           <h4>Pure-Dart Core</h4>
-          <p>Immutable node hierarchy, typed tool descriptors, and fail-closed link validation backed by <strong>143 passing unit tests</strong> in <code>packages/ggen_core</code> and 237 app-level tests.</p>
+          <p id="ggen-fc-1">Immutable node hierarchy, typed tool descriptors, and fail-closed link validation backed by <strong>143 passing unit tests</strong> in <code>packages/ggen_core</code> and 237 app-level tests.</p>
         </div>
         <div class="fc">
           <h4>Linked Text Flow Engine</h4>
-          <p>Deterministic <code>TextFlowEngine</code> enforcing the mathematical conservation invariant: <code>rendered + overflow == story.length</code> across column bounds and ordered frames.</p>
+          <p id="ggen-fc-2">Deterministic <code>TextFlowEngine</code> enforcing the mathematical conservation invariant: <code>rendered + overflow == story.length</code> across column bounds and ordered frames.</p>
         </div>
         <div class="fc">
           <h4>Transactional Persistence</h4>
-          <p><code>FileProjectStore</code> committing atomic <code>.ggen</code> archives with SHA-256 state receipts, idempotent revision jumps, and durable recovery journals.</p>
+          <p id="ggen-fc-3"><code>FileProjectStore</code> committing atomic <code>.ggen</code> archives with SHA-256 state receipts, idempotent revision jumps, and durable recovery journals.</p>
         </div>
         <div class="fc">
           <h4>Real-Device Touch Canvas</h4>
-          <p>Device-validated on Redmi Turbo 4 Pro: responsive canvas, zoom/pan transforms, additive multi-select (1→6), layer groups, and bounded undo/redo journals.</p>
+          <p id="ggen-fc-4">Device-validated on Redmi Turbo 4 Pro: responsive canvas, zoom/pan transforms, additive multi-select (1→6), layer groups, and bounded undo/redo journals.</p>
         </div>
       </div>
 
@@ -264,26 +264,26 @@
         </div>
         <span class="pbadge pbadge-active"><span class="pbadge-dot"></span> Active Development · GPL-3.0</span>
       </div>
-      <p class="flag-summary">
+      <p class="flag-summary" id="lai-summary">
         A privacy-first Android runtime for Bangla-first on-device AI inference and consent-driven device automation. Integrates llama.cpp for verified offline CPU inference while enforcing strict permission barriers, proposal gates, and tamper-evident audit logs. Features symbolized native crash telemetry to isolate vendor driver defects.
       </p>
 
       <div class="fg">
         <div class="fc">
           <h4>Verified CPU Inference</h4>
-          <p>Native ARM64 llama.cpp adapter executing Qwen 2.5 1.5B GGUF with KV-prefix reuse, achieving stable <strong>12–20 tok/s decode</strong> and 0.5–0.7s TTFT on physical hardware.</p>
+          <p id="lai-fc-1">Native ARM64 llama.cpp adapter executing Qwen 2.5 1.5B GGUF with KV-prefix reuse, achieving stable <strong>12–20 tok/s decode</strong> and 0.5–0.7s TTFT on physical hardware.</p>
         </div>
         <div class="fc">
           <h4>Consent-Driven Security</h4>
-          <p>Privileged Shizuku (UID 2000) and Accessibility automation strictly gated by one-shot user proposals, argv allowlists, and replay-protected hash chains.</p>
+          <p id="lai-fc-2">Privileged Shizuku (UID 2000) and Accessibility automation strictly gated by one-shot user proposals, argv allowlists, and replay-protected hash chains.</p>
         </div>
         <div class="fc">
           <h4>Model Integrity &amp; Storage</h4>
-          <p>Strict SHA-256 model checksum verification (<code>6a1a2eb6...</code>), SAF workspace import, offline restore, and deterministic non-tag release signing.</p>
+          <p id="lai-fc-3">Strict SHA-256 model checksum verification (<code>6a1a2eb6...</code>), SAF workspace import, offline restore, and deterministic non-tag release signing.</p>
         </div>
         <div class="fc">
           <h4>Driver Diagnostics</h4>
-          <p>Symbolized Adreno 825 vendor Vulkan crash (<code>SIGSEGV</code> in <code>vkCmdBindPipeline</code>) and implemented a fail-closed CPU-default execution policy.</p>
+          <p id="lai-fc-4">Symbolized Adreno 825 vendor Vulkan crash (<code>SIGSEGV</code> in <code>vkCmdBindPipeline</code>) and implemented a fail-closed CPU-default execution policy.</p>
         </div>
       </div>
 
@@ -324,7 +324,7 @@
           <span class="pbadge pbadge-exp"><span class="pbadge-dot"></span> Experimental / Research</span>
         </div>
         <p>Turnkey no-root Linux workstation on Android. Integrates Termux with PRoot Debian and Xfce4 desktop, utilizing Mesa Turnip + Zink to bridge OpenGL over native Vulkan on the Adreno 825 GPU. Features TCP-routed PulseAudio and automated launcher scripts.</p>
-        <div class="sys-metrics">
+        <div class="sys-metrics" id="ternux-metrics">
           <strong>Validation Evidence:</strong> 465 peak FPS recorded in glmark2-es2; Mesa Turnip translation verified on <code>/dev/kgsl-3d0</code> node.
         </div>
         <div class="tags">
@@ -386,7 +386,7 @@
           </div>
           <div class="case-step">
             <span class="step-tag">Evidence</span>
-            <p>Native aarch64 <code>aapt2</code> linked Android 35 resources; JVM D8 (v8.2.33) compiled <code>MainActivity.class</code> into <code>classes.dex</code>; Debian Trixie <code>apksigner 35.0.2-1</code> ran via JVM on ARM64 host.</p>
+            <p id="case1-evidence">Native aarch64 <code>aapt2</code> linked Android 35 resources; JVM D8 (v8.2.33) compiled <code>MainActivity.class</code> into <code>classes.dex</code>; Debian Trixie <code>apksigner 35.0.2-1</code> ran via JVM on ARM64 host.</p>
           </div>
           <div class="case-step">
             <span class="step-tag">Root Cause</span>
@@ -394,10 +394,10 @@
           </div>
           <div class="case-step span-full">
             <span class="step-tag">Solution &amp; Validation</span>
-            <p>Engineered an automated pipeline combining verified aarch64 AAPT2 binaries with JVM D8 and host apksigner. Tested via RSA-2048 keystore signing; <code>apksigner verify --verbose --print-certs</code> confirmed <strong>v1, v2, and v3 verification true</strong> on the assembled APK.</p>
+            <p id="case1-solution">Engineered an automated pipeline combining verified aarch64 AAPT2 binaries with JVM D8 and host apksigner. Tested via RSA-2048 keystore signing; <code>apksigner verify --verbose --print-certs</code> confirmed <strong>v1, v2, and v3 verification true</strong> on the assembled APK.</p>
           </div>
         </div>
-        <div class="case-outcome">
+        <div class="case-outcome" id="case1-outcome">
           <strong>Outcome:</strong> Reusable, reproducible ARM64-native APK compilation and signing pipeline without desktop workstation dependencies.
         </div>
       </article>
@@ -418,11 +418,11 @@
           </div>
           <div class="case-step">
             <span class="step-tag">Investigation</span>
-            <p>Integrated native crash handler hooks in C++ (<code>native_crash_handler.cpp</code>) and symbolized tombstone logs using <code>addr2line</code> and NDK tools.</p>
+            <p id="case2-investigation">Integrated native crash handler hooks in C++ (<code>native_crash_handler.cpp</code>) and symbolized tombstone logs using <code>addr2line</code> and NDK tools.</p>
           </div>
           <div class="case-step">
             <span class="step-tag">Evidence</span>
-            <p>Symbolized backtrace pinpointed <code>SIGSEGV</code> at <code>vkCmdBindPipeline+0x4</code> inside vendor <code>vulkan.adreno.so</code> while <code>ggml-vulkan.cpp:15635</code> binds the <code>MUL_MAT</code> pipeline.</p>
+            <p id="case2-evidence">Symbolized backtrace pinpointed <code>SIGSEGV</code> at <code>vkCmdBindPipeline+0x4</code> inside vendor <code>vulkan.adreno.so</code> while <code>ggml-vulkan.cpp:15635</code> binds the <code>MUL_MAT</code> pipeline.</p>
           </div>
           <div class="case-step">
             <span class="step-tag">Root Cause</span>
@@ -430,10 +430,10 @@
           </div>
           <div class="case-step span-full">
             <span class="step-tag">Solution &amp; Validation</span>
-            <p>Implemented a fail-closed execution boundary: disabled experimental Vulkan GPU offload by default and optimized multithreaded ARM64 CPU inference with KV-prefix reuse, maintaining rock-solid <strong>12–20 tok/s</strong> generation without crashes.</p>
+            <p id="case2-solution">Implemented a fail-closed execution boundary: disabled experimental Vulkan GPU offload by default and optimized multithreaded ARM64 CPU inference with KV-prefix reuse, maintaining rock-solid <strong>12–20 tok/s</strong> generation without crashes.</p>
           </div>
         </div>
-        <div class="case-outcome">
+        <div class="case-outcome" id="case2-outcome">
           <strong>Outcome:</strong> Guaranteed application runtime stability while maintaining transparent, evidence-backed driver qualification documentation.
         </div>
       </article>
@@ -454,11 +454,11 @@
           </div>
           <div class="case-step">
             <span class="step-tag">Investigation</span>
-            <p>Tested userspace graphics translation stacks bridging OpenGL calls through Vulkan directly to the Adreno hardware device node (<code>/dev/kgsl-3d0</code>).</p>
+            <p id="case3-investigation">Tested userspace graphics translation stacks bridging OpenGL calls through Vulkan directly to the Adreno hardware device node (<code>/dev/kgsl-3d0</code>).</p>
           </div>
           <div class="case-step">
             <span class="step-tag">Evidence</span>
-            <p>Mesa Turnip Vulkan driver combined with Zink (OpenGL-on-Vulkan) achieved <strong>465 peak FPS</strong> in <code>glmark2-es2</code> benchmarks rendered over Termux-X11.</p>
+            <p id="case3-evidence">Mesa Turnip Vulkan driver combined with Zink (OpenGL-on-Vulkan) achieved <strong>465 peak FPS</strong> in <code>glmark2-es2</code> benchmarks rendered over Termux-X11.</p>
           </div>
           <div class="case-step">
             <span class="step-tag">Root Cause</span>
@@ -466,10 +466,10 @@
           </div>
           <div class="case-step span-full">
             <span class="step-tag">Solution &amp; Validation</span>
-            <p>Engineered automated environment scripts (<code>x.sh</code>) setting Mesa driver flags, D-Bus system daemons, and TCP-routed PulseAudio to bypass Android background limits.</p>
+            <p id="case3-solution">Engineered automated environment scripts (<code>x.sh</code>) setting Mesa driver flags, D-Bus system daemons, and TCP-routed PulseAudio to bypass Android background limits.</p>
           </div>
         </div>
-        <div class="case-outcome">
+        <div class="case-outcome" id="case3-outcome">
           <strong>Outcome:</strong> Reproducible, high-performance Linux desktop environment with hardware-accelerated viewport rendering on an unmodified mobile phone.
         </div>
       </article>
@@ -494,7 +494,7 @@
           </div>
           <div class="case-step">
             <span class="step-tag">Evidence</span>
-            <p>143 passing pure-Dart unit tests in <code>packages/ggen_core</code> verifying fail-closed link validators, cycle detection, and exact text length conservation.</p>
+            <p id="case4-evidence">143 passing pure-Dart unit tests in <code>packages/ggen_core</code> verifying fail-closed link validators, cycle detection, and exact text length conservation.</p>
           </div>
           <div class="case-step">
             <span class="step-tag">Root Cause</span>
@@ -502,10 +502,10 @@
           </div>
           <div class="case-step span-full">
             <span class="step-tag">Solution &amp; Validation</span>
-            <p>Architected an immutable document model with <code>TextFlowEngine</code> and atomic <code>FileProjectStore</code> writes backed by SHA-256 receipts. Verified on Redmi Turbo 4 Pro touch canvas.</p>
+            <p id="case4-solution">Architected an immutable document model with <code>TextFlowEngine</code> and atomic <code>FileProjectStore</code> writes backed by SHA-256 receipts. Verified on Redmi Turbo 4 Pro touch canvas.</p>
           </div>
         </div>
-        <div class="case-outcome">
+        <div class="case-outcome" id="case4-outcome">
           <strong>Outcome:</strong> Robust, mathematically verified document and layout core ready for computer-quality studio workflows on mobile devices.
         </div>
       </article>
@@ -641,15 +641,15 @@
       <div class="env-specs">
         <div class="env-spec-item">
           <h4>Primary Test Hardware</h4>
-          <p><strong>Redmi Turbo 4 Pro</strong> (<code>25053RT47C</code>, onyx) · Snapdragon 8s Gen 4 (<code>SM8735</code>), Adreno 825 GPU, 12 GB physical LPDDR5X RAM, Android 16 / HyperOS (API 36).</p>
+          <p id="env-hardware"><strong>Redmi Turbo 4 Pro</strong> (<code>25053RT47C</code>, onyx) · Snapdragon 8s Gen 4 (<code>SM8735</code>), Adreno 825 GPU, 12 GB physical LPDDR5X RAM, Android 16 / HyperOS (API 36).</p>
         </div>
         <div class="env-spec-item">
           <h4>Host Workstation Layer</h4>
-          <p><strong>PRoot Debian ARM64</strong> + Termux-X11 · Clang, GCC, CMake, Ninja, Python 3, Git, Zsh. Direct acceleration via Mesa Turnip/Zink on <code>/dev/kgsl-3d0</code>.</p>
+          <p id="env-host"><strong>PRoot Debian ARM64</strong> + Termux-X11 · Clang, GCC, CMake, Ninja, Python 3, Git, Zsh. Direct acceleration via Mesa Turnip/Zink on <code>/dev/kgsl-3d0</code>.</p>
         </div>
         <div class="env-spec-item">
           <h4>Hybrid Compute Model</h4>
-          <p>Brain planning and local code authoring on-device; multi-architecture builds offloaded to <strong>GitHub Actions CI</strong>; physical runtime tests verified on real silicon.</p>
+          <p id="env-hybrid">Brain planning and local code authoring on-device; multi-architecture builds offloaded to <strong>GitHub Actions CI</strong>; physical runtime tests verified on real silicon.</p>
         </div>
       </div>
     </div>
@@ -723,7 +723,7 @@
 
     <div class="spot rv" style="margin-top:1.4rem;padding:clamp(1.2rem,2.4vw,1.6rem)">
       <h3>Public Evidence &amp; Verification Model</h3>
-      <p style="margin:.4rem 0 .9rem;color:var(--text-2);font-size:.88rem;line-height:1.65">Every technical claim in this portfolio is categorized as <strong>verified current capability</strong>, <strong>experimental research in qualification</strong>, or a <strong>historical benchmark</strong> from a defined test environment.</p>
+      <p id="evidence-model-p" style="margin:.4rem 0 .9rem;color:var(--text-2);font-size:.88rem;line-height:1.65">Every technical claim in this portfolio is categorized as <strong>verified current capability</strong>, <strong>experimental research in qualification</strong>, or a <strong>historical benchmark</strong> from a defined test environment.</p>
       <a class="btn b2" href="claims.html"><span>View Detailed Technical Evidence →</span></a>
     </div>
   </div>
