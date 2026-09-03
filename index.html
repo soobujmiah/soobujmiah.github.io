@@ -649,7 +649,7 @@
         </div>
         <div class="env-spec-item">
           <h4>Closed-Loop Device Control</h4>
-          <p id="env-hybrid">Only the heavy build runs remotely, on <strong>GitHub Actions CI</strong>. Everything else — writing the code, pulling the built artifact back, installing it over ADB, launching it, and debugging what goes wrong — happens on this same phone against the same physical Redmi Turbo 4 Pro. One person holds the entire loop: no separate build machine, test lab, or handoff between roles.</p>
+          <p id="env-hybrid">Only the heavy build runs remotely, on <strong>GitHub Actions CI</strong>. Everything else — writing and editing the code, pulling the built artifact back, installing it over ADB, launching it, and debugging what goes wrong — happens on this same phone against the same physical Redmi Turbo 4 Pro, with <strong>Claude Code</strong> driving the coding and diagnostic work. Failures loop straight back into a fix → rebuild → redeploy → retest pass. One person holds the entire loop: no separate build machine, test lab, or handoff between roles.</p>
         </div>
       </div>
     </div>

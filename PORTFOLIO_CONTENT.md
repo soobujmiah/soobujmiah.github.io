@@ -39,6 +39,7 @@ Core identity statement:
 ### 5. Real-Device Engineering & Root-Cause Debugging
 - Execution model: *Device → Environment → Toolchain → Build → Deploy → Validate → Diagnose → Document*
 - Debugging loop: *Symptom → Reproduce → Evidence → Localize → Hypothesis → Experiment → Root Cause → Fix → Verify → Document*
+- Agent-assisted loop: Claude Code operates as the on-device coding/engineering agent inside the PRoot Debian workstation; GitHub Actions CI handles remote builds, ADB handles deployment to the physical device, and failures feed back into another fix → rebuild → redeploy → retest pass.
 - Physical hardware: Redmi Turbo 4 Pro (`25053RT47C`, Snapdragon 8s Gen 4 / `SM8735`, Adreno 825, 12 GB RAM, Android 16 API 36)
 
 ### 6. Operations & Data Pipelines
