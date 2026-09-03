@@ -33,10 +33,10 @@
 <ul id="cl-verified-list">
 <li><strong>ARM64 APK Toolchain (ADT):</strong> Native aarch64 <code>aapt2</code> resource linking (SDK 35), JVM <code>d8</code> compilation to <code>classes.dex</code>, and Debian host <code>apksigner</code> v1/v2/v3 verification.</li>
 <li><strong>Agent-Assisted Device Workflow:</strong> Claude Code as the on-device coding agent inside PRoot Debian ARM64; GitHub Actions CI for remote builds, ADB deployment to the physical Redmi Turbo 4 Pro, and an iterative diagnose → fix → rebuild → redeploy → retest cycle.</li>
-<li><strong>GGEN Pure-Dart Core:</strong> 143 passing unit tests in <code>packages/ggen_core</code>; deterministic <code>TextFlowEngine</code>; atomic <code>FileProjectStore</code> writes with SHA-256 receipts.</li>
+<li><strong>GGEN Pure-Dart Core:</strong> 143 passing unit tests in <code>packages/ggen_core</code> (353 app-level tests); deterministic <code>TextFlowEngine</code>; atomic <code>FileProjectStore</code> writes with SHA-256 receipts.</li>
 <li><strong>LAI CPU Local Inference:</strong> llama.cpp ARM64 CPU adapter with Qwen 2.5 1.5B GGUF; verified 12–20 tok/s decode with KV-prefix reuse; SHA-256 model integrity verification.</li>
 <li><strong>Ternux Linux Workstation:</strong> No-root PRoot Debian ARM64 on Android; X11 desktop via Termux-X11; TCP PulseAudio; direct acceleration on <code>/dev/kgsl-3d0</code>.</li>
-<li><strong>Songjog Business Ledger:</strong> 74/74 passing CI tests; SQLite local persistence; deterministic minor-unit BDT integer arithmetic; restart-safe JSONL telemetry.</li>
+<li><strong>Songjog Business Ledger:</strong> 94/94 passing CI tests; SQLite local persistence; deterministic minor-unit BDT integer arithmetic; restart-safe JSONL telemetry.</li>
 <li><strong>DataKhoj Android:</strong> Kotlin/Jsoup extraction engine with pure-JVM core; Room database with 85 contract assertions.</li>
 <li><strong>Operations &amp; Administration:</strong> 8+ years across industrial progress reporting (Saudi Aramco/PCMC) and institutional administrative operations.</li>
 </ul>

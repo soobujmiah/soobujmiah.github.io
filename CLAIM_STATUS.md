@@ -8,10 +8,10 @@ Claims supported by current repository evidence, automated test suites, repeatab
 
 - **ARM64 Native Toolchain (ADT):** Native aarch64 `aapt2` resource linking with Android 35 platform APIs, JVM `d8` bytecode compilation (`classes.dex`), and host `apksigner` v1/v2/v3 verification.
 - **Agent-Assisted Device Development Workflow:** Claude Code operating as the on-device coding/engineering agent inside PRoot Debian ARM64; GitHub Actions CI for remote builds, ADB for deployment to the physical Redmi Turbo 4 Pro, and an iterative diagnose → fix → rebuild → redeploy → retest cycle — evidenced by this repository's own commit history.
-- **GGEN Pure-Dart Engine Core:** 143 passing unit tests in `packages/ggen_core` (237 app tests); deterministic `TextFlowEngine` with conservation invariant `rendered + overflow == story.length`; transactional `.ggen` persistence with SHA-256 state receipts.
+- **GGEN Pure-Dart Engine Core:** 143 passing unit tests in `packages/ggen_core` (353 app tests); deterministic `TextFlowEngine` with conservation invariant `rendered + overflow == story.length`; transactional `.ggen` persistence with SHA-256 state receipts.
 - **LAI On-Device CPU Inference:** Real ARM64 llama.cpp CPU adapter with Qwen 2.5 1.5B GGUF; verified 12–20 tok/s decode; 0.5–0.7s TTFT with KV-prefix caching; SHA-256 model checksum verification.
 - **Ternux Linux Workstation on Android:** Turnkey no-root PRoot Debian ARM64 environment; X11 desktop via Termux-X11; TCP PulseAudio routing; direct acceleration on `/dev/kgsl-3d0`.
-- **Songjog Business Ledger:** 74/74 passing CI tests; SQLite local persistence; deterministic minor-unit BDT integer arithmetic (no floats); persistent JSONL telemetry surviving process restarts.
+- **Songjog Business Ledger:** 94/94 passing CI tests; SQLite local persistence; deterministic minor-unit BDT integer arithmetic (no floats); persistent JSONL telemetry surviving process restarts.
 - **DataKhoj Android Core:** Kotlin/Jsoup extraction engine with pure-JVM `:core`; Room database backed by 85 contract assertions.
 - **Technical Operations & Administration:** 8+ years across industrial progress reporting (Saudi Aramco / PCMC gas-plant projects) and institutional administrative operations (Rabeya Education Family).
 

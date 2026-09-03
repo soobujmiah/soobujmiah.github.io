@@ -59,7 +59,7 @@ Core identity statement:
 
 ### Supporting Work
 - **DataKhoj:** Universal structured data extractor (Kotlin + Jsoup, Room DB with 85 contract assertions).
-- **Songjog:** Owner-facing Flutter business ledger (SQLite, deterministic integer minor-unit BDT, 74 tests).
+- **Songjog:** Owner-facing Flutter business ledger (SQLite, deterministic integer minor-unit BDT, 94 tests).
 - **RGEN:** Document automation engine (Dual Python & Dart PDF rendering).
 - **DocDr:** Mobile-first document workspace (Flutter); clean from-scratch rebuild of the document-generation approach proven in RGEN work. Early development, not yet released.
 - **Sobkichu:** Hyperlocal Bangladesh super-app architecture specification.
