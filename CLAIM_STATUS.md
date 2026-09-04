@@ -20,7 +20,7 @@ Claims supported by current repository evidence, automated test suites, repeatab
 Capabilities under active development, dependent on device/driver constraints, or undergoing qualification before production status.
 
 - **Adreno Vulkan Acceleration:** Symbolized `SIGSEGV` in `vkCmdBindPipeline+0x4` in vendor `vulkan.adreno.so` on Snapdragon 8s Gen 4 / Adreno 825 during matrix multiplication (`MUL_MAT`). Contained by fail-closed CPU-default routing.
-- **NPU / Hexagon / QNN / LiteRT:** Abstraction interfaces and fallback logic defined in DataKhoj; native NPU kernel execution remains in qualification.
+- **NPU / Hexagon / QNN / LiteRT:** Abstraction interfaces and fallback logic defined in DataKhoj; LAI reproducibly verified real Hexagon HTP NPU engagement (FastRPC/DSP session evidence) on Snapdragon 8s Gen 4 — not yet the default production path, and per-op compute attribution not yet formally traced; LiteRT kernel execution remains in qualification.
 - **Multi-Step Autonomous Agent Loops:** High-privilege tool execution gated by explicit user proposals and Shizuku allowlists; autonomous multi-step loops remain under active research.
 - **Bangla Vision OCR:** Model boundary defined; custom Bangla printed/handwritten OCR model integration in progress.
 
