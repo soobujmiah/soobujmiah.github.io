@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, useScroll, useInView, type MotionValue } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView, type MotionValue } from 'framer-motion';
 import { useRef, useState } from 'react';
 import { Magnetic, Reveal } from './ui';
 import { MatrixName } from './MatrixName';
