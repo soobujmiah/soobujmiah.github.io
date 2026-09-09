@@ -911,7 +911,6 @@ function Research() {
               <div
                 className="rounded-xl p-6 transition-all duration-500 h-full"
                 style={{ border: '1px solid rgba(232,230,227,0.05)', background: 'rgba(255,255,255,0.01)' }}
-                whileHover={{}}
               >
                 <div className="flex items-center gap-2.5 mb-3">
                   <span
