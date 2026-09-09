@@ -202,7 +202,7 @@ function CustomCursor() {
 
   const ringScale = useSpring(
     useTransform([velX, velY], ([vx, vy]) => {
-      const speed = Math.sqrt((vx || 0) ** 2 + (vy || 0) ** 2);
+      const speed = Math.sqrt((Number(vx) || 0) ** 2 + (Number(vy) || 0) ** 2);
       return Math.min(1 + speed * 0.001, 1.4);
     }),
     { stiffness: 300, damping: 20 }
