@@ -45,11 +45,10 @@ export function PinnedSection({
   const enterStart = index / total;
   const enterEnd = enterStart + enterSpan;
 
-  /* ── slide up from below (hero stays put from the top) ── */
-  const translateY =
-    index === 0
-      ? 0
-      : useTransform(progress, [enterStart, enterEnd], [100, 0], { clamp: true });
+  /* ── slide up from below (hero stays put from the top) ──
+     Hooks are always called; the hero simply maps to [0,0]. */
+  const rawTranslateY = useTransform(progress, [enterStart, enterEnd], [100, 0], { clamp: true });
+  const translateY = index === 0 ? 0 : rawTranslateY;
 
   /* ── recede while the next scene covers this one ── */
   const recedeStart = (index + 1) / total;
