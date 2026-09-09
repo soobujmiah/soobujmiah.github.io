@@ -786,7 +786,7 @@ function About() {
    ═══════════════════════════════════════════════════════════════ */
 
 function ProjectCard({ project, index }: { project: typeof projects[number]; index: number }) {
-  const ref = useRef(null);
+  const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
