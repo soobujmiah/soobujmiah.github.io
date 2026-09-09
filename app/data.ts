@@ -126,7 +126,7 @@ export const projects: Project[] = [
     topics: ['Kotlin', 'llama.cpp', 'Vulkan', 'Accessibility', 'Shizuku', 'GGUF'],
     repo: 'https://github.com/soobujmiah/lai',
     websiteUrl: null,
-    accent: '#38bdf8',
+    accent: '#22c55e',
   },
   {
     name: 'GGEN',
@@ -139,7 +139,7 @@ export const projects: Project[] = [
     topics: ['Flutter', 'Dart', 'Document Generation', 'Vector Graphics'],
     repo: 'https://github.com/soobujmiah/ggen',
     websiteUrl: null,
-    accent: '#00e5a0',
+    accent: '#4ade80',
   },
   {
     name: 'ADT',
@@ -152,7 +152,7 @@ export const projects: Project[] = [
     topics: ['AOSP', 'ARM64', 'Build Tools', 'Cross-compilation'],
     repo: 'https://github.com/soobujmiah/adt',
     websiteUrl: null,
-    accent: '#a78bfa',
+    accent: '#10b981',
   },
   {
     name: 'Ternux',
@@ -165,7 +165,7 @@ export const projects: Project[] = [
     topics: ['Debian', 'Vulkan', 'Turnip', 'Zink', 'Adreno', 'PRoot'],
     repo: 'https://github.com/soobujmiah/ternux',
     websiteUrl: null,
-    accent: '#f59e0b',
+    accent: '#86efac',
   },
 ];
 

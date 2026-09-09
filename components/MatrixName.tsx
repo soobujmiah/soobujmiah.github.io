@@ -1,54 +1,79 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
 /* ═══════════════════════════════════════════════════════════════
-   MATRIX NAME — "সবুজ" digital materialization.
+   MATRIX NAME — "SOOBUJ MIAH" with continuous digital effect.
 
-   Split into syllables (not code units) so the vowel sign ু in বু
-   stays bound to ব and the name never visually tears. Each syllable
-   reveals via a staggered clip-path while a digital-noise sweep
-   passes across the text — elegant, readable, Bangla-safe.
+   After the initial reveal, the name stays readable while a subtle
+   continuous Matrix effect runs: occasional letter glitches,
+   ambient noise, and drifting digital particles. All animation is
+   CSS-driven for performance; only one lightweight interval toggles
+   glitch classes.
 
-   Reduced-motion: simple crossfade, no effect.
+   Reduced-motion: reveal only, no continuous effect.
    ═══════════════════════════════════════════════════════════════ */
 
-const SYLLABLES = ['স', 'বু', 'জ'];
-const NAME = SYLLABLES.join('');
+const NAME = 'SOOBUJ MIAH';
+const LETTERS = NAME.split('');
 
 export function MatrixName({ reducedMotion = false }: { reducedMotion?: boolean }) {
+  const [glitchIndex, setGlitchIndex] = useState<number | null>(null);
+
+  /* Continuous glitch: briefly glitch one random letter at a time */
+  useEffect(() => {
+    if (reducedMotion) return;
+
+    const interval = setInterval(() => {
+      const idx = Math.floor(Math.random() * LETTERS.length);
+      setGlitchIndex(idx);
+      const timeout = setTimeout(() => setGlitchIndex(null), 180);
+      return () => clearTimeout(timeout);
+    }, 700);
+
+    return () => clearInterval(interval);
+  }, [reducedMotion]);
+
   return (
-    <span className="matrix-name" aria-label="সবুজ">
-      {SYLLABLES.map((syl, i) => (
+    <span className="matrix-name" aria-label={NAME}>
+      {/* ambient noise layer */}
+      {!reducedMotion && <span className="matrix-noise" aria-hidden />}
+
+      {/* digital particles */}
+      {!reducedMotion && (
+        <span className="matrix-particles" aria-hidden>
+          {[...Array(6)].map((_, i) => (
+            <span
+              key={i}
+              className="matrix-particle"
+              style={{
+                left: `${15 + i * 14}%`,
+                bottom: `${10 + (i % 3) * 15}%`,
+                animationDelay: `${i * 0.5}s`,
+                animationDuration: `${2.5 + (i % 3) * 0.7}s`,
+              }}
+            />
+          ))}
+        </span>
+      )}
+
+      {/* letters */}
+      {LETTERS.map((letter, i) => (
         <motion.span
           key={i}
-          className="matrix-syllable"
-          initial={reducedMotion ? { opacity: 0 } : { opacity: 0, clipPath: 'inset(0 100% 0 0)' }}
-          animate={
-            reducedMotion
-              ? { opacity: 1 }
-              : { opacity: 1, clipPath: 'inset(0 0% 0 0)' }
-          }
+          className={`matrix-letter${glitchIndex === i ? ' glitching' : ''}`}
+          initial={{ opacity: 0, clipPath: 'inset(0 100% 0 0)' }}
+          animate={{ opacity: 1, clipPath: 'inset(0 0% 0 0)' }}
           transition={{
-            duration: reducedMotion ? 0.5 : 0.7,
-            delay: 0.8 + i * 0.18,
+            duration: 0.6,
+            delay: 0.6 + i * 0.07,
             ease: [0.16, 1, 0.3, 1],
           }}
         >
-          {syl}
+          {letter === ' ' ? ' ' : letter}
         </motion.span>
       ))}
-
-      {/* digital sweep overlay — only when motion is allowed */}
-      {!reducedMotion && (
-        <motion.span
-          className="matrix-sweep"
-          aria-hidden
-          initial={{ x: '-100%' }}
-          animate={{ x: '200%' }}
-          transition={{ duration: 1.4, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        />
-      )}
     </span>
   );
 }

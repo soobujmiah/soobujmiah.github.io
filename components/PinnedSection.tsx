@@ -1,55 +1,75 @@
 'use client';
 
-import { type MotionValue, motion, useScroll, useTransform } from 'framer-motion';
-import { useRef, type ReactNode } from 'react';
+import { type MotionValue, motion, useTransform } from 'framer-motion';
+import { type ReactNode } from 'react';
 
 /* ═══════════════════════════════════════════════════════════════
    PINNED SECTION — reusable cinematic scene layer.
 
-   Each section is position:sticky with top:0 and full viewport
-   height. They stack in the document flow, so the browser handles
-   the scroll-driven covering naturally — no spacer, no shared
-   progress math, no fragile phase-step calculations.
+   Fixed full-viewport layers with content-aware scroll pacing.
+   Each section gets scroll duration proportional to its content
+   weight, so content-heavy sections stay active longer.
 
-   A section's own local scroll progress drives its recede
-   (opacity / scale / blur) as the next section covers it. The
-   last section never recedes (nothing covers it).
+   A single shared scrollYProgress drives every layer. The page
+   spacer provides the natural scroll range. Browser scroll is
+   never hijacked.
 
-   Browser scroll is never hijacked.
+   The last section locks (no recede) with an opaque background,
+   creating a clean terminal state.
    ═══════════════════════════════════════════════════════════════ */
 
 export interface PinnedSectionProps {
   index: number;
-  zIndex: number;
+  total: number;
+  weight: number;
+  weights: number[];
+  progress: MotionValue<number>;
+  enterSpan?: number;
+  reducedMotion?: boolean;
   children: ReactNode;
   className?: string;
 }
 
-export function PinnedSection({ index, zIndex, children, className = '' }: PinnedSectionProps) {
-  const ref = useRef(null);
+export function PinnedSection({
+  index,
+  total,
+  weight,
+  weights,
+  progress,
+  enterSpan = 0.04,
+  reducedMotion = false,
+  children,
+  className = '',
+}: PinnedSectionProps) {
+  const totalWeight = weights.reduce((a, b) => a + b, 0);
+  const offset = weights.slice(0, index).reduce((a, b) => a + b, 0) / totalWeight;
+  const duration = weight / totalWeight;
+  const isLast = index === total - 1;
 
-  /* local scroll progress of THIS section as it passes the viewport */
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start start', 'end start'],
-  });
+  /* ── enter: slide up from below (hero stays put) ── */
+  const rawTranslateY = useTransform(progress, [offset, offset + enterSpan], [100, 0], { clamp: true });
+  const translateY = index === 0 ? 0 : rawTranslateY;
 
-  /* recede as this section scrolls up and away (0 → 1).
-     The last section has nothing covering it, so its recede
-     is forced to 0 (stays locked). */
-  const isLast = false; /* per-section last detection handled by parent */
-  const recede = scrollYProgress;
+  /* ── recede: fade/blur as next section covers (last section locks) ── */
+  const recedeStart = isLast ? 1 : offset + duration;
+  const recedeEnd = recedeStart + enterSpan;
 
-  const opacity = useTransform(recede, [0, 0.6, 1], [1, 0.6, 0.1]);
-  const scale = useTransform(recede, [0, 1], [1, 0.97]);
-  const blurRaw = useTransform(recede, [0, 1], [0, 6]);
+  const opacity = useTransform(progress, [recedeStart, recedeEnd], [1, isLast ? 1 : 0.1], { clamp: true });
+  const scale = useTransform(progress, [recedeStart, recedeEnd], [1, isLast ? 1 : 0.97], { clamp: true });
+  const blurRaw = useTransform(progress, [recedeStart, recedeEnd], [0, isLast ? 0 : 6], { clamp: true });
   const filter = useTransform(blurRaw, (v) => `blur(${v}px)`);
 
   return (
     <motion.section
-      ref={ref}
-      className={`scene-sticky${className ? ` ${className}` : ''}`}
-      style={{ opacity, scale, filter, zIndex, willChange: 'transform, opacity, filter' }}
+      className={`scene-fixed${isLast ? ' scene-terminal' : ''}${className ? ` ${className}` : ''}`}
+      style={{
+        translateY,
+        opacity,
+        scale,
+        filter,
+        zIndex: index + 1,
+        willChange: 'transform, opacity, filter',
+      }}
     >
       <div className="scene-inner">{children}</div>
     </motion.section>

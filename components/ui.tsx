@@ -255,7 +255,7 @@ export function ScrollProgress() {
   return (
     <motion.div
       className="fixed top-0 left-0 right-0 h-[2px] z-[99999] origin-left"
-      style={{ scaleX, background: 'linear-gradient(90deg, #38bdf8, #00e5a0)' }}
+      style={{ scaleX, background: 'linear-gradient(90deg, #22c55e, #4ade80)' }}
     />
   );
 }
@@ -304,7 +304,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
       <div className="absolute bottom-14 left-1/2 -translate-x-1/2 w-40 h-px" style={{ background: 'rgba(232,230,227,0.05)' }}>
         <motion.div
           className="h-full"
-          style={{ width: `${progress}%`, background: '#38bdf8' }}
+          style={{ width: `${progress}%`, background: '#22c55e' }}
           transition={{ duration: 0.08 }}
         />
       </div>
@@ -337,7 +337,7 @@ export function Header() {
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6">
         <a href="#" className="font-mono text-sm font-medium tracking-tight" style={{ color: '#e8e6e3' }} data-magnetic>
-          sobuj<span style={{ color: '#38bdf8' }}>.</span>miah
+          sobuj<span style={{ color: '#22c55e' }}>.</span>miah
         </a>
         <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((l) => (
