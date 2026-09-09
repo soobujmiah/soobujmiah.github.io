@@ -42,7 +42,12 @@ export function PinnedSection({
   children,
   className = '',
 }: PinnedSectionProps) {
-  const enterStart = index / total;
+  /* Phase step: spacing between each section's entrance, chosen so the
+     last section fully arrives at progress = 1 (enterEnd = 1), fixing
+     the bug where Contact stayed stuck partway with empty scroll below. */
+  const phaseStep = (1 - enterSpan) / (total - 1);
+
+  const enterStart = index * phaseStep;
   const enterEnd = enterStart + enterSpan;
 
   /* ── slide up from below (hero stays put from the top) ──
@@ -54,7 +59,7 @@ export function PinnedSection({
      The last section has nothing covering it, so its recede
      range is degenerate (input never exceeds it) → stays locked. */
   const isLast = index === total - 1;
-  const recedeStart = isLast ? 1 : (index + 1) / total;
+  const recedeStart = isLast ? 1 : (index + 1) * phaseStep;
   const recedeEnd = recedeStart + enterSpan;
 
   const opacity = useTransform(progress, [recedeStart, recedeEnd], [1, isLast ? 1 : 0.12], { clamp: true });
