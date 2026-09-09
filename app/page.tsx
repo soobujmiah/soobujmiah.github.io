@@ -298,12 +298,14 @@ function Magnetic({
   className = '',
   href,
   strength = 0.25,
+  style,
   ...props
 }: {
   children: React.ReactNode;
   className?: string;
   href?: string;
   strength?: number;
+  style?: React.CSSProperties;
 }) {
   const ref = useRef<HTMLAnchorElement>(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -330,6 +332,7 @@ function Magnetic({
       style={{
         transform: `translate(${offset.x}px, ${offset.y}px)`,
         transition: offset.x === 0 ? 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)' : 'transform 0.12s ease-out',
+        ...style,
       }}
       {...props}
     >
