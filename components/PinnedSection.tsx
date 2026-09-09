@@ -50,13 +50,16 @@ export function PinnedSection({
   const rawTranslateY = useTransform(progress, [enterStart, enterEnd], [100, 0], { clamp: true });
   const translateY = index === 0 ? 0 : rawTranslateY;
 
-  /* ── recede while the next scene covers this one ── */
-  const recedeStart = (index + 1) / total;
+  /* ── recede while the next scene covers this one ──
+     The last section has nothing covering it, so its recede
+     range is degenerate (input never exceeds it) → stays locked. */
+  const isLast = index === total - 1;
+  const recedeStart = isLast ? 1 : (index + 1) / total;
   const recedeEnd = recedeStart + enterSpan;
 
-  const opacity = useTransform(progress, [recedeStart, recedeEnd], [1, 0.12], { clamp: true });
-  const scale = useTransform(progress, [recedeStart, recedeEnd], [1, 0.97], { clamp: true });
-  const blurRaw = useTransform(progress, [recedeStart, recedeEnd], [0, 7], { clamp: true });
+  const opacity = useTransform(progress, [recedeStart, recedeEnd], [1, isLast ? 1 : 0.12], { clamp: true });
+  const scale = useTransform(progress, [recedeStart, recedeEnd], [1, isLast ? 1 : 0.97], { clamp: true });
+  const blurRaw = useTransform(progress, [recedeStart, recedeEnd], [0, isLast ? 0 : 7], { clamp: true });
   const filter = useTransform(blurRaw, (v) => `blur(${v}px)`);
 
   /* ── reduced motion: snap-fade only, no slide/parallax ── */
