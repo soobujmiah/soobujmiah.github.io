@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { motion, useInView, useScroll, useMotionValue, useSpring, useVelocity } from 'framer-motion';
+import { motion, useInView, useScroll, useMotionValue, useSpring, useVelocity, useTransform } from 'framer-motion';
 import { navLinks, profile } from '@/app/data';
 
 /* ═══════════════════════════════════════════════════════════════
