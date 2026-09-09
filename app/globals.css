@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: 248 248 250;
+    --fg: 22 22 28;
+    --muted: 107 107 120;
+    --border: 217 217 222;
+    --accent: 56 189 248;
+    --signal: 0 229 160;
+  }
+
+  .dark {
+    --bg: 12 12 16;
+    --fg: 238 238 240;
+    --muted: 142 142 153;
+    --border: 51 51 61;
+    --accent: 56 189 248;
+    --signal: 0 229 160;
+  }
+
+  * {
+    border-color: rgb(var(--border));
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: rgb(var(--bg));
+    color: rgb(var(--fg));
+  }
+
+  ::selection {
+    background-color: rgb(var(--accent) / 0.25);
+    color: rgb(var(--fg));
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .border-subtle {
+    border-color: rgb(var(--border) / 0.5);
+  }
+
+  .bg-subtle {
+    background-color: rgb(var(--muted) / 0.06);
+  }
+}
