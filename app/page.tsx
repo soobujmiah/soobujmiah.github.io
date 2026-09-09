@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import {
   motion,
   useScroll,
@@ -8,15 +8,17 @@ import {
   useSpring,
   useInView,
   AnimatePresence,
-  type MotionValue,
+  useMotionValue,
+  useVelocity,
 } from 'framer-motion';
 
 /* ═══════════════════════════════════════════════════════════════
-   DATA
+   DATA — from GitHub, SKB, CV, work history image
    ═══════════════════════════════════════════════════════════════ */
 
 const profile = {
-  name: 'Sobuj Miah',
+  name: 'Sobuj',
+  nameFull: 'Sobuj Miah',
   title: 'Independent Software & AI Systems Engineer',
   tagline: 'On-device AI · Android · Linux · ARM64 · GPU/NPU',
   location: 'Dhaka, Bangladesh',
@@ -26,6 +28,59 @@ const profile = {
   linkedin: 'https://linkedin.com/in/soobujmiah',
 };
 
+/* — corrected work history from /mnt/sdcard/work history.jpg — */
+const workHistory = [
+  {
+    period: 'Mar 2025 – Present',
+    role: 'Office Administrator',
+    company: 'Rabeya Education Family',
+    location: 'Savar, Dhaka',
+    desc: 'Daily operations, social media, SEO, student registration, document management, promotional graphics.',
+  },
+  {
+    period: 'Sep 2022 – Feb 2023',
+    role: 'Computer Operator',
+    company: 'Monika Enterprise',
+    location: 'Savar, Dhaka',
+    desc: 'Online activities, document processing, filing systems.',
+  },
+  {
+    period: '2021 – 2022',
+    role: 'Coordinator',
+    company: 'Abdullah Trading Pvt Ltd',
+    location: 'Jubail, Saudi Arabia',
+    desc: 'Site operations, logistics, team communication.',
+  },
+  {
+    period: '2020 – 2021',
+    role: 'Electrician',
+    company: 'Saudi Electricity Company & Khaled Juffali Company',
+    location: 'Jeddah, Saudi Arabia',
+    desc: 'Electrical installation and maintenance.',
+  },
+  {
+    period: '2018 – 2020',
+    role: 'Progress Reporter',
+    company: 'Fadhli Gas Plant Project / PCMC',
+    location: 'Saudi Arabia',
+    desc: 'Daily progress data, digitization, structured reporting.',
+  },
+  {
+    period: '2017 – 2018',
+    role: 'Fire Watcher',
+    company: 'Fadhli Gas Plant / Saudi Aramco',
+    location: 'Saudi Arabia',
+    desc: 'Fire hazard monitoring, incident prevention.',
+  },
+  {
+    period: '2015 – 2017',
+    role: 'Email Marketing Specialist',
+    company: 'Freelance',
+    location: 'Remote',
+    desc: 'Targeted campaigns, subscriber management, self-taught digital marketing.',
+  },
+];
+
 const projects = [
   {
     name: 'LAI',
@@ -34,7 +89,7 @@ const projects = [
     description:
       'Source-only Android runtime for private on-device LLM inference and Accessibility-gated automation. CPU inference device-validated; GPU/NPU in qualification.',
     evidence:
-      'Real arm64 llama.cpp CPU inference, ~20 tok/s decode, KV-prefix reuse. Symbolized root-cause diagnosis of an Adreno Vulkan driver crash that shaped a fail-closed CPU-default architecture.',
+      'Real arm64 llama.cpp CPU inference, ~20 tok/s decode, KV-prefix reuse. Root-cause diagnosis of an Adreno Vulkan driver crash that shaped a fail-closed CPU-default architecture.',
     topics: ['Kotlin', 'llama.cpp', 'Vulkan', 'Accessibility', 'Shizuku', 'GGUF'],
     repo: 'https://github.com/soobujmiah/lai',
     accent: '#38bdf8',
@@ -46,7 +101,7 @@ const projects = [
     description:
       'Flutter/Dart foundation for professional vector, raster, document, and PDF work. Documentation-first architecture with pure-Dart core and SHA-256 state integrity.',
     evidence:
-      '143 pure-Dart unit tests, 353 widget/controller tests. Multi-stage PR history validated on a physical device round after round.',
+      '143 pure-Dart unit tests, 353 widget/controller tests. Validated on a physical device round after round.',
     topics: ['Flutter', 'Dart', 'Document Generation', 'Vector Graphics'],
     repo: 'https://github.com/soobujmiah/ggen',
     accent: '#00e5a0',
@@ -82,25 +137,25 @@ const research = [
     title: 'Snapdragon / Hexagon NPU',
     status: 'experimental',
     description:
-      'Qualcomm Hexagon HTP NPU evaluation. First real non-CPU backend confirmed working with FastRPC/DSP evidence. QAIRT/QNN runtime evaluation ongoing.',
+      'Qualcomm Hexagon HTP NPU evaluation. First real non-CPU backend confirmed working with FastRPC/DSP evidence.',
   },
   {
     title: 'Adreno Vulkan / GPU',
     status: 'experimental',
     description:
-      'Mesa Turnip Vulkan, Zink OpenGL-on-Vulkan, native Vulkan compute. Vulkan compute crashes at decode — root-caused, documented, shaped fail-closed architecture.',
+      'Mesa Turnip Vulkan, Zink OpenGL-on-Vulkan. Vulkan compute crashes at decode — root-caused, documented.',
   },
   {
     title: 'Android Automation',
     status: 'validated',
     description:
-      'AccessibilityService + Shizuku privileged execution with explicit consent, hash-chained audit trails, typed operation policies. No raw shell API.',
+      'AccessibilityService + Shizuku privileged execution with explicit consent, hash-chained audit trails.',
   },
   {
     title: 'AI Agents & Orchestration',
     status: 'investigating',
     description:
-      'Policy-gated tool dispatch, signed model catalog with SHA-256 verification, multi-provider gateway with failover routing, encrypted credential storage.',
+      'Policy-gated tool dispatch, signed model catalog with SHA-256 verification, multi-provider gateway.',
   },
 ];
 
@@ -114,10 +169,21 @@ const allRepos = [
   { name: 'apiloop', desc: 'Provider-agnostic AI API gateway', lang: 'Python', stars: 0, url: 'https://github.com/soobujmiah/apiloop' },
   { name: 'sobkichu', desc: 'Bangladesh hyperlocal super-app', lang: 'TypeScript', stars: 0, url: 'https://github.com/soobujmiah/sobkichu' },
   { name: 'docdr', desc: 'Mobile-first offline document workspace', lang: 'Dart', stars: 0, url: 'https://github.com/soobujmiah/docdr' },
+  { name: 'faridpur-police-app', desc: 'Official Faridpur District Police app', lang: 'Dart', stars: 0, url: 'https://github.com/soobujmiah/faridpur-police-app' },
+  { name: 'iqra-online-mart', desc: 'Bilingual e-commerce storefront demo', lang: 'JavaScript', stars: 0, url: 'https://github.com/soobujmiah/iqra-online-mart' },
+  { name: 'arms', desc: 'ARM64 dev environment setup scripts', lang: 'HTML', stars: 0, url: 'https://github.com/soobujmiah/arms' },
+];
+
+/* ── stats ── */
+const stats = [
+  { value: '13', label: 'Public Repos' },
+  { value: '7', label: 'Languages' },
+  { value: '19', label: 'Total Projects' },
+  { value: '8+', label: 'Years Working' },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
-   CUSTOM CURSOR
+   CUSTOM CURSOR — magnetic with velocity-based stretch
    ═══════════════════════════════════════════════════════════════ */
 
 function CustomCursor() {
@@ -127,22 +193,40 @@ function CustomCursor() {
   const [clicking, setClicking] = useState(false);
   const [visible, setVisible] = useState(false);
 
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const ringX = useMotionValue(0);
+  const ringY = useMotionValue(0);
+  const velX = useVelocity(mouseX);
+  const velY = useVelocity(mouseY);
+
+  const ringScale = useSpring(
+    useTransform([velX, velY], ([vx, vy]) => {
+      const speed = Math.sqrt((vx || 0) ** 2 + (vy || 0) ** 2);
+      return Math.min(1 + speed * 0.001, 1.4);
+    }),
+    { stiffness: 300, damping: 20 }
+  );
+
   useEffect(() => {
     const dot = dotRef.current;
     const ring = ringRef.current;
     if (!dot || !ring) return;
 
-    let mouseX = 0;
-    let mouseY = 0;
-    let ringX = 0;
-    let ringY = 0;
-
     const onMove = (e: MouseEvent) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      dot.style.left = mouseX + 'px';
-      dot.style.top = mouseY + 'px';
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+      dot.style.left = e.clientX + 'px';
+      dot.style.top = e.clientY + 'px';
       setVisible(true);
+    };
+
+    const animate = () => {
+      const currentX = ringX.get();
+      const currentY = ringY.get();
+      ringX.set(currentX + (mouseX.get() - currentX) * 0.12);
+      ringY.set(currentY + (mouseY.get() - currentY) * 0.12);
+      requestAnimationFrame(animate);
     };
 
     const onDown = () => setClicking(true);
@@ -150,38 +234,23 @@ function CustomCursor() {
     const onLeave = () => setVisible(false);
     const onEnter = () => setVisible(true);
 
-    // magnetic hover on interactive elements
-    const onOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('a, button, [data-magnetic]')) {
-        setHovering(true);
-      }
-    };
-    const onOut = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('a, button, [data-magnetic]')) {
-        setHovering(false);
-      }
-    };
-
-    // smooth ring follow
-    const animate = () => {
-      ringX += (mouseX - ringX) * 0.15;
-      ringY += (mouseY - ringY) * 0.15;
-      ring.style.left = ringX + 'px';
-      ring.style.top = ringY + 'px';
-      requestAnimationFrame(animate);
-    };
-
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mousedown', onDown);
     window.addEventListener('mouseup', onUp);
     document.addEventListener('mouseleave', onLeave);
     document.addEventListener('mouseenter', onEnter);
+
+    /* magnetic hover */
+    const onOver = (e: MouseEvent) => {
+      if ((e.target as HTMLElement).closest('a, button, [data-magnetic]')) setHovering(true);
+    };
+    const onOut = (e: MouseEvent) => {
+      if ((e.target as HTMLElement).closest('a, button, [data-magnetic]')) setHovering(false);
+    };
     document.addEventListener('mouseover', onOver);
     document.addEventListener('mouseout', onOut);
-    const raf = requestAnimationFrame(animate);
 
+    const raf = requestAnimationFrame(animate);
     return () => {
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mousedown', onDown);
@@ -192,19 +261,29 @@ function CustomCursor() {
       document.removeEventListener('mouseout', onOut);
       cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [mouseX, mouseY, ringX, ringY]);
 
   return (
     <>
-      <div
+      <motion.div
         ref={dotRef}
         className="cursor-dot"
-        style={{ opacity: visible ? 1 : 0 }}
+        style={{
+          x: mouseX,
+          y: mouseY,
+          opacity: visible ? 1 : 0,
+          scale: clicking ? 0.5 : 1,
+        }}
       />
-      <div
+      <motion.div
         ref={ringRef}
-        className={`cursor-ring${hovering ? ' hover' : ''}${clicking ? ' clicking' : ''}`}
-        style={{ opacity: visible ? 1 : 0 }}
+        className={`cursor-ring${hovering ? ' hover' : ''}`}
+        style={{
+          x: ringX,
+          y: ringY,
+          opacity: visible ? 1 : 0,
+          scale: hovering ? 1.8 : clicking ? 0.7 : ringScale,
+        }}
       />
     </>
   );
@@ -214,15 +293,17 @@ function CustomCursor() {
    MAGNETIC BUTTON
    ═══════════════════════════════════════════════════════════════ */
 
-function MagneticButton({
+function Magnetic({
   children,
   className = '',
   href,
+  strength = 0.25,
   ...props
 }: {
   children: React.ReactNode;
   className?: string;
   href?: string;
+  strength?: number;
 }) {
   const ref = useRef<HTMLAnchorElement>(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -230,20 +311,13 @@ function MagneticButton({
   const onMove = (e: React.MouseEvent) => {
     if (!ref.current) return;
     const rect = ref.current.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
     setOffset({
-      x: (e.clientX - cx) * 0.25,
-      y: (e.clientY - cy) * 0.25,
+      x: (e.clientX - rect.left - rect.width / 2) * strength,
+      y: (e.clientY - rect.top - rect.height / 2) * strength,
     });
   };
 
   const onLeave = () => setOffset({ x: 0, y: 0 });
-
-  const style: React.CSSProperties = {
-    transform: `translate(${offset.x}px, ${offset.y}px)`,
-    transition: offset.x === 0 ? 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)' : 'transform 0.15s ease',
-  };
 
   return (
     <a
@@ -253,7 +327,10 @@ function MagneticButton({
       className={className}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
-      style={style}
+      style={{
+        transform: `translate(${offset.x}px, ${offset.y}px)`,
+        transition: offset.x === 0 ? 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)' : 'transform 0.12s ease-out',
+      }}
       {...props}
     >
       {children}
@@ -262,14 +339,14 @@ function MagneticButton({
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SCROLL REVEAL WRAPPER
+   SCROLL REVEAL
    ═══════════════════════════════════════════════════════════════ */
 
 function Reveal({
   children,
   delay = 0,
   className = '',
-  y = 40,
+  y = 30,
 }: {
   children: React.ReactNode;
   delay?: number;
@@ -277,7 +354,7 @@ function Reveal({
   y?: number;
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-80px' });
+  const inView = useInView(ref, { once: true, margin: '-60px' });
 
   return (
     <motion.div
@@ -285,7 +362,7 @@ function Reveal({
       className={className}
       initial={{ opacity: 0, y }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
     >
       {children}
     </motion.div>
@@ -293,7 +370,7 @@ function Reveal({
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   TEXT REVEAL (line by line)
+   TEXT REVEAL — word by word
    ═══════════════════════════════════════════════════════════════ */
 
 function TextReveal({
@@ -306,9 +383,8 @@ function TextReveal({
   delay?: number;
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
+  const inView = useInView(ref, { once: true, margin: '-40px' });
 
-  // If children is a string, animate word by word
   if (typeof children === 'string') {
     const words = children.split(' ');
     return (
@@ -319,11 +395,7 @@ function TextReveal({
               className="inline-block"
               initial={{ y: '110%' }}
               animate={inView ? { y: 0 } : {}}
-              transition={{
-                duration: 0.6,
-                delay: delay + i * 0.04,
-                ease: [0.16, 1, 0.3, 1],
-              }}
+              transition={{ duration: 0.55, delay: delay + i * 0.035, ease: [0.16, 1, 0.3, 1] }}
             >
               {word}
             </motion.span>
@@ -333,21 +405,47 @@ function TextReveal({
     );
   }
 
-  // For ReactNode children (e.g. wrapped in span), animate the whole block
   return (
     <span ref={ref} className={className}>
       <motion.span
         className="inline-block"
         initial={{ y: '110%' }}
         animate={inView ? { y: 0 } : {}}
-        transition={{
-          duration: 0.7,
-          delay,
-          ease: [0.16, 1, 0.3, 1],
-        }}
+        transition={{ duration: 0.65, delay, ease: [0.16, 1, 0.3, 1] }}
       >
         {children}
       </motion.span>
+    </span>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UNIQUE NAME ANIMATED LETTERS
+   ═══════════════════════════════════════════════════════════════ */
+
+function AnimatedName() {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true });
+  const letters = profile.name.split('');
+
+  return (
+    <span ref={ref} className="inline-flex overflow-hidden">
+      {letters.map((letter, i) => (
+        <motion.span
+          key={i}
+          className="inline-block"
+          initial={{ y: '120%', rotateX: -90, opacity: 0 }}
+          animate={inView ? { y: 0, rotateX: 0, opacity: 1 } : {}}
+          transition={{
+            duration: 0.7,
+            delay: 0.9 + i * 0.08,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+          style={{ transformOrigin: 'bottom' }}
+        >
+          {letter}
+        </motion.span>
+      ))}
     </span>
   );
 }
@@ -362,44 +460,61 @@ function Preloader({ onComplete }: { onComplete: () => void }) {
   useEffect(() => {
     let current = 0;
     const interval = setInterval(() => {
-      current += Math.random() * 15 + 5;
+      current += Math.random() * 12 + 4;
       if (current >= 100) {
         current = 100;
         clearInterval(interval);
-        setTimeout(onComplete, 400);
+        setTimeout(onComplete, 500);
       }
       setProgress(Math.min(current, 100));
-    }, 120);
+    }, 100);
     return () => clearInterval(interval);
   }, [onComplete]);
 
   return (
     <motion.div
-      className="fixed inset-0 z-[100000] flex flex-col items-center justify-center bg-[#08080a]"
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="fixed inset-0 z-[100000] flex flex-col items-center justify-center"
+      style={{ background: '#060608' }}
+      exit={{ opacity: 0, scale: 1.05 }}
+      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
     >
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.6 }}
+        transition={{ delay: 0.3, duration: 0.7 }}
         className="text-center"
       >
-        <p className="font-mono text-xs uppercase tracking-[0.3em] text-[rgba(232,230,227,0.3)] mb-6">
-          Loading experience
+        <p className="font-mono text-[10px] uppercase tracking-[0.4em] mb-5" style={{ color: 'rgba(232,230,227,0.25)' }}>
+          Initializing
         </p>
-        <p className="font-mono text-5xl font-light text-[#e8e6e3] tabular-nums">
+        <p className="font-mono text-6xl font-extralight tabular-nums" style={{ color: '#e8e6e3' }}>
           {String(Math.round(progress)).padStart(3, '0')}
         </p>
       </motion.div>
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-48 h-px bg-[rgba(232,230,227,0.06)]">
+      <div className="absolute bottom-14 left-1/2 -translate-x-1/2 w-40 h-px" style={{ background: 'rgba(232,230,227,0.05)' }}>
         <motion.div
-          className="h-full bg-[#38bdf8]"
-          style={{ width: `${progress}%` }}
-          transition={{ duration: 0.1 }}
+          className="h-full"
+          style={{ width: `${progress}%`, background: '#38bdf8' }}
+          transition={{ duration: 0.08 }}
         />
       </div>
     </motion.div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLL PROGRESS BAR
+   ═══════════════════════════════════════════════════════════════ */
+
+function ScrollProgress() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+
+  return (
+    <motion.div
+      className="fixed top-0 left-0 right-0 h-[2px] z-[99999] origin-left"
+      style={{ scaleX, background: 'linear-gradient(90deg, #38bdf8, #00e5a0)' }}
+    />
   );
 }
 
@@ -419,17 +534,18 @@ function Header() {
   return (
     <motion.header
       className={`fixed top-0 left-0 right-0 z-[9998] transition-all duration-500 ${
-        scrolled ? 'py-4 backdrop-blur-xl bg-[#08080a]/70 border-b border-[rgba(232,230,227,0.04)]' : 'py-6'
+        scrolled ? 'py-3 backdrop-blur-xl border-b' : 'py-5'
       }`}
+      style={scrolled ? { background: 'rgba(6,6,8,0.75)', borderColor: 'rgba(232,230,227,0.04)' } : {}}
       initial={{ y: -80 }}
       animate={{ y: 0 }}
-      transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 sm:px-10">
-        <a href="#" className="font-mono text-sm font-medium tracking-tight text-[#e8e6e3]" data-magnetic>
-          sobuj<span className="text-[#38bdf8]">.</span>miah
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6">
+        <a href="#" className="font-mono text-sm font-medium tracking-tight" style={{ color: '#e8e6e3' }} data-magnetic>
+          sobuj<span style={{ color: '#38bdf8' }}>.</span>miah
         </a>
-        <nav className="hidden md:flex items-center gap-10">
+        <nav className="hidden md:flex items-center gap-8">
           {[
             { href: '#work', label: 'Work' },
             { href: '#research', label: 'Research' },
@@ -439,19 +555,22 @@ function Header() {
             <a
               key={l.href}
               href={l.href}
-              className="text-sm text-[rgba(232,230,227,0.45)] transition-colors duration-300 hover:text-[#e8e6e3]"
+              className="text-xs uppercase tracking-[0.1em] transition-colors duration-300 hover:opacity-100"
+              style={{ color: 'rgba(232,230,227,0.4)' }}
               data-magnetic
             >
               {l.label}
             </a>
           ))}
         </nav>
-        <MagneticButton
+        <Magnetic
           href="https://github.com/soobujmiah"
-          className="rounded-full border border-[rgba(232,230,227,0.12)] px-5 py-2 text-xs font-medium text-[#e8e6e3] transition-colors duration-300 hover:border-[#38bdf8] hover:text-[#38bdf8]"
+          className="rounded-full px-4 py-1.5 text-[11px] font-medium transition-colors duration-300"
+          style={{ border: '1px solid rgba(232,230,227,0.12)', color: '#e8e6e3' }}
+          strength={0.2}
         >
           GitHub
-        </MagneticButton>
+        </Magnetic>
       </div>
     </motion.header>
   );
@@ -464,85 +583,109 @@ function Header() {
 function Hero() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
-  const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, 250]);
+  const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.7], [1, 0.95]);
 
   return (
     <section ref={ref} className="relative flex min-h-screen items-center justify-center overflow-hidden">
-      {/* orbs */}
+      {/* ambient orbs */}
       <div className="orb orb-1" />
       <div className="orb orb-2" />
 
       {/* grid */}
-      <div className="absolute inset-0 grid-bg opacity-100" />
+      <div className="absolute inset-0 grid-bg" />
 
-      <motion.div style={{ y, opacity }} className="relative z-10 mx-auto max-w-6xl px-6 sm:px-10 text-center pt-32 pb-20">
+      <motion.div style={{ y, opacity, scale }} className="relative z-10 mx-auto max-w-5xl px-6 text-center pt-28 pb-16">
         <motion.p
-          className="font-mono text-xs uppercase tracking-[0.35em] text-[#38bdf8] mb-8"
+          className="font-mono text-[10px] uppercase tracking-[0.4em] mb-8"
+          style={{ color: '#38bdf8' }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.8 }}
+          transition={{ delay: 0.7, duration: 0.7 }}
         >
           {profile.tagline}
         </motion.p>
 
-        <h1 className="text-[clamp(2.8rem,7vw,6.5rem)] font-semibold leading-[0.95] tracking-tight text-[#e8e6e3] mb-8">
-          <TextReveal delay={0.9}>
-            I build systems close to the hardware.
-          </TextReveal>
-          <br />
-          <TextReveal delay={1.2}>
-            <span className="gradient-text">Mostly from a phone.</span>
-          </TextReveal>
+        <h1 className="text-[clamp(2.5rem,6.5vw,5.8rem)] font-semibold leading-[0.92] tracking-tight mb-6" style={{ color: '#e8e6e3' }}>
+          <span className="block">
+            <TextReveal delay={0.8}>I build systems close</TextReveal>
+          </span>
+          <span className="block mt-1">
+            <TextReveal delay={1.0}>
+              <span className="gradient-text">to the hardware.</span>
+            </TextReveal>
+          </span>
         </h1>
 
-        <motion.p
-          className="mx-auto max-w-xl text-lg leading-relaxed text-[rgba(232,230,227,0.45)]"
-          initial={{ opacity: 0, y: 20 }}
+        <motion.div
+          className="mt-4 mb-8"
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.6, duration: 0.8 }}
+          transition={{ delay: 1.4, duration: 0.7 }}
         >
-          Self-taught engineer working at the intersection of on-device AI, Android systems,
-          and ARM64 Linux. Every build runs on CI. Every hardware claim is checked against a physical device.
+          <AnimatedName />
+          <motion.span
+            className="ml-3 text-2xl sm:text-3xl font-light"
+            style={{ color: 'rgba(232,230,227,0.3)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.8, duration: 1 }}
+          >
+            — mostly from a phone.
+          </motion.span>
+        </motion.div>
+
+        <motion.p
+          className="mx-auto max-w-lg text-base leading-relaxed"
+          style={{ color: 'rgba(232,230,227,0.4)' }}
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 2.0, duration: 0.7 }}
+        >
+          Self-taught engineer at the intersection of on-device AI, Android systems,
+          and ARM64 Linux. Every build runs on CI. Every claim checked against a physical device.
         </motion.p>
 
         <motion.div
-          className="mt-12 flex flex-wrap items-center justify-center gap-4"
-          initial={{ opacity: 0, y: 20 }}
+          className="mt-10 flex flex-wrap items-center justify-center gap-3"
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.9, duration: 0.8 }}
+          transition={{ delay: 2.2, duration: 0.7 }}
         >
-          <MagneticButton
+          <Magnetic
             href="#work"
-            className="rounded-full bg-[#38bdf8] px-8 py-3.5 text-sm font-medium text-[#08080a] transition-all duration-300 hover:shadow-[0_0_40px_rgba(56,189,248,0.3)]"
+            className="rounded-full px-7 py-3 text-sm font-medium transition-all duration-300"
+            style={{ background: '#38bdf8', color: '#060608' }}
           >
             Explore my work
-          </MagneticButton>
-          <MagneticButton
+          </Magnetic>
+          <Magnetic
             href="https://github.com/soobujmiah"
-            className="rounded-full border border-[rgba(232,230,227,0.15)] px-8 py-3.5 text-sm font-medium text-[#e8e6e3] transition-all duration-300 hover:border-[rgba(232,230,227,0.3)]"
+            className="rounded-full px-7 py-3 text-sm font-medium transition-all duration-300"
+            style={{ border: '1px solid rgba(232,230,227,0.15)', color: '#e8e6e3' }}
           >
-            View GitHub
-          </MagneticButton>
+            View GitHub ↗
+          </Magnetic>
         </motion.div>
       </motion.div>
 
       {/* scroll indicator */}
       <motion.div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 2.4, duration: 1 }}
+        transition={{ delay: 2.6, duration: 1 }}
       >
         <motion.div
           className="flex flex-col items-center gap-2"
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[rgba(232,230,227,0.25)]">
+          <span className="font-mono text-[9px] uppercase tracking-[0.2em]" style={{ color: 'rgba(232,230,227,0.2)' }}>
             Scroll
           </span>
-          <div className="w-px h-8 bg-gradient-to-b from-[#38bdf8] to-transparent" />
+          <div className="w-px h-6" style={{ background: 'linear-gradient(to bottom, #38bdf8, transparent)' }} />
         </motion.div>
       </motion.div>
     </section>
@@ -550,21 +693,31 @@ function Hero() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   MARQUEE DIVIDER
+   STATS STRIP
    ═══════════════════════════════════════════════════════════════ */
 
-function Marquee({ items, reverse = false }: { items: string[]; reverse?: boolean }) {
-  const track = [...items, ...items];
+function StatsStrip() {
   return (
-    <div className="overflow-hidden border-y border-[rgba(232,230,227,0.04)] py-5">
-      <div
-        className="marquee-track flex gap-12 whitespace-nowrap"
-        style={{ animationDirection: reverse ? 'reverse' : 'normal' }}
-      >
-        {track.map((item, i) => (
-          <span key={i} className="font-mono text-xs uppercase tracking-[0.15em] text-[rgba(232,230,227,0.2)]">
-            {item}
-          </span>
+    <div className="border-y py-8" style={{ borderColor: 'rgba(232,230,227,0.04)' }}>
+      <div className="mx-auto max-w-5xl px-6 grid grid-cols-2 md:grid-cols-4 gap-6">
+        {stats.map((s, i) => (
+          <Reveal key={s.label} delay={i * 0.08}>
+            <div className="text-center">
+              <motion.p
+                className="text-3xl sm:text-4xl font-bold tabular-nums"
+                style={{ color: '#e8e6e3' }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {s.value}
+              </motion.p>
+              <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em]" style={{ color: 'rgba(232,230,227,0.3)' }}>
+                {s.label}
+              </p>
+            </div>
+          </Reveal>
         ))}
       </div>
     </div>
@@ -572,54 +725,49 @@ function Marquee({ items, reverse = false }: { items: string[]; reverse?: boolea
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ABOUT
+   ABOUT — compact
    ═══════════════════════════════════════════════════════════════ */
 
 function About() {
   return (
-    <section id="about" className="relative py-32 sm:py-40">
-      <div className="mx-auto max-w-6xl px-6 sm:px-10">
+    <section id="about" className="relative py-24">
+      <div className="mx-auto max-w-5xl px-6">
         <Reveal>
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#38bdf8] mb-6">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] mb-5" style={{ color: '#38bdf8' }}>
             01 — About
           </p>
         </Reveal>
 
-        <Reveal delay={0.1}>
-          <h2 className="text-[clamp(1.8rem,4vw,3.2rem)] font-semibold leading-[1.15] tracking-tight text-[#e8e6e3] max-w-4xl mb-12">
+        <Reveal delay={0.08}>
+          <h2 className="text-[clamp(1.6rem,3.5vw,2.8rem)] font-semibold leading-[1.15] tracking-tight max-w-3xl mb-8" style={{ color: '#e8e6e3' }}>
             Self-taught systems builder working from constraints most people treat as blockers.
           </h2>
         </Reveal>
 
-        <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr]">
-          <div className="space-y-5">
+        <div className="grid gap-10 lg:grid-cols-[1.5fr_1fr]">
+          <div className="space-y-4">
             {[
               'I am a self-taught systems builder based in Dhaka, Bangladesh. My work sits at the intersection of on-device AI, Android systems, and ARM64 Linux — problems I pursue because the tools I needed did not exist yet on the hardware I had.',
-              'A defining constraint: I develop, build, and validate software primarily from an Android phone running Termux and PRoot Debian, not a conventional PC. This shapes everything — tooling choices, CI architecture, how I verify claims, and which problems I choose to solve.',
-              'My learning philosophy is simple: living till learning, dead upon stop learning. I learn through real problems — hypothesis, test, observation, formal theory, compare, iterate. Mechanism-first, evidence-backed, honest about what is proven versus what is still experimental.',
+              'A defining constraint: I develop, build, and validate software primarily from an Android phone running Termux and PRoot Debian, not a conventional PC. This shapes everything — tooling, CI architecture, how I verify claims.',
+              'My learning philosophy: living till learning, dead upon stop learning. I learn through real problems — hypothesis, test, observation, formal theory, compare, iterate. Mechanism-first, evidence-backed.',
             ].map((p, i) => (
-              <Reveal key={i} delay={0.15 + i * 0.08}>
-                <p className="text-base leading-[1.8] text-[rgba(232,230,227,0.5)]">
-                  {p}
-                </p>
+              <Reveal key={i} delay={0.1 + i * 0.06}>
+                <p className="text-sm leading-[1.8]" style={{ color: 'rgba(232,230,227,0.45)' }}>{p}</p>
               </Reveal>
             ))}
           </div>
 
-          <Reveal delay={0.2}>
-            <div className="rounded-2xl border border-[rgba(232,230,227,0.06)] bg-[rgba(255,255,255,0.015)] p-8 space-y-6">
+          <Reveal delay={0.15}>
+            <div className="rounded-xl p-6 space-y-0" style={{ border: '1px solid rgba(232,230,227,0.05)', background: 'rgba(255,255,255,0.01)' }}>
               {[
                 { label: 'Based in', value: 'Dhaka, Bangladesh (GMT+6)' },
                 { label: 'Languages', value: 'Bangla, English, Hindi/Urdu, Arabic' },
-                { label: 'Education', value: 'Self-taught' },
-                { label: 'Reference device', value: 'Redmi Turbo 4 Pro — Snapdragon 8s Gen 4' },
+                { label: 'Reference device', value: 'Redmi Turbo 4 Pro — SD 8s Gen 4' },
                 { label: 'Build pipeline', value: 'GitHub Actions CI/CD' },
-              ].map((f) => (
-                <div key={f.label} className="flex items-start justify-between gap-4 border-b border-[rgba(232,230,227,0.04)] pb-4 last:border-0 last:pb-0">
-                  <span className="font-mono text-xs uppercase tracking-wider text-[rgba(232,230,227,0.3)]">
-                    {f.label}
-                  </span>
-                  <span className="text-sm font-medium text-[#e8e6e3] text-right">{f.value}</span>
+              ].map((f, i) => (
+                <div key={f.label} className={`flex items-start justify-between gap-4 py-3 ${i < 3 ? 'border-b' : ''}`} style={{ borderColor: 'rgba(232,230,227,0.04)' }}>
+                  <span className="font-mono text-[10px] uppercase tracking-wider" style={{ color: 'rgba(232,230,227,0.25)' }}>{f.label}</span>
+                  <span className="text-xs font-medium text-right" style={{ color: '#e8e6e3' }}>{f.value}</span>
                 </div>
               ))}
             </div>
@@ -631,76 +779,76 @@ function About() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   WORK / PROJECTS
+   WORK / PROJECTS — compact grid with hover glow
    ═══════════════════════════════════════════════════════════════ */
 
 function ProjectCard({ project, index }: { project: typeof projects[number]; index: number }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-100px' });
+  const inView = useInView(ref, { once: true, margin: '-80px' });
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  };
 
   return (
     <motion.article
       ref={ref}
-      className="group relative rounded-2xl border border-[rgba(232,230,227,0.06)] bg-[rgba(255,255,255,0.012)] p-8 sm:p-10 transition-all duration-500 hover:border-[rgba(232,230,227,0.12)] hover:bg-[rgba(255,255,255,0.025)]"
-      initial={{ opacity: 0, y: 60 }}
+      className="group relative rounded-xl p-6 sm:p-7 transition-all duration-500"
+      style={{ border: '1px solid rgba(232,230,227,0.05)', background: 'rgba(255,255,255,0.01)' }}
+      initial={{ opacity: 0, y: 50 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.8, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.7, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onMouseMove={handleMouseMove}
+      whileHover={{ borderColor: 'rgba(232,230,227,0.1)', y: -4 }}
     >
-      {/* hover glow */}
-      <div
-        className="absolute -inset-px rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none"
-        style={{
-          background: `radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${project.accent}08, transparent 60%)`,
-        }}
-      />
+      {/* cursor-following glow */}
+      {isHovered && (
+        <div
+          className="absolute inset-0 rounded-xl pointer-events-none transition-opacity duration-300"
+          style={{
+            background: `radial-gradient(300px circle at ${mousePos.x}px ${mousePos.y}px, ${project.accent}08, transparent 60%)`,
+          }}
+        />
+      )}
 
       <div className="relative z-10">
-        <div className="flex items-start justify-between gap-4 mb-6">
+        <div className="flex items-start justify-between gap-3 mb-4">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="font-mono text-xs text-[rgba(232,230,227,0.25)]">
-                0{index + 1}
-              </span>
-              <span className="font-mono text-xs text-[rgba(232,230,227,0.25)]">
-                {project.year}
-              </span>
+            <div className="flex items-center gap-3 mb-1.5">
+              <span className="font-mono text-[10px]" style={{ color: 'rgba(232,230,227,0.2)' }}>0{index + 1}</span>
+              <span className="font-mono text-[10px]" style={{ color: 'rgba(232,230,227,0.2)' }}>{project.year}</span>
             </div>
-            <h3 className="text-3xl font-semibold tracking-tight text-[#e8e6e3]">
-              {project.name}
-            </h3>
-            <p className="mt-1 text-sm" style={{ color: project.accent }}>
-              {project.tagline}
-            </p>
+            <h3 className="text-2xl font-semibold tracking-tight" style={{ color: '#e8e6e3' }}>{project.name}</h3>
+            <p className="mt-0.5 text-xs" style={{ color: project.accent }}>{project.tagline}</p>
           </div>
-          <MagneticButton
+          <Magnetic
             href={project.repo}
-            className="shrink-0 flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(232,230,227,0.1)] text-[rgba(232,230,227,0.4)] transition-all duration-300 hover:border-[#38bdf8] hover:text-[#38bdf8]"
+            className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-300"
+            style={{ border: '1px solid rgba(232,230,227,0.08)', color: 'rgba(232,230,227,0.35)' }}
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
               <path d="M1 13L13 1M13 1H3M13 1V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-          </MagneticButton>
+          </Magnetic>
         </div>
 
-        <p className="text-sm leading-[1.7] text-[rgba(232,230,227,0.45)] mb-6">
+        <p className="text-xs leading-[1.7] mb-4" style={{ color: 'rgba(232,230,227,0.4)' }}>
           {project.description}
         </p>
 
-        <div className="mb-6">
-          <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-[rgba(232,230,227,0.25)] mb-2">
-            Evidence
-          </p>
-          <p className="text-sm leading-[1.7] text-[rgba(232,230,227,0.35)]">
-            {project.evidence}
-          </p>
-        </div>
+        <p className="text-xs leading-[1.7] mb-5" style={{ color: 'rgba(232,230,227,0.3)' }}>
+          <span style={{ color: 'rgba(232,230,227,0.5)' }}>Evidence: </span>{project.evidence}
+        </p>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {project.topics.map((t) => (
-            <span
-              key={t}
-              className="rounded-full border border-[rgba(232,230,227,0.06)] px-3 py-1 font-mono text-[11px] text-[rgba(232,230,227,0.35)]"
-            >
+            <span key={t} className="rounded-full px-2.5 py-0.5 font-mono text-[10px]" style={{ border: '1px solid rgba(232,230,227,0.06)', color: 'rgba(232,230,227,0.3)' }}>
               {t}
             </span>
           ))}
@@ -712,25 +860,20 @@ function ProjectCard({ project, index }: { project: typeof projects[number]; ind
 
 function Work() {
   return (
-    <section id="work" className="relative py-32 sm:py-40">
-      <div className="mx-auto max-w-6xl px-6 sm:px-10">
+    <section id="work" className="relative py-24">
+      <div className="mx-auto max-w-5xl px-6">
         <Reveal>
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#38bdf8] mb-6">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] mb-5" style={{ color: '#38bdf8' }}>
             02 — Featured Work
           </p>
         </Reveal>
-        <Reveal delay={0.1}>
-          <h2 className="text-[clamp(1.8rem,4vw,3.2rem)] font-semibold leading-[1.15] tracking-tight text-[#e8e6e3] max-w-3xl mb-4">
+        <Reveal delay={0.06}>
+          <h2 className="text-[clamp(1.6rem,3.5vw,2.8rem)] font-semibold leading-[1.15] tracking-tight max-w-2xl mb-10" style={{ color: '#e8e6e3' }}>
             The strongest work — not every repository.
           </h2>
         </Reveal>
-        <Reveal delay={0.15}>
-          <p className="max-w-xl text-[rgba(232,230,227,0.4)] mb-16">
-            Selected projects that demonstrate real technical depth, originality, and evidence of actual work.
-          </p>
-        </Reveal>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2">
           {projects.map((p, i) => (
             <ProjectCard key={p.name} project={p} index={i} />
           ))}
@@ -741,42 +884,45 @@ function Work() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   RESEARCH
+   RESEARCH — compact
    ═══════════════════════════════════════════════════════════════ */
 
 function Research() {
   return (
-    <section id="research" className="relative py-32 sm:py-40">
-      <div className="mx-auto max-w-6xl px-6 sm:px-10">
+    <section id="research" className="relative py-24">
+      <div className="mx-auto max-w-5xl px-6">
         <Reveal>
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#38bdf8] mb-6">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] mb-5" style={{ color: '#38bdf8' }}>
             03 — Research & Experiments
           </p>
         </Reveal>
-        <Reveal delay={0.1}>
-          <h2 className="text-[clamp(1.8rem,4vw,3.2rem)] font-semibold leading-[1.15] tracking-tight text-[#e8e6e3] max-w-3xl mb-16">
-            Serious technical exploration — honest about what is proven.
+        <Reveal delay={0.06}>
+          <h2 className="text-[clamp(1.6rem,3.5vw,2.8rem)] font-semibold leading-[1.15] tracking-tight max-w-2xl mb-10" style={{ color: '#e8e6e3' }}>
+            Honest about what is proven vs. experimental.
           </h2>
         </Reveal>
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           {research.map((r, i) => (
-            <Reveal key={r.title} delay={0.1 + i * 0.08}>
-              <div className="group rounded-2xl border border-[rgba(232,230,227,0.06)] bg-[rgba(255,255,255,0.012)] p-8 transition-all duration-500 hover:border-[rgba(232,230,227,0.12)]">
-                <div className="flex items-center gap-3 mb-4">
+            <Reveal key={r.title} delay={0.08 + i * 0.06}>
+              <div
+                className="rounded-xl p-6 transition-all duration-500 h-full"
+                style={{ border: '1px solid rgba(232,230,227,0.05)', background: 'rgba(255,255,255,0.01)' }}
+                whileHover={{}}
+              >
+                <div className="flex items-center gap-2.5 mb-3">
                   <span
-                    className={`h-2 w-2 rounded-full ${
-                      r.status === 'validated' ? 'bg-[#00e5a0]' : r.status === 'experimental' ? 'bg-[#38bdf8]' : 'bg-[rgba(232,230,227,0.3)]'
-                    }`}
+                    className="h-2 w-2 rounded-full"
+                    style={{
+                      background: r.status === 'validated' ? '#00e5a0' : r.status === 'experimental' ? '#38bdf8' : 'rgba(232,230,227,0.3)',
+                    }}
                   />
-                  <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-[rgba(232,230,227,0.3)]">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.15em]" style={{ color: 'rgba(232,230,227,0.25)' }}>
                     {r.status}
                   </span>
                 </div>
-                <h3 className="text-xl font-semibold text-[#e8e6e3] mb-2">{r.title}</h3>
-                <p className="text-sm leading-[1.7] text-[rgba(232,230,227,0.4)]">
-                  {r.description}
-                </p>
+                <h3 className="text-base font-semibold mb-1.5" style={{ color: '#e8e6e3' }}>{r.title}</h3>
+                <p className="text-xs leading-[1.7]" style={{ color: 'rgba(232,230,227,0.4)' }}>{r.description}</p>
               </div>
             </Reveal>
           ))}
@@ -787,43 +933,41 @@ function Research() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   STACK
+   STACK — compact
    ═══════════════════════════════════════════════════════════════ */
 
 function Stack() {
   const domains = [
-    { name: 'On-Device AI', items: ['llama.cpp', 'GGUF', 'KV-cache reuse', 'Model integrity', 'CPU/GPU/NPU routing'] },
-    { name: 'Android Systems', items: ['Kotlin', 'Compose', 'AccessibilityService', 'Shizuku', 'JNI/C++'] },
-    { name: 'Linux / ARM64', items: ['AOSP builds', 'Clang/CMake/Ninja', 'Termux + PRoot', 'Bash scripting'] },
-    { name: 'GPU / Graphics', items: ['Vulkan', 'Mesa Turnip', 'Zink', 'OpenGL-on-Vulkan', 'Adreno KGSL'] },
-    { name: 'Mobile & Web', items: ['Flutter', 'Dart', 'TypeScript', 'Python', 'HTML/CSS/JS'] },
-    { name: 'Eng Ops', items: ['GitHub Actions', 'Reproducible builds', 'Signed releases', 'Device validation'] },
+    { name: 'On-Device AI', items: ['llama.cpp', 'GGUF', 'KV-cache', 'CPU/GPU/NPU routing'] },
+    { name: 'Android Systems', items: ['Kotlin', 'Compose', 'Accessibility', 'Shizuku', 'JNI/C++'] },
+    { name: 'Linux / ARM64', items: ['AOSP builds', 'Clang/CMake/Ninja', 'Termux + PRoot'] },
+    { name: 'GPU / Graphics', items: ['Vulkan', 'Mesa Turnip', 'Zink', 'Adreno KGSL'] },
+    { name: 'Mobile & Web', items: ['Flutter', 'Dart', 'TypeScript', 'Python'] },
+    { name: 'Eng Ops', items: ['GitHub Actions', 'Signed releases', 'Device validation'] },
   ];
 
   return (
-    <section id="stack" className="relative py-32 sm:py-40">
-      <div className="mx-auto max-w-6xl px-6 sm:px-10">
+    <section id="stack" className="relative py-24">
+      <div className="mx-auto max-w-5xl px-6">
         <Reveal>
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#38bdf8] mb-6">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] mb-5" style={{ color: '#38bdf8' }}>
             04 — Technical Focus
           </p>
         </Reveal>
-        <Reveal delay={0.1}>
-          <h2 className="text-[clamp(1.8rem,4vw,3.2rem)] font-semibold leading-[1.15] tracking-tight text-[#e8e6e3] max-w-3xl mb-16">
+        <Reveal delay={0.06}>
+          <h2 className="text-[clamp(1.6rem,3.5vw,2.8rem)] font-semibold leading-[1.15] tracking-tight max-w-2xl mb-10" style={{ color: '#e8e6e3' }}>
             Technologies I actually work with.
           </h2>
         </Reveal>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {domains.map((d, i) => (
-            <Reveal key={d.name} delay={0.1 + i * 0.06}>
-              <div className="rounded-2xl border border-[rgba(232,230,227,0.05)] bg-[rgba(255,255,255,0.01)] p-6 h-full">
-                <h3 className="font-mono text-sm font-medium text-[#38bdf8] mb-4">{d.name}</h3>
-                <ul className="space-y-2">
+            <Reveal key={d.name} delay={0.06 + i * 0.05}>
+              <div className="rounded-xl p-5 h-full" style={{ border: '1px solid rgba(232,230,227,0.04)', background: 'rgba(255,255,255,0.008)' }}>
+                <h3 className="font-mono text-xs font-medium mb-3" style={{ color: '#38bdf8' }}>{d.name}</h3>
+                <ul className="space-y-1.5">
                   {d.items.map((item) => (
-                    <li key={item} className="text-sm text-[rgba(232,230,227,0.4)]">
-                      {item}
-                    </li>
+                    <li key={item} className="text-xs" style={{ color: 'rgba(232,230,227,0.35)' }}>{item}</li>
                   ))}
                 </ul>
               </div>
@@ -836,100 +980,84 @@ function Stack() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   OPEN SOURCE
+   OPEN SOURCE — compact
    ═══════════════════════════════════════════════════════════════ */
 
 function OpenSource() {
   return (
-    <section id="open-source" className="relative py-32 sm:py-40">
-      <div className="mx-auto max-w-6xl px-6 sm:px-10">
+    <section id="open-source" className="relative py-24">
+      <div className="mx-auto max-w-5xl px-6">
         <Reveal>
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#38bdf8] mb-6">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] mb-5" style={{ color: '#38bdf8' }}>
             05 — Open Source
           </p>
         </Reveal>
-        <Reveal delay={0.1}>
-          <h2 className="text-[clamp(1.8rem,4vw,3.2rem)] font-semibold leading-[1.15] tracking-tight text-[#e8e6e3] max-w-3xl mb-16">
+        <Reveal delay={0.06}>
+          <h2 className="text-[clamp(1.6rem,3.5vw,2.8rem)] font-semibold leading-[1.15] tracking-tight max-w-2xl mb-10" style={{ color: '#e8e6e3' }}>
             Selected repositories.
           </h2>
         </Reveal>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {allRepos.map((r, i) => (
-            <Reveal key={r.name} delay={0.05 + i * 0.04}>
-              <MagneticButton
+            <Reveal key={r.name} delay={0.03 + i * 0.03}>
+              <Magnetic
                 href={r.url}
-                className="group flex flex-col rounded-2xl border border-[rgba(232,230,227,0.05)] bg-[rgba(255,255,255,0.01)] p-6 text-left transition-all duration-500 hover:border-[rgba(232,230,227,0.1)] hover:bg-[rgba(255,255,255,0.02)] h-full"
+                className="group flex flex-col rounded-xl p-5 text-left transition-all duration-500 h-full"
+                style={{ border: '1px solid rgba(232,230,227,0.04)', background: 'rgba(255,255,255,0.008)' }}
+                strength={0.15}
               >
-                <div className="flex items-center gap-2 mb-3">
-                  <h3 className="font-mono text-sm font-semibold text-[#e8e6e3] group-hover:text-[#38bdf8] transition-colors duration-300">
-                    {r.name}
-                  </h3>
-                  {r.stars > 0 && (
-                    <span className="font-mono text-[10px] text-[rgba(232,230,227,0.25)]">★ {r.stars}</span>
-                  )}
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="font-mono text-xs font-semibold transition-colors duration-300" style={{ color: '#e8e6e3' }}>{r.name}</h3>
+                  {r.stars > 0 && <span className="font-mono text-[9px]" style={{ color: 'rgba(232,230,227,0.2)' }}>★ {r.stars}</span>}
                 </div>
-                <p className="flex-1 text-xs leading-relaxed text-[rgba(232,230,227,0.35)] mb-4">
-                  {r.desc}
-                </p>
+                <p className="flex-1 text-[11px] leading-relaxed mb-3" style={{ color: 'rgba(232,230,227,0.3)' }}>{r.desc}</p>
                 <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-[#38bdf8]/60" />
-                  <span className="font-mono text-[11px] text-[rgba(232,230,227,0.3)]">{r.lang}</span>
+                  <span className="h-2 w-2 rounded-full" style={{ background: '#38bdf8', opacity: 0.6 }} />
+                  <span className="font-mono text-[10px]" style={{ color: 'rgba(232,230,227,0.25)' }}>{r.lang}</span>
                 </div>
-              </MagneticButton>
+              </Magnetic>
             </Reveal>
           ))}
         </div>
-
-        <Reveal delay={0.3}>
-          <p className="mt-10 text-sm text-[rgba(232,230,227,0.3)]">
-            See all repositories on{' '}
-            <a href="https://github.com/soobujmiah" className="text-[#38bdf8] underline-offset-4 hover:underline" data-magnetic>
-              github.com/soobujmiah
-            </a>
-          </p>
-        </Reveal>
       </div>
     </section>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   JOURNEY
+   WORK HISTORY — from image
    ═══════════════════════════════════════════════════════════════ */
 
-function Journey() {
-  const events = [
-    { year: '2019', title: 'GitHub journey begins', desc: 'Started building and publishing open-source projects from an Android phone.' },
-    { year: '2022', title: 'Phone-as-workstation', desc: 'Established Termux + PRoot Debian as a primary development environment. Ternux born from this constraint.' },
-    { year: '2024', title: 'Local AI focus', desc: 'Began serious work on on-device LLM inference. LAI project started. llama.cpp CPU backend validated on ARM64.' },
-    { year: '2025', title: 'Ecosystem expansion', desc: 'GGEN, ADT, DataKhoj, Songjog, Sobkichu — multiple projects in parallel. CI/CD pipelines standardized.' },
-    { year: '2026', title: 'NPU qualification + GPU diagnosis', desc: 'Hexagon HTP NPU confirmed working. Vulkan GPU crash root-caused and documented. 19 active repositories.' },
-  ];
-
+function WorkHistory() {
   return (
-    <section id="journey" className="relative py-32 sm:py-40">
-      <div className="mx-auto max-w-4xl px-6 sm:px-10">
+    <section id="experience" className="relative py-24">
+      <div className="mx-auto max-w-5xl px-6">
         <Reveal>
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#38bdf8] mb-6">
-            06 — Journey
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] mb-5" style={{ color: '#38bdf8' }}>
+            06 — Experience
           </p>
         </Reveal>
-        <Reveal delay={0.1}>
-          <h2 className="text-[clamp(1.8rem,4vw,3.2rem)] font-semibold leading-[1.15] tracking-tight text-[#e8e6e3] max-w-3xl mb-16">
-            How the work evolved.
+        <Reveal delay={0.06}>
+          <h2 className="text-[clamp(1.6rem,3.5vw,2.8rem)] font-semibold leading-[1.15] tracking-tight max-w-2xl mb-10" style={{ color: '#e8e6e3' }}>
+            8+ years across operations, engineering, and administration.
           </h2>
         </Reveal>
 
         <div className="relative">
-          <div className="absolute left-[7px] top-0 bottom-0 w-px bg-[rgba(232,230,227,0.06)]" />
-          {events.map((e, i) => (
-            <Reveal key={e.year} delay={0.1 + i * 0.08}>
-              <div className="relative pl-10 pb-10 last:pb-0">
-                <div className="absolute left-0 top-1 h-4 w-4 rounded-full border-2 border-[#38bdf8] bg-[#08080a]" />
-                <span className="font-mono text-sm font-bold text-[#38bdf8]">{e.year}</span>
-                <h3 className="mt-1 text-lg font-semibold text-[#e8e6e3]">{e.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[rgba(232,230,227,0.4)]">{e.desc}</p>
+          <div className="absolute left-[5px] top-0 bottom-0 w-px" style={{ background: 'rgba(232,230,227,0.05)' }} />
+          {workHistory.map((w, i) => (
+            <Reveal key={i} delay={0.06 + i * 0.05}>
+              <div className="relative pl-8 pb-6 last:pb-0">
+                <div className="absolute left-0 top-1 h-3 w-3 rounded-full border-2" style={{ borderColor: '#38bdf8', background: '#060608' }} />
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-1">
+                  <span className="font-mono text-[10px]" style={{ color: 'rgba(232,230,227,0.25)' }}>{w.period}</span>
+                  <h3 className="text-sm font-semibold" style={{ color: '#e8e6e3' }}>{w.role}</h3>
+                </div>
+                <p className="text-xs" style={{ color: 'rgba(232,230,227,0.4)' }}>
+                  {w.company} · {w.location}
+                </p>
+                <p className="text-xs mt-1 leading-relaxed" style={{ color: 'rgba(232,230,227,0.3)' }}>{w.desc}</p>
               </div>
             </Reveal>
           ))}
@@ -945,44 +1073,44 @@ function Journey() {
 
 function Contact() {
   return (
-    <section id="contact" className="relative py-32 sm:py-40">
-      <div className="mx-auto max-w-4xl px-6 sm:px-10 text-center">
+    <section id="contact" className="relative py-24">
+      <div className="mx-auto max-w-3xl px-6 text-center">
         <Reveal>
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#38bdf8] mb-6">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] mb-5" style={{ color: '#38bdf8' }}>
             07 — Contact
           </p>
         </Reveal>
-        <Reveal delay={0.1}>
-          <h2 className="text-[clamp(2rem,5vw,4rem)] font-semibold leading-[1.1] tracking-tight text-[#e8e6e3] mb-6">
+        <Reveal delay={0.06}>
+          <h2 className="text-[clamp(1.8rem,4vw,3.2rem)] font-semibold leading-[1.1] tracking-tight mb-5" style={{ color: '#e8e6e3' }}>
             Open to freelance,
             <br />
             <span className="gradient-text">remote, and collaboration.</span>
           </h2>
         </Reveal>
-        <Reveal delay={0.2}>
-          <p className="mx-auto max-w-lg text-[rgba(232,230,227,0.4)] mb-12">
-            If you are working on on-device AI, Android systems, ARM64 tooling, or local-first products — I would be happy to talk.
+        <Reveal delay={0.12}>
+          <p className="mx-auto max-w-md mb-10 text-sm" style={{ color: 'rgba(232,230,227,0.4)' }}>
+            On-device AI, Android systems, ARM64 tooling, or local-first products — happy to talk.
           </p>
         </Reveal>
 
-        <Reveal delay={0.3}>
-          <div className="flex flex-wrap justify-center gap-4">
+        <Reveal delay={0.18}>
+          <div className="flex flex-wrap justify-center gap-3">
             {[
               { label: 'Email', value: profile.email, href: `mailto:${profile.email}` },
               { label: 'GitHub', value: 'soobujmiah', href: 'https://github.com/soobujmiah' },
               { label: 'Telegram', value: profile.telegram, href: 'https://t.me/soobujmiah' },
               { label: 'LinkedIn', value: 'in/soobujmiah', href: 'https://linkedin.com/in/soobujmiah' },
             ].map((c) => (
-              <MagneticButton
+              <Magnetic
                 key={c.label}
                 href={c.href}
-                className="group flex items-center gap-3 rounded-full border border-[rgba(232,230,227,0.08)] bg-[rgba(255,255,255,0.015)] px-6 py-3.5 transition-all duration-500 hover:border-[#38bdf8]"
+                className="group flex items-center gap-2.5 rounded-full px-5 py-2.5 transition-all duration-500"
+                style={{ border: '1px solid rgba(232,230,227,0.07)', background: 'rgba(255,255,255,0.01)' }}
+                strength={0.2}
               >
-                <span className="text-sm font-medium text-[#e8e6e3] group-hover:text-[#38bdf8] transition-colors duration-300">
-                  {c.label}
-                </span>
-                <span className="font-mono text-xs text-[rgba(232,230,227,0.3)]">{c.value}</span>
-              </MagneticButton>
+                <span className="text-xs font-medium transition-colors duration-300" style={{ color: '#e8e6e3' }}>{c.label}</span>
+                <span className="font-mono text-[10px]" style={{ color: 'rgba(232,230,227,0.25)' }}>{c.value}</span>
+              </Magnetic>
             ))}
           </div>
         </Reveal>
@@ -997,12 +1125,12 @@ function Contact() {
 
 function Footer() {
   return (
-    <footer className="border-t border-[rgba(232,230,227,0.04)] py-8">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 sm:flex-row sm:px-10">
-        <p className="font-mono text-xs text-[rgba(232,230,227,0.2)]">
-          © {new Date().getFullYear()} {profile.name}. Built from a phone.
+    <footer className="border-t py-6" style={{ borderColor: 'rgba(232,230,227,0.04)' }}>
+      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-6 sm:flex-row">
+        <p className="font-mono text-[10px]" style={{ color: 'rgba(232,230,227,0.15)' }}>
+          © {new Date().getFullYear()} {profile.nameFull}. Built from a phone.
         </p>
-        <p className="font-mono text-xs text-[rgba(232,230,227,0.2)]">
+        <p className="font-mono text-[10px]" style={{ color: 'rgba(232,230,227,0.15)' }}>
           Every claim backed by CI or real-device evidence.
         </p>
       </div>
@@ -1020,6 +1148,7 @@ export default function Page() {
   return (
     <>
       <CustomCursor />
+      <ScrollProgress />
 
       <AnimatePresence mode="wait">
         {!loaded && <Preloader onComplete={() => setLoaded(true)} />}
@@ -1029,18 +1158,18 @@ export default function Page() {
         <motion.main
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
+          style={{ background: '#060608' }}
         >
           <Header />
           <Hero />
-          <Marquee items={['On-Device AI', '·', 'Android', '·', 'ARM64', '·', 'Local LLM', '·', 'Vulkan', '·', 'NPU', '·', 'Flutter', '·', 'Kotlin', '·', 'Linux', '·']} />
+          <StatsStrip />
           <About />
           <Work />
-          <Marquee items={['Evidence-First', '·', 'CI/CD', '·', 'Real-Device Validation', '·', 'Open Source', '·', 'Bangla-First', '·', 'Privacy-First', '·']} reverse />
           <Research />
           <Stack />
           <OpenSource />
-          <Journey />
+          <WorkHistory />
           <Contact />
           <Footer />
         </motion.main>

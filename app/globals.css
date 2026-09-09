@@ -179,9 +179,37 @@ a, button {
 /* ── grid lines ── */
 .grid-bg {
   background-image:
-    linear-gradient(rgba(232, 230, 227, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(232, 230, 227, 0.03) 1px, transparent 1px);
-  background-size: 80px 80px;
+    linear-gradient(rgba(232, 230, 227, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232, 230, 227, 0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ── animated name shimmer ── */
+@keyframes nameShimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.name-shimmer {
+  background: linear-gradient(
+    90deg,
+    #e8e6e3 0%,
+    #38bdf8 25%,
+    #00e5a0 50%,
+    #38bdf8 75%,
+    #e8e6e3 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: nameShimmer 4s linear infinite;
+}
+
+/* ── section divider glow ── */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.2), transparent);
 }
 
 @media (max-width: 768px) {
