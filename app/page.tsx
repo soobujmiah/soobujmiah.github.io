@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence, useScroll } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { CustomCursor, ScrollProgress, Preloader, Header, Footer } from '@/components/ui';
 import { PinnedSection } from '@/components/PinnedSection';
 import {
@@ -43,9 +43,6 @@ export default function Page() {
     return () => mq.removeEventListener('change', onChange);
   }, []);
 
-  /* single shared scroll progress drives every layer */
-  const { scrollYProgress } = useScroll();
-
   return (
     <>
       <CustomCursor />
@@ -65,24 +62,18 @@ export default function Page() {
           <Header />
           <Footer />
 
-          {/* ── fixed scene layers ── */}
+          {/* ── sticky scene layers ── */}
           <div className="scenes-stack">
             {SCENES.map(({ id, Component }, i) => (
               <PinnedSection
                 key={id}
                 index={i}
-                total={TOTAL}
                 zIndex={i + 1}
-                progress={scrollYProgress}
-                reducedMotion={reducedMotion}
               >
                 <Component reducedMotion={reducedMotion} />
               </PinnedSection>
             ))}
           </div>
-
-          {/* ── scroll spacer: provides the natural scroll range ── */}
-          <div style={{ height: `${TOTAL * 100}vh` }} aria-hidden />
         </motion.main>
       )}
     </>

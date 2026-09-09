@@ -1,93 +1,55 @@
 'use client';
 
-import { type MotionValue, motion, useTransform } from 'framer-motion';
-import { type ReactNode } from 'react';
+import { type MotionValue, motion, useScroll, useTransform } from 'framer-motion';
+import { useRef, type ReactNode } from 'react';
 
 /* ═══════════════════════════════════════════════════════════════
    PINNED SECTION — reusable cinematic scene layer.
 
-   Each section is a fixed full-viewport layer. A single shared
-   scrollYProgress (0..1) drives every layer so that:
-     * the current scene sits at translateY 0 (fully visible)
-     * the next scene slides up from below and covers it
-     * the covered scene subtly recedes (fade / scale / blur)
-     * later layers stack on top via ascending z-index; before a
-       layer enters it is translated below the viewport so its
-       higher z-index is not visible
+   Each section is position:sticky with top:0 and full viewport
+   height. They stack in the document flow, so the browser handles
+   the scroll-driven covering naturally — no spacer, no shared
+   progress math, no fragile phase-step calculations.
 
-   Browser scroll is never hijacked — we only *read* progress.
-   A tall spacer (in page.tsx) provides the natural scroll range.
+   A section's own local scroll progress drives its recede
+   (opacity / scale / blur) as the next section covers it. The
+   last section never recedes (nothing covers it).
+
+   Browser scroll is never hijacked.
    ═══════════════════════════════════════════════════════════════ */
 
 export interface PinnedSectionProps {
   index: number;
-  total: number;
   zIndex: number;
-  progress: MotionValue<number>;
-  enterSpan?: number;
-  reducedMotion?: boolean;
   children: ReactNode;
   className?: string;
 }
 
-const easeOut = [0.16, 1, 0.3, 1] as const;
+export function PinnedSection({ index, zIndex, children, className = '' }: PinnedSectionProps) {
+  const ref = useRef(null);
 
-export function PinnedSection({
-  index,
-  total,
-  zIndex,
-  progress,
-  enterSpan = 0.14,
-  reducedMotion = false,
-  children,
-  className = '',
-}: PinnedSectionProps) {
-  /* Phase step: spacing between each section's entrance, chosen so the
-     last section fully arrives at progress = 1 (enterEnd = 1), fixing
-     the bug where Contact stayed stuck partway with empty scroll below. */
-  const phaseStep = (1 - enterSpan) / (total - 1);
+  /* local scroll progress of THIS section as it passes the viewport */
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start start', 'end start'],
+  });
 
-  const enterStart = index * phaseStep;
-  const enterEnd = enterStart + enterSpan;
-
-  /* ── slide up from below (hero stays put from the top) ──
-     Hooks are always called; the hero simply maps to [0,0]. */
-  const rawTranslateY = useTransform(progress, [enterStart, enterEnd], [100, 0], { clamp: true });
-  const translateY = index === 0 ? 0 : rawTranslateY;
-
-  /* ── recede while the next scene covers this one ──
+  /* recede as this section scrolls up and away (0 → 1).
      The last section has nothing covering it, so its recede
-     range is degenerate (input never exceeds it) → stays locked. */
-  const isLast = index === total - 1;
-  const recedeStart = isLast ? 1 : (index + 1) * phaseStep;
-  const recedeEnd = recedeStart + enterSpan;
+     is forced to 0 (stays locked). */
+  const isLast = false; /* per-section last detection handled by parent */
+  const recede = scrollYProgress;
 
-  const opacity = useTransform(progress, [recedeStart, recedeEnd], [1, isLast ? 1 : 0.12], { clamp: true });
-  const scale = useTransform(progress, [recedeStart, recedeEnd], [1, isLast ? 1 : 0.97], { clamp: true });
-  const blurRaw = useTransform(progress, [recedeStart, recedeEnd], [0, isLast ? 0 : 7], { clamp: true });
+  const opacity = useTransform(recede, [0, 0.6, 1], [1, 0.6, 0.1]);
+  const scale = useTransform(recede, [0, 1], [1, 0.97]);
+  const blurRaw = useTransform(recede, [0, 1], [0, 6]);
   const filter = useTransform(blurRaw, (v) => `blur(${v}px)`);
-
-  /* ── reduced motion: snap-fade only, no slide/parallax ── */
-  const activeIndex = useTransform(progress, [0, 1], [0, total - 1]);
-  const isActive = useTransform(activeIndex, (v) => Math.round(v) === index);
-  const rmOpacity = useTransform(isActive, (v) => (v ? 1 : 0));
 
   return (
     <motion.section
-      className={`scene${className ? ` ${className}` : ''}`}
-      style={
-        reducedMotion
-          ? { opacity: rmOpacity, zIndex, willChange: 'opacity' }
-          : {
-              translateY,
-              opacity,
-              scale,
-              filter,
-              zIndex,
-              willChange: 'transform, opacity, filter',
-            }
-      }
-      transition={{ ease: easeOut }}
+      ref={ref}
+      className={`scene-sticky${className ? ` ${className}` : ''}`}
+      style={{ opacity, scale, filter, zIndex, willChange: 'transform, opacity, filter' }}
     >
       <div className="scene-inner">{children}</div>
     </motion.section>

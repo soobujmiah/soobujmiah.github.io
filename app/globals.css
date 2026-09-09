@@ -191,20 +191,21 @@ a, button {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SCENE SYSTEM
+   SCENE SYSTEM — sticky stacking layers
    ═══════════════════════════════════════════════════════════════ */
 
 .scenes-stack {
   position: relative;
 }
 
-.scene {
-  position: fixed;
-  inset: 0;
+.scene-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
   overflow: hidden;
+  background: #060608;
   /* GPU containment for performance */
   contain: content;
-  background: #060608;
 }
 
 .scene-fill {
