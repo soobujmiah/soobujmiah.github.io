@@ -301,32 +301,53 @@ function TextReveal({
   className = '',
   delay = 0,
 }: {
-  children: string;
+  children: React.ReactNode;
   className?: string;
   delay?: number;
 }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
-  const words = children.split(' ');
 
+  // If children is a string, animate word by word
+  if (typeof children === 'string') {
+    const words = children.split(' ');
+    return (
+      <span ref={ref} className={className}>
+        {words.map((word, i) => (
+          <span key={i} className="inline-block overflow-hidden align-bottom mr-[0.25em]">
+            <motion.span
+              className="inline-block"
+              initial={{ y: '110%' }}
+              animate={inView ? { y: 0 } : {}}
+              transition={{
+                duration: 0.6,
+                delay: delay + i * 0.04,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+            >
+              {word}
+            </motion.span>
+          </span>
+        ))}
+      </span>
+    );
+  }
+
+  // For ReactNode children (e.g. wrapped in span), animate the whole block
   return (
     <span ref={ref} className={className}>
-      {words.map((word, i) => (
-        <span key={i} className="inline-block overflow-hidden align-bottom mr-[0.25em]">
-          <motion.span
-            className="inline-block"
-            initial={{ y: '110%' }}
-            animate={inView ? { y: 0 } : {}}
-            transition={{
-              duration: 0.6,
-              delay: delay + i * 0.04,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-          >
-            {word}
-          </motion.span>
-        </span>
-      ))}
+      <motion.span
+        className="inline-block"
+        initial={{ y: '110%' }}
+        animate={inView ? { y: 0 } : {}}
+        transition={{
+          duration: 0.7,
+          delay,
+          ease: [0.16, 1, 0.3, 1],
+        }}
+      >
+        {children}
+      </motion.span>
     </span>
   );
 }
