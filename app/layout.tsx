@@ -20,19 +20,8 @@ export const metadata: Metadata = {
   description:
     'On-device AI, Android, Linux, ARM64, GPU/NPU acceleration. Self-taught systems builder working from an Android phone — every claim backed by CI or real-device evidence.',
   keywords: [
-    'Sobuj Miah',
-    'on-device AI',
-    'Android',
-    'ARM64',
-    'local LLM',
-    'Vulkan',
-    'NPU',
-    'Hexagon',
-    'llama.cpp',
-    'Flutter',
-    'Kotlin',
-    'Termux',
-    'Bangla AI',
+    'Sobuj Miah', 'on-device AI', 'Android', 'ARM64', 'local LLM',
+    'Vulkan', 'NPU', 'Hexagon', 'llama.cpp', 'Flutter', 'Kotlin', 'Termux',
   ],
   authors: [{ name: 'Sobuj Miah' }],
   creator: 'Sobuj Miah',
@@ -43,31 +32,21 @@ export const metadata: Metadata = {
     siteName: 'Sobuj Miah',
     title: 'Sobuj Miah — Independent Software & AI Systems Engineer',
     description:
-      'On-device AI, Android, Linux, ARM64, GPU/NPU acceleration. Self-taught systems builder working from an Android phone.',
+      'On-device AI, Android, Linux, ARM64, GPU/NPU acceleration. Self-taught systems builder.',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Sobuj Miah — Independent Software & AI Systems Engineer',
-    description:
-      'On-device AI, Android, Linux, ARM64, GPU/NPU acceleration. Self-taught systems builder.',
+    description: 'On-device AI, Android, Linux, ARM64, GPU/NPU acceleration.',
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  alternates: {
-    canonical: 'https://soobujmiah.github.io',
-  },
+  robots: { index: true, follow: true },
+  alternates: { canonical: 'https://soobujmiah.github.io' },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${inter.variable} ${jetbrains.variable} font-sans`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} ${jetbrains.variable} noise`}>
         {children}
       </body>
     </html>
