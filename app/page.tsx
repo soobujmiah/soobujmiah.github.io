@@ -80,23 +80,25 @@ function PageBody({ index, reducedMotion }: { index: number; reducedMotion: bool
   }
 }
 
-/* Paper turn: gentle tilt + sink + spring slide + quick fade.
-   Restrained on purpose — felt, not noticed. */
+/* Paper turn: deep perspective, gentle tilt, soft scale — every
+   parameter is tuned so the movement feels like one physical sheet
+   sliding into place. The spring has just enough overshoot to feel
+   alive without bouncing. */
 const pageVariants = {
   enter: (dir: number) => ({
-    y: dir >= 0 ? '7%' : '-7%',
-    rotateX: dir >= 0 ? 5 : -5,
-    scale: 0.985,
+    y: dir >= 0 ? '6%' : '-6%',
+    rotateX: dir >= 0 ? 3.5 : -3.5,
+    scale: 0.99,
     opacity: 0,
-    transformPerspective: 1400,
+    transformPerspective: 1800,
   }),
-  center: { y: '0%', rotateX: 0, scale: 1, opacity: 1, transformPerspective: 1400 },
+  center: { y: '0%', rotateX: 0, scale: 1, opacity: 1, transformPerspective: 1800 },
   exit: (dir: number) => ({
-    y: dir >= 0 ? '-7%' : '7%',
-    rotateX: dir >= 0 ? -5 : 5,
-    scale: 0.985,
+    y: dir >= 0 ? '-6%' : '6%',
+    rotateX: dir >= 0 ? -3.5 : 3.5,
+    scale: 0.99,
     opacity: 0,
-    transformPerspective: 1400,
+    transformPerspective: 1800,
   }),
 };
 
@@ -322,9 +324,9 @@ function Pager() {
               reducedMotion
                 ? { duration: 0 }
                 : {
-                    y: { type: 'spring', stiffness: 170, damping: 27, mass: 0.9 },
-                    rotateX: { type: 'spring', stiffness: 170, damping: 27, mass: 0.9 },
-                    scale: { type: 'spring', stiffness: 170, damping: 27, mass: 0.9 },
+                    y: { type: 'spring', stiffness: 140, damping: 22, mass: 1.0 },
+                    rotateX: { type: 'spring', stiffness: 140, damping: 22, mass: 1.0 },
+                    scale: { type: 'spring', stiffness: 140, damping: 22, mass: 1.0 },
                     opacity: { duration: 0.4, ease: 'easeOut' },
                   }
             }

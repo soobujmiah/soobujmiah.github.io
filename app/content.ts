@@ -424,8 +424,8 @@ const bn: Content = {
   profile: {
     name: 'Sobuj',
     nameFull: 'Sobuj Miah',
-    title: 'স্বাধীন সফটওয়্যার ডেভেলপার ও অন-ডিভাইস AI সিস্টেম নির্মাতা',
-    tagline: 'অন-ডিভাইস AI · অ্যান্ড্রয়েড · লিনাক্স · ARM64 · GPU/NPU',
+    title: 'স্বাধীন সফটওয়্যার ডেভেলপার ও অন-ডিভাইস এআই সিস্টেম নির্মাতা',
+    tagline: 'অন-ডিভাইস এআই · অ্যান্ড্রয়েড · লিনাক্স · এআরএম ৬৪ · জিপিইউ/এনপিইউ',
     location: 'ঢাকা, বাংলাদেশ',
     github: 'https://github.com/soobujmiah',
     email: 'soobujmiah@gmail.com',
@@ -433,13 +433,13 @@ const bn: Content = {
     linkedin: 'https://linkedin.com/in/soobujmiah',
   },
   meta: {
-    title: 'সবুজ মিয়া — সফটওয়্যার ডেভেলপার ও অন-ডিভাইস AI সিস্টেম নির্মাতা',
+    title: 'সবুজ মিয়া — সফটওয়্যার ডেভেলপার ও অন-ডিভাইস এআই সিস্টেম নির্মাতা',
     description:
-      'অন-ডিভাইস AI, অ্যান্ড্রয়েড, লিনাক্স, ARM64, GPU/NPU অ্যাকসেলারেশন। অ্যান্ড্রয়েড ফোন থেকে কাজ করা স্ব-শিক্ষিত সিস্টেম নির্মাতা — প্রতিটি দাবি CI বা বাস্তব-ডিভাইস প্রমাণে সমর্থিত।',
+      'অন-ডিভাইস এআই, অ্যান্ড্রয়েড, লিনাক্স, এআরএম ৬৪, জিপিইউ/এনপিইউ ত্বরণ। অ্যান্ড্রয়েড ফোন থেকে কাজ করা স্ব-শিক্ষিত সিস্টেম নির্মাতা — প্রতিটি দাবি CI বা বাস্তব-ডিভাইস প্রমাণে সমর্থিত।',
   },
   hero: {
     intro:
-      'অন-ডিভাইস AI, অ্যান্ড্রয়েড সিস্টেম ও ARM64 লিনাক্সের সংযোগস্থলে কাজ করা স্ব-শিক্ষিত ডেভেলপার। প্রতিটি বিল্ড চলে CI-তে। প্রতিটি দাবি যাচাই করা হয় বাস্তব ডিভাইসে।',
+      'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম ও এআরএম ৬৪ লিনাক্সের সংযোগস্থলে কাজ করা স্ব-শিক্ষিত ডেভেলপার। প্রতিটি বিল্ড চলে CI-তে। প্রতিটি দাবি যাচাই করা হয় বাস্তব ডিভাইসে।',
     ctaWork: 'আমার কাজ দেখুন',
     ctaGithub: 'GitHub দেখুন ↗',
     scrollHint: 'সোয়াইপ',
@@ -447,9 +447,9 @@ const bn: Content = {
   presence: {
     eyebrow: '০২ — আমি আসলে যা করি',
     items: [
-      { label: 'অন-ডিভাইস AI', detail: 'LLM ইনফারেন্স, NPU/GPU অ্যাকসেলারেশন' },
+      { label: 'অন-ডিভাইস এআই', detail: 'LLM ইনফারেন্স, এনপিইউ/জিপিইউ ত্বরণ' },
       { label: 'অ্যান্ড্রয়েড সিস্টেমস', detail: 'Kotlin, Accessibility, Shizuku' },
-      { label: 'ARM64 লিনাক্স', detail: 'AOSP, PRoot, নেটিভ টুলচেইন' },
+      { label: 'এআরএম ৬৪ লিনাক্স', detail: 'AOSP, PRoot, নেটিভ টুলচেইন' },
       { label: 'লোকাল-ফার্স্ট', detail: 'প্রাইভেট, অফলাইন, সম্মতি-চালিত' },
     ],
   },
@@ -457,7 +457,7 @@ const bn: Content = {
     eyebrow: '০৩ — পরিচিতি',
     heading: 'স্ব-শিক্ষিত সিস্টেম নির্মাতা — সীমাবদ্ধতাকে বাধা নয়, ভিত্তি ধরে কাজ করি।',
     paragraphs: [
-      'আমি ঢাকা, বাংলাদেশের একজন স্ব-শিক্ষিত সিস্টেম নির্মাতা। আমার কাজের কেন্দ্রে আছে অন-ডিভাইস AI, অ্যান্ড্রয়েড সিস্টেম ও ARM64 লিনাক্স — এই সমস্যাগুলোর পেছনে লেগে আছি কারণ আমার হাতে থাকা হার্ডওয়্যারে প্রয়োজনীয় টুলগুলো তখন ছিলই না।',
+      'আমি ঢাকা, বাংলাদেশের একজন স্ব-শিক্ষিত সিস্টেম নির্মাতা। আমার কাজের কেন্দ্রে আছে অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম ও এআরএম ৬৪ লিনাক্স — এই সমস্যাগুলোর পেছনে লেগে আছি কারণ আমার হাতে থাকা হার্ডওয়্যারে প্রয়োজনীয় টুলগুলো তখন ছিলই না।',
       'একটি নির্ধারক সীমাবদ্ধতা: প্রচলিত PC নয় — মূলত একটি অ্যান্ড্রয়েড ফোনে Termux ও PRoot Debian চালিয়ে আমি সফটওয়্যার তৈরি, বিল্ড ও যাচাই করি। এটাই গড়ে দিয়েছে আমার টুলিং, CI আর্কিটেকচার, আর দাবি যাচাইয়ের পদ্ধতি।',
       'আমার শেখার দর্শন: যতদিন শিখি ততদিন বাঁচি, শেখা থামলেই মৃত্যু। শিখি বাস্তব সমস্যার মধ্য দিয়ে — হাইপোথিসিস, পরীক্ষা, পর্যবেক্ষণ, প্রাতিষ্ঠানিক তত্ত্ব, তুলনা, পুনরাবৃত্তি। মেকানিজম-ফার্স্ট, প্রমাণ-ভিত্তিক।',
     ],
@@ -477,10 +477,10 @@ const bn: Content = {
     projects: [
       {
         name: 'LAI',
-        tagline: 'বাংলা-ফার্স্ট লোকাল AI + সম্মতি-চালিত অটোমেশন',
+        tagline: 'বাংলা-ফার্স্ট লোকাল এআই + সম্মতি-চালিত স্বয়ংক্রিয়তা',
         year: '২০২৪–২৬',
         description:
-          'প্রাইভেট অন-ডিভাইস LLM ইনফারেন্স ও Accessibility-নিয়ন্ত্রিত অটোমেশনের Android রানটাইম। CPU ইনফারেন্স ডিভাইস-যাচাইকৃত; GPU/NPU যোগ্যতা-পরীক্ষাধীন।',
+          'প্রাইভেট অন-ডিভাইস LLM ইনফারেন্স ও Accessibility-নিয়ন্ত্রিত স্বয়ংক্রিয়তাের Android রানটাইম। CPU ইনফারেন্স ডিভাইস-যাচাইকৃত; জিপিইউ/এনপিইউ যোগ্যতা-পরীক্ষাধীন।',
         evidence:
           'বাস্তব arm64 llama.cpp CPU ইনফারেন্স, 12–20 tok/s ডিকোড, KV-prefix পুনর্ব্যবহার। Adreno Vulkan ড্রাইভার ক্র্যাশের রুট-কজ নির্ণয় — যা গড়েছে ফেইল-ক্লোজড CPU-ডিফল্ট আর্কিটেকচার।',
         topics: ['Kotlin', 'llama.cpp', 'Vulkan', 'Accessibility', 'Shizuku', 'GGUF'],
@@ -503,13 +503,13 @@ const bn: Content = {
       },
       {
         name: 'ADT',
-        tagline: 'নেটিভ ARM64 অ্যান্ড্রয়েড ডেভেলপমেন্ট টুলচেইন',
+        tagline: 'নেটিভ এআরএম ৬৪ অ্যান্ড্রয়েড ডেভেলপমেন্ট টুলচেইন',
         year: '২০২৩–২৬',
         description:
-          'লিনাক্স ARM64/glibc-এর জন্য AOSP সোর্স থেকে Android SDK build-tools ও platform-tools তৈরি করে। SHA-256-যাচাইকৃত অফলাইন রিলিজ আর্টিফ্যাক্ট।',
+          'লিনাক্স এআরএম ৬৪/glibc-এর জন্য AOSP সোর্স থেকে Android SDK build-tools ও platform-tools তৈরি করে। SHA-256-যাচাইকৃত অফলাইন রিলিজ আর্টিফ্যাক্ট।',
         evidence:
-          'Snapdragon 8s Gen 4-এ সম্পূর্ণ ARM64 নেটিভ APK পাইপলাইন শুরু থেকে শেষ পর্যন্ত যাচাইকৃত: সোর্স → APK → সাইন → ইনস্টল → JNI লোড → রান।',
-        topics: ['AOSP', 'ARM64', 'বিল্ড টুলস', 'ক্রস-কম্পাইলেশন'],
+          'Snapdragon 8s Gen 4-এ সম্পূর্ণ এআরএম ৬৪ নেটিভ APK পাইপলাইন শুরু থেকে শেষ পর্যন্ত যাচাইকৃত: সোর্স → APK → সাইন → ইনস্টল → JNI লোড → রান।',
+        topics: ['AOSP', 'এআরএম ৬৪', 'বিল্ড টুলস', 'ক্রস-কম্পাইলেশন'],
         repo: 'https://github.com/soobujmiah/adt',
         websiteUrl: null,
         accent: '#10b981',
@@ -519,7 +519,7 @@ const bn: Content = {
         tagline: 'রুট ছাড়াই Android-এ Debian/Xfce লিনাক্স ডেস্কটপ',
         year: '২০২৩–২৬',
         description:
-          'এক কমান্ডে আসল Debian ARM64 ইউজারস্পেস, Xfce4 ডেস্কটপ, Termux:X11 ডিসপ্লে, PulseAudio ব্রিজ ও Zink/Turnip GPU রুট — রুট ছাড়াই।',
+          'এক কমান্ডে আসল Debian এআরএম ৬৪ ইউজারস্পেস, Xfce4 ডেস্কটপ, Termux:X11 ডিসপ্লে, PulseAudio ব্রিজ ও Zink/Turnip GPU রুট — রুট ছাড়াই।',
         evidence:
           'Adreno 825-এ Zink/Turnip রেন্ডারার নিশ্চিত: glmark2 স্কোর 140 (OpenGL 4.6)। Zink/Adreno/Turnip রেন্ডারারে Blender 4.3.2 চালু হয়েছে।',
         topics: ['Debian', 'Vulkan', 'Turnip', 'Zink', 'Adreno', 'PRoot'],
@@ -557,7 +557,7 @@ const bn: Content = {
           'Mesa Turnip Vulkan, Zink OpenGL-on-Vulkan। ডিকোডে Vulkan compute ক্র্যাশ করে — রুট-কজ বের করে ডকুমেন্ট করা হয়েছে।',
       },
       {
-        title: 'অ্যান্ড্রয়েড অটোমেশন',
+        title: 'অ্যান্ড্রয়েড স্বয়ংক্রিয়তা',
         status: 'validated',
         statusLabel: 'যাচাইকৃত',
         description:
@@ -576,9 +576,9 @@ const bn: Content = {
     eyebrow: '০৬ — প্রযুক্তিগত ফোকাস',
     heading: 'যেসব প্রযুক্তি নিয়ে আমি আসলেই কাজ করি।',
     domains: [
-      { name: 'অন-ডিভাইস AI', items: ['llama.cpp', 'GGUF', 'KV-cache', 'CPU/GPU/NPU রাউটিং'] },
+      { name: 'অন-ডিভাইস এআই', items: ['llama.cpp', 'GGUF', 'KV-cache', 'CPU/জিপিইউ/এনপিইউ রাউটিং'] },
       { name: 'অ্যান্ড্রয়েড সিস্টেমস', items: ['Kotlin', 'Compose', 'Accessibility', 'Shizuku', 'JNI/C++'] },
-      { name: 'লিনাক্স / ARM64', items: ['AOSP বিল্ড', 'Clang/CMake/Ninja', 'Termux + PRoot'] },
+      { name: 'লিনাক্স / এআরএম ৬৪', items: ['AOSP বিল্ড', 'Clang/CMake/Ninja', 'Termux + PRoot'] },
       { name: 'GPU / গ্রাফিক্স', items: ['Vulkan', 'Mesa Turnip', 'Zink', 'Adreno KGSL'] },
       { name: 'মোবাইল ও ওয়েব', items: ['Flutter', 'Dart', 'TypeScript', 'Python'] },
       { name: 'প্রকৌশল পরিচালনা', items: ['GitHub Actions', 'সাইনড রিলিজ', 'ডিভাইস যাচাইকরণ'] },
@@ -594,18 +594,18 @@ const bn: Content = {
     moreLabel: 'GitHub-এ সবকিছু',
     moreSub: 'পরীক্ষা, প্রোটোটাইপ ও চলমান কাজ থাকে সেখানে।',
     repos: [
-      { name: 'lai', desc: 'বাংলা-ফার্স্ট লোকাল AI + অটোমেশন রানটাইম', lang: 'Kotlin', stars: 1, url: 'https://github.com/soobujmiah/lai', websiteUrl: null },
-      { name: 'adt', desc: 'AOSP সোর্স থেকে ARM64 অ্যান্ড্রয়েড ডেভ টুলচেইন', lang: 'Shell', stars: 0, url: 'https://github.com/soobujmiah/adt', websiteUrl: null },
-      { name: 'ternux', desc: 'Android-এ GPU-ত্বরান্বিত লিনাক্স ডেস্কটপ', lang: 'Shell', stars: 1, url: 'https://github.com/soobujmiah/ternux', websiteUrl: 'https://soobujmiah.github.io/ternux/' },
+      { name: 'lai', desc: 'বাংলা-ফার্স্ট লোকাল এআই + স্বয়ংক্রিয়তা রানটাইম', lang: 'Kotlin', stars: 1, url: 'https://github.com/soobujmiah/lai', websiteUrl: null },
+      { name: 'adt', desc: 'AOSP সোর্স থেকে এআরএম ৬৪ অ্যান্ড্রয়েড ডেভ টুলচেইন', lang: 'Shell', stars: 0, url: 'https://github.com/soobujmiah/adt', websiteUrl: null },
+      { name: 'ternux', desc: 'অ্যান্ড্রয়েডে জিপিইউ-ত্বরান্বিত লিনাক্স ডেস্কটপ', lang: 'Shell', stars: 1, url: 'https://github.com/soobujmiah/ternux', websiteUrl: 'https://soobujmiah.github.io/ternux/' },
       { name: 'ggen', desc: 'Android-ফার্স্ট ক্রিয়েটিভ ও ডকুমেন্ট স্টুডিও', lang: 'Dart', stars: 0, url: 'https://github.com/soobujmiah/ggen', websiteUrl: null },
       { name: 'datakhoj-android', desc: 'Android-এর জন্য সার্বজনীন ডেটা সংগ্রাহক', lang: 'Kotlin', stars: 0, url: 'https://github.com/soobujmiah/datakhoj-android', websiteUrl: null },
       { name: 'songjog', desc: 'বাংলা-ফার্স্ট ব্যবসায়িক কার্যক্রম অ্যাপ', lang: 'Dart', stars: 0, url: 'https://github.com/soobujmiah/songjog', websiteUrl: null },
-      { name: 'apiloop', desc: 'প্রোভাইডার-নিরপেক্ষ AI API গেটওয়ে', lang: 'Python', stars: 0, url: 'https://github.com/soobujmiah/apiloop', websiteUrl: null },
+      { name: 'apiloop', desc: 'প্রোভাইডার-নিরপেক্ষ এআই API গেটওয়ে', lang: 'Python', stars: 0, url: 'https://github.com/soobujmiah/apiloop', websiteUrl: null },
       { name: 'sobkichu', desc: 'বাংলাদেশি হাইপারলোকাল সুপার-অ্যাপ', lang: 'TypeScript', stars: 0, url: 'https://github.com/soobujmiah/sobkichu', websiteUrl: null },
       { name: 'docdr', desc: 'মোবাইল-ফার্স্ট অফলাইন ডকুমেন্ট ওয়ার্কস্পেস', lang: 'Dart', stars: 0, url: 'https://github.com/soobujmiah/docdr', websiteUrl: null },
       { name: 'faridpur-police-app', desc: 'জেলা পুলিশ ওয়েবসাইটের অফিসিয়াল WebView অ্যাপ শেল', lang: 'Dart', stars: 0, url: 'https://github.com/soobujmiah/faridpur-police-app', websiteUrl: null },
       { name: 'iqra-online-mart', desc: 'দ্বিভাষিক ই-কমার্স স্টোরফ্রন্ট ডেমো', lang: 'JavaScript', stars: 0, url: 'https://github.com/soobujmiah/iqra-online-mart', websiteUrl: 'https://soobujmiah.github.io/iqra-online-mart/' },
-      { name: 'arms', desc: 'ARM64 লিনাক্স টুল ক্যাটালগ + স্ট্যাটিক সাইট', lang: 'HTML', stars: 0, url: 'https://github.com/soobujmiah/arms', websiteUrl: 'https://soobujmiah.github.io/arms' },
+      { name: 'arms', desc: 'এআরএম ৬৪ লিনাক্স টুল ক্যাটালগ + স্ট্যাটিক সাইট', lang: 'HTML', stars: 0, url: 'https://github.com/soobujmiah/arms', websiteUrl: 'https://soobujmiah.github.io/arms' },
     ],
   },
   experience: {
@@ -667,7 +667,7 @@ const bn: Content = {
     eyebrow: '০৯ — যোগাযোগ',
     headingA: 'ফ্রিল্যান্স,',
     headingB: 'রিমোট ও কোলাবরেশনে উন্মুক্ত।',
-    sub: 'অন-ডিভাইস AI, অ্যান্ড্রয়েড সিস্টেম, ARM64 টুলিং বা লোকাল-ফার্স্ট প্রোডাক্ট — কথা বলতে আগ্রহী।',
+    sub: 'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ টুলিং বা লোকাল-ফার্স্ট প্রোডাক্ট — কথা বলতে আগ্রহী।',
     channels: [
       { label: 'ইমেইল', value: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
       { label: 'GitHub', value: 'soobujmiah', href: 'https://github.com/soobujmiah' },

@@ -479,18 +479,17 @@ export function Header() {
       transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6">
+        {/* Brand: links directly to GitHub profile, not portfolio home */}
         <a
-          href="#hero"
-          aria-label={t.header.homeLabel}
-          onClick={(e) => {
-            e.preventDefault();
-            goToScene(0);
-          }}
+          href="https://github.com/soobujmiah"
+          target="_blank"
+          rel="noreferrer"
+          aria-label={t.header.githubAria}
           className="font-mono text-sm font-medium tracking-tight"
           style={{ color: '#e4e2df' }}
           data-magnetic
         >
-          sobuj<span style={{ color: '#22c55e' }}>.</span>miah
+          soobujmiah
         </a>
         <nav className="hidden md:flex items-center gap-8" aria-label="Sections">
           {t.nav.map((l) => (

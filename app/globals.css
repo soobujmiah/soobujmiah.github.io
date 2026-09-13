@@ -482,40 +482,33 @@ a, button {
   min-width: 0;
 }
 
-/* ── matrix name ── */
+/* ── matrix name (digital diffusion) ── */
 .matrix-name {
   position: relative;
   display: inline-flex;
   align-items: baseline;
   gap: 0.02em;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .matrix-letter {
   display: inline-block;
-  will-change: transform, opacity, contents;
+  will-change: transform, opacity, filter;
   position: relative;
+  background: transparent;
 }
 
-/* Continuous matrix glitch on individual letters */
-.matrix-letter.glitching {
-  animation: matrixGlitch 0.18s steps(2, end);
+.matrix-reveal {
+  /* entrance state — pushed down and invisible, animated by JS */
 }
 
-@keyframes matrixGlitch {
-  0% { opacity: 1; transform: translate(0, 0); }
-  20% { opacity: 0.6; transform: translate(-1px, 0); filter: brightness(1.6); }
-  40% { opacity: 0.9; transform: translate(1px, 0); }
-  60% { opacity: 0.5; transform: translate(0, 1px); filter: brightness(1.8); }
-  80% { opacity: 1; transform: translate(0, 0); }
-  100% { opacity: 1; transform: translate(0, 0); filter: none; }
-}
-
-/* Subtle ambient noise behind the name */
+/* Ambient noise texture behind the name */
 .matrix-noise {
   position: absolute;
-  inset: -20%;
+  inset: -30%;
   pointer-events: none;
-  opacity: 0.04;
+  opacity: 0.035;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   animation: noiseShift 0.5s steps(3, end) infinite;
@@ -540,7 +533,7 @@ a, button {
   position: absolute;
   width: 2px;
   height: 2px;
-  background: var(--accent);
+  background: #4ade80;
   border-radius: 50%;
   opacity: 0;
   animation: particleDrift 3s ease-in-out infinite;
@@ -548,9 +541,9 @@ a, button {
 
 @keyframes particleDrift {
   0% { opacity: 0; transform: translateY(20px) scale(0.5); }
-  20% { opacity: 0.7; }
-  80% { opacity: 0.4; }
-  100% { opacity: 0; transform: translateY(-40px) scale(0.3); }
+  20% { opacity: 0.6; }
+  80% { opacity: 0.3; }
+  100% { opacity: 0; transform: translateY(-50px) scale(0.2); }
 }
 
 /* ── keyboard focus ── */
