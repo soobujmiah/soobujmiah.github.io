@@ -52,7 +52,10 @@ export function PinnedSection({
 
   /* ── recede: fade/blur as next section covers (last section locks) ── */
   const recedeStart = isLast ? 1 : offset + duration;
-  const recedeEnd = recedeStart + enterSpan;
+  /* clamp end to 1 so the last scene's motion range stays inside [0,1] —
+     exceeding 1 makes framer-motion silently skip the animation, leaving
+     the scene stuck at the bottom with no exit transition. */
+  const recedeEnd = Math.min(recedeStart + enterSpan, 1);
 
   const opacity = useTransform(progress, [recedeStart, recedeEnd], [1, isLast ? 1 : 0.1], { clamp: true });
   const scale = useTransform(progress, [recedeStart, recedeEnd], [1, isLast ? 1 : 0.97], { clamp: true });

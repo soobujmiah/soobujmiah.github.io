@@ -506,7 +506,7 @@ export function ContactScene({ reducedMotion }: { reducedMotion: boolean }) {
       <div className="relative z-10 mx-auto flex h-full max-w-3xl flex-col items-center justify-center px-6 text-center">
         <Reveal>
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] mb-5" style={{ color: '#22c55e' }}>
-            07 — Contact
+            09 — Contact
           </p>
         </Reveal>
         <Reveal delay={0.06}>
