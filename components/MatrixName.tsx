@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -17,22 +17,28 @@ import { motion } from 'framer-motion';
 
 const NAME = 'SOOBUJ MIAH';
 const LETTERS = NAME.split('');
+/* Glitch targets exclude the space (glitching it is invisible). */
+const GLITCHABLE = LETTERS.map((ch, i) => (ch === ' ' ? -1 : i)).filter((i) => i >= 0);
 
 export function MatrixName({ reducedMotion = false }: { reducedMotion?: boolean }) {
   const [glitchIndex, setGlitchIndex] = useState<number | null>(null);
 
-  /* Continuous glitch: briefly glitch one random letter at a time */
+  /* Continuous glitch: briefly glitch one random letter at a time. */
   useEffect(() => {
     if (reducedMotion) return;
 
+    let timeout: ReturnType<typeof setTimeout> | undefined;
     const interval = setInterval(() => {
-      const idx = Math.floor(Math.random() * LETTERS.length);
-      setGlitchIndex(idx);
-      const timeout = setTimeout(() => setGlitchIndex(null), 180);
-      return () => clearTimeout(timeout);
+      const pick = GLITCHABLE[Math.floor(Math.random() * GLITCHABLE.length)];
+      setGlitchIndex(pick);
+      if (timeout) clearTimeout(timeout);
+      timeout = setTimeout(() => setGlitchIndex(null), 180);
     }, 700);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (timeout) clearTimeout(timeout);
+    };
   }, [reducedMotion]);
 
   return (
@@ -77,5 +83,3 @@ export function MatrixName({ reducedMotion = false }: { reducedMotion?: boolean 
     </span>
   );
 }
-
-export { NAME as MATRIX_NAME };

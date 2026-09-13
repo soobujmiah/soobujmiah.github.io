@@ -1,7 +1,7 @@
-'use client';
-
 import Link from 'next/link';
 
+/* App Router 404 (static export renders this to 404.html).
+   Server component: bilingual static copy, no client hooks. */
 export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center" style={{ background: 'var(--bg)' }}>
@@ -11,8 +11,11 @@ export default function NotFound() {
       <h1 className="text-4xl font-semibold mb-3" style={{ color: 'var(--fg)' }}>
         Page not found
       </h1>
-      <p className="mb-8" style={{ color: 'var(--muted)' }}>
+      <p className="mb-2" style={{ color: 'var(--muted)' }}>
         The page you are looking for does not exist.
+      </p>
+      <p className="mb-8 text-sm" style={{ color: 'var(--muted)' }}>
+        আপনি যে পেজটি খুঁজছেন তা পাওয়া যায়নি।
       </p>
       <Link
         href="/"
@@ -20,7 +23,7 @@ export default function NotFound() {
         style={{ borderColor: 'rgba(232,230,227,0.15)', color: 'var(--fg)' }}
         data-magnetic
       >
-        Return home
+        Return home · হোমে ফিরুন
       </Link>
     </div>
   );
