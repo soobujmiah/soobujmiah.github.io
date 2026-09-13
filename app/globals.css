@@ -227,6 +227,62 @@ a, button {
   inset: 0;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   FLOW MODE — phone / touch / narrow screens.
+   Same scenes as normal stacked document sections sized by content:
+   nothing fixed, nothing clipped, everything reachable. The inner
+   .scene-fill goes static so orbs/grids anchor to the section.
+   ═══════════════════════════════════════════════════════════════ */
+
+.flow-stack {
+  position: relative;
+  background: #060608;
+}
+
+.flow-section {
+  position: relative;
+  background: #060608;
+  overflow-x: clip;
+  padding: 1.5rem 0;
+  scroll-margin-top: 4rem;
+}
+
+.flow-section + .flow-section {
+  border-top: 1px solid rgba(228, 226, 223, 0.05);
+}
+
+/* Tall flow scenes (hero, contact): fill the screen, centered. */
+.flow-tall {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6rem 0 5rem;
+}
+
+.flow-section .scene-fill {
+  position: static;
+  min-height: 0;
+  background: transparent;
+  display: block;
+}
+
+/* Compact rhythm on phones: desktop py-20/mb-10 breathe too much here. */
+@media (max-width: 768px) {
+  .flow-section .scene-fill > div[class*="py-20"] {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .flow-section h2[class*="mb-10"] {
+    margin-bottom: 1.75rem;
+  }
+
+  .flow-section .scene-fill > div[class*="mb-5"] {
+    margin-bottom: 1rem;
+  }
+}
+
 /* ── matrix name ── */
 .matrix-name {
   position: relative;

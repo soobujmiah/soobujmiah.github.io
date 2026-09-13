@@ -1,12 +1,13 @@
 'use client';
 
 import { type MotionValue, motion, useMotionValueEvent, useTransform } from 'framer-motion';
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
 /* ═══════════════════════════════════════════════════════════════
-   PINNED SECTION — sequential fixed scenes with scroll-driven
-   enter/exit transitions.
+   SCENE LAYOUT — adaptive.
 
+   CINEMATIC (desktop, fine pointer): sequential fixed scenes with
+   scroll-driven crossfades centered on weighted slot boundaries.
    Contract per scene, over its scroll slot [slotStart, slotEnd]:
    - First scene: visible immediately (opacity 1), then crossfades
      out across its end boundary.
@@ -18,16 +19,44 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
      invisible fixed layers above/below can never swallow clicks or
      confuse assistive tech.
 
-   Slot boundaries come from content weights (page.tsx) so heavier
-   scenes genuinely get more scroll time.
+   FLOW (phone / touch / narrow): the same scenes render as normal
+   stacked document sections sized by their content. Nothing is
+   fixed, nothing clips, nothing needs inner scrolling — every card
+   is reachable with a plain page scroll. Reveals play on scroll
+   into view via useInView as usual.
    ═══════════════════════════════════════════════════════════════ */
 
 const SceneActiveContext = createContext<boolean>(true);
 
-/** True while the enclosing scene owns the viewport. Defaults to true
-    outside a PinnedSection so shared components stay safe. */
+/** True while the enclosing scene owns the viewport (cinematic), or
+    always true in flow mode. Defaults to true outside a scene. */
 export function useSceneActive(): boolean {
   return useContext(SceneActiveContext);
+}
+
+/** Cinematic only on wide screens with a fine pointer. Everything
+    else gets robust document flow. Guarded for SSR / old WebViews. */
+export function useCinematic(): boolean {
+  const [cinematic, setCinematic] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+      const mq = window.matchMedia('(min-width: 1024px) and (hover: hover)');
+      const sync = () => setCinematic(mq.matches);
+      sync();
+      if (typeof mq.addEventListener === 'function') {
+        mq.addEventListener('change', sync);
+        return () => mq.removeEventListener('change', sync);
+      }
+      mq.addListener(sync);
+      return () => mq.removeListener(sync);
+    } catch {
+      return;
+    }
+  }, []);
+
+  return cinematic;
 }
 
 export interface PinnedSectionProps {
@@ -38,6 +67,9 @@ export interface PinnedSectionProps {
   isLast: boolean;
   progress: MotionValue<number>;
   sceneId: string;
+  cinematic: boolean;
+  /** Flow mode: stretch short scenes (hero/contact) to fill the screen. */
+  tall?: boolean;
   children: ReactNode;
 }
 
@@ -49,6 +81,8 @@ export function PinnedSection({
   isLast,
   progress,
   sceneId,
+  cinematic,
+  tall = false,
   children,
 }: PinnedSectionProps) {
   const slotLen = Math.max(slotEnd - slotStart, 0.0001);
@@ -87,6 +121,18 @@ export function PinnedSection({
     setActive((prev) => (prev === next ? prev : next));
   });
 
+  /* ── FLOW MODE: plain stacked section, always "active". ── */
+  if (!cinematic) {
+    return (
+      <SceneActiveContext.Provider value={true}>
+        <section id={`scene-${sceneId}`} className={`flow-section${tall ? ' flow-tall' : ''}`}>
+          {children}
+        </section>
+      </SceneActiveContext.Provider>
+    );
+  }
+
+  /* ── CINEMATIC MODE: fixed crossfading layer. ── */
   return (
     <SceneActiveContext.Provider value={active}>
       <motion.section

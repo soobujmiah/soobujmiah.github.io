@@ -35,9 +35,11 @@ alongside the copy so each language tree is complete and reviewable.
   WebViews) and syncs `<html lang>` for assistive tech.
 - `app/page.tsx` — scene list with **content weights** (denser scenes get more
   scroll time) and slot math for programmatic navigation.
-- `components/PinnedSection.tsx` — fixed scene layers: scroll-driven enter/exit
-  fades, pointer-event gating (inactive scenes can never swallow clicks), and
-  the `useSceneActive()` hook that reveals subscribe to.
+- `components/PinnedSection.tsx` — **adaptive scenes**: cinematic fixed
+  crossfade layers on wide screens with a fine pointer (`useCinematic()`),
+  plain stacked document sections everywhere else (phone/touch/narrow).
+  Inactive cinematic layers are pointer-gated; `useSceneActive()` drives
+  reveals in both modes.
 - `components/sections.tsx` — the nine scenes (Hero → Contact).
 - `components/ui.tsx` — cursor, magnetic links, reveals, preloader, header
   (with EN/বাং toggle), footer, scroll progress.
