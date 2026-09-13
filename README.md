@@ -33,13 +33,17 @@ alongside the copy so each language tree is complete and reviewable.
 - `app/language.tsx` — `LanguageProvider` + `useLang()` hook. Preference
   persists to guarded `localStorage` (never throws in private mode / old
   WebViews) and syncs `<html lang>` for assistive tech.
-- `app/page.tsx` — scene list with **content weights** (denser scenes get more
-  scroll time) and slot math for programmatic navigation.
-- `components/PinnedSection.tsx` — **adaptive scenes**: cinematic fixed
-  crossfade layers on wide screens with a fine pointer (`useCinematic()`),
-  plain stacked document sections everywhere else (phone/touch/narrow).
-  Inactive cinematic layers are pointer-gated; `useSceneActive()` drives
-  reveals in both modes.
+- `app/page.tsx` — scene orchestration: measures viewport + per-page content
+  heights, builds the scroll plan, renders fixed layers + spacer.
+- `app/pageplan.ts` — **pure page-turn math** (no React/DOM): splits page
+  scroll into per-page read ranges sized by measured content, with shared
+  turn ranges between pages. Unit-test it with
+  `npx tsc app/pageplan.ts --module commonjs --target es2020 --outDir /tmp/pptest && node scripts/check-pageplan.js`
+  (see `scripts/check-pageplan.js`).
+- `components/PinnedSection.tsx` — fixed full-viewport page layers. Inner
+  content travels through the viewport 1:1 with the finger; incoming pages
+  slide up from the bottom and fade in over the previous page. Inactive
+  pages are pointer-gated + aria-hidden; `useSceneActive()` drives reveals.
 - `components/sections.tsx` — the nine scenes (Hero → Contact).
 - `components/ui.tsx` — cursor, magnetic links, reveals, preloader, header
   (with EN/বাং toggle), footer, scroll progress.

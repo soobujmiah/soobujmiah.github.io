@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
 import { motion, AnimatePresence, useScroll } from 'framer-motion';
 import { CustomCursor, ScrollProgress, Preloader, Header, Footer, NavProvider } from '@/components/ui';
-import { PinnedSection, useCinematic } from '@/components/PinnedSection';
+import { PinnedSection } from '@/components/PinnedSection';
+import { buildPagePlan } from '@/app/pageplan';
 import { LanguageProvider } from '@/app/language';
 import {
   HeroScene,
@@ -17,50 +18,36 @@ import {
   ContactScene,
 } from '@/components/sections';
 
-/* ── content-aware scroll weights (cinematic mode) ──
-   Each scene's scroll slot is proportional to its weight, so the
-   dense Work / Open Source / Experience scenes genuinely get more
-   scroll time than the light Hero / Stats scenes. */
+/* ── paged scenes ──
+   Page scroll (px) is split into per-page segments sized by measured
+   content: [intro hold][page0 read][turn][page1 read][turn]…[outro].
+   Each page's inner content travels 1:1 with the finger through its
+   read range; turns crossfade/slide between pages. Keyframe math is
+   pure (app/pageplan.ts) and unit-tested — see README. */
+
 type SceneComponent = (props: { reducedMotion: boolean }) => JSX.Element;
 
-const SCENES: { id: string; Component: SceneComponent; weight: number; tall?: boolean }[] = [
-  { id: 'hero', Component: HeroScene, weight: 1.0, tall: true },
-  { id: 'stats', Component: StatsScene, weight: 0.8 },
-  { id: 'about', Component: AboutScene, weight: 1.2 },
-  { id: 'work', Component: WorkScene, weight: 1.8 },
-  { id: 'research', Component: ResearchScene, weight: 1.2 },
-  { id: 'stack', Component: StackScene, weight: 1.2 },
-  { id: 'open-source', Component: OpenSourceScene, weight: 1.5 },
-  { id: 'experience', Component: ExperienceScene, weight: 1.3 },
-  { id: 'contact', Component: ContactScene, weight: 1.0, tall: true },
+const SCENES: { id: string; Component: SceneComponent }[] = [
+  { id: 'hero', Component: HeroScene },
+  { id: 'stats', Component: StatsScene },
+  { id: 'about', Component: AboutScene },
+  { id: 'work', Component: WorkScene },
+  { id: 'research', Component: ResearchScene },
+  { id: 'stack', Component: StackScene },
+  { id: 'open-source', Component: OpenSourceScene },
+  { id: 'experience', Component: ExperienceScene },
+  { id: 'contact', Component: ContactScene },
 ];
 
 const TOTAL = SCENES.length;
-const TOTAL_WEIGHT = SCENES.reduce((sum, s) => sum + s.weight, 0);
-
-/* Slot boundaries in page-progress units, derived from weights. */
-const SLOTS: { start: number; end: number }[] = (() => {
-  let cursor = 0;
-  return SCENES.map((s) => {
-    const start = cursor / TOTAL_WEIGHT;
-    cursor += s.weight;
-    return { start, end: cursor / TOTAL_WEIGHT };
-  });
-})();
-
-function scrollToProgress(p: number, smooth: boolean) {
-  try {
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    window.scrollTo({ top: Math.min(Math.max(p, 0), 1) * max, behavior: smooth ? 'smooth' : 'auto' });
-  } catch {
-    /* scroll unavailable — leave the user where they are */
-  }
-}
 
 export default function Page() {
   const [loaded, setLoaded] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const cinematic = useCinematic();
+  const [viewportH, setViewportH] = useState<number>(() =>
+    typeof window !== 'undefined' ? window.innerHeight : 800
+  );
+  const [contentHs, setContentHs] = useState<number[]>(() => SCENES.map(() => 0));
 
   useEffect(() => {
     /* Guarded: matchMedia can be absent in old WebViews / in-app browsers. */
@@ -81,28 +68,53 @@ export default function Page() {
     }
   }, []);
 
-  /* Single shared scroll progress drives every cinematic layer. */
-  const { scrollYProgress } = useScroll();
+  /* Track the viewport: page-turn math is in px, so rotation / URL-bar
+     show-hide re-plans the segments. */
+  useEffect(() => {
+    try {
+      const sync = () => setViewportH(window.innerHeight);
+      sync();
+      window.addEventListener('resize', sync, { passive: true });
+      window.addEventListener('orientationchange', sync);
+      return () => {
+        window.removeEventListener('resize', sync);
+        window.removeEventListener('orientationchange', sync);
+      };
+    } catch {
+      return;
+    }
+  }, []);
+
+  const reportHeight = useCallback((index: number, height: number) => {
+    setContentHs((prev) => {
+      if (Math.abs((prev[index] ?? 0) - height) <= 1) return prev;
+      const next = prev.slice();
+      next[index] = height;
+      return next;
+    });
+  }, []);
+
+  const plan = useMemo(
+    () => buildPagePlan(viewportH, contentHs, TOTAL),
+    [viewportH, contentHs]
+  );
+
+  /* Raw page scroll position in px — the single driver of all motion. */
+  const { scrollY } = useScroll();
 
   const goToScene = useCallback(
     (index: number) => {
       const safe = Math.min(Math.max(index, 0), TOTAL - 1);
-      if (!cinematic) {
-        /* Flow mode: jump to the real section element. */
-        try {
-          document.getElementById(`scene-${SCENES[safe].id}`)?.scrollIntoView({
-            behavior: reducedMotion ? 'auto' : 'smooth',
-            block: 'start',
-          });
-        } catch {
-          /* ignore */
-        }
-        return;
+      try {
+        window.scrollTo({
+          top: safe === 0 ? 0 : plan.scenes[safe].readStart + 2,
+          behavior: reducedMotion ? 'auto' : 'smooth',
+        });
+      } catch {
+        /* ignore */
       }
-      const slot = SLOTS[safe];
-      scrollToProgress((slot.start + slot.end) / 2, !reducedMotion);
     },
-    [cinematic, reducedMotion]
+    [plan, reducedMotion]
   );
 
   const goToTop = useCallback(() => {
@@ -136,53 +148,25 @@ export default function Page() {
             <Header />
             <Footer />
 
-            {cinematic ? (
-              <>
-                {/* ── fixed scene layers ── */}
-                <div className="scenes-stack">
-                  {SCENES.map(({ id, Component }, i) => (
-                    <PinnedSection
-                      key={id}
-                      index={i}
-                      sceneId={id}
-                      slotStart={SLOTS[i].start}
-                      slotEnd={SLOTS[i].end}
-                      isFirst={i === 0}
-                      isLast={i === TOTAL - 1}
-                      progress={scrollYProgress}
-                      cinematic={true}
-                    >
-                      <Component reducedMotion={reducedMotion} />
-                    </PinnedSection>
-                  ))}
-                </div>
+            {/* ── fixed page layers, driven by page scroll ── */}
+            <div className="scenes-stack">
+              {SCENES.map(({ id, Component }, i) => (
+                <PinnedSection
+                  key={id}
+                  index={i}
+                  motion={plan.scenes[i]}
+                  isFirst={i === 0}
+                  scrollY={scrollY}
+                  sceneId={id}
+                  onHeight={reportHeight}
+                >
+                  <Component reducedMotion={reducedMotion} />
+                </PinnedSection>
+              ))}
+            </div>
 
-                {/* ── scroll spacer ──
-                    Extra 100vh at the end gives the terminal scene a proper
-                    hold zone so it rests fully visible at the bottom. */}
-                <div style={{ height: `${(TOTAL + 1) * 100}vh` }} aria-hidden />
-              </>
-            ) : (
-              /* ── document flow: every section sized by its content ── */
-              <div className="flow-stack">
-                {SCENES.map(({ id, Component, tall }, i) => (
-                  <PinnedSection
-                    key={id}
-                    index={i}
-                    sceneId={id}
-                    slotStart={SLOTS[i].start}
-                    slotEnd={SLOTS[i].end}
-                    isFirst={i === 0}
-                    isLast={i === TOTAL - 1}
-                    progress={scrollYProgress}
-                    cinematic={false}
-                    tall={tall}
-                  >
-                    <Component reducedMotion={reducedMotion} />
-                  </PinnedSection>
-                ))}
-              </div>
-            )}
+            {/* ── scroll spacer: page length = journey + one viewport ── */}
+            <div style={{ height: plan.total + viewportH }} aria-hidden />
           </motion.main>
         )}
       </NavProvider>

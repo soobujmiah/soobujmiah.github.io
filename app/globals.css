@@ -60,32 +60,35 @@ a, button {
   background-size: 256px 256px;
 }
 
-/* ── magnetic cursor ── */
-.cursor-dot {
+/* ── magnetic cursor ──
+   The motion wrapper (.cursor-pos) is positioned by JS transforms;
+   the inner dot/ring only centers itself, so the two transforms
+   never fight each other. */
+.cursor-pos {
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 99999;
+  pointer-events: none;
+}
+
+.cursor-dot {
   width: 8px;
   height: 8px;
   background: var(--accent);
   border-radius: 50%;
   pointer-events: none;
-  z-index: 99999;
   mix-blend-mode: difference;
-  transition: transform 0.15s ease, width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+  transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
   transform: translate(-50%, -50%);
 }
 
 .cursor-ring {
-  position: fixed;
-  top: 0;
-  left: 0;
   width: 36px;
   height: 36px;
   border: 1.5px solid rgba(34, 197, 94, 0.5);
   border-radius: 50%;
   pointer-events: none;
-  z-index: 99998;
   transform: translate(-50%, -50%);
   transition: width 0.35s ease, height 0.35s ease, border-color 0.35s ease, opacity 0.35s ease;
 }
@@ -94,11 +97,6 @@ a, button {
   width: 60px;
   height: 60px;
   border-color: rgba(34, 197, 94, 0.8);
-}
-
-.cursor-ring.clicking {
-  width: 28px;
-  height: 28px;
 }
 
 /* ── scroll bar ── */
@@ -111,21 +109,6 @@ a, button {
 ::-webkit-scrollbar-thumb {
   background: rgba(34, 197, 94, 0.3);
   border-radius: 2px;
-}
-
-/* ── text reveal animation ── */
-.line-reveal {
-  overflow: hidden;
-}
-
-.line-reveal span {
-  display: inline-block;
-  transform: translateY(110%);
-  animation: lineUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes lineUp {
-  to { transform: translateY(0); }
 }
 
 /* ── gradient text ── */
@@ -169,16 +152,6 @@ a, button {
   66% { transform: translate(-20px, 20px) scale(0.95); }
 }
 
-/* ── marquee ── */
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.marquee-track {
-  animation: marquee 30s linear infinite;
-}
-
 /* ── grid lines ── */
 .grid-bg {
   background-image:
@@ -187,14 +160,12 @@ a, button {
   background-size: 60px 60px;
 }
 
-/* ── section divider glow ── */
-.section-divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.2), transparent);
-}
-
 /* ═══════════════════════════════════════════════════════════════
-   SCENE SYSTEM — fixed layers with content-aware pacing
+   PAGED SCENES — fixed full-viewport layers, one page at a time.
+   Page scroll drives everything: inner content travels through the
+   viewport 1:1 with the finger, then the next page turns in from
+   the bottom. min-height uses svh (stable on mobile URL-bar
+   show/hide). Short pages center vertically in the viewport.
    ═══════════════════════════════════════════════════════════════ */
 
 .scenes-stack {
@@ -205,20 +176,6 @@ a, button {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  contain: content;
-  background: #060608;
-}
-
-/* Terminal (last) section: opaque background ensures no bleed-through */
-.scene-terminal {
-  background: #060608;
-}
-
-.scene-fill {
-  position: relative;
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
   background: #060608;
 }
 
@@ -227,60 +184,13 @@ a, button {
   inset: 0;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   FLOW MODE — phone / touch / narrow screens.
-   Same scenes as normal stacked document sections sized by content:
-   nothing fixed, nothing clipped, everything reachable. The inner
-   .scene-fill goes static so orbs/grids anchor to the section.
-   ═══════════════════════════════════════════════════════════════ */
-
-.flow-stack {
+.scene-fill {
   position: relative;
-  background: #060608;
-}
-
-.flow-section {
-  position: relative;
-  background: #060608;
-  overflow-x: clip;
-  padding: 1.5rem 0;
-  scroll-margin-top: 4rem;
-}
-
-.flow-section + .flow-section {
-  border-top: 1px solid rgba(228, 226, 223, 0.05);
-}
-
-/* Tall flow scenes (hero, contact): fill the screen, centered. */
-.flow-tall {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 6rem 0 5rem;
-}
-
-.flow-section .scene-fill {
-  position: static;
-  min-height: 0;
-  background: transparent;
-  display: block;
-}
-
-/* Compact rhythm on phones: desktop py-20/mb-10 breathe too much here. */
-@media (max-width: 768px) {
-  .flow-section .scene-fill > div[class*="py-20"] {
-    padding-top: 2.5rem;
-    padding-bottom: 2.5rem;
-  }
-
-  .flow-section h2[class*="mb-10"] {
-    margin-bottom: 1.75rem;
-  }
-
-  .flow-section .scene-fill > div[class*="mb-5"] {
-    margin-bottom: 1rem;
-  }
+  background: #060608;
 }
 
 /* ── matrix name ── */
@@ -409,7 +319,7 @@ body.lang-bn [class*="tracking-"] {
     scroll-behavior: auto !important;
   }
 
-  .orb-1, .orb-2, .marquee-track, .matrix-noise, .matrix-particle, .matrix-letter.glitching {
+  .orb-1, .orb-2, .matrix-noise, .matrix-particle, .matrix-letter.glitching {
     animation: none !important;
   }
 }
