@@ -70,23 +70,22 @@ export default function Page() {
 
           {/* ── fixed scene layers ── */}
           <div className="scenes-stack">
-            {SCENES.map(({ id, Component, weight }, i) => (
+            {SCENES.map(({ id, Component }, i) => (
               <PinnedSection
                 key={id}
                 index={i}
                 total={TOTAL}
-                weight={weight}
-                weights={WEIGHTS}
                 progress={scrollYProgress}
-                reducedMotion={reducedMotion}
               >
                 <Component reducedMotion={reducedMotion} />
               </PinnedSection>
             ))}
           </div>
 
-          {/* ── scroll spacer ── */}
-          <div style={{ height: `${TOTAL * 100}vh` }} aria-hidden />
+          {/* ── scroll spacer ──
+              Extra 100vh at the end gives the last scene a proper recede zone
+              so it can fade out cleanly instead of being locked at opacity=1 */}
+          <div style={{ height: `${(TOTAL + 1) * 100}vh` }} aria-hidden />
         </motion.main>
       )}
     </>
