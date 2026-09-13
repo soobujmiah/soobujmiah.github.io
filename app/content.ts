@@ -136,6 +136,7 @@ export interface Content {
   nav: { scene: number; label: string }[];
   header: { homeLabel: string; githubLabel: string; langLabel: string };
   footer: { built: string; claims: string };
+  ui: { carouselPrev: string; carouselNext: string };
   preloader: { status: string };
 }
 
@@ -163,7 +164,7 @@ const en: Content = {
       'Self-taught developer at the intersection of on-device AI, Android systems, and ARM64 Linux. Every build runs on CI. Every claim checked against a physical device.',
     ctaWork: 'Explore my work',
     ctaGithub: 'View GitHub ↗',
-    scrollHint: 'Scroll',
+    scrollHint: 'Swipe',
   },
   presence: {
     eyebrow: 'What I actually do',
@@ -399,6 +400,7 @@ const en: Content = {
     { scene: 8, label: 'Contact' },
   ],
   header: { homeLabel: 'Back to top', githubLabel: 'GitHub', langLabel: 'বাং' },
+  ui: { carouselPrev: 'Previous', carouselNext: 'Next' },
   footer: {
     built: 'Built from a phone.',
     claims: 'Every claim backed by CI or real-device evidence.',
@@ -432,7 +434,7 @@ const bn: Content = {
       'অন-ডিভাইস AI, অ্যান্ড্রয়েড সিস্টেম ও ARM64 লিনাক্সের সংযোগস্থলে কাজ করা স্ব-শিক্ষিত ডেভেলপার। প্রতিটি বিল্ড চলে CI-তে। প্রতিটি দাবি যাচাই করা হয় বাস্তব ডিভাইসে।',
     ctaWork: 'আমার কাজ দেখুন',
     ctaGithub: 'GitHub দেখুন ↗',
-    scrollHint: 'স্ক্রল',
+    scrollHint: 'সোয়াইপ',
   },
   presence: {
     eyebrow: 'আমি আসলে যা করি',
@@ -668,6 +670,7 @@ const bn: Content = {
     { scene: 8, label: 'যোগাযোগ' },
   ],
   header: { homeLabel: 'উপরে ফিরুন', githubLabel: 'GitHub', langLabel: 'EN' },
+  ui: { carouselPrev: 'আগের', carouselNext: 'পরের' },
   footer: {
     built: 'ফোন থেকে তৈরি।',
     claims: 'প্রতিটি দাবি CI বা বাস্তব-ডিভাইস প্রমাণে সমর্থিত।',

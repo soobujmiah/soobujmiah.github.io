@@ -1,11 +1,24 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
-import { motion, AnimatePresence, useScroll } from 'framer-motion';
-import { CustomCursor, ScrollProgress, Preloader, Header, Footer, NavProvider } from '@/components/ui';
-import { PinnedSection } from '@/components/PinnedSection';
-import { buildPagePlan } from '@/app/pageplan';
+/* ═══════════════════════════════════════════════════════════════
+   DISCRETE PAGER — one full-screen page at a time, zero vertical
+   scrolling. Every gesture (wheel tick, swipe, arrow key, dot, nav
+   link) flips exactly one page with a slide/fade effect.
+   ═══════════════════════════════════════════════════════════════ */
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { TechBackground } from '@/components/TechBackground';
 import { LanguageProvider } from '@/app/language';
+import {
+  NavProvider,
+  CustomCursor,
+  Preloader,
+  Header,
+  Footer,
+  ScrollProgress,
+  PageDots,
+} from '@/components/ui';
 import {
   HeroScene,
   StatsScene,
@@ -18,158 +31,267 @@ import {
   ContactScene,
 } from '@/components/sections';
 
-/* ── paged scenes ──
-   Page scroll (px) is split into per-page segments sized by measured
-   content: [intro hold][page0 read][turn][page1 read][turn]…[outro].
-   Each page's inner content travels 1:1 with the finger through its
-   read range; turns crossfade/slide between pages. Keyframe math is
-   pure (app/pageplan.ts) and unit-tested — see README. */
+const PAGE_IDS = [
+  'home',
+  'presence',
+  'about',
+  'work',
+  'research',
+  'stack',
+  'open-source',
+  'experience',
+  'contact',
+] as const;
 
-type SceneComponent = (props: { reducedMotion: boolean }) => JSX.Element;
-
-const SCENES: { id: string; Component: SceneComponent }[] = [
-  { id: 'hero', Component: HeroScene },
-  { id: 'stats', Component: StatsScene },
-  { id: 'about', Component: AboutScene },
-  { id: 'work', Component: WorkScene },
-  { id: 'research', Component: ResearchScene },
-  { id: 'stack', Component: StackScene },
-  { id: 'open-source', Component: OpenSourceScene },
-  { id: 'experience', Component: ExperienceScene },
-  { id: 'contact', Component: ContactScene },
+const PAGE_LABELS = [
+  'Home',
+  'Presence',
+  'About',
+  'Featured work',
+  'Research',
+  'Technical focus',
+  'Open source',
+  'Experience',
+  'Contact',
 ];
 
-const TOTAL = SCENES.length;
+const PAGE_COUNT = PAGE_IDS.length;
+const FLIP_LOCK_MS = 1050; // one gesture = one flip, no runaway paging
+const WHEEL_THRESHOLD = 24;
+const SWIPE_THRESHOLD = 60;
 
-export default function Page() {
-  const [loaded, setLoaded] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
-  const [viewportH, setViewportH] = useState<number>(() =>
-    typeof window !== 'undefined' ? window.innerHeight : 800
-  );
-  const [contentHs, setContentHs] = useState<number[]>(() => SCENES.map(() => 0));
+type PageProps = { reducedMotion: boolean };
 
+function PageBody({ index, reducedMotion }: { index: number; reducedMotion: boolean }) {
+  const props: PageProps = { reducedMotion };
+  switch (index) {
+    case 0:
+      return <HeroScene {...props} />;
+    case 1:
+      return <StatsScene />;
+    case 2:
+      return <AboutScene />;
+    case 3:
+      return <WorkScene />;
+    case 4:
+      return <ResearchScene />;
+    case 5:
+      return <StackScene />;
+    case 6:
+      return <OpenSourceScene />;
+    case 7:
+      return <ExperienceScene />;
+    case 8:
+      return <ContactScene />;
+    default:
+      return <HeroScene {...props} />;
+  }
+}
+
+const pageVariants = {
+  enter: (dir: number) => ({ y: dir >= 0 ? '9%' : '-9%', opacity: 0 }),
+  center: { y: '0%', opacity: 1 },
+  exit: (dir: number) => ({ y: dir >= 0 ? '-9%' : '9%', opacity: 0 }),
+};
+
+function indexFromHash(): number | null {
+  try {
+    const hash = window.location.hash.replace(/^#/, '');
+    const i = PAGE_IDS.indexOf(hash as (typeof PAGE_IDS)[number]);
+    return i >= 0 ? i : null;
+  } catch {
+    return null;
+  }
+}
+
+export default function Home() {
+  const prefersReduced = useReducedMotion();
+  const reducedMotion = prefersReduced ?? false;
+  const [ready, setReady] = useState(false);
+  const [index, setIndex] = useState(0);
+  const [dir, setDir] = useState(1);
+  const lastFlip = useRef(0);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // Deep-link: honour #page-id on load, stay in sync with history.
   useEffect(() => {
-    /* Guarded: matchMedia can be absent in old WebViews / in-app browsers. */
     try {
-      if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
-      const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-      setReducedMotion(mq.matches);
-      const onChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
-      if (typeof mq.addEventListener === 'function') {
-        mq.addEventListener('change', onChange);
-        return () => mq.removeEventListener('change', onChange);
+      const i = indexFromHash();
+      if (i !== null) {
+        setIndex(i);
+        setDir(1);
       }
-      /* Legacy Safari lacks addEventListener on MediaQueryList. */
-      mq.addListener(onChange);
-      return () => mq.removeListener(onChange);
-    } catch {
-      return;
-    }
-  }, []);
-
-  /* Track the viewport: page-turn math is in px, so rotation / URL-bar
-     show-hide re-plans the segments. */
-  useEffect(() => {
-    try {
-      const sync = () => setViewportH(window.innerHeight);
-      sync();
-      window.addEventListener('resize', sync, { passive: true });
-      window.addEventListener('orientationchange', sync);
-      return () => {
-        window.removeEventListener('resize', sync);
-        window.removeEventListener('orientationchange', sync);
+      const onHash = () => {
+        const j = indexFromHash();
+        if (j !== null) {
+          setIndex((prev) => {
+            if (j !== prev) setDir(j > prev ? 1 : -1);
+            return j;
+          });
+          lastFlip.current = Date.now();
+        }
       };
+      window.addEventListener('hashchange', onHash);
+      return () => window.removeEventListener('hashchange', onHash);
     } catch {
       return;
     }
   }, []);
-
-  const reportHeight = useCallback((index: number, height: number) => {
-    setContentHs((prev) => {
-      if (Math.abs((prev[index] ?? 0) - height) <= 1) return prev;
-      const next = prev.slice();
-      next[index] = height;
-      return next;
-    });
-  }, []);
-
-  const plan = useMemo(
-    () => buildPagePlan(viewportH, contentHs, TOTAL),
-    [viewportH, contentHs]
-  );
-
-  /* Raw page scroll position in px — the single driver of all motion. */
-  const { scrollY } = useScroll();
 
   const goToScene = useCallback(
-    (index: number) => {
-      const safe = Math.min(Math.max(index, 0), TOTAL - 1);
-      try {
-        window.scrollTo({
-          top: safe === 0 ? 0 : plan.scenes[safe].readStart + 2,
-          behavior: reducedMotion ? 'auto' : 'smooth',
-        });
-      } catch {
-        /* ignore */
-      }
+    (next: number) => {
+      const clamped = Math.max(0, Math.min(PAGE_COUNT - 1, next));
+      setIndex((prev) => {
+        if (clamped === prev) return prev;
+        setDir(clamped > prev ? 1 : -1);
+        lastFlip.current = Date.now();
+        return clamped;
+      });
     },
-    [plan, reducedMotion]
+    []
   );
 
-  const goToTop = useCallback(() => {
+  // Keep the URL hash on the visible page (no history spam).
+  useEffect(() => {
     try {
-      window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
+      window.history.replaceState(null, '', `#${PAGE_IDS[index]}`);
     } catch {
       /* ignore */
     }
-  }, [reducedMotion]);
+  }, [index]);
 
-  const nav = useMemo(() => ({ goToScene, goToTop }), [goToScene, goToTop]);
-  const handleLoaded = useCallback(() => setLoaded(true), []);
+  const tryFlip = useCallback(
+    (delta: 1 | -1) => {
+      const now = Date.now();
+      if (now - lastFlip.current < FLIP_LOCK_MS) return;
+      lastFlip.current = now;
+      setIndex((prev) => {
+        const next = Math.max(0, Math.min(PAGE_COUNT - 1, prev + delta));
+        if (next !== prev) setDir(delta);
+        return next;
+      });
+    },
+    []
+  );
+
+  // Touch: dominant-axis vertical swipes flip pages; horizontal swipes
+  // stay native so carousels keep working.
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    const t = e.touches[0];
+    if (t) touchStart.current = { x: t.clientX, y: t.clientY };
+  }, []);
+
+  const onTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      const start = touchStart.current;
+      touchStart.current = null;
+      if (!start) return;
+      const t = e.changedTouches[0];
+      if (!t) return;
+      const dx = t.clientX - start.x;
+      const dy = t.clientY - start.y;
+      if (Math.abs(dy) < SWIPE_THRESHOLD) return;
+      if (Math.abs(dy) < Math.abs(dx) * 1.2) return;
+      tryFlip(dy < 0 ? 1 : -1);
+    },
+    [tryFlip]
+  );
+
+  // Native non-passive wheel listener — React delegates wheel as passive,
+  // so preventDefault would warn. Vertical ticks flip pages; horizontal
+  // pans belong to carousels.
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const onWheelNative = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) return; // pinch-zoom gesture, leave alone
+      const { deltaX, deltaY } = e;
+      if (Math.abs(deltaY) < WHEEL_THRESHOLD) return;
+      if (Math.abs(deltaX) > Math.abs(deltaY)) return;
+      e.preventDefault();
+      tryFlip(deltaY > 0 ? 1 : -1);
+    };
+    root.addEventListener('wheel', onWheelNative, { passive: false });
+    return () => root.removeEventListener('wheel', onWheelNative);
+  }, [tryFlip]);
+
+  // Keyboard paging.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      switch (e.key) {
+        case 'ArrowDown':
+        case 'PageDown':
+          e.preventDefault();
+          tryFlip(1);
+          break;
+        case 'ArrowUp':
+        case 'PageUp':
+          e.preventDefault();
+          tryFlip(-1);
+          break;
+        case 'Home':
+          e.preventDefault();
+          goToScene(0);
+          break;
+        case 'End':
+          e.preventDefault();
+          goToScene(PAGE_COUNT - 1);
+          break;
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [tryFlip, goToScene]);
 
   return (
     <LanguageProvider>
-      <NavProvider value={nav}>
-        <CustomCursor />
-        <ScrollProgress />
+    <NavProvider value={{ goToScene, goToTop: () => goToScene(0) }}>
+      <CustomCursor />
+      {/* boot splash */}
+      <AnimatePresence>
+        {!ready && !reducedMotion && <Preloader key="preloader" onComplete={() => setReady(true)} />}
+      </AnimatePresence>
 
-        <AnimatePresence mode="wait">
-          {!loaded && <Preloader onComplete={handleLoaded} />}
+      <ScrollProgress value={(index + 1) / PAGE_COUNT} />
+      <Header />
+
+      <div
+        ref={rootRef}
+        className="pager-root"
+        style={{ touchAction: 'pan-x' }}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        <TechBackground pulseKey={index} reducedMotion={reducedMotion} />
+        <div className="pager-grid grid-bg" aria-hidden />
+        <div className="pager-vignette" aria-hidden />
+
+        <AnimatePresence custom={dir} initial={false} mode="sync">
+          <motion.div
+            key={index}
+            className="page-abs"
+            custom={dir}
+            variants={pageVariants}
+            initial={reducedMotion ? false : 'enter'}
+            animate="center"
+            exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : 'exit'}
+            transition={
+              reducedMotion
+                ? { duration: 0 }
+                : { duration: 0.7, ease: [0.16, 1, 0.3, 1] }
+            }
+          >
+            {(ready || reducedMotion) && <PageBody index={index} reducedMotion={reducedMotion} />}
+          </motion.div>
         </AnimatePresence>
 
-        {loaded && (
-          <motion.main
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            style={{ background: '#060608' }}
-          >
-            <Header />
-            <Footer />
+        <PageDots total={PAGE_COUNT} active={index} labels={PAGE_LABELS} onGo={goToScene} />
+      </div>
 
-            {/* ── fixed page layers, driven by page scroll ── */}
-            <div className="scenes-stack">
-              {SCENES.map(({ id, Component }, i) => (
-                <PinnedSection
-                  key={id}
-                  index={i}
-                  motion={plan.scenes[i]}
-                  isFirst={i === 0}
-                  scrollY={scrollY}
-                  sceneId={id}
-                  onHeight={reportHeight}
-                >
-                  <Component reducedMotion={reducedMotion} />
-                </PinnedSection>
-              ))}
-            </div>
-
-            {/* ── scroll spacer: page length = journey + one viewport ── */}
-            <div style={{ height: plan.total + viewportH }} aria-hidden />
-          </motion.main>
-        )}
-      </NavProvider>
+      <Footer />
+    </NavProvider>
     </LanguageProvider>
   );
 }

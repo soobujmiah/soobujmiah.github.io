@@ -1,14 +1,12 @@
 'use client';
 
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { motion, useInView, useScroll, useMotionValue, useSpring, useVelocity, useTransform } from 'framer-motion';
+import { Children, createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { motion, useInView, useMotionValue, useSpring, useVelocity, useTransform } from 'framer-motion';
 import { useLang } from '@/app/language';
-import { useSceneActive } from './PinnedSection';
 
 /* ═══════════════════════════════════════════════════════════════
-   SCENE NAVIGATION — fixed scenes can't use #anchor jumps, so nav
-   scrolls the page to the middle of the target scene's slot.
-   Provided by page.tsx (the only place that knows slot math).
+   PAGE NAVIGATION — discrete pager: goToScene jumps to a page.
+   Provided by page.tsx.
    ═══════════════════════════════════════════════════════════════ */
 
 interface NavValue {
@@ -181,9 +179,8 @@ export function Magnetic({
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SCROLL REVEAL — fade up. Scene-aware: fixed layers are always
-   geometrically "in view", so the reveal also waits for the scene
-   to own the viewport before playing.
+   SCROLL REVEAL — fade up on view. Pages mount fresh on every
+   visit, so reveals replay on each page entry.
    ═══════════════════════════════════════════════════════════════ */
 
 export function Reveal({
@@ -198,16 +195,14 @@ export function Reveal({
   y?: number;
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
-  const sceneActive = useSceneActive();
-  const shown = inView && sceneActive;
+  const inView = useInView(ref, { once: true, margin: '-40px' });
 
   return (
     <motion.div
       ref={ref}
       className={className}
       initial={{ opacity: 0, y }}
-      animate={shown ? { opacity: 1, y: 0 } : {}}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
     >
       {children}
@@ -216,18 +211,184 @@ export function Reveal({
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SCROLL PROGRESS BAR
+   PAGE PROGRESS BAR — driven by pager fraction, not scroll.
    ═══════════════════════════════════════════════════════════════ */
 
-export function ScrollProgress() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
-
+export function ScrollProgress({ value }: { value: number }) {
   return (
     <motion.div
       className="fixed top-0 left-0 right-0 h-[2px] z-[99999] origin-left"
-      style={{ scaleX, background: 'linear-gradient(90deg, #22c55e, #4ade80)' }}
+      style={{ background: 'linear-gradient(90deg, #22c55e, #4ade80)' }}
+      initial={false}
+      animate={{ scaleX: Math.min(Math.max(value, 0), 1) }}
+      transition={{ type: 'spring', stiffness: 120, damping: 24 }}
     />
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE DOTS — vertical rail on desktop, mini row above the footer
+   on phones.
+   ═══════════════════════════════════════════════════════════════ */
+
+export function PageDots({
+  total,
+  active,
+  labels,
+  onGo,
+}: {
+  total: number;
+  active: number;
+  labels: string[];
+  onGo: (index: number) => void;
+}) {
+  const dots = Array.from({ length: total }, (_, i) => i);
+  return (
+    <>
+      {/* desktop rail */}
+      <nav
+        aria-label="Pages"
+        className="pager-dots-rail"
+      >
+        {dots.map((i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => onGo(i)}
+            aria-label={labels[i] ?? `Page ${i + 1}`}
+            aria-current={i === active ? 'true' : undefined}
+            data-magnetic
+            className={`pager-dot${i === active ? ' pager-dot-active' : ''}`}
+          />
+        ))}
+      </nav>
+      {/* phone row */}
+      <nav aria-label="Pages" className="pager-dots-row">
+        {dots.map((i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => onGo(i)}
+            aria-label={labels[i] ?? `Page ${i + 1}`}
+            aria-current={i === active ? 'true' : undefined}
+            className={`pager-dot-sm${i === active ? ' pager-dot-sm-active' : ''}`}
+          />
+        ))}
+      </nav>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SNAP CAROUSEL — native horizontal snap swipe + buttons + dots.
+   Used inside dense pages so nothing ever needs vertical scroll.
+   ═══════════════════════════════════════════════════════════════ */
+
+export function SnapCarousel({
+  children,
+  label,
+  prevLabel = 'Previous',
+  nextLabel = 'Next',
+}: {
+  children: ReactNode;
+  label: string;
+  prevLabel?: string;
+  nextLabel?: string;
+}) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [at, setAt] = useState(0);
+  const slides = Children.toArray(children);
+  const count = slides.length;
+
+  const slideStep = useCallback(() => {
+    try {
+      const track = trackRef.current;
+      const first = track?.querySelector(':scope > *') as HTMLElement | null;
+      if (!track || !first) return 300;
+      const gap = parseFloat(getComputedStyle(track).columnGap || '16') || 16;
+      return first.offsetWidth + gap;
+    } catch {
+      return 300;
+    }
+  }, []);
+
+  const go = useCallback(
+    (index: number) => {
+      try {
+        trackRef.current?.scrollTo({ left: index * slideStep(), behavior: 'smooth' });
+      } catch {
+        /* ignore */
+      }
+    },
+    [slideStep]
+  );
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        try {
+          setAt(Math.round(track.scrollLeft / slideStep()));
+        } catch {
+          /* ignore */
+        }
+      });
+    };
+    track.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      track.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, [slideStep]);
+
+  return (
+    <div>
+      <div ref={trackRef} className="snap-carousel" role="group" aria-label={label} aria-roledescription="carousel">
+        {slides.map((child, i) => (
+          <div key={i} className="snap-slide" role="group" aria-roledescription="slide" aria-label={`${i + 1} / ${count}`}>
+            {child}
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 flex items-center justify-between">
+        <div className="flex items-center gap-1.5" aria-hidden>
+          {slides.map((_, i) => (
+            <span key={i} className={`h-1 rounded-full transition-all duration-300 ${i === at ? 'w-5' : 'w-1.5'}`} style={{ background: i === at ? '#22c55e' : 'rgba(228,226,223,0.15)' }} />
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => go(Math.max(at - 1, 0))}
+            disabled={at <= 0}
+            aria-label={prevLabel}
+            data-magnetic
+            className="flex h-8 w-8 items-center justify-center rounded-full transition-opacity duration-300 disabled:opacity-25"
+            style={{ border: '1px solid rgba(228,226,223,0.12)', color: '#e4e2df' }}
+          >
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden>
+              <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => go(Math.min(at + 1, count - 1))}
+            disabled={at >= count - 1}
+            aria-label={nextLabel}
+            data-magnetic
+            className="flex h-8 w-8 items-center justify-center rounded-full transition-opacity duration-300 disabled:opacity-25"
+            style={{ border: '1px solid rgba(228,226,223,0.12)', color: '#e4e2df' }}
+          >
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden>
+              <path d="M5 2l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -270,14 +431,14 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
         transition={{ delay: 0.3, duration: 0.7 }}
         className="text-center"
       >
-        <p className="font-mono text-[10px] uppercase tracking-[0.4em] mb-5" style={{ color: 'rgba(232,230,227,0.25)' }}>
+        <p className="font-mono text-[10px] uppercase tracking-[0.4em] mb-5" style={{ color: 'rgba(228,226,223,0.25)' }}>
           {t.preloader.status}
         </p>
-        <p className="font-mono text-6xl font-extralight tabular-nums" style={{ color: '#e8e6e3' }}>
+        <p className="font-mono text-6xl font-extralight tabular-nums" style={{ color: '#e4e2df' }}>
           {String(Math.round(progress)).padStart(3, '0')}
         </p>
       </motion.div>
-      <div className="absolute bottom-14 left-1/2 -translate-x-1/2 w-40 h-px" style={{ background: 'rgba(232,230,227,0.05)' }}>
+      <div className="absolute bottom-14 left-1/2 -translate-x-1/2 w-40 h-px" style={{ background: 'rgba(228,226,223,0.05)' }}>
         <motion.div
           className="h-full"
           style={{ width: `${progress}%`, background: '#22c55e' }}
@@ -289,40 +450,31 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   HEADER — fixed; nav scrolls to scene slots (no #anchor jumps).
+   HEADER — fixed; nav jumps between pages.
    ═══════════════════════════════════════════════════════════════ */
 
 export function Header() {
   const { t, toggleLang } = useLang();
-  const { goToScene, goToTop } = useNav();
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  const { goToScene } = useNav();
 
   return (
     <motion.header
-      className={`fixed top-0 left-0 right-0 z-[9998] transition-all duration-500 ${
-        scrolled ? 'py-3 backdrop-blur-xl border-b' : 'py-5'
-      }`}
-      style={scrolled ? { background: 'rgba(6,6,8,0.75)', borderColor: 'rgba(232,230,227,0.04)' } : {}}
+      className="fixed top-0 left-0 right-0 z-[9998] py-4 backdrop-blur-xl border-b"
+      style={{ background: 'rgba(6,6,8,0.6)', borderColor: 'rgba(228,226,223,0.05)' }}
       initial={{ y: -80 }}
       animate={{ y: 0 }}
       transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6">
         <a
-          href="#top"
+          href="#hero"
           aria-label={t.header.homeLabel}
           onClick={(e) => {
             e.preventDefault();
-            goToTop();
+            goToScene(0);
           }}
           className="font-mono text-sm font-medium tracking-tight"
-          style={{ color: '#e8e6e3' }}
+          style={{ color: '#e4e2df' }}
           data-magnetic
         >
           sobuj<span style={{ color: '#22c55e' }}>.</span>miah
@@ -337,7 +489,7 @@ export function Header() {
                 goToScene(l.scene);
               }}
               className="text-xs uppercase tracking-[0.1em] transition-colors duration-300 hover:opacity-100"
-              style={{ color: 'rgba(232,230,227,0.4)' }}
+              style={{ color: 'rgba(228,226,223,0.4)' }}
               data-magnetic
             >
               {l.label}
@@ -359,7 +511,7 @@ export function Header() {
             href="https://github.com/soobujmiah"
             ariaLabel="GitHub profile"
             className="rounded-full px-4 py-1.5 text-[11px] font-medium transition-colors duration-300"
-            style={{ border: '1px solid rgba(232,230,227,0.12)', color: '#e8e6e3' }}
+            style={{ border: '1px solid rgba(228,226,223,0.12)', color: '#e4e2df' }}
             strength={0.2}
           >
             {t.header.githubLabel}
@@ -377,12 +529,12 @@ export function Header() {
 export function Footer() {
   const { t } = useLang();
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-[9997] border-t py-3" style={{ borderColor: 'rgba(232,230,227,0.04)', background: 'rgba(6,6,8,0.6)', backdropFilter: 'blur(12px)' }}>
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-2 px-6 sm:flex-row">
-        <p className="font-mono text-[10px]" style={{ color: 'rgba(232,230,227,0.35)' }}>
+    <footer className="fixed bottom-0 left-0 right-0 z-[9997] border-t py-2.5" style={{ borderColor: 'rgba(228,226,223,0.04)', background: 'rgba(6,6,8,0.6)', backdropFilter: 'blur(12px)' }}>
+      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-1 px-6 sm:flex-row">
+        <p className="font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>
           © {new Date().getFullYear()} {t.profile.nameFull}. {t.footer.built}
         </p>
-        <p className="font-mono text-[10px]" style={{ color: 'rgba(232,230,227,0.35)' }}>
+        <p className="font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>
           {t.footer.claims}
         </p>
       </div>

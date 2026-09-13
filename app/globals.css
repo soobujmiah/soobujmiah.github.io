@@ -24,17 +24,21 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  height: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: var(--bg);
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
+  height: 100%;
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-inter), system-ui, sans-serif;
-  overflow-x: hidden;
+  overflow: hidden;
+  overscroll-behavior: none;
   cursor: none;
 }
 
@@ -161,36 +165,177 @@ a, button {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PAGED SCENES — fixed full-viewport layers, one page at a time.
-   Page scroll drives everything: inner content travels through the
-   viewport 1:1 with the finger, then the next page turns in from
-   the bottom. min-height uses svh (stable on mobile URL-bar
-   show/hide). Short pages center vertically in the viewport.
+   DISCRETE PAGER — one full-screen page at a time, zero vertical
+   scrolling. Pages are transparent layers over the live canvas
+   background; gestures flip exactly one page (see app/page.tsx).
    ═══════════════════════════════════════════════════════════════ */
 
-.scenes-stack {
-  position: relative;
-}
-
-.scene-fixed {
+.pager-root {
   position: fixed;
   inset: 0;
+  height: 100dvh;
   overflow: hidden;
   background: #060608;
 }
 
-.scene-inner {
+/* live canvas background */
+.tech-bg {
   position: absolute;
   inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-.scene-fill {
+.pager-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.pager-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 42%, transparent 55%, rgba(0, 0, 0, 0.52) 100%);
+}
+
+/* one page layer; incoming paints above outgoing by DOM order */
+.page-abs {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  overflow: hidden;
+  background: transparent;
+  will-change: transform, opacity;
+}
+
+.page-fill {
   position: relative;
-  min-height: 100svh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background: #060608;
+  padding: 88px 0 116px;
+  background: transparent;
+}
+
+.page-content {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .page-fill {
+    padding: 96px 0 88px;
+  }
+  .page-content {
+    padding: 0 2rem;
+  }
+}
+
+/* ── page dots: desktop rail + phone row ── */
+
+.pager-dots-rail {
+  position: absolute;
+  z-index: 30;
+  right: max(1.25rem, env(safe-area-inset-right));
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (min-width: 768px) {
+  .pager-dots-rail {
+    display: flex;
+  }
+}
+
+.pager-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  border: none;
+  padding: 0;
+  background: rgba(228, 226, 223, 0.18);
+  transition: all 0.35s ease;
+}
+
+.pager-dot:hover {
+  background: rgba(228, 226, 223, 0.4);
+}
+
+.pager-dot-active {
+  background: #22c55e;
+  height: 26px;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
+}
+
+.pager-dots-row {
+  position: absolute;
+  z-index: 30;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(66px + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .pager-dots-row {
+    display: none;
+  }
+}
+
+.pager-dot-sm {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  border: none;
+  padding: 0;
+  background: rgba(228, 226, 223, 0.2);
+  transition: all 0.35s ease;
+}
+
+.pager-dot-sm-active {
+  width: 22px;
+  background: #22c55e;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+}
+
+/* ── snap carousels (dense pages on phones) ── */
+
+.snap-carousel {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  margin: 0 -1.5rem;
+  padding: 0 1.5rem 6px;
+  overscroll-behavior-x: contain;
+}
+
+.snap-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.snap-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  min-width: 0;
 }
 
 /* ── matrix name ── */

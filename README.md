@@ -33,20 +33,20 @@ alongside the copy so each language tree is complete and reviewable.
 - `app/language.tsx` — `LanguageProvider` + `useLang()` hook. Preference
   persists to guarded `localStorage` (never throws in private mode / old
   WebViews) and syncs `<html lang>` for assistive tech.
-- `app/page.tsx` — scene orchestration: measures viewport + per-page content
-  heights, builds the scroll plan, renders fixed layers + spacer.
-- `app/pageplan.ts` — **pure page-turn math** (no React/DOM): splits page
-  scroll into per-page read ranges sized by measured content, with shared
-  turn ranges between pages. Unit-test it with
-  `npx tsc app/pageplan.ts --module commonjs --target es2020 --outDir /tmp/pptest && node scripts/check-pageplan.js`
-  (see `scripts/check-pageplan.js`).
-- `components/PinnedSection.tsx` — fixed full-viewport page layers. Inner
-  content travels through the viewport 1:1 with the finger; incoming pages
-  slide up from the bottom and fade in over the previous page. Inactive
-  pages are pointer-gated + aria-hidden; `useSceneActive()` drives reveals.
-- `components/sections.tsx` — the nine scenes (Hero → Contact).
+- `app/page.tsx` — **discrete pager**: fixed 100dvh root, zero vertical
+  scrolling (`body { overflow: hidden }`). Wheel ticks, vertical swipes,
+  arrow/PageUp/PageDown/Home/End keys, dots, and nav links each flip exactly
+  one page (`AnimatePresence` slide/fade, ~1s flip lock, `#page-id` hashes).
+- `components/TechBackground.tsx` — live canvas background behind the
+  transparent pages: drifting particle network, pointer repulsion + glow,
+  tap ripples, scanline sweep, and a pulse on every page change. Pauses
+  off-screen, renders one static frame under reduced motion.
+- `components/sections.tsx` — the nine pages (Hero → Contact). Every page
+  fits its viewport: dense collections become horizontal snap carousels on
+  phones (Work incl. Songjog slide, Open Source 3×2×2) or a fitted grid /
+  timeline on desktop; Experience is an accordion on phones.
 - `components/ui.tsx` — cursor, magnetic links, reveals, preloader, header
-  (with EN/বাং toggle), footer, scroll progress.
+  (with EN/বাং toggle), footer, page progress, page dots, snap carousel.
 
 ### i18n rules (must follow)
 
@@ -84,15 +84,15 @@ app/
   content.ts     bilingual copy (en/bn trees)
   language.tsx   language provider + hook
   layout.tsx     metadata, JSON-LD, fonts, viewport
-  page.tsx       scene orchestration + navigation
-  globals.css    theme, scenes, cursor, responsive, reduced-motion
+  page.tsx       discrete pager + navigation
+  globals.css    theme, pager, carousels, cursor, responsive, reduced-motion
   icon.svg       favicon
   not-found.tsx  bilingual 404 → 404.html on export
 components/
-  PinnedSection.tsx  fixed scene layer + active-state context
-  sections.tsx       the nine scene contents
-  ui.tsx             cursor, links, reveals, header, footer
-  MatrixName.tsx     animated hero name
+  TechBackground.tsx  live canvas background (particles, ripples, pulses)
+  sections.tsx        the nine page contents (carousels, accordion)
+  ui.tsx              cursor, links, reveals, header, footer, dots, carousel
+  MatrixName.tsx      animated hero name
 ```
 
 ## Owner context
