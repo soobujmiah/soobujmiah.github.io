@@ -16,7 +16,7 @@ import type { Project, Repo } from '@/app/content';
    use translucent fills + backdrop blur for readability.
    ═══════════════════════════════════════════════ */
 
-const CARD_BG = 'rgba(8,10,8,0.62)';
+const CARD_BG = 'rgba(6,7,6,0.66)';
 
 const NUMERALS = {
   en: ['01', '02', '03', '04', '05', '06', '07', '08', '09'],
@@ -598,34 +598,71 @@ function RepoCard({ repo, liveLabel, codeLabel }: { repo: Repo; liveLabel: strin
   );
 }
 
+/* ── 07 · SELECTED OPEN SOURCE ────────────────────────────────────────── */
+
+/* Curated set only (content.openSource.selected) + one GitHub route.
+   Featured projects are NOT repeated here. */
+
+function GithubRouteCard() {
+  const { t } = useLang();
+  return (
+    <Magnetic
+      href="https://github.com/soobujmiah"
+      className="repo-card flex h-full flex-col justify-between gap-3 rounded-xl p-4 text-left backdrop-blur-md"
+      style={{ border: '1px solid rgba(34,197,94,0.25)', background: 'rgba(34,197,94,0.07)' }}
+      strength={0.08}
+    >
+      <span>
+        <span className="block text-sm font-semibold" style={{ color: '#e4e2df' }}>{t.openSource.moreLabel}</span>
+        <span className="mt-1 block text-[11px] leading-relaxed" style={{ color: 'rgba(228,226,223,0.55)' }}>{t.openSource.moreSub}</span>
+      </span>
+      <span aria-hidden className="font-mono text-lg leading-none" style={{ color: '#4ade80' }}>
+        &rarr;
+      </span>
+    </Magnetic>
+  );
+}
+
 export function OpenSourceScene() {
   const { t } = useLang();
-  const repos = t.openSource.repos;
-  const slides: Repo[][] = [repos.slice(0, 4), repos.slice(4, 8), repos.slice(8, 12)];
+  const selected = t.openSource.selected
+    .map((name) => t.openSource.repos.find((r) => r.name === name))
+    .filter((r): r is Repo => Boolean(r));
+  const cells: (Repo | null)[] = [...selected, null]; // null = GitHub route card
+  const slides: (Repo | null)[][] = [cells.slice(0, 4), cells.slice(4, 8)];
+
+  const renderCell = (c: Repo | null, key: string) =>
+    c === null ? (
+      <GithubRouteCard key={key} />
+    ) : (
+      <RepoCard key={key} repo={c} liveLabel={t.openSource.liveLabel} codeLabel={t.openSource.codeLabel} />
+    );
+
   return (
     <div className="page-fill">
       <PageNumeral index={6} />
       <div className="page-content page-content-wide">
         <PageHeading eyebrow={t.openSource.eyebrow} heading={t.openSource.heading} />
+        <Reveal delay={0.1}>
+          <p className="text-xs mb-4 sm:mb-5" style={{ color: 'rgba(228,226,223,0.5)' }}>
+            {t.openSource.note}
+          </p>
+        </Reveal>
 
-        {/* phones + tablets: 3 swipeable 2×2 slides */}
+        {/* phones + tablets: 2 swipeable 2x2 slides */}
         <div className="lg:hidden">
           <SnapCarousel label={t.openSource.heading} prevLabel={t.ui.carouselPrev} nextLabel={t.ui.carouselNext}>
             {slides.map((group, i) => (
               <div key={i} className="grid grid-cols-2 gap-2.5">
-                {group.map((r) => (
-                  <RepoCard key={r.name} repo={r} liveLabel={t.openSource.liveLabel} codeLabel={t.openSource.codeLabel} />
-                ))}
+                {group.map((c, j) => renderCell(c, `${i}-${j}`))}
               </div>
             ))}
           </SnapCarousel>
         </div>
 
-        {/* desktop: fitted 4-column grid, all twelve */}
+        {/* desktop: fitted 4-column grid */}
         <div className="hidden lg:grid gap-3 lg:grid-cols-4">
-          {repos.map((r) => (
-            <RepoCard key={r.name} repo={r} liveLabel={t.openSource.liveLabel} codeLabel={t.openSource.codeLabel} />
-          ))}
+          {cells.map((c, i) => renderCell(c, `d-${i}`))}
         </div>
       </div>
     </div>

@@ -143,6 +143,7 @@ export function Magnetic({
 }) {
   const ref = useRef<HTMLAnchorElement>(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [pressing, setPressing] = useState(false);
 
   const onMove = (e: React.MouseEvent) => {
     if (!ref.current) return;
@@ -153,7 +154,10 @@ export function Magnetic({
     });
   };
 
-  const onLeave = () => setOffset({ x: 0, y: 0 });
+  const onLeave = () => {
+    setOffset({ x: 0, y: 0 });
+    setPressing(false);
+  };
   const isExternal = !!href && /^https?:\/\//.test(href);
 
   return (
@@ -166,10 +170,18 @@ export function Magnetic({
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       onClick={onClick}
+      onMouseDown={() => setPressing(true)}
+      onMouseUp={() => setPressing(false)}
+      onTouchStart={() => setPressing(true)}
+      onTouchEnd={() => setPressing(false)}
       {...(isExternal ? { target: '_blank', rel: 'noreferrer' } : {})}
       style={{
-        transform: `translate(${offset.x}px, ${offset.y}px)`,
-        transition: offset.x === 0 && offset.y === 0 ? 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)' : 'transform 0.12s ease-out',
+        transform: `translate(${offset.x}px, ${offset.y}px) scale(${pressing ? 0.96 : 1})`,
+        transition: pressing
+          ? 'transform 0.1s ease-out'
+          : offset.x === 0 && offset.y === 0
+            ? 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
+            : 'transform 0.12s ease-out',
         ...style,
       }}
     >
@@ -520,84 +532,6 @@ export function Header() {
         </div>
       </div>
     </motion.header>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   FIT-TO-VIEWPORT — measures the page against the real viewport and
-   scales it down only when it would overflow, then centers it. Header
-   / footer clearances live inside the measured box, so content can
-   never slide under the top bar or clip at the bottom on any screen.
-   Re-fits on resize, language switch, accordion/spotlight changes,
-   and font load. Pixel-perfect (no transform) when everything fits.
-   ═══════════════════════════════════════════════════════════════ */
-
-export function FitPage({ children }: { children: ReactNode }) {
-  const { lang } = useLang();
-  const outerRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-  const [fit, setFit] = useState({ scale: 1, offset: 0 });
-
-  useEffect(() => {
-    const outer = outerRef.current;
-    const inner = innerRef.current;
-    if (!outer || !inner) return;
-    let raf = 0;
-    const compute = () => {
-      try {
-        const avail = outer.clientHeight;
-        const need = inner.scrollHeight;
-        if (avail > 20 && need > 0) {
-          const scale = Math.min(1, avail / need);
-          setFit({ scale, offset: Math.max(0, (avail - need * scale) / 2) });
-        }
-      } catch {
-        /* ignore */
-      }
-    };
-    const refit = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(compute);
-    };
-    refit();
-    let ro: ResizeObserver | null = null;
-    try {
-      ro = new ResizeObserver(refit);
-      ro.observe(outer);
-      ro.observe(inner);
-    } catch {
-      /* older WebViews: resize events only */
-    }
-    window.addEventListener('resize', refit);
-    window.addEventListener('orientationchange', refit);
-    try {
-      const fonts = (document as Document & { fonts?: { ready: Promise<unknown> } }).fonts;
-      if (fonts?.ready) fonts.ready.then(refit).catch(() => {});
-    } catch {
-      /* ignore */
-    }
-    return () => {
-      cancelAnimationFrame(raf);
-      ro?.disconnect();
-      window.removeEventListener('resize', refit);
-      window.removeEventListener('orientationchange', refit);
-    };
-  }, [lang]);
-
-  return (
-    <div ref={outerRef} className="fit-outer">
-      <div
-        ref={innerRef}
-        className="fit-inner"
-        style={
-          fit.scale >= 1
-            ? { marginTop: fit.offset }
-            : { transform: `scale(${fit.scale})`, marginTop: fit.offset }
-        }
-      >
-        {children}
-      </div>
-    </div>
   );
 }
 

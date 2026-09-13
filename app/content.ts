@@ -119,6 +119,10 @@ export interface Content {
     heading: string;
     liveLabel: string;
     codeLabel: string;
+    selected: string[];
+    note: string;
+    moreLabel: string;
+    moreSub: string;
     repos: Repo[];
   };
   experience: {
@@ -194,7 +198,7 @@ const en: Content = {
     eyebrow: '04 — Featured Work',
     heading: 'The strongest work — not every repository.',
     evidenceLabel: 'Evidence: ',
-    liveLabel: 'Live ↗',
+    liveLabel: 'Explore ↗',
     codeLabel: 'Code ↗',
     projects: [
       {
@@ -309,8 +313,12 @@ const en: Content = {
   openSource: {
     eyebrow: '07 — Open Source',
     heading: 'Selected repositories.',
-    liveLabel: 'Live ↗',
+    liveLabel: 'Explore ↗',
     codeLabel: 'Code ↗',
+    selected: ['faridpur-police-app', 'docdr', 'apiloop', 'datakhoj-android', 'sobkichu', 'arms', 'iqra-online-mart'],
+    note: 'Beyond the featured projects — each one earns its place.',
+    moreLabel: 'Everything on GitHub',
+    moreSub: 'Experiments, prototypes, and work in progress live there.',
     repos: [
       { name: 'lai', desc: 'Bangla-first local AI + automation runtime', lang: 'Kotlin', stars: 1, url: 'https://github.com/soobujmiah/lai', websiteUrl: null },
       { name: 'adt', desc: 'ARM64 Android dev toolchain from AOSP source', lang: 'Shell', stars: 0, url: 'https://github.com/soobujmiah/adt', websiteUrl: null },
@@ -464,7 +472,7 @@ const bn: Content = {
     eyebrow: '০৪ — নির্বাচিত কাজ',
     heading: 'সব রিপোজিটরি নয় — সবচেয়ে শক্তিশালী কাজ।',
     evidenceLabel: 'প্রমাণ: ',
-    liveLabel: 'লাইভ ↗',
+    liveLabel: 'ঘুরে দেখুন ↗',
     codeLabel: 'কোড ↗',
     projects: [
       {
@@ -579,8 +587,12 @@ const bn: Content = {
   openSource: {
     eyebrow: '০৭ — ওপেন সোর্স',
     heading: 'নির্বাচিত রিপোজিটরি।',
-    liveLabel: 'লাইভ ↗',
+    liveLabel: 'ঘুরে দেখুন ↗',
     codeLabel: 'কোড ↗',
+    selected: ['faridpur-police-app', 'docdr', 'apiloop', 'datakhoj-android', 'sobkichu', 'arms', 'iqra-online-mart'],
+    note: 'নির্বাচিত প্রজেক্টের বাইরে — প্রতিটি তার জায়গা অর্জন করে।',
+    moreLabel: 'GitHub-এ সবকিছু',
+    moreSub: 'পরীক্ষা, প্রোটোটাইপ ও চলমান কাজ থাকে সেখানে।',
     repos: [
       { name: 'lai', desc: 'বাংলা-ফার্স্ট লোকাল AI + অটোমেশন রানটাইম', lang: 'Kotlin', stars: 1, url: 'https://github.com/soobujmiah/lai', websiteUrl: null },
       { name: 'adt', desc: 'AOSP সোর্স থেকে ARM64 অ্যান্ড্রয়েড ডেভ টুলচেইন', lang: 'Shell', stars: 0, url: 'https://github.com/soobujmiah/adt', websiteUrl: null },
