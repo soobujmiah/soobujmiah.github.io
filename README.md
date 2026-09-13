@@ -46,7 +46,7 @@ alongside the copy so each language tree is complete and reviewable.
   phones (Work incl. Songjog slide, Open Source 3×2×2) or a fitted grid /
   timeline on desktop; Experience is an accordion on phones.
 - `components/ui.tsx` — cursor, magnetic links, reveals, preloader, header
-  (with EN/বাং toggle), footer, page progress, page dots, snap carousel.
+  (with EN/বাং toggle), footer, page progress, page dots, snap carousel, fit-to-viewport.
 
 ### i18n rules (must follow)
 

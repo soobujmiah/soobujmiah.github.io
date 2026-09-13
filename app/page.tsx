@@ -18,6 +18,7 @@ import {
   Footer,
   ScrollProgress,
   PageDots,
+  FitPage,
 } from '@/components/ui';
 import {
   HeroScene,
@@ -280,7 +281,11 @@ function Pager() {
                   }
             }
           >
-            {(ready || reducedMotion) && <PageBody index={index} reducedMotion={reducedMotion} />}
+            {(ready || reducedMotion) && (
+              <FitPage>
+                <PageBody index={index} reducedMotion={reducedMotion} />
+              </FitPage>
+            )}
           </motion.div>
         </AnimatePresence>
 
