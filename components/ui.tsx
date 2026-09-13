@@ -2,7 +2,7 @@
 
 import { Children, createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { motion, useInView, useMotionValue, useSpring, useVelocity, useTransform } from 'framer-motion';
-import { useLang } from '@/app/language';
+import { useLang, localizeDigits } from '@/app/language';
 
 /* ═══════════════════════════════════════════════════════════════
    PAGE NAVIGATION — discrete pager: goToScene jumps to a page.
@@ -295,6 +295,7 @@ export function SnapCarousel({
   prevLabel?: string;
   nextLabel?: string;
 }) {
+  const { lang } = useLang();
   const trackRef = useRef<HTMLDivElement>(null);
   const [at, setAt] = useState(0);
   const slides = Children.toArray(children);
@@ -348,7 +349,7 @@ export function SnapCarousel({
     <div>
       <div ref={trackRef} className="snap-carousel" role="group" aria-label={label} aria-roledescription="carousel">
         {slides.map((child, i) => (
-          <div key={i} className="snap-slide" role="group" aria-roledescription="slide" aria-label={`${i + 1} / ${count}`}>
+          <div key={i} className="snap-slide" role="group" aria-roledescription="slide" aria-label={localizeDigits(`${i + 1} / ${count}`, lang)}>
             {child}
           </div>
         ))}
@@ -397,7 +398,7 @@ export function SnapCarousel({
    ═══════════════════════════════════════════════════════════════ */
 
 export function Preloader({ onComplete }: { onComplete: () => void }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -435,7 +436,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
           {t.preloader.status}
         </p>
         <p className="font-mono text-6xl font-extralight tabular-nums" style={{ color: '#e4e2df' }}>
-          {String(Math.round(progress)).padStart(3, '0')}
+          {localizeDigits(String(Math.round(progress)).padStart(3, '0'), lang)}
         </p>
       </motion.div>
       <div className="absolute bottom-14 left-1/2 -translate-x-1/2 w-40 h-px" style={{ background: 'rgba(228,226,223,0.05)' }}>
@@ -500,7 +501,7 @@ export function Header() {
           <button
             type="button"
             onClick={toggleLang}
-            aria-label="Switch language / ভাষা বদলান"
+            aria-label={t.header.langAria}
             data-magnetic
             className="rounded-full px-4 py-1.5 font-mono text-[11px] font-medium transition-colors duration-300"
             style={{ border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80' }}
@@ -509,7 +510,7 @@ export function Header() {
           </button>
           <Magnetic
             href="https://github.com/soobujmiah"
-            ariaLabel="GitHub profile"
+            ariaLabel={t.header.githubAria}
             className="rounded-full px-4 py-1.5 text-[11px] font-medium transition-colors duration-300"
             style={{ border: '1px solid rgba(228,226,223,0.12)', color: '#e4e2df' }}
             strength={0.2}
@@ -527,12 +528,12 @@ export function Header() {
    ═══════════════════════════════════════════════════════════════ */
 
 export function Footer() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   return (
     <footer className="fixed bottom-0 left-0 right-0 z-[9997] border-t py-2.5" style={{ borderColor: 'rgba(228,226,223,0.04)', background: 'rgba(6,6,8,0.6)', backdropFilter: 'blur(12px)' }}>
       <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-1 px-6 sm:flex-row">
         <p className="font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>
-          © {new Date().getFullYear()} {t.profile.nameFull}. {t.footer.built}
+          © {localizeDigits(new Date().getFullYear(), lang)} {t.profile.nameFull}. {t.footer.built}
         </p>
         <p className="font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>
           {t.footer.claims}

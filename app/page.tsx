@@ -3,13 +3,13 @@
 /* ═══════════════════════════════════════════════════════════════
    DISCRETE PAGER — one full-screen page at a time, zero vertical
    scrolling. Every gesture (wheel tick, swipe, arrow key, dot, nav
-   link) flips exactly one page with a slide/fade effect.
+   link) flips exactly one page with a buttery spring slide/fade.
    ═══════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { TechBackground } from '@/components/TechBackground';
-import { LanguageProvider } from '@/app/language';
+import { LanguageProvider, useLang } from '@/app/language';
 import {
   NavProvider,
   CustomCursor,
@@ -43,20 +43,8 @@ const PAGE_IDS = [
   'contact',
 ] as const;
 
-const PAGE_LABELS = [
-  'Home',
-  'Presence',
-  'About',
-  'Featured work',
-  'Research',
-  'Technical focus',
-  'Open source',
-  'Experience',
-  'Contact',
-];
-
 const PAGE_COUNT = PAGE_IDS.length;
-const FLIP_LOCK_MS = 1050; // one gesture = one flip, no runaway paging
+const FLIP_LOCK_MS = 1000; // one gesture = one flip, no runaway paging
 const WHEEL_THRESHOLD = 24;
 const SWIPE_THRESHOLD = 60;
 
@@ -88,10 +76,11 @@ function PageBody({ index, reducedMotion }: { index: number; reducedMotion: bool
   }
 }
 
+/* Buttery flip: spring slide + subtle depth scale + quick fade. */
 const pageVariants = {
-  enter: (dir: number) => ({ y: dir >= 0 ? '9%' : '-9%', opacity: 0 }),
-  center: { y: '0%', opacity: 1 },
-  exit: (dir: number) => ({ y: dir >= 0 ? '-9%' : '9%', opacity: 0 }),
+  enter: (dir: number) => ({ y: dir >= 0 ? '10%' : '-10%', scale: 0.98, opacity: 0 }),
+  center: { y: '0%', scale: 1, opacity: 1 },
+  exit: (dir: number) => ({ y: dir >= 0 ? '-10%' : '10%', scale: 1.015, opacity: 0 }),
 };
 
 function indexFromHash(): number | null {
@@ -104,9 +93,10 @@ function indexFromHash(): number | null {
   }
 }
 
-export default function Home() {
+function Pager() {
   const prefersReduced = useReducedMotion();
   const reducedMotion = prefersReduced ?? false;
+  const { t } = useLang();
   const [ready, setReady] = useState(false);
   const [index, setIndex] = useState(0);
   const [dir, setDir] = useState(1);
@@ -246,7 +236,6 @@ export default function Home() {
   }, [tryFlip, goToScene]);
 
   return (
-    <LanguageProvider>
     <NavProvider value={{ goToScene, goToTop: () => goToScene(0) }}>
       <CustomCursor />
       {/* boot splash */}
@@ -265,7 +254,11 @@ export default function Home() {
         onTouchEnd={onTouchEnd}
       >
         <TechBackground pulseKey={index} reducedMotion={reducedMotion} />
-        <div className="pager-grid grid-bg" aria-hidden />
+        <div
+          className="pager-grid grid-bg"
+          aria-hidden
+          style={reducedMotion ? {} : { transform: `translate3d(0, ${-index * 14}px, 0)` }}
+        />
         <div className="pager-vignette" aria-hidden />
 
         <AnimatePresence custom={dir} initial={false} mode="sync">
@@ -280,18 +273,29 @@ export default function Home() {
             transition={
               reducedMotion
                 ? { duration: 0 }
-                : { duration: 0.7, ease: [0.16, 1, 0.3, 1] }
+                : {
+                    y: { type: 'spring', stiffness: 170, damping: 27, mass: 0.9 },
+                    scale: { type: 'spring', stiffness: 170, damping: 27, mass: 0.9 },
+                    opacity: { duration: 0.4, ease: 'easeOut' },
+                  }
             }
           >
             {(ready || reducedMotion) && <PageBody index={index} reducedMotion={reducedMotion} />}
           </motion.div>
         </AnimatePresence>
 
-        <PageDots total={PAGE_COUNT} active={index} labels={PAGE_LABELS} onGo={goToScene} />
+        <PageDots total={PAGE_COUNT} active={index} labels={t.ui.pageLabels} onGo={goToScene} />
       </div>
 
       <Footer />
     </NavProvider>
+  );
+}
+
+export default function Home() {
+  return (
+    <LanguageProvider>
+      <Pager />
     </LanguageProvider>
   );
 }

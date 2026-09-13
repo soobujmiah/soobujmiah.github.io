@@ -39,11 +39,16 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setLangState(readStoredLang());
   }, []);
 
-  /* Keep <html lang> and body font-stack in sync for a11y + typography. */
+  /* Keep <html lang>, tab title, meta description, and body font-stack
+     in sync so each language is fully itself. */
   useEffect(() => {
     try {
       document.documentElement.lang = lang === 'bn' ? 'bn' : 'en';
       document.body.classList.toggle('lang-bn', lang === 'bn');
+      document.title = content[lang].meta.title;
+      document
+        .querySelector('meta[name="description"]')
+        ?.setAttribute('content', content[lang].meta.description);
     } catch {
       /* non-fatal: document unavailable */
     }
@@ -74,4 +79,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
 export function useLang(): LanguageValue {
   return useContext(LanguageContext);
+}
+
+/* Render counters in the active script — Bengali digits in BN mode,
+   Latin digits otherwise. For UI chrome only; technical figures
+   (benchmarks, versions, test counts) stay Latin in content. */
+export function localizeDigits(value: string | number, lang: Lang): string {
+  const s = String(value);
+  if (lang !== 'bn') return s;
+  return s.replace(/[0-9]/g, (d) => '০১২৩৪৫৬৭৮৯'[Number(d)]);
 }

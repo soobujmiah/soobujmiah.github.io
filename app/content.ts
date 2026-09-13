@@ -134,9 +134,9 @@ export interface Content {
     channels: { label: string; value: string; href: string }[];
   };
   nav: { scene: number; label: string }[];
-  header: { homeLabel: string; githubLabel: string; langLabel: string };
+  header: { homeLabel: string; githubLabel: string; langLabel: string; langAria: string; githubAria: string };
   footer: { built: string; claims: string };
-  ui: { carouselPrev: string; carouselNext: string };
+  ui: { carouselPrev: string; carouselNext: string; pageLabels: string[]; repoWord: string };
   preloader: { status: string };
 }
 
@@ -167,7 +167,7 @@ const en: Content = {
     scrollHint: 'Swipe',
   },
   presence: {
-    eyebrow: 'What I actually do',
+    eyebrow: '02 — What I actually do',
     items: [
       { label: 'On-Device AI', detail: 'LLM inference, NPU/GPU acceleration' },
       { label: 'Android Systems', detail: 'Kotlin, Accessibility, Shizuku' },
@@ -176,7 +176,7 @@ const en: Content = {
     ],
   },
   about: {
-    eyebrow: '01 — About',
+    eyebrow: '03 — About',
     heading: 'Self-taught systems builder working from constraints most people treat as blockers.',
     paragraphs: [
       'I am a self-taught systems builder based in Dhaka, Bangladesh. My work sits at the intersection of on-device AI, Android systems, and ARM64 Linux — problems I pursue because the tools I needed did not exist yet on the hardware I had.',
@@ -191,7 +191,7 @@ const en: Content = {
     ],
   },
   work: {
-    eyebrow: '02 — Featured Work',
+    eyebrow: '04 — Featured Work',
     heading: 'The strongest work — not every repository.',
     evidenceLabel: 'Evidence: ',
     liveLabel: 'Live ↗',
@@ -252,7 +252,7 @@ const en: Content = {
     ],
     nowBuilding: {
       eyebrow: 'Now building — P0 release track',
-      name: 'Songjog (সংযোগ)',
+      name: 'Songjog',
       description:
         'Bengali-first business and institution operations app. Owner Edition: fast daily entry, local SQLite records, auditable corrections instead of destructive deletes.',
       testsNote: '94 tests green on CI · export/diagnostics device-validated on the Redmi Turbo 4 Pro',
@@ -261,7 +261,7 @@ const en: Content = {
     },
   },
   research: {
-    eyebrow: '03 — Research & Experiments',
+    eyebrow: '05 — Research & Experiments',
     heading: 'Honest about what is proven vs. experimental.',
     entries: [
       {
@@ -295,7 +295,7 @@ const en: Content = {
     ],
   },
   stack: {
-    eyebrow: '04 — Technical Focus',
+    eyebrow: '06 — Technical Focus',
     heading: 'Technologies I actually work with.',
     domains: [
       { name: 'On-Device AI', items: ['llama.cpp', 'GGUF', 'KV-cache', 'CPU/GPU/NPU routing'] },
@@ -307,7 +307,7 @@ const en: Content = {
     ],
   },
   openSource: {
-    eyebrow: '05 — Open Source',
+    eyebrow: '07 — Open Source',
     heading: 'Selected repositories.',
     liveLabel: 'Live ↗',
     codeLabel: 'Code ↗',
@@ -327,7 +327,7 @@ const en: Content = {
     ],
   },
   experience: {
-    eyebrow: '06 — Experience',
+    eyebrow: '08 — Experience',
     heading: '8+ years across operations, engineering, and administration.',
     entries: [
       {
@@ -382,7 +382,7 @@ const en: Content = {
     ],
   },
   contact: {
-    eyebrow: '07 — Contact',
+    eyebrow: '09 — Contact',
     headingA: 'Open to freelance,',
     headingB: 'remote, and collaboration.',
     sub: 'On-device AI, Android systems, ARM64 tooling, or local-first products — happy to talk.',
@@ -399,8 +399,8 @@ const en: Content = {
     { scene: 5, label: 'Stack' },
     { scene: 8, label: 'Contact' },
   ],
-  header: { homeLabel: 'Back to top', githubLabel: 'GitHub', langLabel: 'বাং' },
-  ui: { carouselPrev: 'Previous', carouselNext: 'Next' },
+  header: { homeLabel: 'Back to top', githubLabel: 'GitHub', langLabel: 'Bangla', langAria: 'Switch to Bangla', githubAria: 'GitHub profile' },
+  ui: { carouselPrev: 'Previous', carouselNext: 'Next', pageLabels: ['Home', 'Presence', 'About', 'Featured work', 'Research', 'Technical focus', 'Open source', 'Experience', 'Contact'], repoWord: 'repository' },
   footer: {
     built: 'Built from a phone.',
     claims: 'Every claim backed by CI or real-device evidence.',
@@ -437,7 +437,7 @@ const bn: Content = {
     scrollHint: 'সোয়াইপ',
   },
   presence: {
-    eyebrow: 'আমি আসলে যা করি',
+    eyebrow: '০২ — আমি আসলে যা করি',
     items: [
       { label: 'অন-ডিভাইস AI', detail: 'LLM ইনফারেন্স, NPU/GPU অ্যাকসেলারেশন' },
       { label: 'অ্যান্ড্রয়েড সিস্টেমস', detail: 'Kotlin, Accessibility, Shizuku' },
@@ -446,12 +446,12 @@ const bn: Content = {
     ],
   },
   about: {
-    eyebrow: '০১ — পরিচিতি',
+    eyebrow: '০৩ — পরিচিতি',
     heading: 'স্ব-শিক্ষিত সিস্টেম নির্মাতা — সীমাবদ্ধতাকে বাধা নয়, ভিত্তি ধরে কাজ করি।',
     paragraphs: [
       'আমি ঢাকা, বাংলাদেশের একজন স্ব-শিক্ষিত সিস্টেম নির্মাতা। আমার কাজের কেন্দ্রে আছে অন-ডিভাইস AI, অ্যান্ড্রয়েড সিস্টেম ও ARM64 লিনাক্স — এই সমস্যাগুলোর পেছনে লেগে আছি কারণ আমার হাতে থাকা হার্ডওয়্যারে প্রয়োজনীয় টুলগুলো তখন ছিলই না।',
       'একটি নির্ধারক সীমাবদ্ধতা: প্রচলিত PC নয় — মূলত একটি অ্যান্ড্রয়েড ফোনে Termux ও PRoot Debian চালিয়ে আমি সফটওয়্যার তৈরি, বিল্ড ও যাচাই করি। এটাই গড়ে দিয়েছে আমার টুলিং, CI আর্কিটেকচার, আর দাবি যাচাইয়ের পদ্ধতি।',
-      'আমার শেখার দর্শন: living till learning, dead upon stop learning. শিখি বাস্তব সমস্যার মধ্য দিয়ে — হাইপোথিসিস, পরীক্ষা, পর্যবেক্ষণ, প্রাতিষ্ঠানিক তত্ত্ব, তুলনা, পুনরাবৃত্তি। মেকানিজম-ফার্স্ট, প্রমাণ-ভিত্তিক।',
+      'আমার শেখার দর্শন: যতদিন শিখি ততদিন বাঁচি, শেখা থামলেই মৃত্যু। শিখি বাস্তব সমস্যার মধ্য দিয়ে — হাইপোথিসিস, পরীক্ষা, পর্যবেক্ষণ, প্রাতিষ্ঠানিক তত্ত্ব, তুলনা, পুনরাবৃত্তি। মেকানিজম-ফার্স্ট, প্রমাণ-ভিত্তিক।',
     ],
     facts: [
       { label: 'অবস্থান', value: 'ঢাকা, বাংলাদেশ (GMT+6)' },
@@ -461,7 +461,7 @@ const bn: Content = {
     ],
   },
   work: {
-    eyebrow: '০২ — নির্বাচিত কাজ',
+    eyebrow: '০৪ — নির্বাচিত কাজ',
     heading: 'সব রিপোজিটরি নয় — সবচেয়ে শক্তিশালী কাজ।',
     evidenceLabel: 'প্রমাণ: ',
     liveLabel: 'লাইভ ↗',
@@ -470,7 +470,7 @@ const bn: Content = {
       {
         name: 'LAI',
         tagline: 'বাংলা-ফার্স্ট লোকাল AI + সম্মতি-চালিত অটোমেশন',
-        year: '2024–26',
+        year: '২০২৪–২৬',
         description:
           'প্রাইভেট অন-ডিভাইস LLM ইনফারেন্স ও Accessibility-নিয়ন্ত্রিত অটোমেশনের Android রানটাইম। CPU ইনফারেন্স ডিভাইস-যাচাইকৃত; GPU/NPU যোগ্যতা-পরীক্ষাধীন।',
         evidence:
@@ -483,12 +483,12 @@ const bn: Content = {
       {
         name: 'GGEN',
         tagline: 'Android-ফার্স্ট ক্রিয়েটিভ ও ডকুমেন্ট স্টুডিও',
-        year: '2024–26',
+        year: '২০২৪–২৬',
         description:
           'পেশাদার ভেক্টর, রাস্টার, ডকুমেন্ট ও PDF কাজের Flutter/Dart ভিত্তি। SHA-256 স্টেট ইন্টেগ্রিটিসহ পিওর-Dart কোরের ডকুমেন্টেশন-ফার্স্ট আর্কিটেকচার।',
         evidence:
           '143টি পিওর-Dart ইউনিট টেস্ট, 353টি উইজেট/কন্ট্রোলার টেস্ট। বারবার বাস্তব ডিভাইসে যাচাইকৃত।',
-        topics: ['Flutter', 'Dart', 'Document Generation', 'Vector Graphics'],
+        topics: ['Flutter', 'Dart', 'ডকুমেন্ট জেনারেশন', 'ভেক্টর গ্রাফিক্স'],
         repo: 'https://github.com/soobujmiah/ggen',
         websiteUrl: null,
         accent: '#4ade80',
@@ -496,12 +496,12 @@ const bn: Content = {
       {
         name: 'ADT',
         tagline: 'নেটিভ ARM64 অ্যান্ড্রয়েড ডেভেলপমেন্ট টুলচেইন',
-        year: '2023–26',
+        year: '২০২৩–২৬',
         description:
-          'Linux ARM64/glibc-এর জন্য AOSP সোর্স থেকে Android SDK build-tools ও platform-tools তৈরি করে। SHA-256-যাচাইকৃত অফলাইন রিলিজ আর্টিফ্যাক্ট।',
+          'লিনাক্স ARM64/glibc-এর জন্য AOSP সোর্স থেকে Android SDK build-tools ও platform-tools তৈরি করে। SHA-256-যাচাইকৃত অফলাইন রিলিজ আর্টিফ্যাক্ট।',
         evidence:
-          'Snapdragon 8s Gen 4-এ সম্পূর্ণ ARM64 নেটিভ APK পাইপলাইন end-to-end যাচাইকৃত: সোর্স → APK → সাইন → ইনস্টল → JNI লোড → রান।',
-        topics: ['AOSP', 'ARM64', 'Build Tools', 'Cross-compilation'],
+          'Snapdragon 8s Gen 4-এ সম্পূর্ণ ARM64 নেটিভ APK পাইপলাইন শুরু থেকে শেষ পর্যন্ত যাচাইকৃত: সোর্স → APK → সাইন → ইনস্টল → JNI লোড → রান।',
+        topics: ['AOSP', 'ARM64', 'বিল্ড টুলস', 'ক্রস-কম্পাইলেশন'],
         repo: 'https://github.com/soobujmiah/adt',
         websiteUrl: null,
         accent: '#10b981',
@@ -509,7 +509,7 @@ const bn: Content = {
       {
         name: 'Ternux',
         tagline: 'রুট ছাড়াই Android-এ Debian/Xfce লিনাক্স ডেস্কটপ',
-        year: '2023–26',
+        year: '২০২৩–২৬',
         description:
           'এক কমান্ডে আসল Debian ARM64 ইউজারস্পেস, Xfce4 ডেস্কটপ, Termux:X11 ডিসপ্লে, PulseAudio ব্রিজ ও Zink/Turnip GPU রুট — রুট ছাড়াই।',
         evidence:
@@ -524,14 +524,14 @@ const bn: Content = {
       eyebrow: 'এখন যা বানাচ্ছি — P0 রিলিজ ট্র্যাক',
       name: 'Songjog (সংযোগ)',
       description:
-        'বাংলা-ফার্স্ট ব্যবসা ও প্রতিষ্ঠান পরিচালনার অ্যাপ। Owner Edition: দ্রুত দৈনিক এন্ট্রি, লোকাল SQLite রেকর্ড, ধ্বংসাত্মক ডিলিটের বদলে অডিটযোগ্য সংশোধন।',
+        'বাংলা-ফার্স্ট ব্যবসা ও প্রতিষ্ঠান পরিচালনার অ্যাপ। ওনার এডিশন: দ্রুত দৈনিক এন্ট্রি, লোকাল SQLite রেকর্ড, ধ্বংসাত্মক ডিলিটের বদলে অডিটযোগ্য সংশোধন।',
       testsNote: 'CI-তে 94টি টেস্ট সবুজ · Redmi Turbo 4 Pro-তে এক্সপোর্ট/ডায়াগনস্টিক ডিভাইস-যাচাইকৃত',
       cta: 'বিল্ড অনুসরণ করুন ↗',
       url: 'https://github.com/soobujmiah/songjog',
     },
   },
   research: {
-    eyebrow: '০৩ — গবেষণা ও পরীক্ষা',
+    eyebrow: '০৫ — গবেষণা ও পরীক্ষা',
     heading: 'কোনটা প্রমাণিত, কোনটা পরীক্ষামূলক — সৎভাবে বলা।',
     entries: [
       {
@@ -565,7 +565,7 @@ const bn: Content = {
     ],
   },
   stack: {
-    eyebrow: '০৪ — প্রযুক্তিগত ফোকাস',
+    eyebrow: '০৬ — প্রযুক্তিগত ফোকাস',
     heading: 'যেসব প্রযুক্তি নিয়ে আমি আসলেই কাজ করি।',
     domains: [
       { name: 'অন-ডিভাইস AI', items: ['llama.cpp', 'GGUF', 'KV-cache', 'CPU/GPU/NPU রাউটিং'] },
@@ -573,11 +573,11 @@ const bn: Content = {
       { name: 'লিনাক্স / ARM64', items: ['AOSP বিল্ড', 'Clang/CMake/Ninja', 'Termux + PRoot'] },
       { name: 'GPU / গ্রাফিক্স', items: ['Vulkan', 'Mesa Turnip', 'Zink', 'Adreno KGSL'] },
       { name: 'মোবাইল ও ওয়েব', items: ['Flutter', 'Dart', 'TypeScript', 'Python'] },
-      { name: 'Eng Ops', items: ['GitHub Actions', 'সাইনড রিলিজ', 'ডিভাইস যাচাইকরণ'] },
+      { name: 'প্রকৌশল পরিচালনা', items: ['GitHub Actions', 'সাইনড রিলিজ', 'ডিভাইস যাচাইকরণ'] },
     ],
   },
   openSource: {
-    eyebrow: '০৫ — ওপেন সোর্স',
+    eyebrow: '০৭ — ওপেন সোর্স',
     heading: 'নির্বাচিত রিপোজিটরি।',
     liveLabel: 'লাইভ ↗',
     codeLabel: 'কোড ↗',
@@ -597,8 +597,8 @@ const bn: Content = {
     ],
   },
   experience: {
-    eyebrow: '০৬ — অভিজ্ঞতা',
-    heading: 'অপারেশন, ইঞ্জিনিয়ারিং ও প্রশাসনে 8+ বছর।',
+    eyebrow: '০৮ — অভিজ্ঞতা',
+    heading: 'অপারেশন, ইঞ্জিনিয়ারিং ও প্রশাসনে ৮+ বছর।',
     entries: [
       {
         period: 'মার্চ ২০২৫ – বর্তমান',
@@ -652,7 +652,7 @@ const bn: Content = {
     ],
   },
   contact: {
-    eyebrow: '০৭ — যোগাযোগ',
+    eyebrow: '০৯ — যোগাযোগ',
     headingA: 'ফ্রিল্যান্স,',
     headingB: 'রিমোট ও কোলাবরেশনে উন্মুক্ত।',
     sub: 'অন-ডিভাইস AI, অ্যান্ড্রয়েড সিস্টেম, ARM64 টুলিং বা লোকাল-ফার্স্ট প্রোডাক্ট — কথা বলতে আগ্রহী।',
@@ -669,8 +669,8 @@ const bn: Content = {
     { scene: 5, label: 'স্ট্যাক' },
     { scene: 8, label: 'যোগাযোগ' },
   ],
-  header: { homeLabel: 'উপরে ফিরুন', githubLabel: 'GitHub', langLabel: 'EN' },
-  ui: { carouselPrev: 'আগের', carouselNext: 'পরের' },
+  header: { homeLabel: 'উপরে ফিরুন', githubLabel: 'GitHub', langLabel: 'ইংরেজি', langAria: 'ইংরেজিতে বদলান', githubAria: 'GitHub প্রোফাইল' },
+  ui: { carouselPrev: 'আগের', carouselNext: 'পরের', pageLabels: ['হোম', 'উপস্থিতি', 'পরিচিতি', 'নির্বাচিত কাজ', 'গবেষণা', 'প্রযুক্তিগত ফোকাস', 'ওপেন সোর্স', 'অভিজ্ঞতা', 'যোগাযোগ'], repoWord: 'রিপোজিটরি' },
   footer: {
     built: 'ফোন থেকে তৈরি।',
     claims: 'প্রতিটি দাবি CI বা বাস্তব-ডিভাইস প্রমাণে সমর্থিত।',
