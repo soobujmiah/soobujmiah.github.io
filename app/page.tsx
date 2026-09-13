@@ -70,12 +70,11 @@ export default function Page() {
 
           {/* ── fixed scene layers ── */}
           <div className="scenes-stack">
-            {SCENES.map(({ id, Component, weight }, i) => (
+            {SCENES.map(({ id, Component }, i) => (
               <PinnedSection
                 key={id}
                 index={i}
                 total={TOTAL}
-                weight={weight}
                 weights={WEIGHTS}
                 progress={scrollYProgress}
                 reducedMotion={reducedMotion}
