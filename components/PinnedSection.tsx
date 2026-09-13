@@ -47,7 +47,12 @@ export function PinnedSection({
   const isLast = index === total - 1;
 
   /* ── enter: slide up from below (hero stays put) ── */
-  const rawTranslateY = useTransform(progress, [offset, offset + enterSpan], [100, 0], { clamp: true });
+  /* Phase step gives every scene an evenly-spaced entrance slot within [0,1],
+     so no scene waits past its turn — the spacer height (TOTAL*100vh) matches.
+     Weight-based recede (below) keeps content-aware pacing for hold duration. */
+  const phaseStep = (1 - enterSpan) / (total - 1);
+  const enterStart = index === 0 ? 0 : index * phaseStep;
+  const rawTranslateY = useTransform(progress, [enterStart, Math.min(enterStart + enterSpan, 1)], [100, 0], { clamp: true });
   const translateY = index === 0 ? 0 : rawTranslateY;
 
   /* ── recede: fade/blur as next section covers (last section locks) ── */
