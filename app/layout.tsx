@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, JetBrains_Mono, Noto_Sans_Bengali } from 'next/font/google';
+import { Inter, JetBrains_Mono, Noto_Sans_Bengali, Space_Grotesk } from 'next/font/google';
 import { BRAND } from './design-tokens';
 import './globals.css';
 
@@ -26,6 +26,16 @@ const bengali = Noto_Sans_Bengali({
   variable: '--font-bengali',
   display: 'swap',
   weight: ['400', '500', '600', '700'],
+});
+
+/* Display face for the identity mark. Latin-only on purpose: Bengali
+   codepoints are absent from this subset, so the name falls through to
+   `--font-bengali` and both scripts get a deliberate display treatment
+   instead of a Latin default stretched over Bengali. */
+const display = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
 });
 
 const TITLE = 'Sobuj Miah — Software Developer & On-Device AI Systems Builder';
@@ -107,8 +117,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
+        {/* The identity mark's reveal is scripted. Without JS the glyphs
+            would sit at their pre-reveal opacity, so the name is pinned
+            readable rather than left invisible. */}
+        <noscript>
+          <style>{`.sig-ink{opacity:1 !important;transform:none !important}`}</style>
+        </noscript>
       </head>
-      <body className={`${inter.variable} ${jetbrains.variable} ${bengali.variable} noise`}>
+      <body className={`${inter.variable} ${jetbrains.variable} ${bengali.variable} ${display.variable} noise`}>
         {children}
       </body>
     </html>

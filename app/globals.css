@@ -83,7 +83,12 @@ a, button {
   background: var(--accent);
   border-radius: 50%;
   pointer-events: none;
-  mix-blend-mode: difference;
+  /* No blending here, deliberately. `difference` promoted the whole page
+     into a blend group, so every cursor move re-composited the backdrop —
+     a real flicker source over a full-screen SVG — and it inverted the dot
+     to magenta over the pale name, which is off-brand. check-design bans
+     blend modes in this file outright. */
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.35);
   transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
   transform: translate(-50%, -50%);
 }
@@ -139,10 +144,19 @@ a, button {
 }
 
 /* ── world map — the environment behind the identity ──
-   Cartographic contours only. There is no graticule, no tiling and
-   no box pattern here: the old 60px square grid was deleted at the
-   source, not hidden. Contrast stays deliberately far below the
-   name's, so the map can never compete with it. */
+   Cartographic contours only. No graticule, no tiling, no box pattern;
+   the old 60px square grid was deleted at the source, not hidden.
+
+   STABILITY CONTRACT — the reason the background stops flickering.
+   Nothing here animates geometry, and nothing animates the land at
+   all. The previous version scaled the land group while
+   `vector-effect: non-scaling-stroke` was set, scaled stroked hub
+   circles, and animated `stroke-dashoffset` on the arcs. Each of those
+   forces the renderer to re-tessellate a 29 KB vector path every
+   frame, which is exactly what shimmered. The only animation left is
+   the OPACITY of one small ring, which cannot re-tessellate anything.
+   Anything added here must obey the same rule; `check-design` enforces
+   it by inspecting every keyframe the map references. */
 .worldmap {
   position: absolute;
   inset: 0;
@@ -170,16 +184,6 @@ a, button {
   display: block;
 }
 
-.worldmap-drift {
-  transform-origin: 50% 46%;
-  animation: mapDrift 150s ease-in-out infinite;
-}
-
-@keyframes mapDrift {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50%      { transform: translate3d(-0.5%, -0.35%, 0) scale(1.03); }
-}
-
 .worldmap-land {
   fill: rgba(16, 185, 129, 0.055);
   stroke: rgba(52, 211, 153, 0.16);
@@ -188,48 +192,58 @@ a, button {
   vector-effect: non-scaling-stroke;
 }
 
-/* network hubs — restrained atmospheric signals */
-.worldmap-hub-core {
-  fill: rgba(74, 222, 128, 0.5);
-  animation: hubPulse 7.5s ease-in-out infinite;
+/* network — static. Signals read as geography, not as a pulse. */
+.worldmap-hub {
+  fill: rgba(74, 222, 128, 0.38);
 }
-
-.worldmap-hub-halo {
-  fill: none;
-  stroke: rgba(34, 197, 94, 0.12);
-  stroke-width: 0.7;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: hubHalo 7.5s ease-in-out infinite;
-}
-
-.worldmap-hub-home .worldmap-hub-core { fill: var(--accent-bright); }
-.worldmap-hub-home .worldmap-hub-halo { stroke: rgba(34, 197, 94, 0.26); }
 
 .worldmap-link {
   fill: none;
-  stroke: rgba(34, 197, 94, 0.09);
-  stroke-width: 0.55;
-  stroke-dasharray: 3 6;
-  animation: linkFlow 34s linear infinite;
+  stroke: rgba(34, 197, 94, 0.1);
+  stroke-width: 0.7;
+  stroke-dasharray: 2 7;
+  vector-effect: non-scaling-stroke;
 }
 
-@keyframes hubPulse {
-  0%, 100% { opacity: 0.35; }
-  50%      { opacity: 0.8; }
+/* ── the origin: Bangladesh, then the pin ──
+   The country is brighter than any continent and carries a real
+   national outline; the pin is projected from Dhaka's coordinates by
+   app/geo.ts, never placed by hand. */
+.worldmap-bd {
+  fill: rgba(74, 222, 128, 0.2);
+  stroke: rgba(74, 222, 128, 0.6);
+  stroke-width: 0.9;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
 
-@keyframes hubHalo {
-  0%, 100% { opacity: 0.1; transform: scale(0.85); }
-  50%      { opacity: 0.28; transform: scale(1.15); }
+.worldmap-origin-halo {
+  fill: none;
+  stroke: rgba(34, 197, 94, 0.5);
+  stroke-width: 0.8;
+  vector-effect: non-scaling-stroke;
+  /* opacity ONLY — the one animation in the environment */
+  animation: originPulse 6.5s ease-in-out infinite;
 }
 
-@keyframes linkFlow {
-  to { stroke-dashoffset: -72; }
+.worldmap-origin-ring {
+  fill: none;
+  stroke: rgba(74, 222, 128, 0.8);
+  stroke-width: 0.9;
+  vector-effect: non-scaling-stroke;
+}
+
+.worldmap-origin-core {
+  fill: var(--accent-bright);
+}
+
+@keyframes originPulse {
+  0%, 100% { opacity: 0.14; }
+  50%      { opacity: 0.44; }
 }
 
 /* suspension: the map is decoration, so it stops when unseen */
-.worldmap[data-paused='true'] * { animation-play-state: paused; }
+.worldmap[data-paused='true'] .worldmap-origin-halo { animation-play-state: paused; }
 
 .pager-vignette {
   position: absolute;
@@ -519,16 +533,23 @@ a, button {
   min-width: 0;
 }
 
-/* ── signature name — digital reconstruction ──
-   The letters ARE the living object. Diffusion is applied per glyph
-   through CSS custom properties written by the pointer loop
-   (`--sx`, `--sy`, `--d`), so a disturbed letter fades, drifts and
-   hands over to fragments drawn inside its own box — then settles
-   back. There is no sweeping panel, no white flash and no
-   full-width overlay anywhere behind the name.
-   The real name is always real DOM text on top (z-index 1); the
-   fragment canvas sits underneath (z-index 0) and can never obscure
-   it. Interaction animates transform/opacity/colour only. */
+/* ── signature name — every glyph is its own living entity ──
+   Each grapheme is a separate object with its own state machine
+   (STABLE → SIGNAL → DIFFUSING → FRAGMENTED → RECONSTRUCTING), its own
+   ink from the brand green ramp, and its own geometry. Neighbours run
+   on different clocks, so the word reads as alive rather than as one
+   synchronised animation.
+
+   The loop writes CSS custom properties directly on the glyph
+   (transform/opacity variables only — compositor-friendly), so there is
+   never a React re-render per frame. `--ink` is written ONLY on a state
+   change, and the CSS transition does the colour blending, which keeps
+   colour work off the animation path.
+
+   There is still no sweep, no panel, no full-width overlay and no light
+   behind the name: the energy comes from the letters. The real name is
+   real DOM text on top (z-index 1); the fragment canvas sits underneath
+   (z-index 0) and can never obscure it. */
 .sig-name {
   position: relative;
   display: inline-flex;
@@ -553,66 +574,36 @@ a, button {
 .sig-cell {
   display: inline-block;
   position: relative;
-  opacity: 0;
-  transform: translate3d(0, 0.22em, 0);
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.62s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform, opacity;
-}
-
-.sig-cell.sig-locked {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
-}
-
-/* reduced motion: a calm, fully designed static mark */
-.sig-static .sig-cell {
-  opacity: 1;
-  transform: none;
-  transition: none;
 }
 
 .sig-space {
-  width: 0.28em;
+  width: 0.26em;
 }
 
+/* One element carries one transform. Default opacity is 0 so the
+   server-rendered markup never flashes the finished name before the
+   reveal starts; the loop raises `--go`. */
 .sig-ink {
   display: inline-block;
-  color: var(--fg);
-  transform: translate3d(var(--sx, 0px), var(--sy, 0px), 0) scale(calc(1 + var(--d, 0) * 0.05));
-  /* diffusion: a disturbed glyph dissolves toward its fragments… */
-  opacity: calc(1 - var(--d, 0) * 0.68);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.34s ease, color 0.3s ease,
-    text-shadow 0.3s ease;
+  color: var(--ink, var(--fg));
+  opacity: var(--go, 0);
+  transform: translate3d(var(--tx, 0px), var(--ty, 0.2em), 0) rotate(var(--rot, 0deg)) scale(var(--sc, 1));
+  will-change: transform, opacity;
+  transition: color 0.6s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.45s ease;
 }
 
-/* …and while disturbed, the idle breath steps aside for the pointer */
-.sig-cell.sig-near .sig-ink {
-  animation: none;
-  color: var(--accent-bright);
-  text-shadow: 0 0 15px rgba(74, 222, 128, 0.32);
+/* a disturbed glyph blooms — tight and green, never a generic glow */
+.sig-cell[data-state='FRAGMENTED'] .sig-ink,
+.sig-cell[data-state='DIFFUSING'] .sig-ink {
+  text-shadow: 0 0 12px rgba(74, 222, 128, 0.26);
 }
 
-/* idle: a slow signal travelling letter to letter. Glyph-local,
-   colour/opacity only — deliberately not a sweeping panel. */
-.sig-decoded .sig-ink {
-  animation: sigSignal 9s ease-in-out infinite;
-  animation-delay: calc(var(--i, 0) * 0.42s);
-}
-
-@keyframes sigSignal {
-  0%, 64%, 100% { color: var(--fg); opacity: 1; }
-  74% { color: var(--accent-bright); opacity: 0.88; }
-}
-
-/* page change: one short local decode pulse, never a full replay */
-.sig-cell.sig-pulse .sig-ink {
-  animation: sigPulse 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes sigPulse {
-  0% { color: var(--accent-bright); opacity: 0.5; }
-  60% { color: var(--signal); opacity: 0.92; }
-  100% { color: var(--fg); opacity: 1; }
+/* reduced motion: a calm, fully designed multi-tone mark */
+.sig-static .sig-ink {
+  opacity: 1;
+  transform: none;
+  transition: none;
+  will-change: auto;
 }
 
 /* ── keyboard focus ── */
@@ -659,7 +650,13 @@ body.lang-bn h3 {
   letter-spacing: 0 !important;
 }
 
-body.lang-bn .hero-name { line-height: 1.34; }
+body.lang-bn .hero-name {
+  line-height: 1.34;
+  /* Bangla needs the shoulder weight and none of the Latin tracking:
+     negative tracking breaks Indic shaping. */
+  font-weight: 700;
+  letter-spacing: 0 !important;
+}
 
 body.lang-bn .hero-status { letter-spacing: 0.12em !important; }
 
@@ -669,6 +666,19 @@ body.lang-bn p,
 body.lang-bn li,
 body.lang-bn span {
   overflow-wrap: break-word;
+}
+
+/* ── the identity mark's own typography ──
+   The name is a brand mark, not UI text, so it gets a display face.
+   Space Grotesk is Latin-only by design: Bengali codepoints are not in
+   its subset, so Bangla falls through to the project's Bengali webfont
+   on the next line of the stack. Both scripts therefore get a deliberate
+   display treatment instead of a Latin default stretched over Bengali. */
+.hero-name {
+  font-family: var(--font-display), var(--font-bengali), var(--font-inter), system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.028em;
+  font-feature-settings: 'ss01' 1;
 }
 
 /* ── hero hierarchy ──
@@ -974,15 +984,22 @@ body.lang-bn span {
     scroll-behavior: auto !important;
   }
 
-  /* the environment is static: no drift, no pulsing hubs, no flow */
-  .worldmap-drift, .worldmap-hub-core, .worldmap-hub-halo, .worldmap-link,
-  .hero-status-dot, .sig-ink {
+  /* the environment is static: the origin ring stops too, and holds a
+     calm mid opacity rather than freezing wherever it happened to be */
+  .worldmap-origin-halo,
+  .hero-status-dot {
     animation: none !important;
   }
+  .worldmap-origin-halo { opacity: 0.3; }
 
-  /* the name stays fully legible and interactive-but-still: every
-     diffusion variable is pinned, so no calc() can shift a glyph */
-  .sig-name { --d: 0 !important; --sx: 0px !important; --sy: 0px !important; }
-  .sig-cell { opacity: 1 !important; transform: none !important; transition: none !important; }
-  .sig-ink { transform: none !important; opacity: 1 !important; }
+  /* the name stays fully legible and still. Every per-glyph variable is
+     pinned, so no stray value can shift or dim a letter; each glyph
+     keeps the ink it was given, so the static mark is still multi-tone. */
+  .sig-ink {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    text-shadow: none !important;
+    will-change: auto;
+  }
 }

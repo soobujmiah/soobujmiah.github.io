@@ -33,62 +33,69 @@ below verbatim. Both stay correct — the gate guarantees it.
 
 <!-- design-tokens:start -->
 ```json
-{
-  "brand": {
-    "bg": "#050507",
-    "fg": "#e4e2df",
-    "muted": "rgba(228,226,223,0.45)",
-    "border": "rgba(228,226,223,0.07)",
-    "accent": "#22c55e",
-    "accentBright": "#4ade80",
-    "accentGlow": "rgba(34,197,94,0.18)",
-    "signal": "#10b981",
-    "cardBg": "rgba(6,7,6,0.66)",
-    "chrome": "#060608"
-  },
-  "pageTurn": {
-    "spring": {
-      "stiffness": 140,
-      "damping": 22,
-      "mass": 1
+  {
+    "brand": {
+      "bg": "#050507",
+      "fg": "#e4e2df",
+      "muted": "rgba(228,226,223,0.45)",
+      "border": "rgba(228,226,223,0.07)",
+      "accent": "#22c55e",
+      "accentBright": "#4ade80",
+      "accentGlow": "rgba(34,197,94,0.18)",
+      "signal": "#10b981",
+      "cardBg": "rgba(6,7,6,0.66)",
+      "chrome": "#060608"
     },
-    "yPercent": 6,
-    "rotateX": 3.5,
-    "scale": 0.99,
-    "perspective": 1800,
-    "opacitySeconds": 0.4,
-    "flipLockMs": 1000
-  },
-  "reveal": {
-    "seconds": 0.7,
-    "ease": "cubic-bezier(0.16, 1, 0.3, 1)"
-  },
-  "magnetic": {
-    "followSeconds": 0.12,
-    "releaseSeconds": 0.5,
-    "pressSeconds": 0.1
-  },
-  "canvas": {
-    "maxDpr": 1.5
-  },
-  "name": {
-    "decodeSeconds": 1.5,
-    "lockSeconds": 0.55,
-    "lockStaggerSeconds": 0.065,
-    "pointerRadiusPx": 130,
-    "pointerMaxShiftPx": 5,
-    "fragmentsPerGlyph": 5,
-    "maxFragments": 72,
-    "fragmentLifeTicks": 34,
-    "fragmentCooldownMs": 150
-  },
-  "pullToRefresh": {
-    "armPx": 12,
-    "thresholdPx": 76,
-    "resistance": 2.2,
-    "maxPx": 118
+    "pageTurn": {
+      "spring": {
+        "stiffness": 140,
+        "damping": 22,
+        "mass": 1
+      },
+      "yPercent": 6,
+      "rotateX": 3.5,
+      "scale": 0.99,
+      "perspective": 1800,
+      "opacitySeconds": 0.4,
+      "flipLockMs": 1000
+    },
+    "reveal": {
+      "seconds": 0.7,
+      "ease": "cubic-bezier(0.16, 1, 0.3, 1)"
+    },
+    "magnetic": {
+      "followSeconds": 0.12,
+      "releaseSeconds": 0.5,
+      "pressSeconds": 0.1
+    },
+    "canvas": {
+      "maxDpr": 1.5
+    },
+    "name": {
+      "revealSeconds": 1.9,
+      "lockSeconds": 0.55,
+      "lockStaggerSeconds": 0.09,
+      "signalSeconds": 0.5,
+      "diffuseSeconds": 0.55,
+      "fragmentSeconds": 0.75,
+      "rebuildSeconds": 0.6,
+      "idleGapMinSeconds": 2.8,
+      "idleGapMaxSeconds": 5.4,
+      "pointerRadiusPx": 130,
+      "pointerMaxShiftPx": 6,
+      "fragmentsPerGlyph": 6,
+      "maxFragments": 84,
+      "fragmentLifeTicks": 36,
+      "fragmentCooldownMs": 140,
+      "pulseGlyphs": 3
+    },
+    "pullToRefresh": {
+      "armPx": 12,
+      "thresholdPx": 76,
+      "resistance": 2.2,
+      "maxPx": 118
+    }
   }
-}
 ```
 <!-- design-tokens:end -->
 

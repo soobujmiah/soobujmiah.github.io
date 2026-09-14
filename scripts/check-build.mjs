@@ -185,9 +185,30 @@ if (homeHtml) {
   if (!homeHtml.includes('worldmap-land')) {
     fail('out/index.html has no world map — the hero environment must be server-rendered');
   } else {
-    const hubs = (homeHtml.match(/worldmap-hub-core/g) || []).length;
+    /* Hub markers. Both class shapes are accepted so a legitimate
+       rename cannot produce a false failure — the invariant is "the map
+       ships visible network signals", not a particular class name. */
+    const hubs = (homeHtml.match(/worldmap-hub(?:-core)?(?![\w-])/g) || []).length;
     if (hubs < 6) fail(`out/index.html ships only ${hubs} map signals (expected >= 6)`);
     else ok(`hero world map is server-rendered (contours + ${hubs} signals), no grid, no light layer`);
+
+    /* The origin must be present AND marked: Bangladesh is the point of
+       the map, so a refactor that silently drops it has to fail here. */
+    if (!homeHtml.includes('worldmap-bd')) {
+      fail('out/index.html has no Bangladesh outline — the map must show the origin country');
+    }
+    if (!homeHtml.includes('worldmap-origin-core')) {
+      fail('out/index.html has no origin pin over Bangladesh');
+    } else {
+      ok('Bangladesh origin is server-rendered (outline + projected pin)');
+    }
+
+    /* The identity must stay REAL TEXT. If a future change swaps the
+       glyphs for a canvas or an image, the name becomes unselectable and
+       invisible to assistive tech — that is the end of the site's premise. */
+    const ink = (homeHtml.match(/class="sig-ink"/g) || []).length;
+    if (ink < 6) fail(`out/index.html ships only ${ink} real glyph text nodes (expected >= 6)`);
+    else ok(`identity mark is real DOM text (${ink} glyphs), not a canvas or image`);
   }
 }
 

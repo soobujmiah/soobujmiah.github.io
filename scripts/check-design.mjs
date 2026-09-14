@@ -217,6 +217,108 @@ try {
   if (!existsSync(join(ROOT, 'tools', 'make-worldmap.py'))) {
     fail('tools/make-worldmap.py is missing — the contour data would no longer be reproducible');
   }
+
+  const ruleRe2 = /([^{}]+)\{([^}]*)\}/g;
+
+  /* ── 5. background flicker ──
+     The reported flicker traced to geometry that re-rasterised every
+     frame: the land group scaled while `vector-effect: non-scaling-stroke`
+     was set, stroked hub circles were scaled, and the link arcs animated
+     `stroke-dashoffset`. A 29 KB vector path re-tessellated per frame is
+     the shimmer. So: the map's geometry is painted once and never
+     animated. Only the origin ring may move, and only its OPACITY. */
+  const mapGeoSelectors = ['worldmap-land', 'worldmap-hub', 'worldmap-link', 'worldmap-bd'];
+  ruleRe2.lastIndex = 0;
+  let mapRule;
+  while ((mapRule = ruleRe2.exec(css))) {
+    const sel = mapRule[1].trim().split('\n').pop().trim();
+    const body = mapRule[2];
+    if (!/\.worldmap/.test(sel)) continue;
+    const isOriginRing = /\.worldmap-origin-halo/.test(sel);
+    if (!isOriginRing && /(^|[;\s])animation\s*:/.test(body)) {
+      fail(`app/globals.css animates map geometry (${sel}) — that forces a vector re-rasterise every frame and is the flicker`);
+    }
+    if (!isOriginRing && /(^|[;\s])transition\s*:/.test(body)) {
+      fail(`app/globals.css transitions map geometry (${sel}) — the map must be painted once, not moved`);
+    }
+    if (mapGeoSelectors.some((n) => sel.includes(n)) && /(^|[;\s])transform\s*:/.test(body)) {
+      fail(`app/globals.css transforms map geometry (${sel}) — scaling a stroked path is what shimmered`);
+    }
+  }
+  /* the one surviving map animation must be opacity-only */
+  const originKeyframes = css.match(/@keyframes\s+originPulse\s*\{([\s\S]*?)\n\}/);
+  if (originKeyframes) {
+    const kb = originKeyframes[1];
+    for (const prop of ['transform', 'stroke', 'stroke-width', 'd:', 'r:', 'filter']) {
+      if (kb.includes(prop)) {
+        fail(`the origin ring's keyframes animate "${prop}" — only opacity can run without a repaint`);
+      }
+    }
+  }
+
+  /* blend modes composite the whole page on every pointer move and also
+     invert to magenta over the pale name. Both were reported defects. */
+  if (/mix-blend-mode/.test(css)) {
+    fail('app/globals.css still uses mix-blend-mode — it re-composites the page per frame and is off-brand over the name');
+  }
+
+  /* ── 6. the name animates per glyph, never as one lump ── */
+  const sigComp = tryRead('components/SignatureName.tsx');
+  if (sigComp) {
+    for (const v of ['--tx', '--ty', '--rot', '--sc', '--go']) {
+      if (!sigComp.includes(`'${v}'`) && !sigComp.includes(`"${v}"`)) {
+        fail(`components/SignatureName.tsx never writes ${v} — each glyph must carry its own transform`);
+      }
+    }
+    for (const st of ['SIGNAL', 'DIFFUSING', 'FRAGMENTED', 'RECONSTRUCTING']) {
+      if (!sigComp.includes(`'${st}'`)) {
+        fail(`components/SignatureName.tsx has no ${st} state — the per-glyph state machine is the requirement`);
+      }
+    }
+    if (!/data-state/.test(sigComp)) {
+      fail('components/SignatureName.tsx does not publish per-glyph state — the CSS cannot vary one letter from another');
+    }
+    /* the word itself must not be the animated object */
+    const nameRule = css.match(/\.sig-name\s*\{([^}]*)\}/);
+    if (nameRule && /(^|[;\s])animation\s*:/.test(nameRule[1])) {
+      fail('app/globals.css animates .sig-name as a whole — that is the "one sweep over the whole word" effect');
+    }
+  }
+
+  /* ── 7. the palette stays in the brand's greens ── */
+  const hue = (hex) => {
+    const m = /^#([0-9a-f]{6})$/i.exec(hex);
+    if (!m) return null;
+    const n = parseInt(m[1], 16);
+    const r = (n >> 16) & 255;
+    const g = (n >> 8) & 255;
+    const b = n & 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    if (max === min) return { h: 0, r, g, b };
+    let h;
+    if (max === g) h = 60 * (2 + (b - r) / (max - min));
+    else if (max === r) h = 60 * (((g - b) / (max - min) + 6) % 6);
+    else h = 60 * (4 + (r - g) / (max - min));
+    return { h, r, g, b };
+  };
+  if (sigComp) {
+    const inks = [
+      ...(sigComp.match(/INK_RAMP\s*=\s*\[([^\]]*)\]/)?.[1].match(/#[0-9a-f]{6}/gi) ?? []),
+      ...(sigComp.match(/INK_LIT\s*=\s*'(#[0-9a-f]{6})'/i) ?? []).slice(1),
+    ];
+    if (inks.length < 4) {
+      fail('components/SignatureName.tsx no longer defines a spread of inks — every letter needs its own colour');
+    }
+    for (const hex of inks) {
+      const c = hue(hex);
+      if (!c) continue;
+      /* green family: hue 75..190 (lime → teal), green dominant */
+      if (c.h < 75 || c.h > 190 || c.g < c.r || c.g < c.b) {
+        fail(`components/SignatureName.tsx uses an off-family ink ${hex} (hue ${Math.round(c.h)}) — the identity is green, not a rainbow`);
+      }
+    }
+  }
 } finally {
   rmSync(tmp, { recursive: true, force: true });
 }
