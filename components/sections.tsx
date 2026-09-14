@@ -3,7 +3,8 @@
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { Magnetic, Reveal, SnapCarousel, useNav } from './ui';
-import { MatrixName } from './MatrixName';
+import { SignatureName } from './SignatureName';
+import { sectionHref } from '@/app/sections';
 import { useLang, localizeDigits } from '@/app/language';
 import type { Project, Repo } from '@/app/content';
 
@@ -34,10 +35,9 @@ function PageNumeral({ index }: { index: number }) {
 
 /* ── 01 · HERO ───────────────────────────────────────────────── */
 
-export function HeroScene({ reducedMotion }: { reducedMotion: boolean }) {
-  const { t } = useLang();
-  const { goToScene } = useNav();
-  const chips = t.profile.tagline.split('·').map((c) => c.trim()).filter(Boolean);
+export function HeroScene({ reducedMotion, pageIndex = 0 }: { reducedMotion: boolean; pageIndex?: number }) {
+  const { t, lang } = useLang();
+  const { goToScene, openNav } = useNav();
 
   return (
     <div className="page-fill">
@@ -46,49 +46,42 @@ export function HeroScene({ reducedMotion }: { reducedMotion: boolean }) {
       <div className="orb orb-2" aria-hidden />
 
       <div className="page-content flex flex-col items-center text-center">
+        {/* 1 · where the work happens — a status line, not a second job title */}
         <motion.p
-          className="font-mono text-[10px] uppercase tracking-[0.4em] mb-5"
-          style={{ color: '#22c55e' }}
+          className="hero-status font-mono text-[10px] uppercase tracking-[0.4em] mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.7 }}
         >
-          {t.profile.tagline}
+          <span className="hero-status-dot" aria-hidden />
+          {t.profile.location} · {t.hero.availability}
         </motion.p>
 
-        <h1
-          className="text-[clamp(2.85rem,9vw,6.5rem)] font-semibold leading-[0.95] tracking-tight mb-5"
-          style={{ color: '#e4e2df' }}
-        >
-          <MatrixName reducedMotion={reducedMotion} />
+        {/* 2 · who I am — the identity mark dominates */}
+        <h1 className="hero-name text-[clamp(2.85rem,9vw,6.5rem)] font-semibold leading-[1.02] tracking-tight">
+          <SignatureName text={t.profile.nameFull} reducedMotion={reducedMotion} pulseKey={pageIndex} />
         </h1>
 
+        {/* 3 · what I do — exactly one professional identity treatment */}
         <motion.p
-          className="mx-auto max-w-md text-sm leading-relaxed"
-          style={{ color: 'rgba(228,226,223,0.65)' }}
+          className="hero-role mt-5 text-[13px] font-medium sm:text-sm"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.6, duration: 0.7 }}
+        >
+          {t.profile.title}
+        </motion.p>
+
+        {/* 4 · what I build, and why it is credible */}
+        <motion.p
+          className="mx-auto mt-4 max-w-lg text-sm leading-relaxed"
+          style={{ color: 'rgba(228,226,223,0.62)' }}
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.7, duration: 0.7 }}
+          transition={{ delay: 1.75, duration: 0.7 }}
         >
           {t.hero.intro}
         </motion.p>
-
-        <motion.div
-          className="mt-5 flex flex-wrap items-center justify-center gap-2"
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.85, duration: 0.7 }}
-        >
-          {chips.map((c) => (
-            <span
-              key={c}
-              className="rounded-full px-3 py-1 font-mono text-[10px] backdrop-blur-md"
-              style={{ border: '1px solid rgba(228,226,223,0.1)', color: 'rgba(228,226,223,0.55)', background: 'rgba(8,10,8,0.5)' }}
-            >
-              {c}
-            </span>
-          ))}
-        </motion.div>
 
         <motion.div
           className="mt-6 flex flex-wrap items-center justify-center gap-3"
@@ -97,7 +90,7 @@ export function HeroScene({ reducedMotion }: { reducedMotion: boolean }) {
           transition={{ delay: 2.0, duration: 0.7 }}
         >
           <Magnetic
-            href="#work"
+            href={sectionHref(3)}
             onClick={(e) => {
               e.preventDefault();
               goToScene(3);
@@ -124,7 +117,10 @@ export function HeroScene({ reducedMotion }: { reducedMotion: boolean }) {
         transition={{ delay: 2.5, duration: 1 }}
         aria-hidden
       >
-        <motion.div
+        <motion.button
+          type="button"
+          onClick={openNav}
+          aria-label={t.ui.navOpen}
           className="flex flex-col items-center gap-2"
           animate={reducedMotion ? {} : { y: [0, 6, 0] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
@@ -133,7 +129,7 @@ export function HeroScene({ reducedMotion }: { reducedMotion: boolean }) {
             {t.hero.scrollHint}
           </span>
           <div className="w-px h-6" style={{ background: 'linear-gradient(to bottom, #22c55e, transparent)' }} />
-        </motion.div>
+        </motion.button>
       </motion.div>
     </div>
   );

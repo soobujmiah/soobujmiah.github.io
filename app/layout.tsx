@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Inter, JetBrains_Mono, Noto_Sans_Bengali } from 'next/font/google';
+import { BRAND } from './design-tokens';
 import './globals.css';
 
+/* Latin UI + mono, loaded through next/font. */
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -14,17 +16,33 @@ const jetbrains = JetBrains_Mono({
   display: 'swap',
 });
 
+/* Bangla gets a real webfont rather than a hoped-for system fallback.
+   The previous build named 'Noto Sans Bengali' in CSS while only
+   Inter/JetBrains were ever loaded, so Bengali text fell through to a
+   Latin-only face on most devices. `--font-bengali` is consumed by
+   `body.lang-bn` in globals.css. */
+const bengali = Noto_Sans_Bengali({
+  subsets: ['bengali'],
+  variable: '--font-bengali',
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
+});
+
+const TITLE = 'Sobuj Miah — Software Developer & On-Device AI Systems Builder';
+const DESCRIPTION =
+  'On-device AI, Android, Linux, ARM64, GPU/NPU acceleration. Self-taught systems builder working from an Android phone — every claim backed by CI or real-device evidence.';
+const OG_IMAGE = { url: '/og.png', width: 1200, height: 630, alt: 'Sobuj Miah — on-device AI systems builder' };
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://soobujmiah.github.io'),
-  title: 'Sobuj Miah — Software Developer & On-Device AI Systems Builder',
-  description:
-    'On-device AI, Android, Linux, ARM64, GPU/NPU acceleration. Self-taught systems builder working from an Android phone — every claim backed by CI or real-device evidence.',
+  title: TITLE,
+  description: DESCRIPTION,
   keywords: [
     'Sobuj Miah', 'on-device AI', 'Android', 'ARM64', 'local LLM',
     'Vulkan', 'NPU', 'Hexagon', 'llama.cpp', 'Flutter', 'Kotlin', 'Termux',
     'সবুজ মিয়া',
   ],
-  authors: [{ name: 'Sobuj Miah' }],
+  authors: [{ name: 'Sobuj Miah', url: 'https://soobujmiah.github.io' }],
   creator: 'Sobuj Miah',
   openGraph: {
     type: 'website',
@@ -32,21 +50,23 @@ export const metadata: Metadata = {
     alternateLocale: 'bn_BD',
     url: 'https://soobujmiah.github.io',
     siteName: 'Sobuj Miah',
-    title: 'Sobuj Miah — Software Developer & On-Device AI Systems Builder',
-    description:
-      'On-device AI, Android, Linux, ARM64, GPU/NPU acceleration. Self-taught systems builder.',
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sobuj Miah — Software Developer & On-Device AI Systems Builder',
-    description: 'On-device AI, Android, Linux, ARM64, GPU/NPU acceleration.',
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [OG_IMAGE.url],
   },
   robots: { index: true, follow: true },
   alternates: { canonical: 'https://soobujmiah.github.io' },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#060608',
+  /* Was '#060608', which matched neither the --bg token nor the page. */
+  themeColor: BRAND.bg,
   colorScheme: 'dark',
 };
 
@@ -88,7 +108,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
       </head>
-      <body className={`${inter.variable} ${jetbrains.variable} noise`}>
+      <body className={`${inter.variable} ${jetbrains.variable} ${bengali.variable} noise`}>
         {children}
       </body>
     </html>

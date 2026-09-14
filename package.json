@@ -4,15 +4,21 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "check": "node scripts/check-content.mjs",
-    "prebuild": "node scripts/check-content.mjs",
+    "check": "node scripts/check-content.mjs && node scripts/check-design.mjs && node scripts/check-purity-adversarial.mjs && node scripts/check-units.mjs",
+    "prebuild": "npm run check",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check:content": "node scripts/check-content.mjs",
+    "check:design": "node scripts/check-design.mjs",
+    "check:purity": "node scripts/check-purity-adversarial.mjs",
+    "check:build": "node scripts/check-build.mjs",
+    "typecheck": "tsc --noEmit",
+    "check:units": "node scripts/check-units.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.11.9",
-    "next": "14.2.15",
+    "next": "14.2.35",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -21,13 +27,14 @@
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.47",
+    "postcss": "^8.5.23",
     "tailwindcss": "^3.4.13",
     "typescript": "^5.6.3",
     "eslint": "^8.57.1",
-    "eslint-config-next": "14.2.15"
+    "eslint-config-next": "14.2.35"
   },
   "overrides": {
-    "next": "14.2.15"
+    "next": "14.2.35",
+    "postcss": "^8.5.23"
   }
 }

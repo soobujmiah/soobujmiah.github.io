@@ -15,14 +15,29 @@ fully bilingual **English / বাংলা**, green-on-black theme.
 ## Develop
 
 ```bash
-npm install
-npm run dev      # local dev server
-npm run lint     # ESLint (next/core-web-vitals)
-npm run build    # static export to ./out
+npm ci             # reproducible install from the committed lockfile
+npm run dev        # local dev server
+npm run check      # every gate (see below) — also runs automatically on prebuild
+npm run lint       # ESLint (next/core-web-vitals)
+npm run typecheck  # tsc --noEmit
+npm run build      # gates + static export to ./out
+npm run check:build  # validate the exported artifact (needs ./out)
 ```
 
-`npm run build` is the authoritative check — it runs lint, type-check, and the
-static export. The deploy workflow runs the same steps on every push to `main`.
+`npm run build` is authoritative: `prebuild` runs every gate, so a failure
+stops the build before anything is emitted. The deploy workflow runs the same
+sequence on Node 22 with `npm ci`, and finishes by validating the exported
+artifact.
+
+### Gates
+
+| Script | Proves |
+|---|---|
+| `check:content` | en/bn key parity, **two-way language purity**, `selected` ⊆ repos, labels/nav/URL sanity. Self-tests its own predicates every run. |
+| `check:purity` | Adversarial suite — injects `"এটি AI Work Section GitHub"` and `"This is বাংলা বিভাগ"` into copies of the real content and asserts the gate rejects each, with an unmodified control that must pass. |
+| `check:design` | `app/design-tokens.ts` = `DESIGN_SYSTEM.md` = `globals.css :root` = browser `themeColor`. Documentation drift fails the build. |
+| `check:units` | Bengali grapheme segmentation (both the `Intl.Segmenter` path and the fallback), section routing, digit localisation. |
+| `check:build` | From the built `out/`: 9 real routes with server-rendered text, per-route title/canonical/social card, `robots.txt`/`sitemap.xml`/`og.png`, and the JavaScript budget. |
 
 ## Content model
 
@@ -59,13 +74,22 @@ portfolio and future repository websites (same brand, different context).
 
 ### i18n rules (must follow)
 
-1. **Technical identifiers stay Latin in both languages** — Kotlin, llama.cpp,
-   Vulkan, GGUF, repo names, versions, benchmark figures. Bangla semantic
-   translation of domain terms produces wrong-meaning substitutions.
-2. Company/product proper nouns stay Latin (e.g. `Rabeya Education Family`).
-3. Wide `letter-spacing` breaks Indic shaping — `body.lang-bn` collapses all
-   tracking automatically (see `globals.css`).
-4. Every new user-facing string needs both `en` and `bn` in `content.ts`.
+**Two-way purity. Both directions are mandatory and both fail the build.**
+
+1. **The English tree contains zero Bengali codepoints.**
+2. **The Bangla tree contains zero Latin letters** — every heading, tagline,
+   description, button, badge, role, tooltip and accessibility label is
+   Bangla, including technology, company and product names
+   (কোটলিন, গিটহাব, লামা.সিপিপি, স্ন্যাপড্রাগন).
+3. The **only** exception is a small, explicitly enumerated set of verbatim
+   *data*: the e-mail address, real account handles, repository slugs that
+   must match the URL path, URLs and hex accents. The list lives in
+   `IDENTIFIER_PATHS` in `scripts/check-content.mjs`, so how small the
+   exception is can be checked rather than trusted.
+4. Bengali numerals inside Bangla prose; Latin figures inside the English tree.
+5. Wide `letter-spacing` breaks Indic shaping — `body.lang-bn` collapses all
+   tracking and opens up the leading (see `globals.css`).
+6. Every new user-facing string needs both `en` and `bn` in `content.ts`.
 
 ## Claim-verification log
 
@@ -86,26 +110,68 @@ below were last re-verified **2026-09-13** against live repository state:
 
 Re-verify before reusing any figure professionally if significant time has passed.
 
+## Routes
+
+Every section is a real static page. The pager is the presentation; the
+route is the address.
+
+```text
+/              /presence/   /about/      /work/       /research/
+/stack/        /open-source/            /experience/ /contact/
+```
+
+Deep links land straight on their section (the boot splash only runs on `/`),
+the URL follows the visible page as you turn, back/forward move the pager, and
+legacy `#work`-style hashes are rewritten to the real route on load.
+
 ## Project structure
 
 ```text
 app/
-  content.ts     bilingual copy (en/bn trees) + curated structure
-  language.tsx   language provider + hook + digit localization
-  layout.tsx     metadata, JSON-LD, fonts, viewport
-  page.tsx       discrete pager + gestures + paper-turn transition
-  globals.css    tokens, pager, inner scroll, carousels, responsive, a11y
-  icon.svg       favicon
-  not-found.tsx  bilingual 404 → 404.html on export
+  design-tokens.ts   brand + motion tokens — the machine-checked root
+  sections.ts        the one section list driving routes, sitemap, overlay
+  content.ts         bilingual copy (en/bn trees) + curated structure
+  graphemes.ts       grapheme segmentation (Bengali-safe)
+  language.tsx       language provider + hook + digit localization
+  layout.tsx         metadata, JSON-LD, fonts (Inter/JetBrains/Noto BN)
+  robots.ts          robots.txt
+  sitemap.ts         sitemap.xml, one line per section
+  page.tsx           home route (section 0)
+  [section]/page.tsx the eight other static routes + per-route metadata
+  globals.css        tokens, pager, overlay, name, carousels, responsive, a11y
+  icon.svg           favicon (also the social-card fallback mark)
+  not-found.tsx      bilingual 404 → 404.html on export
 components/
+  Pager.tsx           discrete pager, gestures, paper-turn, route sync
+  NavOverlay.tsx      the section index dialog (role=dialog, focus-managed)
+  PullToRefresh.tsx   real mobile pull-to-refresh
+  SignatureName.tsx   the hero identity mark (decode + lock + proximity)
   TechBackground.tsx  live canvas background (particles, ripples, pulses)
   sections.tsx        the nine curated pages (spotlight, carousels, accordion)
   ui.tsx              cursor, links, reveals, header, footer, dots, carousel
-  MatrixName.tsx      animated hero name
 scripts/
-  check-content.mjs   bilingual + model gate (prebuild + npm run check)
+  check-content.mjs         parity + two-way purity gate
+  check-purity-adversarial.mjs  adversarial purity suite
+  check-design.mjs          token/document/CSS drift gate
+  check-units.mjs           logic checks (segmentation, routing, digits)
+  check-build.mjs           artifact validation (routes, deep links, budget)
+tools/
+  make-og.py          generates public/og.png (run manually; see its header)
 DESIGN_SYSTEM.md      shared visual DNA for portfolio + future project sites
 ```
+
+## Social card
+
+`public/og.png` is a 1200×630 card generated by `tools/make-og.py` and
+committed. Regenerate it when the identity changes:
+
+```bash
+python3 tools/make-og.py   # needs Pillow + numpy and two font files
+```
+
+`scripts/check-build.mjs` verifies from the built artifact that it exists as a
+real 1200×630 PNG — social platforms reject SVG, so the format is checked, not
+assumed.
 
 ## Owner context
 

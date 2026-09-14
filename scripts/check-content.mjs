@@ -1,32 +1,97 @@
 /* ═══════════════════════════════════════════════════════════════
-   CONTENT GATE — bilingual parity + content-model sanity.
+   CONTENT GATE — bilingual parity, two-way language purity, and
+   content-model sanity. Runs on `prebuild`, so the build fails if
+   any invariant breaks.
 
-   Runs automatically before every build (`prebuild`) and on demand via
-   `npm run check`. Fails loudly on:
+   Language purity (both directions, both mandatory)
+   -------------------------------------------------
+     EN tree → zero Bengali codepoints          (U+0980–U+09FF)
+     BN tree → zero Latin letters               (A–Z, a–z)
+               except the enumerated verbatim-data paths below.
 
-   1. en/bn key-structure drift (missing or extra keys, array lengths)
-   2. openSource.selected naming repos that don't exist (or order drift)
-   3. Bengali characters anywhere in the EN tree
-   4. pageLabels count, nav scene range, accent/URL shape
+   The BN exception list is deliberately tiny and explicit. It holds
+   *data*, never language: an e-mail address that must stay routable,
+   real account handles, repository slugs that must match the URL
+   path, and URLs/hex accents. Everything a visitor reads as a word
+   is Bangla, including transliterated technology names.
+
+   The gate also proves it is still capable of failing: it runs a
+   predicate self-test on every invocation, and `scripts/check-
+   purity-adversarial.mjs` feeds whole adversarial content files
+   through this same gate and asserts a non-zero exit.
    ═══════════════════════════════════════════════════════════════ */
 
 import { execSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 let failures = 0;
 let leaves = 0;
+let bnProse = 0;
+let identifiers = 0;
 
 const fail = (msg) => {
   failures += 1;
   console.error(`check-content FAIL: ${msg}`);
 };
 
-/* 1 ── deep key parity between en and bn ── */
+/* ── the purity predicates ─────────────────────────────────────── */
+
+const BENGALI = /[\u0980-\u09FF]/;
+const LATIN = /[A-Za-z]/;
+
+const bengaliHits = (s) => (s.match(/[\u0980-\u09FF]/g) || []).length;
+const latinHits = (s) => (s.match(/[A-Za-z]/g) || []).length;
+
+/* Verbatim data that must stay in Latin script even in Bangla mode.
+   Path syntax: dotted keys, `[]` for "every element of this array". */
+const IDENTIFIER_PATHS = new Set([
+  'profile.email',
+  'profile.github',
+  'profile.telegram',
+  'profile.linkedin',
+  'contact.channels[].value',
+  'contact.channels[].href',
+  'work.projects[].name',
+  'work.projects[].repo',
+  'work.projects[].websiteUrl',
+  'work.projects[].accent',
+  'work.nowBuilding.url',
+  /* machine enum consumed by CSS, not rendered — `statusLabel` is the
+     visible string and stays under the purity rule */
+  'research.entries[].status',
+  'openSource.selected[]',
+  'openSource.repos[].name',
+  'openSource.repos[].url',
+  'openSource.repos[].websiteUrl',
+]);
+
+/* Self-test: if either predicate ever stops catching its own
+   adversarial input, the gate is dead and must not report PASS. */
+function selfTest() {
+  const cases = [
+    { lang: 'bn', value: 'এটি AI Work Section GitHub', expect: true },
+    { lang: 'bn', value: 'On-device AI', expect: true },
+    { lang: 'bn', value: 'কাজ', expect: false },
+    { lang: 'bn', value: 'গিটহাব অ্যাকশনস', expect: false },
+    { lang: 'en', value: 'This is বাংলা বিভাগ', expect: true },
+    { lang: 'en', value: 'নির্বাচিত কাজ', expect: true },
+    { lang: 'en', value: 'Featured work', expect: false },
+    { lang: 'en', value: 'CI/CD and SHA-256', expect: false },
+  ];
+  for (const c of cases) {
+    const caught = c.lang === 'bn' ? latinHits(c.value) > 0 : bengaliHits(c.value) > 0;
+    if (caught !== c.expect) {
+      fail(`purity predicate self-test failed for ${c.lang} "${c.value}" (caught=${caught}, expected=${c.expect})`);
+    }
+  }
+}
+
+/* ── 1. deep key parity between en and bn ─────────────────────── */
+
 function checkParity(a, b, path) {
   const bothArr = Array.isArray(a) && Array.isArray(b);
   const oneArr = Array.isArray(a) || Array.isArray(b);
@@ -55,24 +120,60 @@ function checkParity(a, b, path) {
   leaves += 1;
 }
 
-/* 3 ── EN purity walk ── */
-const BENGALI = /[\u0980-\u09FF]/;
-function checkEnPure(node, path) {
+/* ── 2. purity walk, both directions ─────────────────────────── */
+
+function walk(node, path, visit) {
   if (typeof node === 'string') {
-    if (BENGALI.test(node)) fail(`Bengali chars in en at ${path}`);
+    visit(node, path);
     return;
   }
   if (Array.isArray(node)) {
-    node.forEach((v, i) => checkEnPure(v, `${path}[${i}]`));
+    node.forEach((v, i) => walk(v, `${path}[]` || `[${i}]`, visit));
     return;
   }
   if (node && typeof node === 'object') {
-    Object.entries(node).forEach(([k, v]) => checkEnPure(v, path ? `${path}.${k}` : k));
+    Object.entries(node).forEach(([k, v]) => walk(v, path ? `${path}.${k}` : k, visit));
   }
 }
 
+function checkPurity(tree, lang) {
+  walk(tree, '', (value, path) => {
+    if (lang === 'en') {
+      if (BENGALI.test(value)) {
+        fail(`EN purity: ${bengaliHits(value)} Bengali char(s) in en.${path} → "${value.slice(0, 60)}"`);
+      }
+      return;
+    }
+    /* Bangla mode */
+    if (IDENTIFIER_PATHS.has(path)) {
+      /* Identifier fields are data: they must NOT contain Bangla. */
+      identifiers += 1;
+      if (BENGALI.test(value)) {
+        fail(`identifier field ${path} must stay verbatim ASCII, found Bengali → "${value.slice(0, 60)}"`);
+      }
+      return;
+    }
+    bnProse += 1;
+    if (LATIN.test(value)) {
+      const hits = latinHits(value);
+      const sample = (value.match(/[A-Za-z]+/g) || []).slice(0, 4).join(', ');
+      fail(`BN purity: ${hits} Latin letter(s) in bn.${path} (${sample}) → "${value.slice(0, 60)}"`);
+    }
+  });
+}
+
+/* ── run ──────────────────────────────────────────────────────── */
+
+selfTest();
+
 const tmp = mkdtempSync(join(tmpdir(), 'content-check-'));
+const OVERRIDE = process.env.CONTENT_FILE;
 try {
+  const source = OVERRIDE ? resolve(ROOT, OVERRIDE) : join(ROOT, 'app', 'content.ts');
+  if (!existsSync(source)) {
+    fail(`content source not found: ${source}`);
+    throw new Error('no source');
+  }
   const tscBin = join(ROOT, 'node_modules', 'typescript', 'bin', 'tsc');
   if (!existsSync(tscBin)) {
     fail(`TypeScript compiler not found at ${tscBin} — run npm install first`);
@@ -80,31 +181,35 @@ try {
   }
   try {
     execSync(
-      `node "${tscBin}" app/content.ts --outDir "${tmp}" --module commonjs --target es2020 --skipLibCheck`,
+      `node "${tscBin}" "${source}" --outDir "${tmp}" --module commonjs --target es2020 --skipLibCheck --strict false`,
       { cwd: ROOT, stdio: 'pipe' }
     );
   } catch (e) {
     const detail = e?.stderr?.toString() || e?.message || 'unknown';
-    fail(`could not compile app/content.ts:\n${detail.slice(0, 2000)}`);
+    fail(`could not compile ${source}:\n${detail.slice(0, 2000)}`);
     throw new Error('compile failed');
   }
-  const compiled = [join(tmp, 'content.js'), join(tmp, 'app', 'content.js')].find((p) =>
-    existsSync(p)
-  );
+  const base = source.replace(/\.ts$/, '.js').replace(/^.*[\\/]/, '');
+  const compiled =
+    [join(tmp, base), join(tmp, 'app', base), join(tmp, 'content.js'), join(tmp, 'app', 'content.js')].find((p) =>
+      existsSync(p)
+    );
   if (!compiled) {
     fail(`tsc produced no output under ${tmp}`);
     throw new Error('no output');
   }
-  const { content } = await import(pathToFileURL(compiled).href);
+  const mod = await import(pathToFileURL(compiled).href);
+  const content = mod.content ?? mod.default;
   if (!content?.en || !content?.bn) {
     fail('content export must have en and bn trees');
     throw new Error('bad export');
   }
 
   checkParity(content.en, content.bn, '');
-  checkEnPure(content.en, 'en');
+  checkPurity(content.en, 'en');
+  checkPurity(content.bn, 'bn');
 
-  /* 2 ── selected ⊆ repos, same order both languages ── */
+  /* 3 ── selected ⊆ repos, same order both languages ── */
   for (const lang of ['en', 'bn']) {
     const os = content[lang].openSource;
     const names = os.repos.map((r) => r.name);
@@ -154,4 +259,7 @@ if (failures > 0) {
   console.error(`check-content: ${failures} failure(s)`);
   process.exit(1);
 }
-console.log(`check-content PASS (${leaves} leaf values compared, EN pure, selected valid)`);
+console.log(
+  `check-content PASS (${leaves} leaf values compared · EN pure · BN pure across ${bnProse} prose fields ` +
+    `· ${identifiers} enumerated identifier fields · predicate self-test ok)`
+);

@@ -1,16 +1,33 @@
 /* ═══════════════════════════════════════════════════════════════
    CONTENT — centralized, bilingual source of truth for the portfolio.
 
-   - `en` and `bn` trees carry the same keys; every user-facing string
-     exists in both languages. No fabricated projects, repos, websites,
-     employers, or statistics.
-   - Technical identifiers (Kotlin, llama.cpp, Vulkan, GGUF, repo names,
-     versions, benchmark numbers) stay in Latin script in BOTH languages.
-     This is deliberate: Bangla transliteration of domain terms causes
-     wrong-meaning substitutions (see SKB repositories/portfolio.md i18n
-     pitfall note). Prose is translated; identifiers are preserved.
-   - websiteUrl is set ONLY for repositories with a verified live site.
-     Projects without one use websiteUrl: null (never fabricate).
+   LANGUAGE PURITY CONTRACT (enforced by scripts/check-content.mjs)
+   ---------------------------------------------------------------
+   EN mode  → zero Bengali codepoints anywhere in this tree.
+   BN mode  → zero Latin letters (A–Z, a–z) anywhere in this tree,
+              EXCEPT the enumerated verbatim-data fields below.
+
+   The BN tree carries the same keys as EN (checked on every build),
+   so no string is ever missing in either language. Prose is written
+   natively in each language — never machine-translated phrasing.
+
+   WHAT STAYS LATIN IN BANGLA MODE, AND WHY
+   ----------------------------------------
+   Four kinds of *data*, never language:
+     1. The e-mail address        (must stay copyable and routable)
+     2. Social handles            (the real account identifiers)
+     3. Repository slugs          (must match the URL path)
+     4. URLs                      (`repo`, `websiteUrl`, `href`)
+
+   Everything else in the BN tree — every heading, description,
+   button, badge, role, tooltip and accessibility label — is Bangla,
+   including transliterated technology names (কোটলিন, ভলকান,
+   গিটহাব, লামা.সিপিপি). That set is declared explicitly in
+   `IDENTIFIER_PATHS` inside scripts/check-content.mjs, so the gate
+   proves the exception list is exactly this small.
+
+   No fabricated projects, repos, websites, employers, or statistics.
+   websiteUrl is set ONLY for repositories with a verified live site.
    ═══════════════════════════════════════════════════════════════ */
 
 export type Lang = 'en' | 'bn';
@@ -74,6 +91,7 @@ export interface Content {
   };
   hero: {
     intro: string;
+    availability: string;
     ctaWork: string;
     ctaGithub: string;
     scrollHint: string;
@@ -140,7 +158,20 @@ export interface Content {
   nav: { scene: number; label: string }[];
   header: { homeLabel: string; githubLabel: string; langLabel: string; langAria: string; githubAria: string };
   footer: { built: string; claims: string };
-  ui: { carouselPrev: string; carouselNext: string; pageLabels: string[]; repoWord: string };
+  ui: {
+    carouselPrev: string;
+    carouselNext: string;
+    pageLabels: string[];
+    repoWord: string;
+    navOpen: string;
+    navTitle: string;
+    navClose: string;
+    navHint: string;
+    current: string;
+    pull: string;
+    release: string;
+    refreshing: string;
+  };
   preloader: { status: string };
 }
 
@@ -166,9 +197,10 @@ const en: Content = {
   hero: {
     intro:
       'Self-taught developer at the intersection of on-device AI, Android systems, and ARM64 Linux. Every build runs on CI. Every claim checked against a physical device.',
+    availability: 'Open to remote',
     ctaWork: 'Explore my work',
     ctaGithub: 'View GitHub ↗',
-    scrollHint: 'Swipe',
+    scrollHint: 'Open index',
   },
   presence: {
     eyebrow: '02 — What I actually do',
@@ -407,8 +439,21 @@ const en: Content = {
     { scene: 5, label: 'Stack' },
     { scene: 8, label: 'Contact' },
   ],
-  header: { homeLabel: 'Back to top', githubLabel: 'GitHub', langLabel: 'Bangla', langAria: 'Switch to Bangla', githubAria: 'GitHub profile' },
-  ui: { carouselPrev: 'Previous', carouselNext: 'Next', pageLabels: ['Home', 'Presence', 'About', 'Featured work', 'Research', 'Technical focus', 'Open source', 'Experience', 'Contact'], repoWord: 'repository' },
+  header: { homeLabel: 'Back to home', githubLabel: 'GitHub', langLabel: 'Bangla', langAria: 'Switch to Bangla', githubAria: 'GitHub profile' },
+  ui: {
+    carouselPrev: 'Previous',
+    carouselNext: 'Next',
+    pageLabels: ['Home', 'Presence', 'About', 'Featured work', 'Research', 'Technical focus', 'Open source', 'Experience', 'Contact'],
+    repoWord: 'repository',
+    navOpen: 'Open section index',
+    navTitle: 'Index',
+    navClose: 'Close index',
+    navHint: 'Arrow keys move · Enter opens · Esc closes',
+    current: 'You are here',
+    pull: 'Pull to refresh',
+    release: 'Release to refresh',
+    refreshing: 'Refreshing',
+  },
   footer: {
     built: 'Built from a phone.',
     claims: 'Every claim backed by CI or real-device evidence.',
@@ -417,13 +462,15 @@ const en: Content = {
 };
 
 /* ── Bangla ────────────────────────────────────────────────────
-   Technical identifiers stay in Latin script (see header note).
-   Company/product proper nouns stay in Latin script.           */
+   Prose is Bangla only. Technology, company and product names are
+   transliterated (কোটলিন, গিটহাব, লামা.সিপিপি); only the four
+   verbatim-data kinds listed at the top of this file stay Latin.
+   Numerals inside Bangla prose are Bengali digits.               */
 
 const bn: Content = {
   profile: {
-    name: 'Sobuj',
-    nameFull: 'Sobuj Miah',
+    name: 'সবুজ',
+    nameFull: 'সবুজ মিয়া',
     title: 'স্বাধীন সফটওয়্যার ডেভেলপার ও অন-ডিভাইস এআই সিস্টেম নির্মাতা',
     tagline: 'অন-ডিভাইস এআই · অ্যান্ড্রয়েড · লিনাক্স · এআরএম ৬৪ · জিপিইউ/এনপিইউ',
     location: 'ঢাকা, বাংলাদেশ',
@@ -435,21 +482,22 @@ const bn: Content = {
   meta: {
     title: 'সবুজ মিয়া — সফটওয়্যার ডেভেলপার ও অন-ডিভাইস এআই সিস্টেম নির্মাতা',
     description:
-      'অন-ডিভাইস এআই, অ্যান্ড্রয়েড, লিনাক্স, এআরএম ৬৪, জিপিইউ/এনপিইউ ত্বরণ। অ্যান্ড্রয়েড ফোন থেকে কাজ করা স্ব-শিক্ষিত সিস্টেম নির্মাতা — প্রতিটি দাবি CI বা বাস্তব-ডিভাইস প্রমাণে সমর্থিত।',
+      'অন-ডিভাইস এআই, অ্যান্ড্রয়েড, লিনাক্স, এআরএম ৬৪, জিপিইউ/এনপিইউ ত্বরণ। অ্যান্ড্রয়েড ফোন থেকে কাজ করা স্ব-শিক্ষিত সিস্টেম নির্মাতা — প্রতিটি দাবি সিআই বা বাস্তব-ডিভাইস প্রমাণে সমর্থিত।',
   },
   hero: {
     intro:
-      'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম ও এআরএম ৬৪ লিনাক্সের সংযোগস্থলে কাজ করা স্ব-শিক্ষিত ডেভেলপার। প্রতিটি বিল্ড চলে CI-তে। প্রতিটি দাবি যাচাই করা হয় বাস্তব ডিভাইসে।',
+      'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম ও এআরএম ৬৪ লিনাক্সের সংযোগস্থলে কাজ করা স্ব-শিক্ষিত ডেভেলপার। প্রতিটি বিল্ড চলে সিআই-তে। প্রতিটি দাবি যাচাই করা হয় বাস্তব ডিভাইসে।',
+    availability: 'রিমোটে উন্মুক্ত',
     ctaWork: 'আমার কাজ দেখুন',
-    ctaGithub: 'GitHub দেখুন ↗',
-    scrollHint: 'সোয়াইপ',
+    ctaGithub: 'গিটহাব দেখুন ↗',
+    scrollHint: 'সূচি দেখুন',
   },
   presence: {
     eyebrow: '০২ — আমি আসলে যা করি',
     items: [
-      { label: 'অন-ডিভাইস এআই', detail: 'LLM ইনফারেন্স, এনপিইউ/জিপিইউ ত্বরণ' },
-      { label: 'অ্যান্ড্রয়েড সিস্টেমস', detail: 'Kotlin, Accessibility, Shizuku' },
-      { label: 'এআরএম ৬৪ লিনাক্স', detail: 'AOSP, PRoot, নেটিভ টুলচেইন' },
+      { label: 'অন-ডিভাইস এআই', detail: 'এলএলএম ইনফারেন্স, এনপিইউ/জিপিইউ ত্বরণ' },
+      { label: 'অ্যান্ড্রয়েড সিস্টেমস', detail: 'কোটলিন, অ্যাক্সেসিবিলিটি, শিজুকু' },
+      { label: 'এআরএম ৬৪ লিনাক্স', detail: 'এওএসপি, পিআরুট, নেটিভ টুলচেইন' },
       { label: 'লোকাল-ফার্স্ট', detail: 'প্রাইভেট, অফলাইন, সম্মতি-চালিত' },
     ],
   },
@@ -458,14 +506,14 @@ const bn: Content = {
     heading: 'স্ব-শিক্ষিত সিস্টেম নির্মাতা — সীমাবদ্ধতাকে বাধা নয়, ভিত্তি ধরে কাজ করি।',
     paragraphs: [
       'আমি ঢাকা, বাংলাদেশের একজন স্ব-শিক্ষিত সিস্টেম নির্মাতা। আমার কাজের কেন্দ্রে আছে অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম ও এআরএম ৬৪ লিনাক্স — এই সমস্যাগুলোর পেছনে লেগে আছি কারণ আমার হাতে থাকা হার্ডওয়্যারে প্রয়োজনীয় টুলগুলো তখন ছিলই না।',
-      'একটি নির্ধারক সীমাবদ্ধতা: প্রচলিত PC নয় — মূলত একটি অ্যান্ড্রয়েড ফোনে Termux ও PRoot Debian চালিয়ে আমি সফটওয়্যার তৈরি, বিল্ড ও যাচাই করি। এটাই গড়ে দিয়েছে আমার টুলিং, CI আর্কিটেকচার, আর দাবি যাচাইয়ের পদ্ধতি।',
-      'আমার শেখার দর্শন: যতদিন শিখি ততদিন বাঁচি, শেখা থামলেই মৃত্যু। শিখি বাস্তব সমস্যার মধ্য দিয়ে — হাইপোথিসিস, পরীক্ষা, পর্যবেক্ষণ, প্রাতিষ্ঠানিক তত্ত্ব, তুলনা, পুনরাবৃত্তি। মেকানিজম-ফার্স্ট, প্রমাণ-ভিত্তিক।',
+      'একটি নির্ধারক সীমাবদ্ধতা: প্রচলিত পিসি নয় — মূলত একটি অ্যান্ড্রয়েড ফোনে টারমাক্স ও পিআরুট ডেবিয়ান চালিয়ে আমি সফটওয়্যার তৈরি, বিল্ড ও যাচাই করি। এটাই গড়ে দিয়েছে আমার টুলিং, সিআই আর্কিটেকচার, আর দাবি যাচাইয়ের পদ্ধতি।',
+      'আমার শেখার দর্শন: যতদিন শিখি ততদিন বাঁচি, শেখা থামলেই মৃত্যু। শিখি বাস্তব সমস্যার মধ্য দিয়ে — প্রকল্প, পরীক্ষা, পর্যবেক্ষণ, প্রাতিষ্ঠানিক তত্ত্ব, তুলনা, পুনরাবৃত্তি। মেকানিজম-ফার্স্ট, প্রমাণ-ভিত্তিক।',
     ],
     facts: [
-      { label: 'অবস্থান', value: 'ঢাকা, বাংলাদেশ (GMT+6)' },
+      { label: 'অবস্থান', value: 'ঢাকা, বাংলাদেশ (জিএমটি+৬)' },
       { label: 'ভাষা', value: 'বাংলা, ইংরেজি, হিন্দি/উর্দু, আরবি' },
-      { label: 'রেফারেন্স ডিভাইস', value: 'Redmi Turbo 4 Pro — SD 8s Gen 4' },
-      { label: 'বিল্ড পাইপলাইন', value: 'GitHub Actions CI/CD' },
+      { label: 'রেফারেন্স ডিভাইস', value: 'রেডমি টার্বো ৪ প্রো — এসডি ৮এস জেন ৪' },
+      { label: 'বিল্ড পাইপলাইন', value: 'গিটহাব অ্যাকশনস সিআই/সিডি' },
     ],
   },
   work: {
@@ -480,23 +528,23 @@ const bn: Content = {
         tagline: 'বাংলা-ফার্স্ট লোকাল এআই + সম্মতি-চালিত স্বয়ংক্রিয়তা',
         year: '২০২৪–২৬',
         description:
-          'প্রাইভেট অন-ডিভাইস LLM ইনফারেন্স ও Accessibility-নিয়ন্ত্রিত স্বয়ংক্রিয়তাের Android রানটাইম। CPU ইনফারেন্স ডিভাইস-যাচাইকৃত; জিপিইউ/এনপিইউ যোগ্যতা-পরীক্ষাধীন।',
+          'প্রাইভেট অন-ডিভাইস এলএলএম ইনফারেন্স ও অ্যাক্সেসিবিলিটি-নিয়ন্ত্রিত স্বয়ংক্রিয়তার অ্যান্ড্রয়েড রানটাইম। সিপিইউ ইনফারেন্স ডিভাইস-যাচাইকৃত; জিপিইউ/এনপিইউ এখনও যোগ্যতা-পরীক্ষায়।',
         evidence:
-          'বাস্তব arm64 llama.cpp CPU ইনফারেন্স, 12–20 tok/s ডিকোড, KV-prefix পুনর্ব্যবহার। Adreno Vulkan ড্রাইভার ক্র্যাশের রুট-কজ নির্ণয় — যা গড়েছে ফেইল-ক্লোজড CPU-ডিফল্ট আর্কিটেকচার।',
-        topics: ['Kotlin', 'llama.cpp', 'Vulkan', 'Accessibility', 'Shizuku', 'GGUF'],
+          'বাস্তব এআরএম ৬৪ লামা.সিপিপি সিপিইউ ইনফারেন্স, ডিকোডে সেকেন্ডে ১২–২০ টোকেন, কেভি-প্রিফিক্স পুনর্ব্যবহার। অ্যাড্রেনো ভলকান ড্রাইভার ক্র্যাশের মূল কারণ নির্ণয় — যা গড়ে দিয়েছে ফেইল-ক্লোজড সিপিইউ-ডিফল্ট আর্কিটেকচার।',
+        topics: ['কোটলিন', 'লামা.সিপিপি', 'ভলকান', 'অ্যাক্সেসিবিলিটি', 'শিজুকু', 'জিজিইউএফ'],
         repo: 'https://github.com/soobujmiah/lai',
         websiteUrl: null,
         accent: '#22c55e',
       },
       {
         name: 'GGEN',
-        tagline: 'Android-ফার্স্ট ক্রিয়েটিভ ও ডকুমেন্ট স্টুডিও',
+        tagline: 'অ্যান্ড্রয়েড-ফার্স্ট ক্রিয়েটিভ ও ডকুমেন্ট স্টুডিও',
         year: '২০২৪–২৬',
         description:
-          'পেশাদার ভেক্টর, রাস্টার, ডকুমেন্ট ও PDF কাজের Flutter/Dart ভিত্তি। SHA-256 স্টেট ইন্টেগ্রিটিসহ পিওর-Dart কোরের ডকুমেন্টেশন-ফার্স্ট আর্কিটেকচার।',
+          'পেশাদার ভেক্টর, রাস্টার, ডকুমেন্ট ও পিডিএফ কাজের ফ্লাটার/ডার্ট ভিত্তি। এসএইচএ-২৫৬ স্টেট ইন্টিগ্রিটিসহ পিওর-ডার্ট কোরের ডকুমেন্টেশন-ফার্স্ট আর্কিটেকচার।',
         evidence:
-          '143টি পিওর-Dart ইউনিট টেস্ট, 353টি উইজেট/কন্ট্রোলার টেস্ট। বারবার বাস্তব ডিভাইসে যাচাইকৃত।',
-        topics: ['Flutter', 'Dart', 'ডকুমেন্ট জেনারেশন', 'ভেক্টর গ্রাফিক্স'],
+          '১৪৩টি পিওর-ডার্ট ইউনিট টেস্ট, ৩৫৩টি উইজেট/কন্ট্রোলার টেস্ট। বারবার বাস্তব ডিভাইসে যাচাইকৃত।',
+        topics: ['ফ্লাটার', 'ডার্ট', 'ডকুমেন্ট জেনারেশন', 'ভেক্টর গ্রাফিক্স'],
         repo: 'https://github.com/soobujmiah/ggen',
         websiteUrl: null,
         accent: '#4ade80',
@@ -506,34 +554,34 @@ const bn: Content = {
         tagline: 'নেটিভ এআরএম ৬৪ অ্যান্ড্রয়েড ডেভেলপমেন্ট টুলচেইন',
         year: '২০২৩–২৬',
         description:
-          'লিনাক্স এআরএম ৬৪/glibc-এর জন্য AOSP সোর্স থেকে Android SDK build-tools ও platform-tools তৈরি করে। SHA-256-যাচাইকৃত অফলাইন রিলিজ আর্টিফ্যাক্ট।',
+          'লিনাক্স এআরএম ৬৪/গ্লিবসি-র জন্য এওএসপি সোর্স থেকে অ্যান্ড্রয়েড এসডিকে বিল্ড-টুলস ও প্লাটফর্ম-টুলস তৈরি করে। এসএইচএ-২৫৬-যাচাইকৃত অফলাইন রিলিজ আর্টিফ্যাক্ট।',
         evidence:
-          'Snapdragon 8s Gen 4-এ সম্পূর্ণ এআরএম ৬৪ নেটিভ APK পাইপলাইন শুরু থেকে শেষ পর্যন্ত যাচাইকৃত: সোর্স → APK → সাইন → ইনস্টল → JNI লোড → রান।',
-        topics: ['AOSP', 'এআরএম ৬৪', 'বিল্ড টুলস', 'ক্রস-কম্পাইলেশন'],
+          'স্ন্যাপড্রাগন ৮এস জেন ৪-এ সম্পূর্ণ এআরএম ৬৪ নেটিভ এপিকে পাইপলাইন শুরু থেকে শেষ পর্যন্ত যাচাইকৃত: সোর্স → এপিকে → সাইন → ইনস্টল → জেএনআই লোড → রান।',
+        topics: ['এওএসপি', 'এআরএম ৬৪', 'বিল্ড টুলস', 'ক্রস-কম্পাইলেশন'],
         repo: 'https://github.com/soobujmiah/adt',
         websiteUrl: null,
         accent: '#10b981',
       },
       {
         name: 'Ternux',
-        tagline: 'রুট ছাড়াই Android-এ Debian/Xfce লিনাক্স ডেস্কটপ',
+        tagline: 'রুট ছাড়াই অ্যান্ড্রয়েডে ডেবিয়ান/এক্সএফসিই লিনাক্স ডেস্কটপ',
         year: '২০২৩–২৬',
         description:
-          'এক কমান্ডে আসল Debian এআরএম ৬৪ ইউজারস্পেস, Xfce4 ডেস্কটপ, Termux:X11 ডিসপ্লে, PulseAudio ব্রিজ ও Zink/Turnip GPU রুট — রুট ছাড়াই।',
+          'এক কমান্ডে আসল ডেবিয়ান এআরএম ৬৪ ইউজারস্পেস, এক্সএফসিই৪ ডেস্কটপ, টারমাক্স:এক্স১১ ডিসপ্লে, পালসঅডিও ব্রিজ ও জিংক/টার্নিপ জিপিইউ রুট — রুট ছাড়াই।',
         evidence:
-          'Adreno 825-এ Zink/Turnip রেন্ডারার নিশ্চিত: glmark2 স্কোর 140 (OpenGL 4.6)। Zink/Adreno/Turnip রেন্ডারারে Blender 4.3.2 চালু হয়েছে।',
-        topics: ['Debian', 'Vulkan', 'Turnip', 'Zink', 'Adreno', 'PRoot'],
+          'অ্যাড্রেনো ৮২৫-এ জিংক/টার্নিপ রেন্ডারার নিশ্চিত: গ্লমার্ক২ স্কোর ১৪০ (ওপেনজিএল ৪.৬)। জিংক/অ্যাড্রেনো/টার্নিপ রেন্ডারারে ব্লেন্ডার ৪.৩.২ চালু হয়েছে।',
+        topics: ['ডেবিয়ান', 'ভলকান', 'টার্নিপ', 'জিংক', 'অ্যাড্রেনো', 'পিআরুট'],
         repo: 'https://github.com/soobujmiah/ternux',
         websiteUrl: 'https://soobujmiah.github.io/ternux/',
         accent: '#86efac',
       },
     ],
     nowBuilding: {
-      eyebrow: 'এখন যা বানাচ্ছি — P0 রিলিজ ট্র্যাক',
-      name: 'Songjog (সংযোগ)',
+      eyebrow: 'এখন যা বানাচ্ছি — পি০ রিলিজ ট্র্যাক',
+      name: 'সংযোগ',
       description:
-        'বাংলা-ফার্স্ট ব্যবসা ও প্রতিষ্ঠান পরিচালনার অ্যাপ। ওনার এডিশন: দ্রুত দৈনিক এন্ট্রি, লোকাল SQLite রেকর্ড, ধ্বংসাত্মক ডিলিটের বদলে অডিটযোগ্য সংশোধন।',
-      testsNote: 'CI-তে 94টি টেস্ট সবুজ · Redmi Turbo 4 Pro-তে এক্সপোর্ট/ডায়াগনস্টিক ডিভাইস-যাচাইকৃত',
+        'বাংলা-ফার্স্ট ব্যবসা ও প্রতিষ্ঠান পরিচালনার অ্যাপ। ওনার এডিশন: দ্রুত দৈনিক এন্ট্রি, লোকাল এসকিউলাইট রেকর্ড, ধ্বংসাত্মক ডিলিটের বদলে অডিটযোগ্য সংশোধন।',
+      testsNote: 'সিআই-তে ৯৪টি টেস্ট সবুজ · রেডমি টার্বো ৪ প্রো-তে এক্সপোর্ট ও ডায়াগনস্টিক ডিভাইস-যাচাইকৃত',
       cta: 'বিল্ড অনুসরণ করুন ↗',
       url: 'https://github.com/soobujmiah/songjog',
     },
@@ -543,32 +591,32 @@ const bn: Content = {
     heading: 'কোনটা প্রমাণিত, কোনটা পরীক্ষামূলক — সৎভাবে বলা।',
     entries: [
       {
-        title: 'Snapdragon / Hexagon NPU',
+        title: 'স্ন্যাপড্রাগন / হেক্সাগন এনপিইউ',
         status: 'experimental',
         statusLabel: 'পরীক্ষামূলক',
         description:
-          'Qualcomm Hexagon HTP NPU মূল্যায়ন। FastRPC/DSP প্রমাণসহ প্রথম বাস্তব non-CPU ব্যাকএন্ড কাজ করছে বলে নিশ্চিত।',
+          'কোয়ালকম হেক্সাগন এইচটিপি এনপিইউ মূল্যায়ন। ফাস্টআরপিসি/ডিএসপি প্রমাণসহ প্রথম বাস্তব নন-সিপিইউ ব্যাকএন্ড কাজ করছে বলে নিশ্চিত।',
       },
       {
-        title: 'Adreno Vulkan / GPU',
+        title: 'অ্যাড্রেনো ভলকান / জিপিইউ',
         status: 'experimental',
         statusLabel: 'পরীক্ষামূলক',
         description:
-          'Mesa Turnip Vulkan, Zink OpenGL-on-Vulkan। ডিকোডে Vulkan compute ক্র্যাশ করে — রুট-কজ বের করে ডকুমেন্ট করা হয়েছে।',
+          'মেসা টার্নিপ ভলকান, জিংক ওপেনজিএল-অন-ভলকান। ডিকোডে ভলকান কম্পিউট ক্র্যাশ করে — মূল কারণ বের করে ডকুমেন্ট করা হয়েছে।',
       },
       {
         title: 'অ্যান্ড্রয়েড স্বয়ংক্রিয়তা',
         status: 'validated',
         statusLabel: 'যাচাইকৃত',
         description:
-          'স্পষ্ট সম্মতিসহ AccessibilityService + Shizuku প্রিভিলেজড এক্সিকিউশন, হ্যাশ-চেইনড অডিট ট্রেইল।',
+          'স্পষ্ট সম্মতিসহ অ্যাক্সেসিবিলিটি সার্ভিস ও শিজুকু প্রিভিলেজড এক্সিকিউশন, হ্যাশ-চেইনড অডিট ট্রেইল।',
       },
       {
-        title: 'AI এজেন্ট ও অর্কেস্ট্রেশন',
+        title: 'এআই এজেন্ট ও অর্কেস্ট্রেশন',
         status: 'investigating',
         statusLabel: 'অনুসন্ধানাধীন',
         description:
-          'পলিসি-নিয়ন্ত্রিত টুল ডিসপ্যাচ, SHA-256 যাচাইসহ সাইনড মডেল ক্যাটালগ, মাল্টি-প্রোভাইডার গেটওয়ে।',
+          'পলিসি-নিয়ন্ত্রিত টুল ডিসপ্যাচ, এসএইচএ-২৫৬ যাচাইসহ সাইনড মডেল ক্যাটালগ, মাল্টি-প্রোভাইডার গেটওয়ে।',
       },
     ],
   },
@@ -576,12 +624,12 @@ const bn: Content = {
     eyebrow: '০৬ — প্রযুক্তিগত ফোকাস',
     heading: 'যেসব প্রযুক্তি নিয়ে আমি আসলেই কাজ করি।',
     domains: [
-      { name: 'অন-ডিভাইস এআই', items: ['llama.cpp', 'GGUF', 'KV-cache', 'CPU/জিপিইউ/এনপিইউ রাউটিং'] },
-      { name: 'অ্যান্ড্রয়েড সিস্টেমস', items: ['Kotlin', 'Compose', 'Accessibility', 'Shizuku', 'JNI/C++'] },
-      { name: 'লিনাক্স / এআরএম ৬৪', items: ['AOSP বিল্ড', 'Clang/CMake/Ninja', 'Termux + PRoot'] },
-      { name: 'GPU / গ্রাফিক্স', items: ['Vulkan', 'Mesa Turnip', 'Zink', 'Adreno KGSL'] },
-      { name: 'মোবাইল ও ওয়েব', items: ['Flutter', 'Dart', 'TypeScript', 'Python'] },
-      { name: 'প্রকৌশল পরিচালনা', items: ['GitHub Actions', 'সাইনড রিলিজ', 'ডিভাইস যাচাইকরণ'] },
+      { name: 'অন-ডিভাইস এআই', items: ['লামা.সিপিপি', 'জিজিইউএফ', 'কেভি-ক্যাশ', 'সিপিইউ/জিপিইউ/এনপিইউ রাউটিং'] },
+      { name: 'অ্যান্ড্রয়েড সিস্টেমস', items: ['কোটলিন', 'কম্পোজ', 'অ্যাক্সেসিবিলিটি', 'শিজুকু', 'জেএনআই/সি++'] },
+      { name: 'লিনাক্স / এআরএম ৬৪', items: ['এওএসপি বিল্ড', 'ক্ল্যাং/সিএমেক/নিনজা', 'টারমাক্স + পিআরুট'] },
+      { name: 'জিপিইউ / গ্রাফিক্স', items: ['ভলকান', 'মেসা টার্নিপ', 'জিংক', 'অ্যাড্রেনো কেজিএসএল'] },
+      { name: 'মোবাইল ও ওয়েব', items: ['ফ্লাটার', 'ডার্ট', 'টাইপস্ক্রিপ্ট', 'পাইথন'] },
+      { name: 'প্রকৌশল পরিচালনা', items: ['গিটহাব অ্যাকশনস', 'সাইনড রিলিজ', 'ডিভাইস যাচাইকরণ'] },
     ],
   },
   openSource: {
@@ -591,21 +639,21 @@ const bn: Content = {
     codeLabel: 'কোড ↗',
     selected: ['faridpur-police-app', 'docdr', 'apiloop', 'datakhoj-android', 'sobkichu', 'arms', 'iqra-online-mart'],
     note: 'নির্বাচিত প্রজেক্টের বাইরে — প্রতিটি তার জায়গা অর্জন করে।',
-    moreLabel: 'GitHub-এ সবকিছু',
+    moreLabel: 'গিটহাবে সবকিছু',
     moreSub: 'পরীক্ষা, প্রোটোটাইপ ও চলমান কাজ থাকে সেখানে।',
     repos: [
-      { name: 'lai', desc: 'বাংলা-ফার্স্ট লোকাল এআই + স্বয়ংক্রিয়তা রানটাইম', lang: 'Kotlin', stars: 1, url: 'https://github.com/soobujmiah/lai', websiteUrl: null },
-      { name: 'adt', desc: 'AOSP সোর্স থেকে এআরএম ৬৪ অ্যান্ড্রয়েড ডেভ টুলচেইন', lang: 'Shell', stars: 0, url: 'https://github.com/soobujmiah/adt', websiteUrl: null },
-      { name: 'ternux', desc: 'অ্যান্ড্রয়েডে জিপিইউ-ত্বরান্বিত লিনাক্স ডেস্কটপ', lang: 'Shell', stars: 1, url: 'https://github.com/soobujmiah/ternux', websiteUrl: 'https://soobujmiah.github.io/ternux/' },
-      { name: 'ggen', desc: 'Android-ফার্স্ট ক্রিয়েটিভ ও ডকুমেন্ট স্টুডিও', lang: 'Dart', stars: 0, url: 'https://github.com/soobujmiah/ggen', websiteUrl: null },
-      { name: 'datakhoj-android', desc: 'Android-এর জন্য সার্বজনীন ডেটা সংগ্রাহক', lang: 'Kotlin', stars: 0, url: 'https://github.com/soobujmiah/datakhoj-android', websiteUrl: null },
-      { name: 'songjog', desc: 'বাংলা-ফার্স্ট ব্যবসায়িক কার্যক্রম অ্যাপ', lang: 'Dart', stars: 0, url: 'https://github.com/soobujmiah/songjog', websiteUrl: null },
-      { name: 'apiloop', desc: 'প্রোভাইডার-নিরপেক্ষ এআই API গেটওয়ে', lang: 'Python', stars: 0, url: 'https://github.com/soobujmiah/apiloop', websiteUrl: null },
-      { name: 'sobkichu', desc: 'বাংলাদেশি হাইপারলোকাল সুপার-অ্যাপ', lang: 'TypeScript', stars: 0, url: 'https://github.com/soobujmiah/sobkichu', websiteUrl: null },
-      { name: 'docdr', desc: 'মোবাইল-ফার্স্ট অফলাইন ডকুমেন্ট ওয়ার্কস্পেস', lang: 'Dart', stars: 0, url: 'https://github.com/soobujmiah/docdr', websiteUrl: null },
-      { name: 'faridpur-police-app', desc: 'জেলা পুলিশ ওয়েবসাইটের অফিসিয়াল WebView অ্যাপ শেল', lang: 'Dart', stars: 0, url: 'https://github.com/soobujmiah/faridpur-police-app', websiteUrl: null },
-      { name: 'iqra-online-mart', desc: 'দ্বিভাষিক ই-কমার্স স্টোরফ্রন্ট ডেমো', lang: 'JavaScript', stars: 0, url: 'https://github.com/soobujmiah/iqra-online-mart', websiteUrl: 'https://soobujmiah.github.io/iqra-online-mart/' },
-      { name: 'arms', desc: 'এআরএম ৬৪ লিনাক্স টুল ক্যাটালগ + স্ট্যাটিক সাইট', lang: 'HTML', stars: 0, url: 'https://github.com/soobujmiah/arms', websiteUrl: 'https://soobujmiah.github.io/arms' },
+      { name: 'lai', desc: 'বাংলা-ফার্স্ট লোকাল এআই + স্বয়ংক্রিয়তা রানটাইম', lang: 'কোটলিন', stars: 1, url: 'https://github.com/soobujmiah/lai', websiteUrl: null },
+      { name: 'adt', desc: 'এওএসপি সোর্স থেকে এআরএম ৬৪ অ্যান্ড্রয়েড ডেভ টুলচেইন', lang: 'শেল', stars: 0, url: 'https://github.com/soobujmiah/adt', websiteUrl: null },
+      { name: 'ternux', desc: 'অ্যান্ড্রয়েডে জিপিইউ-ত্বরান্বিত লিনাক্স ডেস্কটপ', lang: 'শেল', stars: 1, url: 'https://github.com/soobujmiah/ternux', websiteUrl: 'https://soobujmiah.github.io/ternux/' },
+      { name: 'ggen', desc: 'অ্যান্ড্রয়েড-ফার্স্ট ক্রিয়েটিভ ও ডকুমেন্ট স্টুডিও', lang: 'ডার্ট', stars: 0, url: 'https://github.com/soobujmiah/ggen', websiteUrl: null },
+      { name: 'datakhoj-android', desc: 'অ্যান্ড্রয়েডের জন্য সার্বজনীন ডেটা সংগ্রাহক', lang: 'কোটলিন', stars: 0, url: 'https://github.com/soobujmiah/datakhoj-android', websiteUrl: null },
+      { name: 'songjog', desc: 'বাংলা-ফার্স্ট ব্যবসায়িক কার্যক্রম অ্যাপ', lang: 'ডার্ট', stars: 0, url: 'https://github.com/soobujmiah/songjog', websiteUrl: null },
+      { name: 'apiloop', desc: 'প্রোভাইডার-নিরপেক্ষ এআই এপিআই গেটওয়ে', lang: 'পাইথন', stars: 0, url: 'https://github.com/soobujmiah/apiloop', websiteUrl: null },
+      { name: 'sobkichu', desc: 'বাংলাদেশি হাইপারলোকাল সুপার-অ্যাপ', lang: 'টাইপস্ক্রিপ্ট', stars: 0, url: 'https://github.com/soobujmiah/sobkichu', websiteUrl: null },
+      { name: 'docdr', desc: 'মোবাইল-ফার্স্ট অফলাইন ডকুমেন্ট ওয়ার্কস্পেস', lang: 'ডার্ট', stars: 0, url: 'https://github.com/soobujmiah/docdr', websiteUrl: null },
+      { name: 'faridpur-police-app', desc: 'জেলা পুলিশ ওয়েবসাইটের অফিসিয়াল ওয়েবভিউ অ্যাপ শেল', lang: 'ডার্ট', stars: 0, url: 'https://github.com/soobujmiah/faridpur-police-app', websiteUrl: null },
+      { name: 'iqra-online-mart', desc: 'দ্বিভাষিক ই-কমার্স স্টোরফ্রন্ট ডেমো', lang: 'জাভাস্ক্রিপ্ট', stars: 0, url: 'https://github.com/soobujmiah/iqra-online-mart', websiteUrl: 'https://soobujmiah.github.io/iqra-online-mart/' },
+      { name: 'arms', desc: 'এআরএম ৬৪ লিনাক্স টুল ক্যাটালগ + স্ট্যাটিক সাইট', lang: 'এইচটিএমএল', stars: 0, url: 'https://github.com/soobujmiah/arms', websiteUrl: 'https://soobujmiah.github.io/arms' },
     ],
   },
   experience: {
@@ -615,42 +663,42 @@ const bn: Content = {
       {
         period: 'মার্চ ২০২৫ – বর্তমান',
         role: 'অফিস অ্যাডমিনিস্ট্রেটর',
-        company: 'Rabeya Education Family',
+        company: 'রাবেয়া এডুকেশন ফ্যামিলি',
         location: 'সাভার, ঢাকা',
-        desc: 'দৈনিক কার্যক্রম, সোশ্যাল মিডিয়া, SEO, শিক্ষার্থী নিবন্ধন, ডকুমেন্ট ব্যবস্থাপনা, প্রচারণামূলক গ্রাফিক্স।',
+        desc: 'দৈনিক কার্যক্রম, সোশ্যাল মিডিয়া, সার্চ ইঞ্জিন অপটিমাইজেশন, শিক্ষার্থী নিবন্ধন, ডকুমেন্ট ব্যবস্থাপনা, প্রচারণামূলক গ্রাফিক্স।',
       },
       {
-        period: 'সেপ্টে ২০২২ – ফেব্রু ২০২৩',
+        period: 'সেপ্টেম্বর ২০২২ – ফেব্রুয়ারি ২০২৩',
         role: 'কম্পিউটার অপারেটর',
-        company: 'Monika Enterprise',
+        company: 'মনিকা এন্টারপ্রাইজ',
         location: 'সাভার, ঢাকা',
         desc: 'অনলাইন কার্যক্রম, ডকুমেন্ট প্রসেসিং, ফাইলিং সিস্টেম।',
       },
       {
         period: '২০২১ – ২০২২',
         role: 'কোঅর্ডিনেটর',
-        company: 'Abdullah Trading Pvt Ltd',
+        company: 'আবদুল্লাহ ট্রেডিং প্রাইভেট লিমিটেড',
         location: 'জুবাইল, সৌদি আরব',
         desc: 'সাইট অপারেশন, লজিস্টিক, টিম কমিউনিকেশন।',
       },
       {
         period: '২০২০ – ২০২১',
         role: 'ইলেকট্রিশিয়ান',
-        company: 'Saudi Electricity Company ও Khaled Juffali Company',
+        company: 'সৌদি ইলেকট্রিসিটি কোম্পানি ও খালেদ জুফফালি কোম্পানি',
         location: 'জেদ্দা, সৌদি আরব',
         desc: 'ইলেকট্রিক্যাল ইনস্টলেশন ও রক্ষণাবেক্ষণ।',
       },
       {
         period: '২০১৮ – ২০২০',
         role: 'প্রোগ্রেস রিপোর্টার',
-        company: 'Fadhli Gas Plant Project / PCMC',
+        company: 'ফাদলি গ্যাস প্ল্যান্ট প্রজেক্ট / পিসিএমসি',
         location: 'সৌদি আরব',
         desc: 'দৈনিক অগ্রগতি ডেটা, ডিজিটাইজেশন, কাঠামোবদ্ধ রিপোর্টিং।',
       },
       {
         period: '২০১৭ – ২০১৮',
         role: 'ফায়ার ওয়াচার',
-        company: 'Fadhli Gas Plant / Saudi Aramco',
+        company: 'ফাদলি গ্যাস প্ল্যান্ট / সৌদি আরামকো',
         location: 'সৌদি আরব',
         desc: 'অগ্নি-ঝুঁকি পর্যবেক্ষণ, দুর্ঘটনা প্রতিরোধ।',
       },
@@ -670,9 +718,9 @@ const bn: Content = {
     sub: 'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ টুলিং বা লোকাল-ফার্স্ট প্রোডাক্ট — কথা বলতে আগ্রহী।',
     channels: [
       { label: 'ইমেইল', value: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
-      { label: 'GitHub', value: 'soobujmiah', href: 'https://github.com/soobujmiah' },
+      { label: 'গিটহাব', value: 'soobujmiah', href: 'https://github.com/soobujmiah' },
       { label: 'টেলিগ্রাম', value: '@soobujmiah', href: 'https://t.me/soobujmiah' },
-      { label: 'LinkedIn', value: 'in/soobujmiah', href: 'https://linkedin.com/in/soobujmiah' },
+      { label: 'লিংকডইন', value: 'in/soobujmiah', href: 'https://linkedin.com/in/soobujmiah' },
     ],
   },
   nav: [
@@ -681,11 +729,30 @@ const bn: Content = {
     { scene: 5, label: 'স্ট্যাক' },
     { scene: 8, label: 'যোগাযোগ' },
   ],
-  header: { homeLabel: 'উপরে ফিরুন', githubLabel: 'GitHub', langLabel: 'ইংরেজি', langAria: 'ইংরেজিতে বদলান', githubAria: 'GitHub প্রোফাইল' },
-  ui: { carouselPrev: 'আগের', carouselNext: 'পরের', pageLabels: ['হোম', 'উপস্থিতি', 'পরিচিতি', 'নির্বাচিত কাজ', 'গবেষণা', 'প্রযুক্তিগত ফোকাস', 'ওপেন সোর্স', 'অভিজ্ঞতা', 'যোগাযোগ'], repoWord: 'রিপোজিটরি' },
+  header: {
+    homeLabel: 'হোমে ফিরুন',
+    githubLabel: 'গিটহাব',
+    langLabel: 'ইংরেজি',
+    langAria: 'ইংরেজিতে বদলান',
+    githubAria: 'গিটহাব প্রোফাইল',
+  },
+  ui: {
+    carouselPrev: 'আগের',
+    carouselNext: 'পরের',
+    pageLabels: ['হোম', 'উপস্থিতি', 'পরিচিতি', 'নির্বাচিত কাজ', 'গবেষণা', 'প্রযুক্তিগত ফোকাস', 'ওপেন সোর্স', 'অভিজ্ঞতা', 'যোগাযোগ'],
+    repoWord: 'রিপোজিটরি',
+    navOpen: 'সূচি খুলুন',
+    navTitle: 'সূচি',
+    navClose: 'সূচি বন্ধ করুন',
+    navHint: 'অ্যারো কী দিয়ে চলুন · এন্টার দিয়ে খুলুন · এসকেপে বন্ধ করুন',
+    current: 'এখানে আছেন',
+    pull: 'রিফ্রেশ করতে টানুন',
+    release: 'রিফ্রেশে ছেড়ে দিন',
+    refreshing: 'রিফ্রেশ হচ্ছে',
+  },
   footer: {
     built: 'ফোন থেকে তৈরি।',
-    claims: 'প্রতিটি দাবি CI বা বাস্তব-ডিভাইস প্রমাণে সমর্থিত।',
+    claims: 'প্রতিটি দাবি সিআই বা বাস্তব-ডিভাইস প্রমাণে সমর্থিত।',
   },
   preloader: { status: 'চালু হচ্ছে' },
 };

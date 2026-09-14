@@ -3,6 +3,7 @@
 import { Children, createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { motion, useInView, useMotionValue, useSpring, useVelocity, useTransform } from 'framer-motion';
 import { useLang, localizeDigits } from '@/app/language';
+import { sectionHref } from '@/app/sections';
 
 /* ═══════════════════════════════════════════════════════════════
    PAGE NAVIGATION — discrete pager: goToScene jumps to a page.
@@ -12,11 +13,14 @@ import { useLang, localizeDigits } from '@/app/language';
 interface NavValue {
   goToScene: (index: number) => void;
   goToTop: () => void;
+  /** Opens the section index overlay (the pager's own navigation). */
+  openNav: () => void;
 }
 
 const NavContext = createContext<NavValue>({
   goToScene: () => {},
   goToTop: () => {},
+  openNav: () => {},
 });
 
 export const NavProvider = NavContext.Provider;
@@ -238,6 +242,15 @@ export function ScrollProgress({ value }: { value: number }) {
   );
 }
 
+/** Three stacked rails — reads as "index", not "hamburger". */
+function IndexGlyph() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden>
+      <path d="M1 3h12M1 7h12M1 11h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════
    PAGE DOTS — vertical rail on desktop, mini row above the footer
    on phones.
@@ -254,38 +267,56 @@ export function PageDots({
   labels: string[];
   onGo: (index: number) => void;
 }) {
+  const { t } = useLang();
+  const { openNav } = useNav();
   const dots = Array.from({ length: total }, (_, i) => i);
   return (
     <>
-      {/* desktop rail */}
-      <nav
-        aria-label="Pages"
-        className="pager-dots-rail"
-      >
+      {/* desktop rail — the pager control, plus the index trigger */}
+      <nav aria-label={t.ui.navTitle} className="pager-dots-rail">
         {dots.map((i) => (
           <button
             key={i}
             type="button"
             onClick={() => onGo(i)}
-            aria-label={labels[i] ?? `Page ${i + 1}`}
+            aria-label={labels[i] ?? String(i + 1)}
             aria-current={i === active ? 'true' : undefined}
             data-magnetic
             className={`pager-dot${i === active ? ' pager-dot-active' : ''}`}
           />
         ))}
+        <button
+          type="button"
+          onClick={openNav}
+          aria-label={t.ui.navOpen}
+          aria-expanded={false}
+          data-magnetic
+          className="pager-index-trigger"
+        >
+          <IndexGlyph />
+        </button>
       </nav>
       {/* phone row */}
-      <nav aria-label="Pages" className="pager-dots-row">
+      <nav aria-label={t.ui.navTitle} className="pager-dots-row">
         {dots.map((i) => (
           <button
             key={i}
             type="button"
             onClick={() => onGo(i)}
-            aria-label={labels[i] ?? `Page ${i + 1}`}
+            aria-label={labels[i] ?? String(i + 1)}
             aria-current={i === active ? 'true' : undefined}
             className={`pager-dot-sm${i === active ? ' pager-dot-sm-active' : ''}`}
           />
         ))}
+        <button
+          type="button"
+          onClick={openNav}
+          aria-label={t.ui.navOpen}
+          aria-expanded={false}
+          className="pager-index-trigger pager-index-trigger-sm"
+        >
+          <IndexGlyph />
+        </button>
       </nav>
     </>
   );
@@ -479,12 +510,11 @@ export function Header() {
       transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6">
-        {/* Brand: links directly to GitHub profile, not portfolio home */}
+        {/* Brand mark returns to the site root — the portfolio is the
+            brand root of the ecosystem, so its own mark must lead home. */}
         <a
-          href="https://github.com/soobujmiah"
-          target="_blank"
-          rel="noreferrer"
-          aria-label={t.header.githubAria}
+          href={sectionHref(0)}
+          aria-label={t.header.homeLabel}
           className="font-mono text-sm font-medium tracking-tight"
           style={{ color: '#e4e2df' }}
           data-magnetic
@@ -495,7 +525,7 @@ export function Header() {
           {t.nav.map((l) => (
             <a
               key={l.scene}
-              href={`#scene-${l.scene}`}
+              href={sectionHref(l.scene)}
               onClick={(e) => {
                 e.preventDefault();
                 goToScene(l.scene);
@@ -546,9 +576,19 @@ export function Footer() {
         <p className="font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>
           © {localizeDigits(new Date().getFullYear(), lang)} {t.profile.nameFull}. {t.footer.built}
         </p>
-        <p className="font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>
-          {t.footer.claims}
-        </p>
+        {/* The promise is made checkable rather than merely asserted: the
+            link opens the repository's claim-verification log, where each
+            figure is tied to a commit, a CI run or a device record. */}
+        <a
+          href="https://github.com/soobujmiah/soobujmiah.github.io#claim-verification-log"
+          target="_blank"
+          rel="noreferrer"
+          data-magnetic
+          className="font-mono text-[10px] transition-colors duration-300 hover:text-[#4ade80]"
+          style={{ color: 'rgba(228,226,223,0.35)' }}
+        >
+          {t.footer.claims} <span aria-hidden>↗</span>
+        </a>
       </div>
     </footer>
   );

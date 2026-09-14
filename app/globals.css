@@ -11,8 +11,8 @@
   --accent-bright: #4ade80;
   --accent-glow: rgba(34, 197, 94, 0.18);
   --signal: #10b981;
-  --card: rgba(255, 255, 255, 0.02);
-  --card-hover: rgba(255, 255, 255, 0.04);
+  --card: rgba(6, 7, 6, 0.66);
+  --card-hover: rgba(6, 7, 6, 0.8);
   --green-soft: rgba(34, 197, 94, 0.08);
   --green-mid: rgba(34, 197, 94, 0.15);
 }
@@ -358,6 +358,9 @@ a, button {
   -webkit-text-stroke: 1.5px rgba(228, 226, 223, 0.08);
   user-select: none;
   pointer-events: none;
+  /* scroll-linked parallax; --page-scroll is published by components/Pager.tsx */
+  transform: translate3d(0, calc(var(--page-scroll, 0px) * -0.05), 0);
+  will-change: transform;
 }
 
 @supports not (-webkit-text-stroke: 1px black) {
@@ -482,68 +485,95 @@ a, button {
   min-width: 0;
 }
 
-/* ── matrix name (digital diffusion) ── */
-.matrix-name {
+/* ── signature name — digital reconstruction ──
+   The real name is always real DOM text on top (z-index 1); the
+   decode canvas sits underneath (z-index 0) and can never obscure
+   it. Interaction animates transform/opacity only. */
+.sig-name {
   position: relative;
   display: inline-flex;
   align-items: baseline;
-  gap: 0.02em;
-  background: transparent !important;
-  box-shadow: none !important;
+  isolation: isolate;
 }
 
-.matrix-letter {
-  display: inline-block;
-  will-change: transform, opacity, filter;
+.sig-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.sig-glyphs {
   position: relative;
-  background: transparent;
+  z-index: 1;
+  display: inline-flex;
 }
 
-.matrix-reveal {
-  /* entrance state — pushed down and invisible, animated by JS */
-}
-
-/* Ambient noise texture behind the name */
-.matrix-noise {
-  position: absolute;
-  inset: -30%;
-  pointer-events: none;
-  opacity: 0.035;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: noiseShift 0.5s steps(3, end) infinite;
-}
-
-@keyframes noiseShift {
-  0% { transform: translate(0, 0); }
-  33% { transform: translate(-3%, 2%); }
-  66% { transform: translate(2%, -2%); }
-  100% { transform: translate(0, 0); }
-}
-
-/* Digital particles container */
-.matrix-particles {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.matrix-particle {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: #4ade80;
-  border-radius: 50%;
+.sig-cell {
+  display: inline-block;
+  position: relative;
   opacity: 0;
-  animation: particleDrift 3s ease-in-out infinite;
+  transform: translate3d(0, 0.22em, 0);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.62s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
 }
 
-@keyframes particleDrift {
-  0% { opacity: 0; transform: translateY(20px) scale(0.5); }
-  20% { opacity: 0.6; }
-  80% { opacity: 0.3; }
-  100% { opacity: 0; transform: translateY(-50px) scale(0.2); }
+.sig-cell.sig-locked {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* reduced motion: a calm, fully designed static mark */
+.sig-static .sig-cell {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.sig-space {
+  width: 0.28em;
+}
+
+.sig-ink {
+  display: inline-block;
+  color: var(--fg);
+  transform: translate3d(var(--sx, 0px), var(--sy, 0px), 0);
+  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.sig-cell.sig-near .sig-ink {
+  color: var(--accent-bright);
+  text-shadow: 0 0 14px rgba(74, 222, 128, 0.4);
+}
+
+/* idle signal sweep — pure CSS, no JavaScript loop */
+.sig-sweep {
+  position: absolute;
+  inset: -6% -2%;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(100deg, transparent 42%, rgba(134, 239, 172, 0.15) 50%, transparent 58%);
+  transform: translate3d(-120%, 0, 0);
+  animation: sigSweep 9s cubic-bezier(0.55, 0, 0.45, 1) infinite;
+  animation-delay: 2.4s;
+}
+
+@keyframes sigSweep {
+  0%, 76% { transform: translate3d(-120%, 0, 0); opacity: 0; }
+  79% { opacity: 1; }
+  90% { transform: translate3d(120%, 0, 0); opacity: 0.85; }
+  91%, 100% { transform: translate3d(120%, 0, 0); opacity: 0; }
+}
+
+/* page change: a short re-decode flash, never a full replay */
+.sig-name.sig-flash .sig-sweep { animation: none; }
+.sig-name.sig-flash .sig-ink { animation: sigFlash 0.4s ease-out; }
+
+@keyframes sigFlash {
+  0% { color: #86efac; text-shadow: 0 0 18px rgba(74, 222, 128, 0.55); }
+  100% { color: var(--fg); text-shadow: none; }
 }
 
 /* ── keyboard focus ── */
@@ -559,19 +589,320 @@ button:active {
 }
 
 /* ── Bangla typography ──
-   Bengali-capable system stack (Android/Windows/macOS all ship one).
-   Wide letter-spacing breaks Indic-script shaping, so tracking is
-   collapsed whenever Bangla is active. */
+   A real Bengali webfont, loaded through next/font as
+   `--font-bengali`, replaces the old system-fallback stack (which
+   named 'Noto Sans Bengali' while nothing ever loaded it, so Bangla
+   fell through to a Latin-only face on most devices).
+
+   Indic metrics differ from Latin: matras above and descenders
+   below need more leading than the tight Latin line-heights, and wide
+   letter-spacing breaks Indic shaping. So when Bangla is active the
+   tracking collapses and the leading opens up — deliberately, not as
+   a side effect. */
 body.lang-bn {
-  font-family: 'Noto Sans Bengali', 'SolaimanLipi', 'Siyam Rupali', 'Nirmala UI', var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-bengali), var(--font-inter), system-ui, sans-serif;
+  line-height: 1.85;
 }
 
-body.lang-bn .font-mono {
-  font-family: 'Noto Sans Bengali', 'SolaimanLipi', ui-monospace, monospace;
+body.lang-bn .font-mono,
+body.lang-bn .page-numeral {
+  font-family: var(--font-bengali), var(--font-inter), system-ui, sans-serif;
 }
 
 body.lang-bn [class*="tracking-"] {
-  letter-spacing: 0.05em !important;
+  letter-spacing: 0.01em !important;
+}
+
+body.lang-bn h1,
+body.lang-bn h2,
+body.lang-bn h3 {
+  line-height: 1.34;
+  letter-spacing: 0 !important;
+}
+
+body.lang-bn .hero-name { line-height: 1.34; }
+
+body.lang-bn .hero-status { letter-spacing: 0.12em !important; }
+
+body.lang-bn .sig-glyphs { line-height: 1.34; }
+
+body.lang-bn p,
+body.lang-bn li,
+body.lang-bn span {
+  overflow-wrap: break-word;
+}
+
+/* ── hero hierarchy ──
+   One identity: status line → name → single professional descriptor
+   → what/why → where to explore. Nothing repeats. */
+.hero-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  color: var(--accent);
+}
+
+.hero-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
+  animation: statusPulse 3.4s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 0.45; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.hero-role {
+  color: rgba(228, 226, 223, 0.92);
+  letter-spacing: -0.01em;
+}
+
+/* ── pager index trigger — the pager's own navigation control ── */
+.pager-index-trigger {
+  width: 30px;
+  height: 30px;
+  margin-top: 8px;
+  border-radius: 9999px;
+  border: 1px solid rgba(228, 226, 223, 0.12);
+  background: rgba(6, 6, 8, 0.6);
+  color: rgba(228, 226, 223, 0.6);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+
+.pager-index-trigger:hover {
+  border-color: rgba(34, 197, 94, 0.45);
+  color: var(--accent-bright);
+  transform: scale(1.06);
+}
+
+.pager-index-trigger-sm {
+  width: 26px;
+  height: 26px;
+  margin-top: 0;
+  margin-left: 4px;
+}
+
+/* ── navigation overlay ──
+   The pager's index as a dialog. Real anchors to real routes. */
+.nav-overlay-root {
+  position: fixed;
+  inset: 0;
+  z-index: 100001;
+  pointer-events: none;
+  /* Hidden from the tab order once closed (the delay lets the exit
+     animation play first). Without this the rows would still be
+     focusable behind an aria-hidden dialog — an axe violation. */
+  visibility: hidden;
+  transition: visibility 0s linear 0.5s;
+}
+
+.nav-overlay-root[data-open='true'] {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.nav-overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 4, 3, 0.74);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.nav-overlay-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  margin: 0 auto;
+  width: min(560px, calc(100% - 1.25rem));
+  max-height: min(80vh, 680px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1.2rem 1.2rem 1rem;
+  border: 1px solid rgba(228, 226, 223, 0.09);
+  border-top: none;
+  border-radius: 0 0 18px 18px;
+  background: rgba(8, 9, 8, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+}
+
+.nav-overlay-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.nav-overlay-eyebrow {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+
+.nav-overlay-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+}
+
+.nav-overlay-close {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  border: 1px solid rgba(228, 226, 223, 0.12);
+  color: rgba(228, 226, 223, 0.7);
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.25s ease, color 0.25s ease;
+}
+
+.nav-overlay-close:hover {
+  border-color: rgba(228, 226, 223, 0.3);
+  color: var(--fg);
+}
+
+.nav-overlay-rail {
+  height: 1px;
+  background: rgba(228, 226, 223, 0.08);
+  overflow: hidden;
+  margin-bottom: 0.7rem;
+}
+
+.nav-overlay-rail-fill {
+  display: block;
+  height: 100%;
+  transform-origin: left;
+  background: linear-gradient(90deg, var(--accent), var(--accent-bright));
+}
+
+.nav-overlay-list ol {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-row {
+  display: grid;
+  grid-template-columns: 2.1rem 1fr auto 0.7rem;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.62rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  color: rgba(228, 226, 223, 0.66);
+  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+
+.nav-row:hover,
+.nav-row:focus-visible {
+  background: rgba(228, 226, 223, 0.035);
+  border-color: rgba(228, 226, 223, 0.1);
+  color: var(--fg);
+  transform: translateX(2px);
+}
+
+.nav-row-current {
+  background: rgba(34, 197, 94, 0.07);
+  border-color: rgba(34, 197, 94, 0.28);
+  color: var(--fg);
+}
+
+.nav-row-num {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: rgba(228, 226, 223, 0.35);
+}
+
+.nav-row-current .nav-row-num { color: var(--accent-bright); }
+
+.nav-row-label { font-size: 0.94rem; }
+
+.nav-row-here {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent-bright);
+  white-space: nowrap;
+}
+
+.nav-row-mark {
+  justify-self: end;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgba(228, 226, 223, 0.15);
+}
+
+.nav-row-current .nav-row-mark {
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
+}
+
+.nav-overlay-hint {
+  margin-top: 0.85rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+  text-align: center;
+  color: rgba(228, 226, 223, 0.32);
+}
+
+/* ── pull-to-refresh indicator ──
+   Sits below the header and slides out from under the chrome. */
+.ptr-host {
+  position: fixed;
+  left: 50%;
+  top: calc(60px + env(safe-area-inset-top));
+  z-index: 9996;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.ptr-host[data-visible='true'] { opacity: 1; }
+
+.ptr-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.75rem 0.3rem 0.4rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(228, 226, 223, 0.1);
+  background: rgba(8, 10, 8, 0.86);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.ptr-ring { flex: 0 0 auto; }
+
+.ptr-label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(228, 226, 223, 0.72);
+  white-space: nowrap;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -606,7 +937,11 @@ body.lang-bn [class*="tracking-"] {
     scroll-behavior: auto !important;
   }
 
-  .orb-1, .orb-2, .matrix-noise, .matrix-particle, .matrix-letter.glitching {
+  .orb-1, .orb-2, .hero-status-dot, .sig-sweep {
     animation: none !important;
   }
+
+  /* the name stays fully legible and interactive-but-still */
+  .sig-cell { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .sig-ink { transform: none !important; }
 }
