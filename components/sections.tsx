@@ -42,8 +42,6 @@ export function HeroScene({ reducedMotion, pageIndex = 0 }: { reducedMotion: boo
   return (
     <div className="page-fill">
       <PageNumeral index={0} />
-      <div className="orb orb-1" aria-hidden />
-      <div className="orb orb-2" aria-hidden />
 
       <div className="page-content flex flex-col items-center text-center">
         {/* 1 · where the work happens — a status line, not a second job title */}

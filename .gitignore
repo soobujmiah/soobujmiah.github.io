@@ -35,3 +35,4 @@ yarn-error.log*
 /.units-build/
 .units-tsconfig.json
 next-env.d.ts
+__pycache__/

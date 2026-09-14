@@ -124,51 +124,10 @@ a, button {
   background-clip: text;
 }
 
-/* ── glow orbs ── */
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-.orb-1 {
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(34, 197, 94, 0.12), transparent 70%);
-  top: -200px;
-  right: -200px;
-  animation: orbFloat 20s ease-in-out infinite;
-}
-
-.orb-2 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.08), transparent 70%);
-  bottom: -150px;
-  left: -150px;
-  animation: orbFloat 25s ease-in-out infinite reverse;
-}
-
-@keyframes orbFloat {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -40px) scale(1.05); }
-  66% { transform: translate(-20px, 20px) scale(0.95); }
-}
-
-/* ── grid lines ── */
-.grid-bg {
-  background-image:
-    linear-gradient(rgba(228, 226, 223, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(228, 226, 223, 0.025) 1px, transparent 1px);
-  background-size: 60px 60px;
-}
-
 /* ═══════════════════════════════════════════════════════════════
    DISCRETE PAGER — one full-screen page at a time, zero vertical
-   scrolling. Pages are transparent layers over the live canvas
-   background; gestures flip exactly one page (see app/page.tsx).
+   scrolling. Pages are transparent layers over the world-map
+   environment; gestures flip exactly one page (see app/page.tsx).
    ═══════════════════════════════════════════════════════════════ */
 
 .pager-root {
@@ -179,23 +138,98 @@ a, button {
   background: #050507;
 }
 
-/* live canvas background */
-.tech-bg {
+/* ── world map — the environment behind the identity ──
+   Cartographic contours only. There is no graticule, no tiling and
+   no box pattern here: the old 60px square grid was deleted at the
+   source, not hidden. Contrast stays deliberately far below the
+   name's, so the map can never compete with it. */
+.worldmap {
   position: absolute;
   inset: 0;
   z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: radial-gradient(145% 115% at 50% 6%, #06120d 0%, #04090a 46%, var(--bg) 100%);
+}
+
+/* deep-green atmosphere — a soft radial wash, never a panel */
+.worldmap-atmosphere {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(52% 44% at 50% 40%, rgba(16, 185, 129, 0.075), transparent 72%),
+    radial-gradient(32% 28% at 16% 80%, rgba(34, 197, 94, 0.045), transparent 70%),
+    radial-gradient(30% 26% at 86% 22%, rgba(16, 185, 129, 0.04), transparent 70%);
+}
+
+.worldmap-svg {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: block;
 }
 
-.pager-grid {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+.worldmap-drift {
+  transform-origin: 50% 46%;
+  animation: mapDrift 150s ease-in-out infinite;
 }
+
+@keyframes mapDrift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(-0.5%, -0.35%, 0) scale(1.03); }
+}
+
+.worldmap-land {
+  fill: rgba(16, 185, 129, 0.055);
+  stroke: rgba(52, 211, 153, 0.16);
+  stroke-width: 0.6;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* network hubs — restrained atmospheric signals */
+.worldmap-hub-core {
+  fill: rgba(74, 222, 128, 0.5);
+  animation: hubPulse 7.5s ease-in-out infinite;
+}
+
+.worldmap-hub-halo {
+  fill: none;
+  stroke: rgba(34, 197, 94, 0.12);
+  stroke-width: 0.7;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hubHalo 7.5s ease-in-out infinite;
+}
+
+.worldmap-hub-home .worldmap-hub-core { fill: var(--accent-bright); }
+.worldmap-hub-home .worldmap-hub-halo { stroke: rgba(34, 197, 94, 0.26); }
+
+.worldmap-link {
+  fill: none;
+  stroke: rgba(34, 197, 94, 0.09);
+  stroke-width: 0.55;
+  stroke-dasharray: 3 6;
+  animation: linkFlow 34s linear infinite;
+}
+
+@keyframes hubPulse {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 0.8; }
+}
+
+@keyframes hubHalo {
+  0%, 100% { opacity: 0.1; transform: scale(0.85); }
+  50%      { opacity: 0.28; transform: scale(1.15); }
+}
+
+@keyframes linkFlow {
+  to { stroke-dashoffset: -72; }
+}
+
+/* suspension: the map is decoration, so it stops when unseen */
+.worldmap[data-paused='true'] * { animation-play-state: paused; }
 
 .pager-vignette {
   position: absolute;
@@ -486,9 +520,15 @@ a, button {
 }
 
 /* ── signature name — digital reconstruction ──
+   The letters ARE the living object. Diffusion is applied per glyph
+   through CSS custom properties written by the pointer loop
+   (`--sx`, `--sy`, `--d`), so a disturbed letter fades, drifts and
+   hands over to fragments drawn inside its own box — then settles
+   back. There is no sweeping panel, no white flash and no
+   full-width overlay anywhere behind the name.
    The real name is always real DOM text on top (z-index 1); the
-   decode canvas sits underneath (z-index 0) and can never obscure
-   it. Interaction animates transform/opacity only. */
+   fragment canvas sits underneath (z-index 0) and can never obscure
+   it. Interaction animates transform/opacity/colour only. */
 .sig-name {
   position: relative;
   display: inline-flex;
@@ -538,42 +578,41 @@ a, button {
 .sig-ink {
   display: inline-block;
   color: var(--fg);
-  transform: translate3d(var(--sx, 0px), var(--sy, 0px), 0);
-  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease, text-shadow 0.3s ease;
+  transform: translate3d(var(--sx, 0px), var(--sy, 0px), 0) scale(calc(1 + var(--d, 0) * 0.05));
+  /* diffusion: a disturbed glyph dissolves toward its fragments… */
+  opacity: calc(1 - var(--d, 0) * 0.68);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.34s ease, color 0.3s ease,
+    text-shadow 0.3s ease;
 }
 
+/* …and while disturbed, the idle breath steps aside for the pointer */
 .sig-cell.sig-near .sig-ink {
+  animation: none;
   color: var(--accent-bright);
-  text-shadow: 0 0 14px rgba(74, 222, 128, 0.4);
+  text-shadow: 0 0 15px rgba(74, 222, 128, 0.32);
 }
 
-/* idle signal sweep — pure CSS, no JavaScript loop */
-.sig-sweep {
-  position: absolute;
-  inset: -6% -2%;
-  z-index: 2;
-  pointer-events: none;
-  opacity: 0;
-  background: linear-gradient(100deg, transparent 42%, rgba(134, 239, 172, 0.15) 50%, transparent 58%);
-  transform: translate3d(-120%, 0, 0);
-  animation: sigSweep 9s cubic-bezier(0.55, 0, 0.45, 1) infinite;
-  animation-delay: 2.4s;
+/* idle: a slow signal travelling letter to letter. Glyph-local,
+   colour/opacity only — deliberately not a sweeping panel. */
+.sig-decoded .sig-ink {
+  animation: sigSignal 9s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 0.42s);
 }
 
-@keyframes sigSweep {
-  0%, 76% { transform: translate3d(-120%, 0, 0); opacity: 0; }
-  79% { opacity: 1; }
-  90% { transform: translate3d(120%, 0, 0); opacity: 0.85; }
-  91%, 100% { transform: translate3d(120%, 0, 0); opacity: 0; }
+@keyframes sigSignal {
+  0%, 64%, 100% { color: var(--fg); opacity: 1; }
+  74% { color: var(--accent-bright); opacity: 0.88; }
 }
 
-/* page change: a short re-decode flash, never a full replay */
-.sig-name.sig-flash .sig-sweep { animation: none; }
-.sig-name.sig-flash .sig-ink { animation: sigFlash 0.4s ease-out; }
+/* page change: one short local decode pulse, never a full replay */
+.sig-cell.sig-pulse .sig-ink {
+  animation: sigPulse 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-@keyframes sigFlash {
-  0% { color: #86efac; text-shadow: 0 0 18px rgba(74, 222, 128, 0.55); }
-  100% { color: var(--fg); text-shadow: none; }
+@keyframes sigPulse {
+  0% { color: var(--accent-bright); opacity: 0.5; }
+  60% { color: var(--signal); opacity: 0.92; }
+  100% { color: var(--fg); opacity: 1; }
 }
 
 /* ── keyboard focus ── */
@@ -921,8 +960,6 @@ body.lang-bn span {
   a, button { cursor: pointer; }
   .cursor-pos { display: none; }
 
-  .orb-1 { width: 300px; height: 300px; top: -100px; right: -100px; }
-  .orb-2 { width: 250px; height: 250px; bottom: -80px; left: -80px; }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -937,11 +974,15 @@ body.lang-bn span {
     scroll-behavior: auto !important;
   }
 
-  .orb-1, .orb-2, .hero-status-dot, .sig-sweep {
+  /* the environment is static: no drift, no pulsing hubs, no flow */
+  .worldmap-drift, .worldmap-hub-core, .worldmap-hub-halo, .worldmap-link,
+  .hero-status-dot, .sig-ink {
     animation: none !important;
   }
 
-  /* the name stays fully legible and interactive-but-still */
+  /* the name stays fully legible and interactive-but-still: every
+     diffusion variable is pinned, so no calc() can shift a glyph */
+  .sig-name { --d: 0 !important; --sx: 0px !important; --sy: 0px !important; }
   .sig-cell { opacity: 1 !important; transform: none !important; transition: none !important; }
-  .sig-ink { transform: none !important; }
+  .sig-ink { transform: none !important; opacity: 1 !important; }
 }

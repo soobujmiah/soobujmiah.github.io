@@ -68,20 +68,19 @@ below verbatim. Both stay correct — the gate guarantees it.
     "releaseSeconds": 0.5,
     "pressSeconds": 0.1
   },
-  "gridDriftPx": 14,
   "canvas": {
-    "maxDpr": 1.5,
-    "minParticles": 24,
-    "maxParticles": 90,
-    "areaPerParticle": 22000
+    "maxDpr": 1.5
   },
   "name": {
     "decodeSeconds": 1.5,
     "lockSeconds": 0.55,
     "lockStaggerSeconds": 0.065,
-    "redecodeSeconds": 0.4,
     "pointerRadiusPx": 130,
-    "pointerMaxShiftPx": 5
+    "pointerMaxShiftPx": 5,
+    "fragmentsPerGlyph": 5,
+    "maxFragments": 72,
+    "fragmentLifeTicks": 34,
+    "fragmentCooldownMs": 150
   },
   "pullToRefresh": {
     "armPx": 12,
@@ -167,37 +166,49 @@ English tree. Neither language borrows the other's script.
 - Reveals: `0.7s cubic-bezier(0.16, 1, 0.3, 1)` fade-up; pages remount, so
   reveals replay on each entry.
 - Micro: 0.1–0.5s; magnetic links ease-out 0.12s, release 0.5s expo.
-- Environment responds to paging: background grid drifts 14px/page, canvas
-  emits a pulse ring, progress bar springs forward.
-- Animate **transform + opacity only** (compositor-friendly). Canvas: capped
-  DPR (≤1.5), modest particle counts, paused when hidden.
-- `prefers-reduced-motion`: instant transitions, static background frame, no
-  auto-advance, no glitch loops, and the signature name becomes a calm static
-  mark. Reduced motion removes animation, never functionality.
+- Environment responds to paging: the map drifts on a 150s cycle at a fixed
+  rate, progress bar springs forward, and the name takes one short *local*
+  decode pulse (never a full replay).
+- Animate **transform + opacity only** (compositor-friendly). The fragment
+  canvas is capped in DPR (≤1.5), fragment count and lifetime, and stops
+  entirely when nothing is disturbed.
+- `prefers-reduced-motion`: instant transitions, a fully static environment,
+  no auto-advance, no glitch loops, and the signature name becomes a calm
+  static mark. Reduced motion removes animation, never functionality.
 
 ## 5b. Signature name (`components/SignatureName.tsx`)
 
-The identity mark is the portfolio's centrepiece and follows its own rules:
+The identity mark is the portfolio's centrepiece and follows its own rules.
+**The letters are the living object** — every effect is glyph-local.
 
-- **Concept** — the name is a signal being resolved: a decode field of falling
-  glyphs sweeps across and locks glyph by glyph into precise typography.
+- **Concept** — `digital signal → diffusion → reconstruction → stable
+  identity`. A disturbed letter fades and drifts, hands over to Matrix-style
+  glyph fragments drawn *inside its own box*, then intelligently settles back
+  into exact typography.
+- **Nothing sweeps across the name.** There is no full-width overlay, no scan
+  bar, no panel and no light flash. Idle life is per-glyph (`sigSignal`, a slow
+  signal travelling letter to letter, colour/opacity only).
 - **Legibility first.** The real name is always real DOM text in the correct
-  font, selectable, painted *above* the decode canvas (canvas `z-index: 0`,
-  glyphs `z-index: 1`). The canvas can never obscure it.
+  font, selectable, painted *above* the fragment canvas (canvas `z-index: 0`,
+  glyphs `z-index: 1`). The canvas can never obscure it, and a dissolving glyph
+  only ever dips to ~32% opacity while its own fragments stand in.
 - **Grapheme-safe.** Clusters are produced by `Intl.Segmenter`, with a
-  combining-mark-aware fallback, so Bengali conjuncts and matras (`মি`, `য়া`)
+  combining-mark-aware fallback, so Bengali conjuncts and matras (`মি`, `ক্ষ`)
   are never split. Splitting them by code point would corrupt the shaping.
-- **Bounded cost.** The canvas runs for one ~1.85s sequence and then stops.
-  Idle motion is pure CSS (`sigSweep`). The pointer-proximity loop runs only
-  while a pointer is over the mark, is rAF-throttled, and writes CSS custom
-  properties rather than re-rendering React.
-- **Interaction states** — idle (slow sweep), pointer proximity (nearby
-  glyphs diffuse and converge back), page change (a 0.4s re-decode flash,
-  never a full replay), and recovery (pointer leave, cancel, blur, resize and
-  tab-hide all reset every glyph — nothing is ever left stuck).
-- Matrix influence is carried by **motion language**, not by rain: the decode
-  glyph set is digits plus a few katakana, and the palette stays in the green
-  family.
+- **Bounded cost.** One canvas sized to the name, DPR ≤1.5, a hard cap of 72
+  live fragments, per-glyph spawn cooldown, and an rAF loop that stops itself
+  the moment nothing is disturbed. The pointer writes CSS custom properties
+  (`--sx`, `--sy`, `--d`) and never re-renders React.
+- **Interaction states** — reveal (per-letter stabilisation out of its own
+  fragments), idle (glyph-local breathing), pointer proximity (local
+  diffusion that converges back), tap/drag (localised disturbance and a
+  rate-limited trail), page change (a short *local* decode pulse on a few
+  letters, never a full replay), and recovery (pointer leave, cancel, up,
+  blur, resize and tab-hide all reset every glyph).
+- **Palette** — green family only: `--accent`, `--accent-bright`, `--signal`,
+  and a single adjacent emerald. No near-white, no cyan, no rainbow.
+- Matrix influence is carried by **motion language**, not by rain: the fragment
+  set is digits plus a few katakana.
 
 ## 6. Interaction states
 
@@ -249,9 +260,27 @@ no model change needed.
 
 ## 9. Background & atmosphere
 
-Alive when idle, calm always: drifting particle network, pointer repulsion +
-glow, tap ripples, slow scanline, page-change pulse. No WebGL, no heavy
-shaders, no aggressive loops. Content always wins over effects.
+A **dark, deep-green global map** (`components/WorldMap.tsx`): Natural Earth
+1:110m land contours in a Miller projection, cropped to the inhabited
+latitudes and simplified by `tools/make-worldmap.py`. It is an environment,
+not a spectacle.
+
+Rules, so this never drifts back:
+
+- **No grid.** There is no graticule, no tiling, no box or square motif and no
+  repeating geometric overlay anywhere behind the hero. The previous 60px
+  square grid (`.grid-bg` / `.pager-grid`) was deleted at the source.
+- **No light layer.** Nothing behind the name may flash, panel, or bloom. The
+  previous near-white sweep band (`.sig-sweep`) and the `#86efac` page-change
+  flash were removed with their keyframes, not hidden.
+- **Contours only** — land fill `rgba(16,185,129,0.055)`, coastline hairline
+  `rgba(52,211,153,0.16)`. Contrast stays far below the name's.
+- **Signals, not noise** — nine projected network hubs and three faint links.
+  No pointer repulsion, no ripples, no scanline: the background must never
+  compete with the name for attention.
+- **Cost** — one inline SVG, zero canvas, zero rAF. Motion is CSS
+  transform/opacity, paused via `data-paused` when the tab is hidden and
+  disabled entirely under reduced motion.
 
 ## 10. Accessibility
 
@@ -318,7 +347,9 @@ components/Pager.tsx     discrete pager, gestures, paper-turn, route sync
 components/NavOverlay.tsx  the section index dialog
 components/PullToRefresh.tsx  real mobile pull-to-refresh gesture
 components/SignatureName.tsx  the hero identity mark (§5b)
-components/TechBackground.tsx  living canvas (§9)
+components/WorldMap.tsx   dark-green global map environment (§9)
+components/world-map-path.ts  generated land contours (do not edit)
+tools/make-worldmap.py    regenerates the contours from Natural Earth
 components/sections.tsx  the nine curated pages
 components/ui.tsx        cursor, magnetic, reveals, dots, carousel, chrome
 scripts/check-content.mjs        bilingual parity + two-way purity gate

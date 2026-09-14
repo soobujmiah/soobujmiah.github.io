@@ -16,7 +16,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { MOTION } from '@/app/design-tokens';
 import { PAGE_COUNT, SECTION_IDS, indexFromPathname, sectionHref } from '@/app/sections';
-import { TechBackground } from '@/components/TechBackground';
+import { WorldMap } from '@/components/WorldMap';
 import { LanguageProvider, useLang } from '@/app/language';
 import {
   NavProvider,
@@ -339,12 +339,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        <TechBackground pulseKey={index} reducedMotion={reducedMotion} />
-        <div
-          className="pager-grid grid-bg"
-          aria-hidden
-          style={reducedMotion ? {} : { transform: `translate3d(0, ${-index * MOTION.gridDriftPx}px, 0)` }}
-        />
+        <WorldMap reducedMotion={reducedMotion} />
         <div className="pager-vignette" aria-hidden />
 
         <AnimatePresence custom={dir} initial={false} mode="sync">

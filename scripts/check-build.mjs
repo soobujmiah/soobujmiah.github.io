@@ -176,8 +176,51 @@ if (existsSync(chunksDir)) {
   fail('out/_next/static not found');
 }
 
+/* ── hero environment, verified from what actually ships ──
+   Source-level guards live in check-design.mjs; these confirm the same
+   thing in the built output, where a stray rule or a client-only render
+   would otherwise slip through. */
+const homeHtml = textByRoute && existsSync(join(OUT, 'index.html')) ? readFileSync(join(OUT, 'index.html'), 'utf8') : '';
+if (homeHtml) {
+  if (!homeHtml.includes('worldmap-land')) {
+    fail('out/index.html has no world map — the hero environment must be server-rendered');
+  } else {
+    const hubs = (homeHtml.match(/worldmap-hub-core/g) || []).length;
+    if (hubs < 6) fail(`out/index.html ships only ${hubs} map signals (expected >= 6)`);
+    else ok(`hero world map is server-rendered (contours + ${hubs} signals), no grid, no light layer`);
+  }
+}
+
+const cssDir = join(OUT, '_next', 'static', 'css');
+if (existsSync(cssDir)) {
+  const sheets = readdirSync(cssDir).filter((f) => f.endsWith('.css'));
+  if (!sheets.length) fail('no CSS bundle found in out/_next/static/css');
+  let css = '';
+  for (const f of sheets) css += readFileSync(join(cssDir, f), 'utf8');
+  const banned = [
+    ['grid-bg', 'the 60px square grid'],
+    ['pager-grid', 'the grid overlay'],
+    ['sig-sweep', 'the sweeping light band'],
+    ['sigFlash', 'the light-flash keyframes'],
+    ['86efac', 'near-white mint ink'],
+    ['134,239,172', 'the near-white mint gradient'],
+    ['134, 239, 172', 'the near-white mint gradient'],
+    ['220,255,230', 'the near-white particle core'],
+    ['blur(80px)', 'the blurred glow layer'],
+  ];
+  const leaked = banned.filter(([needle]) => css.includes(needle));
+  if (leaked.length) {
+    for (const [needle, what] of leaked) fail(`shipped CSS still contains ${what} ("${needle}")`);
+  } else {
+    ok(`shipped CSS is free of the removed hero motifs (${sheets.length} sheet(s) scanned)`);
+  }
+  if (!/prefers-reduced-motion/.test(css)) fail('shipped CSS has no prefers-reduced-motion block');
+}
+
 if (failures > 0) {
   console.error(`\ncheck-build: ${failures} failure(s)`);
   process.exit(1);
 }
-console.log('\ncheck-build PASS (routes, deep links, SEO assets, and JS budget verified from the built artifact)');
+console.log(
+  '\ncheck-build PASS (routes, deep links, SEO assets, hero environment, and JS budget verified from the built artifact)'
+);

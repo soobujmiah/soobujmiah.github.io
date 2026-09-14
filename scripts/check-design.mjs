@@ -142,6 +142,81 @@ try {
   if (!/from '\.\/design-tokens'|from '@\/app\/design-tokens'/.test(layout)) {
     fail('app/layout.tsx must import its theme colour from design-tokens.ts rather than hard-coding it');
   }
+
+  /* ── 4. hero visual system ──
+     Regression guards for three concrete, reported defects: a near-white
+     band sweeping behind the name, a repeating square grid behind the
+     hero, and a blurred glow layer competing with it. Each was removed at
+     its source; these checks make sure none of them can come back
+     unnoticed. They assert removals, not taste. */
+  const tryRead = (rel) => (existsSync(join(ROOT, rel)) ? readFileSync(join(ROOT, rel), 'utf8') : '');
+  const removedMotifs = [
+    ['.grid-bg', 'the 60px square grid'],
+    ['pager-grid', 'the grid overlay behind the pages'],
+    ['sig-sweep', 'the sweeping light band behind the name'],
+    ['sigSweep', 'the sweep keyframes'],
+    ['sigFlash', 'the light-flash keyframes'],
+    ['sig-flash', 'the flash state class'],
+    ['86efac', 'near-white mint ink'],
+    ['134, 239, 172', 'the near-white mint gradient'],
+    ['134,239,172', 'the near-white mint gradient'],
+    ['220, 255, 230', 'the near-white particle core'],
+    ['220,255,230', 'the near-white particle core'],
+    ['orb-1', 'the blurred glow orb layer'],
+    ['orb-2', 'the blurred glow orb layer'],
+    ['TechBackground', 'the removed particle canvas'],
+    ['MatrixName', 'the removed name implementation'],
+  ];
+  for (const rel of [
+    'app/globals.css',
+    'components/SignatureName.tsx',
+    'components/WorldMap.tsx',
+    'components/Pager.tsx',
+    'components/sections.tsx',
+    'components/ui.tsx',
+  ]) {
+    const text = tryRead(rel);
+    if (!text) continue;
+    for (const [needle, what] of removedMotifs) {
+      if (text.includes(needle)) {
+        fail(`${rel} still references ${what} ("${needle}") — remove the source, do not hide the symptom`);
+      }
+    }
+  }
+
+  /* no rule targeting the name may paint a surface or stack a filter */
+  const ruleRe = /([^{}]+)\{([^}]*)\}/g;
+  let rule;
+  while ((rule = ruleRe.exec(css))) {
+    const selector = rule[1].trim().split('\n').pop().trim();
+    const body = rule[2];
+    if (!/\.sig-/.test(rule[1])) continue;
+    if (/(^|[;\s])background(-image|-color)?\s*:/.test(body)) {
+      fail(`app/globals.css paints a background on the name (${selector}) — the identity sits on the environment, never on its own panel`);
+    }
+    if (/(^|[;\s])filter\s*:/.test(body)) {
+      fail(`app/globals.css applies a filter to the name (${selector}) — no blur stacks on the identity`);
+    }
+  }
+
+  /* the replacement environment must actually exist and be wired up */
+  const worldMap = tryRead('components/WorldMap.tsx');
+  if (!worldMap) {
+    fail('components/WorldMap.tsx is missing — the hero environment must be the dark-green global map');
+  } else {
+    if (!/WORLD_LAND/.test(worldMap)) fail('components/WorldMap.tsx must render the generated land contours');
+    if (!/data-paused/.test(worldMap)) fail('components/WorldMap.tsx must suspend its animation when the tab is hidden');
+    if (!/reducedMotion/.test(worldMap)) fail('components/WorldMap.tsx must accept a reduced-motion path');
+  }
+  if (!/from '@\/components\/WorldMap'/.test(tryRead('components/Pager.tsx'))) {
+    fail('components/Pager.tsx must mount WorldMap as the page background');
+  }
+  if (!existsSync(join(ROOT, 'components', 'world-map-path.ts'))) {
+    fail('components/world-map-path.ts is missing — run tools/make-worldmap.py');
+  }
+  if (!existsSync(join(ROOT, 'tools', 'make-worldmap.py'))) {
+    fail('tools/make-worldmap.py is missing — the contour data would no longer be reproducible');
+  }
 } finally {
   rmSync(tmp, { recursive: true, force: true });
 }
@@ -150,4 +225,6 @@ if (failures > 0) {
   console.error(`check-design: ${failures} failure(s)`);
   process.exit(1);
 }
-console.log('check-design PASS (design-tokens.ts = DESIGN_SYSTEM.md = globals.css :root = themeColor)');
+console.log(
+  'check-design PASS (design-tokens.ts = DESIGN_SYSTEM.md = globals.css :root = themeColor · hero system: no grid, no light layer, world map wired)'
+);

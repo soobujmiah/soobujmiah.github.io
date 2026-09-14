@@ -42,18 +42,23 @@ export const MOTION = {
   reveal: { seconds: 0.7, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' },
   /** Magnetic link pointer-follow / release. */
   magnetic: { followSeconds: 0.12, releaseSeconds: 0.5, pressSeconds: 0.1 },
-  /** Background grid drift per page (px) — computed from yPercent maths. */
-  gridDriftPx: 14,
   /** Canvas budget. */
-  canvas: { maxDpr: 1.5, minParticles: 24, maxParticles: 90, areaPerParticle: 22000 },
-  /** Signature name decode sequence. */
+  canvas: { maxDpr: 1.5 },
+  /** Signature name — glyph-local diffusion budget. */
   name: {
     decodeSeconds: 1.5,
     lockSeconds: 0.55,
     lockStaggerSeconds: 0.065,
-    redecodeSeconds: 0.4,
     pointerRadiusPx: 130,
     pointerMaxShiftPx: 5,
+    /** Fragments scattered inside one glyph on reveal / tap. */
+    fragmentsPerGlyph: 5,
+    /** Hard ceiling on live fragments across the whole name. */
+    maxFragments: 72,
+    /** Fragment lifetime in animation ticks (~60/s). */
+    fragmentLifeTicks: 34,
+    /** Minimum ms between trail bursts on the same glyph. */
+    fragmentCooldownMs: 150,
   },
   /** Pull-to-refresh gesture. */
   pullToRefresh: {
