@@ -163,6 +163,7 @@ export interface Content {
     carouselNext: string;
     pageLabels: string[];
     repoWord: string;
+    liveSiteWord: string;
     navOpen: string;
     navTitle: string;
     navClose: string;
@@ -445,6 +446,7 @@ const en: Content = {
     carouselNext: 'Next',
     pageLabels: ['Home', 'Presence', 'About', 'Featured work', 'Research', 'Technical focus', 'Open source', 'Experience', 'Contact'],
     repoWord: 'repository',
+    liveSiteWord: 'live site',
     navOpen: 'Open section index',
     navTitle: 'Index',
     navClose: 'Close index',
@@ -741,6 +743,7 @@ const bn: Content = {
     carouselNext: 'পরের',
     pageLabels: ['হোম', 'উপস্থিতি', 'পরিচিতি', 'নির্বাচিত কাজ', 'গবেষণা', 'প্রযুক্তিগত ফোকাস', 'ওপেন সোর্স', 'অভিজ্ঞতা', 'যোগাযোগ'],
     repoWord: 'রিপোজিটরি',
+    liveSiteWord: 'লাইভ সাইট',
     navOpen: 'সূচি খুলুন',
     navTitle: 'সূচি',
     navClose: 'সূচি বন্ধ করুন',

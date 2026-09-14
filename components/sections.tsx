@@ -267,7 +267,21 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
               <span className="font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>{localizeDigits(`0${index + 1}`, lang)}</span>
               <span className="font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>{project.year}</span>
             </div>
-            <h3 className="text-xl sm:text-2xl font-semibold tracking-tight" style={{ color: '#e4e2df' }}>{project.name}</h3>
+            <h3 className="text-xl sm:text-2xl font-semibold tracking-tight" style={{ color: '#e4e2df' }}>
+              {project.websiteUrl ? (
+                <a
+                  href={project.websiteUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="project-name-link"
+                  aria-label={`${project.name} — ${t.ui.liveSiteWord}`}
+                >
+                  {project.name}
+                </a>
+              ) : (
+                project.name
+              )}
+            </h3>
             <p className="mt-0.5 text-xs" style={{ color: project.accent }}>{project.tagline}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
