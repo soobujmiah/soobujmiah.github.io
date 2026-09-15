@@ -107,7 +107,7 @@ below were last re-verified **2026-09-13** against live repository state:
 | Ternux: Blender 4.3.2 on Zink/Adreno/Turnip | `docs/BENCHMARKS.md` + `docs/USAGE.md` at live head |
 | Songjog: 94 tests green on CI | CI green at live head `742ae5b`; device Record 5 verified 2026-09-12 |
 | ADT: end-to-end ARM64 APK pipeline | 3 published releases (v35.0.2/v36.0.0/v37.0.0) + device validation |
-| Selected repos (7 + GitHub route) | Curated subset of the 12 site-eligible repos (14 public − profile repo − this site); featured work not repeated. Live API listing, 2026-09-13 |
+| Selected repos (6 + GitHub route) | Curated subset of the 11 repos listed in content (12 site-eligible − faridpur-police-app, omitted by owner decision); applied-first ordering, featured work not repeated. Live API listing, 2026-09-16 |
 | Live-site links (ternux, iqra, arms) | `has_pages=true` via live GitHub API, 2026-09-13 |
 
 Re-verify before reusing any figure professionally if significant time has passed.

@@ -25,10 +25,14 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: { params: { section: string } }): Metadata {
   const i = indexForSlug(params.section);
   if (i === null) return {};
-  const label = content.en.ui.pageLabels[i];
+  /* Unique, factual per-route metadata. Titles and descriptions are
+     authored once in app/content.ts (seo.sections, aligned with
+     SECTION_IDS) so the route, the sitemap, the nav and the metadata
+     can never drift apart. */
+  const seo = content.en.seo.sections[i];
   const url = new URL(sectionHref(i), SITE_ORIGIN).href;
-  const title = `${label} — ${content.en.profile.nameFull}`;
-  const description = `${label} — ${content.en.profile.title}. ${content.en.hero.intro}`;
+  const title = seo.title;
+  const description = seo.description;
   return {
     title,
     description,

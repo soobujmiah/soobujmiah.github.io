@@ -60,7 +60,7 @@ export function HeroScene({ reducedMotion, pageIndex = 0 }: { reducedMotion: boo
           <SignatureName text={t.profile.nameFull} reducedMotion={reducedMotion} pulseKey={pageIndex} />
         </h1>
 
-        {/* 3 · what I do — exactly one professional identity treatment */}
+        {/* 3 · what I am — exactly one professional identity treatment */}
         <motion.p
           className="hero-role mt-5 text-[13px] font-medium sm:text-sm"
           initial={{ opacity: 0, y: 14 }}
@@ -68,6 +68,17 @@ export function HeroScene({ reducedMotion, pageIndex = 0 }: { reducedMotion: boo
           transition={{ delay: 1.6, duration: 0.7 }}
         >
           {t.profile.title}
+        </motion.p>
+
+        {/* 3b · the specialization line — the identity's second half */}
+        <motion.p
+          className="hero-tagline mt-2.5 font-mono text-[10px] leading-relaxed tracking-[0.18em] sm:text-[11px]"
+          style={{ color: '#4ade80' }}
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.68, duration: 0.7 }}
+        >
+          {t.profile.tagline}
         </motion.p>
 
         {/* 4 · what I build, and why it is credible */}
@@ -142,9 +153,14 @@ export function StatsScene() {
       <PageNumeral index={1} />
       <div className="page-content page-content-wide flex flex-col items-center">
         <Reveal>
-          <p className="ph-e font-mono text-[10px] uppercase tracking-[0.3em] mb-6 text-center" style={{ color: '#22c55e' }}>
+          <p className="ph-e font-mono text-[10px] uppercase tracking-[0.3em] mb-3 text-center" style={{ color: '#22c55e' }}>
             {t.presence.eyebrow}
           </p>
+        </Reveal>
+        <Reveal delay={0.06}>
+          <h1 className="ph-h text-[clamp(1.35rem,5.2vw,2.6rem)] font-semibold leading-[1.12] tracking-tight max-w-3xl mb-6 text-center" style={{ color: '#e4e2df' }}>
+            {t.presence.heading}
+          </h1>
         </Reveal>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 w-full">
           {t.presence.items.map((p, i) => (
@@ -166,7 +182,10 @@ export function StatsScene() {
   );
 }
 
-/* ── shared compact eyebrow + heading ── */
+/* ── shared compact eyebrow + heading ──
+   Each section route server-renders exactly one scene, and the pager
+   keeps only one scene in the DOM, so every page carries exactly one
+   <h1>: the hero name on home, the section topic everywhere else. */
 
 function PageHeading({ eyebrow, heading }: { eyebrow: string; heading: string }) {
   return (
@@ -177,9 +196,9 @@ function PageHeading({ eyebrow, heading }: { eyebrow: string; heading: string })
         </p>
       </Reveal>
       <Reveal delay={0.06}>
-        <h2 className="ph-h text-[clamp(1.35rem,5.2vw,2.6rem)] font-semibold leading-[1.12] tracking-tight max-w-2xl mb-4 sm:mb-6" style={{ color: '#e4e2df' }}>
+        <h1 className="ph-h text-[clamp(1.35rem,5.2vw,2.6rem)] font-semibold leading-[1.12] tracking-tight max-w-2xl mb-4 sm:mb-6" style={{ color: '#e4e2df' }}>
           {heading}
-        </h2>
+        </h1>
       </Reveal>
     </>
   );
@@ -205,6 +224,21 @@ export function AboutScene() {
                 </Reveal>
               ))}
             </div>
+            {/* Engineering method, as working principles — the same
+                discipline the evidence lines on the work page rely on. */}
+            <Reveal delay={0.13}>
+              <div className="flex flex-wrap gap-1.5 mb-5">
+                {t.about.principles.map((p) => (
+                  <span
+                    key={p}
+                    className="rounded-full px-2.5 py-1 font-mono text-[10px]"
+                    style={{ border: '1px solid rgba(34,197,94,0.25)', color: 'rgba(228,226,223,0.6)', background: 'rgba(34,197,94,0.05)' }}
+                  >
+                    {p}
+                  </span>
+                ))}
+              </div>
+            </Reveal>
             <Reveal delay={0.15}>
               <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl backdrop-blur-md" style={{ border: '1px solid rgba(228,226,223,0.08)', background: 'rgba(228,226,223,0.06)' }}>
                 {t.about.facts.map((f) => (
@@ -518,7 +552,7 @@ export function ResearchScene() {
       <PageNumeral index={4} />
       <div className="page-content page-content-wide">
         <PageHeading eyebrow={t.research.eyebrow} heading={t.research.heading} />
-        <div className="grid gap-3 sm:grid-cols-2 min-[1400px]:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {t.research.entries.map((r, i) => (
             <Reveal key={r.title} delay={0.08 + i * 0.06}>
               <div
@@ -583,8 +617,16 @@ function RepoCard({ repo, liveLabel, codeLabel }: { repo: Repo; liveLabel: strin
       className="repo-card dense-card flex flex-col rounded-xl p-4 text-left backdrop-blur-md h-full"
       style={{ border: '1px solid rgba(228,226,223,0.08)', background: CARD_BG }}
     >
-      <div className="flex items-center gap-2 mb-1.5">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1.5">
         <h3 className="font-mono text-xs font-semibold transition-colors duration-300" style={{ color: '#e4e2df' }}>{repo.name}</h3>
+        {repo.tier === 'applied' && (
+          <span
+            className="rounded-full px-2 py-0.5 font-mono text-[9px]"
+            style={{ border: '1px solid rgba(34,197,94,0.3)', color: '#4ade80' }}
+          >
+            {t.openSource.appliedBadge}
+          </span>
+        )}
         {repo.stars > 0 && <span className="font-mono text-[9px]" style={{ color: 'rgba(228,226,223,0.4)' }}>★ {localizeDigits(repo.stars, lang)}</span>}
       </div>
       <p className="flex-1 text-[11px] leading-relaxed mb-2.5" style={{ color: 'rgba(228,226,223,0.55)' }}>{repo.desc}</p>
@@ -740,6 +782,24 @@ export function ExperienceScene() {
         <div className="grid gap-6 lg:grid-cols-[1fr_1.6fr] lg:gap-12">
           <div>
             <PageHeading eyebrow={t.experience.eyebrow} heading={t.experience.heading} />
+            {/* Practical professional layer — deliberately separate
+                from the engineering identity on the work pages. */}
+            <Reveal delay={0.1}>
+              <p className="font-mono text-[9px] uppercase tracking-wider mb-2" style={{ color: 'rgba(228,226,223,0.4)' }}>
+                {t.experience.services.label}
+              </p>
+              <div className="flex flex-wrap gap-1.5 max-w-md">
+                {t.experience.services.items.map((s) => (
+                  <span
+                    key={s}
+                    className="rounded-full px-2.5 py-1 font-mono text-[10px]"
+                    style={{ border: '1px solid rgba(228,226,223,0.09)', color: 'rgba(228,226,223,0.55)', background: 'rgba(8,10,8,0.45)' }}
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </Reveal>
           </div>
           <div>
             {/* phones: accordion, one story at a time */}
@@ -789,11 +849,11 @@ export function ContactScene() {
               </p>
             </Reveal>
             <Reveal delay={0.06}>
-              <h2 className="ph-h text-[clamp(1.7rem,7vw,3.2rem)] font-semibold leading-[1.1] tracking-tight mb-4" style={{ color: '#e4e2df' }}>
+              <h1 className="ph-h text-[clamp(1.7rem,7vw,3.2rem)] font-semibold leading-[1.1] tracking-tight mb-4" style={{ color: '#e4e2df' }}>
                 {t.contact.headingA}
                 <br />
                 <span className="gradient-text">{t.contact.headingB}</span>
-              </h2>
+              </h1>
             </Reveal>
             <Reveal delay={0.12}>
               <p className="mx-auto lg:mx-0 max-w-md text-sm" style={{ color: 'rgba(228,226,223,0.6)' }}>

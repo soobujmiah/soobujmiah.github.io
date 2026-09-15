@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { content, type Content, type Lang } from './content';
+import { indexFromPathname } from './sections';
 
 const STORAGE_KEY = 'sobuj-portfolio-lang';
 
@@ -40,15 +41,27 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /* Keep <html lang>, tab title, meta description, and body font-stack
-     in sync so each language is fully itself. */
+     in sync so each language is fully itself. Title and description
+     follow the section the visitor is on (seo.sections, aligned with
+     SECTION_IDS) so the live document matches the server-rendered
+     metadata of the current route in either language. */
   useEffect(() => {
     try {
       document.documentElement.lang = lang === 'bn' ? 'bn' : 'en';
       document.body.classList.toggle('lang-bn', lang === 'bn');
-      document.title = content[lang].meta.title;
+      let i = 0;
+      try {
+        i = indexFromPathname(window.location.pathname);
+      } catch {
+        /* fall back to home metadata */
+      }
+      const seo = content[lang].seo.sections[i] ?? content[lang].seo.sections[0];
+      /* Mirror the server's metadata template: home keeps its full
+         title; section topics get the name appended. */
+      document.title = i === 0 ? seo.title : `${seo.title} — ${content[lang].profile.nameFull}`;
       document
         .querySelector('meta[name="description"]')
-        ?.setAttribute('content', content[lang].meta.description);
+        ?.setAttribute('content', seo.description);
     } catch {
       /* non-fatal: document unavailable */
     }

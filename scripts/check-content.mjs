@@ -60,13 +60,15 @@ const IDENTIFIER_PATHS = new Set([
   'work.projects[].websiteUrl',
   'work.projects[].accent',
   'work.nowBuilding.url',
-  /* machine enum consumed by CSS, not rendered — `statusLabel` is the
-     visible string and stays under the purity rule */
+  /* machine enums consumed by logic/CSS, not rendered as prose —
+     `statusLabel` / the badge labels are the visible strings and stay
+     under the purity rule */
   'research.entries[].status',
   'openSource.selected[]',
   'openSource.repos[].name',
   'openSource.repos[].url',
   'openSource.repos[].websiteUrl',
+  'openSource.repos[].tier',
 ]);
 
 /* Self-test: if either predicate ever stops catching its own
@@ -228,6 +230,11 @@ try {
   for (const lang of ['en', 'bn']) {
     const tree = content[lang];
     if (tree.ui.pageLabels.length !== 9) fail(`${lang}.ui.pageLabels length != 9`);
+    /* per-route search metadata must cover every section route */
+    if (tree.seo.sections.length !== 9) fail(`${lang}.seo.sections length != 9`);
+    for (const s of tree.seo.sections) {
+      if (!s.title || !s.description) fail(`${lang}.seo.sections has an entry missing title/description`);
+    }
     for (const l of tree.nav) {
       if (!Number.isInteger(l.scene) || l.scene < 0 || l.scene > 8) {
         fail(`${lang}.nav scene out of range: ${l.scene}`);

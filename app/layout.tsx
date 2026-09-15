@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono, Noto_Sans_Bengali, Space_Grotesk } from 'next/font/google';
 import { BRAND } from './design-tokens';
+import { content } from './content';
 import './globals.css';
 
 /* Latin UI + mono, loaded through next/font. */
@@ -38,40 +39,57 @@ const display = Space_Grotesk({
   display: 'swap',
 });
 
-const TITLE = 'Sobuj Miah — Software Developer & On-Device AI Systems Builder';
-const DESCRIPTION =
-  'On-device AI, Android, Linux, ARM64, GPU/NPU acceleration. Self-taught systems builder working from an Android phone — every claim backed by CI or real-device evidence.';
-const OG_IMAGE = { url: '/og.png', width: 1200, height: 630, alt: 'Sobuj Miah — on-device AI systems builder' };
+/* ── Metadata derives from content.ts — the single source of truth.
+      Home title/description come from seo.sections[0] (kept identical
+      to meta), so the server render and the client-side language
+      switch can never drift apart. Section routes override via
+      app/[section]/page.tsx. ────────────────────────────────────── */
+const en = content.en;
+const HOME = en.seo.sections[0];
+const ORIGIN = 'https://soobujmiah.github.io';
+const OG_IMAGE = { url: '/og.png', width: 1200, height: 630, alt: 'Sobuj Miah — independent systems builder, on-device AI and ARM64 systems' };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://soobujmiah.github.io'),
-  title: TITLE,
-  description: DESCRIPTION,
+  metadataBase: new URL(ORIGIN),
+  /* Home carries the full identity title; section routes return their
+     topic title and the template appends the name, so every route's
+     <title> names the author (a rule check-build enforces). */
+  title: {
+    default: HOME.title,
+    template: `%s — ${en.profile.nameFull}`,
+  },
+  description: HOME.description,
+  /* Identity + specialization cluster. Site-level only; pages carry no
+     keyword stuffing. */
   keywords: [
-    'Sobuj Miah', 'on-device AI', 'Android', 'ARM64', 'local LLM',
-    'Vulkan', 'NPU', 'Hexagon', 'llama.cpp', 'Flutter', 'Kotlin', 'Termux',
-    'সবুজ মিয়া',
+    'Sobuj Miah', 'সবুজ মিয়া', 'soobujmiah',
+    'independent systems builder', 'on-device AI', 'local LLM', 'local AI',
+    'Android systems', 'ARM64 Linux', 'Linux on Android', 'native tooling',
+    'Android development on ARM64', 'mobile systems',
+    'llama.cpp', 'GGUF', 'Vulkan', 'Mesa', 'Turnip', 'Adreno',
+    'Qualcomm', 'Hexagon', 'QNN', 'Termux', 'PRoot', 'Debian',
+    'Flutter', 'Dart', 'Kotlin', 'JNI', 'Android NDK', 'GitHub Actions',
   ],
-  authors: [{ name: 'Sobuj Miah', url: 'https://soobujmiah.github.io' }],
-  creator: 'Sobuj Miah',
+  authors: [{ name: en.profile.nameFull, url: ORIGIN }],
+  creator: en.profile.nameFull,
   openGraph: {
     type: 'website',
     locale: 'en_US',
     alternateLocale: 'bn_BD',
-    url: 'https://soobujmiah.github.io',
-    siteName: 'Sobuj Miah',
-    title: TITLE,
-    description: DESCRIPTION,
+    url: ORIGIN,
+    siteName: en.profile.nameFull,
+    title: HOME.title,
+    description: HOME.description,
     images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
-    title: TITLE,
-    description: DESCRIPTION,
+    title: HOME.title,
+    description: HOME.description,
     images: [OG_IMAGE.url],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: 'https://soobujmiah.github.io' },
+  alternates: { canonical: ORIGIN },
 };
 
 export const viewport: Viewport = {
@@ -80,32 +98,92 @@ export const viewport: Viewport = {
   colorScheme: 'dark',
 };
 
-const personJsonLd = {
+/* ── Structured data: one graph that names the entity, the profile,
+      the site, and the showcased work. Every value is visible on the
+      pages — nothing here is a claim the site does not make. ────── */
+const projects = [
+  ...en.work.projects.map((p) => ({ name: p.name, description: `${p.tagline}. ${p.description}`, url: p.repo })),
+  { name: en.work.nowBuilding.name, description: en.work.nowBuilding.description, url: en.work.nowBuilding.url },
+];
+
+const jsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'Person',
-  name: 'Sobuj Miah',
-  alternateName: 'সবুজ মিয়া',
-  url: 'https://soobujmiah.github.io',
-  jobTitle: 'Independent Software Developer & On-Device AI Systems Builder',
-  address: {
-    '@type': 'PostalAddress',
-    addressLocality: 'Dhaka',
-    addressCountry: 'BD',
-  },
-  sameAs: [
-    'https://github.com/soobujmiah',
-    'https://linkedin.com/in/soobujmiah',
-    'https://t.me/soobujmiah',
-  ],
-  knowsLanguage: ['bn', 'en', 'hi', 'ur', 'ar'],
-  knowsAbout: [
-    'On-device AI',
-    'Android systems',
-    'ARM64 Linux',
-    'llama.cpp',
-    'Vulkan',
-    'Flutter',
-    'Kotlin',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${ORIGIN}/#website`,
+      url: ORIGIN,
+      name: en.profile.nameFull,
+      publisher: { '@id': `${ORIGIN}/#person` },
+      inLanguage: ['en', 'bn'],
+    },
+    {
+      '@type': 'ProfilePage',
+      '@id': `${ORIGIN}/#profilepage`,
+      url: ORIGIN,
+      mainEntity: { '@id': `${ORIGIN}/#person` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${ORIGIN}/#person`,
+      name: en.profile.nameFull,
+      alternateName: 'সবুজ মিয়া',
+      url: ORIGIN,
+      jobTitle: `${en.profile.title} — ${en.profile.tagline}`,
+      description: en.meta.description,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Dhaka',
+        addressCountry: 'BD',
+      },
+      sameAs: [
+        en.profile.github,
+        en.profile.linkedin,
+        `https://t.me/${en.profile.telegram.replace(/^@/, '')}`,
+      ],
+      knowsLanguage: ['bn', 'en', 'hi', 'ur', 'ar'],
+      knowsAbout: [
+        'On-device AI',
+        'Local LLM inference',
+        'Android systems',
+        'ARM64 Linux',
+        'Linux on Android',
+        'Native tooling',
+        'Consent-driven Android automation',
+        'llama.cpp',
+        'GGUF',
+        'Vulkan',
+        'Mesa Turnip',
+        'Zink',
+        'Adreno',
+        'Qualcomm Hexagon',
+        'Termux',
+        'PRoot',
+        'Debian',
+        'Flutter',
+        'Dart',
+        'Kotlin',
+        'Android NDK',
+        'GitHub Actions',
+      ],
+    },
+    {
+      '@type': 'ItemList',
+      name: 'Showcased projects',
+      description: 'Flagship and active projects presented on the work page.',
+      numberOfItems: projects.length,
+      itemListElement: projects.map((p, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        item: {
+          '@type': 'SoftwareApplication',
+          name: p.name,
+          description: p.description,
+          url: p.url,
+          operatingSystem: 'Android',
+        },
+      })),
+    },
   ],
 };
 
@@ -115,7 +193,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         {/* The identity mark's reveal is scripted. Without JS the glyphs
             would sit at their pre-reveal opacity, so the name is pinned
