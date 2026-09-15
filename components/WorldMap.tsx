@@ -41,9 +41,22 @@
    app/geo.ts — never hand-placed. `check-units` asserts the origin
    point falls inside the projected Bangladesh outline.
 
+   Arrival
+   -------
+   Two sections can legitimately share a country (a work history is not
+   one city), so a country tint alone cannot say where a page is. Every
+   non-origin section therefore carries a projected marker on its real
+   coordinates plus a small label naming the place, in the reader's
+   language. The camera centres that point, `check-units` asserts it
+   lands on the frame's centre for phone and desktop viewports, and the
+   ink, label and route hand over together at 55% of the flight — so a
+   destination is never lit before its own geography arrives, and the
+   previous one is never still lit after it has left.
+
    Accessibility: the map is decoration (`aria-hidden`), but the
    active geography is also announced as real text (sr-only focus
-   line), so the focus never exists only visually.
+   line, polite live region, following the route rather than the
+   animation), so the focus never exists only visually.
    ═══════════════════════════════════════════════════════════════ */
 
 import { useEffect, useRef, useState } from 'react';
@@ -56,9 +69,10 @@ import {
   HUB_POINTS,
   MICRO_FOCUS,
   ORIGIN_POINT,
-  clampCamera,
-  focusCamera,
+  cameraFor,
   projectPoint,
+  projectToScreen,
+  type Camera,
   type PageFocus,
 } from '@/app/geo';
 import { useLang } from '@/app/language';
@@ -81,22 +95,22 @@ const PACKETS = LINKS.map((d, i) => ({ d, dur: 7 + i * 2.4, begin: 1.2 + i * 1.9
 /** Country shapes are static; memoised so re-renders never re-map 171 paths. */
 const COUNTRY_ELEMENTS = Object.entries(COUNTRY_PATHS).map(([iso, d]) => ({ iso, d }));
 
-type Cam = { x: number; y: number; hw: number };
-
 const FLIGHT_MS = 1250;
+
+/* The country ink, the arrival label and the route change hands as the
+   camera arrives, not as the page turns. A destination that lights up
+   while the previous geography still fills the screen is the same class
+   of flicker as a stale country — just at the other end of the flight.
+   0.55 puts the swap on the far side of the midpoint. */
+const HANDOVER = 0.55;
+
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 function focusFor(index: number): PageFocus {
   return GEO_FOCUS[index] ?? GEO_FOCUS[0];
 }
 
-function camFor(index: number): Cam {
-  const f = focusFor(index);
-  const c = focusCamera(f);
-  return clampCamera(c.cx, c.cy, c.hw);
-}
-
-function viewBoxOf(cam: Cam): string {
+function viewBoxOf(cam: Camera): string {
   return `${(cam.x - cam.hw).toFixed(1)} ${(cam.y - cam.hw).toFixed(1)} ${(cam.hw * 2).toFixed(1)} ${(cam.hw * 2).toFixed(1)}`;
 }
 
@@ -107,17 +121,37 @@ export function WorldMap({
   sectionIndex?: number;
   reducedMotion?: boolean;
 }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const hostRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const glowRef = useRef<SVGCircleElement>(null);
+  const labelRef = useRef<HTMLSpanElement>(null);
 
   /* Server-render the page's own camera so deep links and crawlers see
-     the geography that belongs to the route. */
-  const [initialCam] = useState<Cam>(() => camFor(sectionIndex));
-  const camRef = useRef<Cam>(initialCam);
+     the geography that belongs to the route. `cameraFor` is the only
+     place a camera is derived — this component never computes one, so
+     the rendered state and the promised state cannot drift. */
+  const [initialCam] = useState<Camera>(() => cameraFor(sectionIndex));
+  const camRef = useRef<Camera>(initialCam);
 
-  const applyCam = (cam: Cam) => {
+  /* Which section owns the map's pixels right now. It trails the page
+     index until the camera has flown, so the highlight can never arrive
+     ahead of the geography it belongs to. */
+  const [activeIndex, setActiveIndex] = useState(sectionIndex);
+  const activeIndexRef = useRef(sectionIndex);
+
+  const f = focusFor(activeIndex);
+  const focusPoint = projectPoint(f.lon, f.lat);
+  const focusPointRef = useRef(focusPoint);
+  focusPointRef.current = focusPoint;
+  const activeInk = COUNTRY_INKS[f.country];
+
+  const placeLabel = (index: number) => {
+    const g = focusFor(index);
+    return lang === 'bn' ? g.placeBn : g.place;
+  };
+
+  const applyCam = (cam: Camera) => {
     const svg = svgRef.current;
     if (svg) svg.setAttribute('viewBox', viewBoxOf(cam));
     const glow = glowRef.current;
@@ -127,27 +161,55 @@ export function WorldMap({
       glow.setAttribute('r', (cam.hw * 0.95).toFixed(1));
     }
     const host = hostRef.current;
-    if (host) host.dataset.cam = `${cam.x.toFixed(1)},${cam.y.toFixed(1)},${cam.hw.toFixed(1)}`;
+    if (!host) return;
+    host.dataset.cam = `${cam.x.toFixed(1)},${cam.y.toFixed(1)},${cam.hw.toFixed(1)}`;
+
+    /* The arrival label sits on the focus's real coordinates, in screen
+       space: text inside the viewBox would scale with the camera and be
+       unreadable on a phone-sized map. One transform write per frame —
+       no layout, no transition, nothing re-rasterised. */
+    const label = labelRef.current;
+    if (!label) return;
+    const p = projectToScreen(cam, focusPointRef.current, {
+      width: host.clientWidth,
+      height: host.clientHeight,
+    });
+    const inside =
+      p.x > 8 && p.y > 8 && p.x < host.clientWidth - 8 && p.y < host.clientHeight - 8;
+    label.style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0)`;
+    label.dataset.on = inside ? 'true' : 'false';
   };
 
-  /* Fly the camera when the page changes. */
+  /* Fly the camera when the page changes, and hand the map over to the
+     new section as it arrives. One effect owns both, so nothing else can
+     move the camera or flip the geography on its own. */
   useEffect(() => {
-    const target = camFor(sectionIndex);
+    const target = cameraFor(sectionIndex);
     const from = camRef.current;
+    const handOver = () => {
+      if (activeIndexRef.current === sectionIndex) return;
+      activeIndexRef.current = sectionIndex;
+      setActiveIndex(sectionIndex);
+    };
     if (reducedMotion) {
       camRef.current = target;
       applyCam(target);
+      handOver();
       return;
     }
-    if (from.x === target.x && from.y === target.y && from.hw === target.hw) return;
+    if (from.x === target.x && from.y === target.y && from.hw === target.hw) {
+      handOver();
+      return;
+    }
 
+    const timer = window.setTimeout(handOver, FLIGHT_MS * HANDOVER);
     let raf = 0;
     const start = performance.now();
     const step = (now: number) => {
       raf = 0;
       const t = Math.min(1, (now - start) / FLIGHT_MS);
       const k = easeInOut(t);
-      const cam: Cam = {
+      const cam: Camera = {
         x: from.x + (target.x - from.x) * k,
         y: from.y + (target.y - from.y) * k,
         hw: from.hw + (target.hw - from.hw) * k,
@@ -159,13 +221,24 @@ export function WorldMap({
         /* hidden mid-flight: land quietly at the destination */
         camRef.current = target;
         applyCam(target);
+        handOver();
       }
     };
     raf = requestAnimationFrame(step);
     return () => {
+      window.clearTimeout(timer);
       if (raf) cancelAnimationFrame(raf);
     };
   }, [sectionIndex, reducedMotion]);
+
+  /* A resize changes the screen mapping (the square is fitted to the
+     smaller side), so the label is placed again. The camera itself does
+     not move — this is not a second thing driving the camera. */
+  useEffect(() => {
+    const onResize = () => applyCam(camRef.current);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   /* The origin ring is the only CSS-animated thing here (opacity
      only). Stop it when the tab is hidden — one attribute flip per
@@ -183,9 +256,6 @@ export function WorldMap({
   }, [reducedMotion]);
 
   const { x, y } = ORIGIN_POINT;
-  const f = focusFor(sectionIndex);
-  const activeInk = COUNTRY_INKS[f.country];
-  const focusPoint = projectPoint(f.lon, f.lat);
 
   /* The active route: origin → this section's focus. Its packet
      remounts per section, so SMIL restarts cleanly on every flight. */
@@ -193,8 +263,10 @@ export function WorldMap({
 
   return (
     <>
-      {/* the focus is real text, not only pixels */}
-      <span className="sr-only">{`${t.ui.mapFocus}: ${f.place}`}</span>
+      {/* the focus is real text, not only pixels — and it follows the
+          ROUTE, not the animation, so a screen reader hears the page's
+          geography the moment the page turns */}
+      <span className="sr-only" aria-live="polite">{`${t.ui.mapFocus}: ${placeLabel(sectionIndex)}`}</span>
 
       <div
         ref={hostRef}
@@ -298,6 +370,22 @@ export function WorldMap({
             <circle className="worldmap-origin-core" cx={x} cy={y} r={1.7} />
           </g>
         </svg>
+
+        {/* The arriving focus, named — placed on the same real
+            coordinates as the marker, in the reader's language. Only the
+            origin page is exempt: Dhaka already owns the most prominent
+            marker on the map, so labelling it twice would be noise. */}
+        {f.country !== 'BGD' && (
+          <span
+            ref={labelRef}
+            className="worldmap-pin"
+            data-on="false"
+            style={{ '--pin-ink': activeInk?.stroke } as CSSProperties}
+          >
+            <span className="worldmap-pin-mark" />
+            <span className="worldmap-pin-body">{placeLabel(activeIndex)}</span>
+          </span>
+        )}
 
         {/* L4 — technical vector motifs. Screen-space, decorative, static:
             circuit traces, orbits, a waveform fragment, network nodes. */}

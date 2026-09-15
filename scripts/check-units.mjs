@@ -62,7 +62,7 @@ writeFileSync(
         strict: false,
         plugins: [],
       },
-      include: ['app/graphemes.ts', 'app/sections.ts', 'app/language.tsx'],
+      include: ['app/graphemes.ts', 'app/sections.ts', 'app/language.tsx', 'app/geo.ts'],
     },
     null,
     2
@@ -81,8 +81,9 @@ const pick = (...cands) => cands.map((c) => join(tmp, c)).find((p) => existsSync
 const sigPath = pick('graphemes.js', 'app/graphemes.js');
 const sectionsPath = pick('app/sections.js', 'sections.js');
 const langPath = pick('app/language.js', 'language.js');
+const geoPath = pick('app/geo.js', 'geo.js');
 
-if (!sigPath || !sectionsPath || !langPath) {
+if (!sigPath || !sectionsPath || !langPath || !geoPath) {
   console.error(`check-units FAIL: compiled output not found under ${tmp}`);
   console.log(existsSync(tmp) ? execSync(`find "${tmp}" -name '*.js'`, { encoding: 'utf8' }) : '');
   process.exit(1);
@@ -93,6 +94,9 @@ const { SECTION_IDS, sectionHref, indexForSlug, indexFromPathname, sectionUrl, S
   pathToFileURL(sectionsPath).href
 );
 const { localizeDigits } = await import(pathToFileURL(langPath).href);
+const { GEO_FOCUS, cameraFor, clampCamera, projectPoint, projectToScreen } = await import(
+  pathToFileURL(geoPath).href
+);
 
 console.log('\nBengali grapheme segmentation (Intl.Segmenter path)');
 eq('সবুজ মিয়া → 6 clusters, not 9 code points', segmentGraphemes('সবুজ মিয়া'), ['স', 'বু', 'জ', ' ', 'মি', 'য়া']);
@@ -124,6 +128,43 @@ eq('pathname /work/ → index 3', indexFromPathname('/work/'), 3);
 eq('pathname / → home', indexFromPathname('/'), 0);
 eq('unknown pathname falls back to home', indexFromPathname('/nonsense/'), 0);
 eq('absolute section URL', sectionUrl(3), `${SITE_ORIGIN}/work/`);
+
+/* ── the map's promise ──
+   Every route promises one thing visually: its own geography, framed.
+   The camera is derived in app/geo.ts and rendered by WorldMap, so the
+   promise is testable here rather than eyeballed in a browser we do not
+   have. "Framed" means the focus's real projected coordinates land on
+   the centre of the visible square — the same mapping the arrival label
+   uses for its screen position. */
+console.log('\nMap camera framing (the geography each route promises)');
+eq('one focus per section, in section order', GEO_FOCUS.map((g) => g.section), [...SECTION_IDS]);
+const VIEWPORTS = [
+  { width: 390, height: 844 }, // phone
+  { width: 1440, height: 900 }, // desktop
+];
+for (const [i, g] of GEO_FOCUS.entries()) {
+  const cam = cameraFor(i);
+  const point = projectPoint(g.lon, g.lat);
+  for (const vp of VIEWPORTS) {
+    const p = projectToScreen(cam, point, vp);
+    const offX = Math.abs(p.x - vp.width / 2);
+    const offY = Math.abs(p.y - vp.height / 2);
+    eq(
+      `${g.section}: focus on the frame centre @${vp.width}x${vp.height} (off by ${offX.toFixed(1)},${offY.toFixed(1)} px)`,
+      offX <= 1 && offY <= 1,
+      true
+    );
+  }
+}
+const cams = GEO_FOCUS.map((_, i) => cameraFor(i));
+eq('every section gets its own camera', new Set(cams.map((c) => `${c.x},${c.y},${c.hw}`)).size, GEO_FOCUS.length);
+eq('cameraFor is deterministic (same page, same frame, always)', cameraFor(4), cameraFor(4));
+eq('clamping an already-clamped camera changes nothing', clampCamera(cams[7].x, cams[7].y, cams[7].hw), cams[7]);
+eq(
+  'a zoom wider than the projected map still yields a finite camera',
+  Number.isFinite(clampCamera(500, -200, 400).y),
+  true
+);
 
 console.log('\nBengali digits');
 eq('English digits unchanged', localizeDigits('2026', 'en'), '2026');

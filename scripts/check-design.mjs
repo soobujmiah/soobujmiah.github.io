@@ -395,7 +395,11 @@ if (!geo) {
   fail('app/geo.ts is missing — the camera mapping must live with the projection');
 } else {
   const block = geo.slice(geo.indexOf('GEO_FOCUS'), geo.indexOf('export const HALF_WORLD'));
-  const entries = [...block.matchAll(/\{\s*section:\s*'([^']+)',\s*place:\s*'([^']*)',\s*country:\s*'([A-Z]{3})',\s*lon:\s*(-?[\d.]+),\s*lat:\s*(-?[\d.]+),\s*zoom:\s*([\d.]+)\s*\}/g)];
+  const entries = [
+    ...block.matchAll(
+      /\{\s*section:\s*'([^']+)',\s*place:\s*'([^']*)',\s*country:\s*'([A-Z]{3})',\s*lon:\s*(-?[\d.]+),\s*lat:\s*(-?[\d.]+),\s*zoom:\s*([\d.]+),\s*placeBn:\s*'([^']*)'\s*\}/g
+    ),
+  ];
   if (entries.length !== 9) {
     fail(`app/geo.ts GEO_FOCUS must define exactly one camera position per section (found ${entries.length}, need 9)`);
   }
@@ -410,12 +414,47 @@ if (!geo) {
   if (new Set(entries.map((e) => `${e[4]},${e[5]}`)).size !== entries.length) {
     fail('GEO_FOCUS positions must be distinct — nine pages, nine geographies');
   }
-  /* every focus country carries its own restrained ink */
+  /* one source for the camera: the component renders what app/geo.ts
+     derives. If WorldMap ever clamps or focuses a camera itself, two
+     code paths own the same state and a stale frame becomes possible. */
+  const wm = tryRead('components/WorldMap.tsx');
+  if (wm) {
+    if (!/cameraFor\(/.test(wm)) {
+      fail('components/WorldMap.tsx must derive its camera from app/geo.ts → cameraFor()');
+    }
+    if (/focusCamera\(|clampCamera\(/.test(wm)) {
+      fail('components/WorldMap.tsx must not build or clamp a camera itself — the framing rule lives in app/geo.ts');
+    }
+    if (!/focusFor\(activeIndex\)/.test(wm)) {
+      fail('components/WorldMap.tsx must stage the geography (activeIndex) so the highlight cannot arrive before the camera does');
+    }
+  } else {
+    fail('components/WorldMap.tsx is missing — the map has no renderer');
+  }
+
+  /* every focus country carries its own restrained ink, and every focus
+     is drawable: a real outline in components/world-map-countries.ts, or
+     a declared city-state that gets a projected marker instead. A focus
+     whose country has no geometry is a page whose destination can never
+     appear — the exact failure this section exists to catch. */
   const inks = [...(geo.match(/COUNTRY_INKS[^=]*=\s*\{([\s\S]*?)\n\};/)?.[1].matchAll(/^\s*([A-Z]{3}):/gm) ?? [])].map((m) => m[1]);
+  const countrySrc = tryRead('components/world-map-countries.ts') || '';
+  const drawn = new Set([...countrySrc.matchAll(/^\s{2}([A-Z]{3}):/gm)].map((m) => m[1]));
+  const micro = new Set(
+    [...(geo.match(/MICRO_FOCUS[^=]*=\s*new Set\(\[([^\]]*)\]\)/)?.[1].matchAll(/'([A-Z]{3})'/g) ?? [])].map((m) => m[1])
+  );
   for (const e of entries) {
-    const country = e[2];
-    if (!inks.includes(country) && !/MICRO_FOCUS[^=]*=[^;]*'([A-Z]{3})'/.test(geo)) {
+    const country = e[3];
+    if (!inks.includes(country)) {
       fail(`focus country ${country} has no entry in COUNTRY_INKS`);
+    }
+    if (!drawn.has(country) && !micro.has(country)) {
+      fail(
+        `focus country ${country} has no outline in components/world-map-countries.ts and is not in MICRO_FOCUS — the destination could never be visible`
+      );
+    }
+    if (!/[\u0980-\u09FF]/.test(e[7] ?? '')) {
+      fail(`GEO_FOCUS entry for ${e[1]} has no Bengali place name — the visible label would be English in both languages`);
     }
   }
   const alphas = [...(geo.matchAll(/rgba\(\d+,\d+,\d+,([\d.]+)\)/g))].map((m) => Number(m[1]));
