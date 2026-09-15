@@ -518,6 +518,102 @@ function WorkSpotlight() {
   );
 }
 
+/* ── ecosystem relationship — ADT ↔ Ternux ──────────────────────
+   One physical Android device, two complementary layers. Compact by
+   design: a device rail, the two layer cards, then one evidence line
+   each way (verified / not yet proven). It reuses the page's existing
+   card idiom and each project's own accent, so it adds no animation,
+   no dependency and no new design token. */
+function RelationshipBlock() {
+  const { t } = useLang();
+  const rel = t.work.relationship;
+  const edge = { borderColor: 'rgba(228,226,223,0.08)' };
+
+  return (
+    <Reveal delay={0.16}>
+      <section
+        aria-labelledby="work-ecosystem"
+        className="mt-4 rounded-xl backdrop-blur-md"
+        style={{ border: '1px solid rgba(34,197,94,0.18)', background: CARD_BG }}
+      >
+        <div className="flex items-center gap-2.5 border-b px-4 py-2.5" style={edge}>
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: '#22c55e' }} aria-hidden />
+          <span className="font-mono text-[9px] uppercase tracking-[0.2em]" style={{ color: 'rgba(228,226,223,0.45)' }}>
+            {rel.deviceLabel}
+          </span>
+          <span className="ml-auto hidden font-mono text-[9px] uppercase tracking-[0.2em] sm:block" style={{ color: 'rgba(74,222,128,0.7)' }}>
+            {rel.eyebrow}
+          </span>
+        </div>
+
+        <div className="px-4 pt-3">
+          <h3 id="work-ecosystem" className="text-sm font-semibold tracking-tight" style={{ color: '#e4e2df' }}>
+            {rel.heading}
+          </h3>
+          <p className="mt-1 text-[11px] leading-[1.6]" style={{ color: 'rgba(228,226,223,0.55)' }}>
+            {rel.body}
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2">
+          {rel.layers.map((layer, i) => {
+            const accent = t.work.projects.find((p) => p.name === layer.name)?.accent ?? '#4ade80';
+            return (
+              <div
+                key={layer.name}
+                className={`border-t px-4 py-3 sm:border-t-0 ${i === 1 ? 'sm:border-l' : ''}`}
+                style={edge}
+              >
+                <div className="mb-1.5 flex items-center gap-2">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: accent }}>
+                    {layer.name}
+                  </span>
+                  <span className="h-px flex-1" style={{ background: 'rgba(228,226,223,0.08)' }} aria-hidden />
+                  <span className="font-mono text-[9px]" style={{ color: 'rgba(228,226,223,0.4)' }}>{layer.role}</span>
+                </div>
+                <p className="text-[11px] leading-[1.6]" style={{ color: 'rgba(228,226,223,0.6)' }}>{layer.note}</p>
+                <div className="mt-2.5 flex items-center gap-2">
+                  <Magnetic
+                    href={layer.websiteUrl}
+                    ariaLabel={`${layer.name} — ${t.ui.liveSiteWord}`}
+                    className="rounded-full px-2.5 py-1 font-mono text-[10px] transition-colors duration-300"
+                    style={{ border: `1px solid ${accent}59`, color: accent }}
+                    strength={0.15}
+                  >
+                    {t.work.liveLabel}
+                  </Magnetic>
+                  <Magnetic
+                    href={layer.repo}
+                    ariaLabel={`${layer.name} ${t.ui.repoWord}`}
+                    className="rounded-full px-2.5 py-1 font-mono text-[10px] transition-colors duration-300"
+                    style={{ border: '1px solid rgba(228,226,223,0.1)', color: 'rgba(228,226,223,0.55)' }}
+                    strength={0.15}
+                  >
+                    {t.work.codeLabel}
+                  </Magnetic>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="grid gap-2 border-t px-4 py-3 sm:grid-cols-2" style={edge}>
+          <p className="text-[11px] leading-[1.6]" style={{ color: 'rgba(228,226,223,0.5)' }}>
+            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full align-middle" style={{ background: '#22c55e' }} aria-hidden />
+            <span style={{ color: 'rgba(228,226,223,0.7)' }}>{rel.verifiedLabel}</span>
+            {rel.verified}
+          </p>
+          <p className="text-[11px] leading-[1.6]" style={{ color: 'rgba(228,226,223,0.5)' }}>
+            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full align-middle" style={{ background: 'rgba(228,226,223,0.3)' }} aria-hidden />
+            <span style={{ color: 'rgba(228,226,223,0.7)' }}>{rel.experimentalLabel}</span>
+            {rel.experimental}
+          </p>
+        </div>
+      </section>
+    </Reveal>
+  );
+}
+
 export function WorkScene() {
   const { t } = useLang();
   return (
@@ -538,6 +634,9 @@ export function WorkScene() {
 
         {/* desktop: interactive spotlight, always fits */}
         <WorkSpotlight />
+
+        {/* ecosystem: ADT ↔ Ternux — two layers of one device */}
+        <RelationshipBlock />
       </div>
     </div>
   );

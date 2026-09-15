@@ -60,6 +60,12 @@ const IDENTIFIER_PATHS = new Set([
   'work.projects[].websiteUrl',
   'work.projects[].accent',
   'work.nowBuilding.url',
+  /* the ADT ↔ Ternux relationship block repeats the same three kinds
+     of data as work.projects[] above: the project name, its repository
+     slug and its verified live site. Same justification, same shape. */
+  'work.relationship.layers[].name',
+  'work.relationship.layers[].repo',
+  'work.relationship.layers[].websiteUrl',
   /* machine enums consumed by logic/CSS, not rendered as prose —
      `statusLabel` / the badge labels are the visible strings and stay
      under the purity rule */
