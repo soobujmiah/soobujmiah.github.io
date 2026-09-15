@@ -78,22 +78,52 @@ export const HUB_POINTS = HUBS.map((h) => projectPoint(h.lon, h.lat));
 export interface PageFocus {
   section: string;
   place: string;
+  /** ISO 3166-1 alpha-3 of the active country for this section. */
+  country: string;
   lon: number;
   lat: number;
   zoom: number;
 }
 
 export const GEO_FOCUS: readonly PageFocus[] = [
-  { section: 'home', place: 'Dhaka, Bangladesh', lon: 90.4, lat: 23.8, zoom: 1.5 },
-  { section: 'presence', place: 'Riyadh, Arabia', lon: 46.7, lat: 24.7, zoom: 2.8 },
-  { section: 'about', place: 'Jeddah, Arabia', lon: 39.2, lat: 21.5, zoom: 2.8 },
-  { section: 'work', place: 'London', lon: 0.1, lat: 51.5, zoom: 3.0 },
-  { section: 'research', place: 'Toronto', lon: -79.4, lat: 43.7, zoom: 2.9 },
-  { section: 'stack', place: 'Bengaluru', lon: 77.6, lat: 12.97, zoom: 3.0 },
-  { section: 'open-source', place: 'Shenzhen', lon: 114.1, lat: 22.5, zoom: 3.0 },
-  { section: 'experience', place: 'São Paulo', lon: -46.6, lat: -23.5, zoom: 2.9 },
-  { section: 'contact', place: 'Singapore', lon: 103.8, lat: 1.4, zoom: 3.1 },
+  { section: 'home', place: 'Dhaka, Bangladesh', country: 'BGD', lon: 90.4, lat: 23.8, zoom: 2.1 },
+  { section: 'presence', place: 'Riyadh, Arabia', country: 'SAU', lon: 46.7, lat: 24.7, zoom: 2.8 },
+  { section: 'about', place: 'Jeddah, Arabia', country: 'SAU', lon: 39.2, lat: 21.5, zoom: 2.8 },
+  { section: 'work', place: 'London', country: 'GBR', lon: 0.1, lat: 51.5, zoom: 3.0 },
+  { section: 'research', place: 'Toronto', country: 'CAN', lon: -79.4, lat: 43.7, zoom: 2.9 },
+  { section: 'stack', place: 'Bengaluru', country: 'IND', lon: 77.6, lat: 12.97, zoom: 3.0 },
+  { section: 'open-source', place: 'Shenzhen', country: 'CHN', lon: 114.1, lat: 22.5, zoom: 3.0 },
+  { section: 'experience', place: 'São Paulo', country: 'BRA', lon: -46.6, lat: -23.5, zoom: 2.9 },
+  { section: 'contact', place: 'Singapore', country: 'SGP', lon: 103.8, lat: 1.4, zoom: 3.1 },
 ] as const;
+
+/* ── active-country inks ──
+   Each focus country carries its own colour so the active territory is
+   identifiable at a glance — but every ink is a low-alpha technical tone
+   from the portfolio palette family (greens + cool accents + one warm
+   band). Inactive countries stay subdued; content always wins. */
+export interface CountryInk {
+  fill: string;
+  stroke: string;
+}
+
+export const COUNTRY_INKS: Record<string, CountryInk> = {
+  BGD: { fill: 'rgba(34,197,94,0.30)', stroke: 'rgba(74,222,128,0.60)' }, /* origin green */
+  SAU: { fill: 'rgba(217,119,6,0.16)', stroke: 'rgba(245,158,11,0.55)' }, /* amber */
+  GBR: { fill: 'rgba(59,130,246,0.15)', stroke: 'rgba(96,165,250,0.55)' }, /* blue */
+  CAN: { fill: 'rgba(45,212,191,0.14)', stroke: 'rgba(45,212,191,0.50)' }, /* teal */
+  IND: { fill: 'rgba(129,140,248,0.15)', stroke: 'rgba(129,140,248,0.55)' }, /* indigo */
+  CHN: { fill: 'rgba(244,63,94,0.13)', stroke: 'rgba(251,113,133,0.50)' }, /* rose */
+  BRA: { fill: 'rgba(163,230,53,0.14)', stroke: 'rgba(163,230,53,0.50)' }, /* lime */
+  SGP: { fill: 'rgba(103,232,249,0.16)', stroke: 'rgba(103,232,249,0.60)' }, /* cyan */
+};
+
+/**
+ * Focus countries with no outline at Natural Earth 1:110m scale
+ * (city-states simplify away entirely). They get a projected marker at
+ * their real coordinates instead of a fabricated shape.
+ */
+export const MICRO_FOCUS = new Set(['SGP']);
 
 /** Half the full map width; the camera aperture is derived from it. */
 export const HALF_WORLD = MAP_WIDTH / 2;

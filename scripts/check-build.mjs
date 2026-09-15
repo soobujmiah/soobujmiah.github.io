@@ -203,6 +203,15 @@ if (homeHtml) {
       ok('Bangladesh origin is server-rendered (outline + projected pin)');
     }
 
+    /* Real per-country geography: the country layer ships, and the route's
+       active country is highlighted server-side. */
+    if (!homeHtml.includes('worldmap-countries')) {
+      fail('out/index.html has no country layer — geography must be per-country, not dots');
+    }
+    if (!homeHtml.includes('worldmap-country-active')) {
+      fail('out/index.html has no active country — Home must activate Bangladesh');
+    }
+
     /* The page-aware camera must be server-rendered: Home carries its own
        viewBox + data-cam + data-section, so deep links and crawlers see
        the geography that belongs to the route (Bangladesh, focused). */
@@ -225,11 +234,15 @@ if (homeHtml) {
     /* every route pre-renders its own camera position */
     const homeCam = (homeHtml.match(/data-cam="([^"]*)"/) || [])[1];
     const cams = new Set([homeCam]);
+    const homeCountry = (homeHtml.match(/data-country="([^"]*)"/) || [])[1];
+    if (homeCountry !== 'BGD') fail(`home must activate Bangladesh (found data-country="${homeCountry}")`);
     for (const slug of SECTIONS) {
       const html = slug === 'home' ? homeHtml : existsSync(routeFile(slug)) ? readFileSync(routeFile(slug), 'utf8') : '';
       const cam = (html.match(/data-cam="([^"]*)"/) || [])[1];
       if (!cam) fail(`route "${slug}" ships no camera state — every page needs its own map position`);
       else cams.add(cam);
+      const country = (html.match(/data-country="([^"]*)"/) || [])[1];
+      if (!country) fail(`route "${slug}" ships no active country (data-country)`);
     }
     if (cams.size < SECTIONS.length) {
       fail(`only ${cams.size} distinct camera positions across ${SECTIONS.length} routes — each page must focus its own geography`);

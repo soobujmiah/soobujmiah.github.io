@@ -202,6 +202,7 @@ export interface Content {
     pull: string;
     release: string;
     refreshing: string;
+    mapFocus: string;
   };
   preloader: { status: string };
   /* Per-route search metadata, aligned with SECTION_IDS in
@@ -526,6 +527,7 @@ const en: Content = {
     pull: 'Pull to refresh',
     release: 'Release to refresh',
     refreshing: 'Refreshing',
+    mapFocus: 'Background map focus',
   },
   footer: {
     built: 'Built from a phone.',
@@ -910,6 +912,7 @@ const bn: Content = {
     pull: 'রিফ্রেশ করতে টানুন',
     release: 'রিফ্রেশে ছেড়ে দিন',
     refreshing: 'রিফ্রেশ হচ্ছে',
+    mapFocus: 'পটভূমি মানচিত্রের কেন্দ্র',
   },
   footer: {
     built: 'ফোন থেকে তৈরি।',

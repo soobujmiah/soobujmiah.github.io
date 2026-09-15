@@ -250,7 +250,50 @@ a, button {
 .worldmap[data-paused='true'] .worldmap-origin-halo { animation-play-state: paused; }
 
 /* ── the page-aware camera system ──
-   L2 focus glow — a soft radial wash centred on the current page's
+   L1b countries — every territory keeps its real 1:110m shape.
+   Inactive countries are subdued political geography; the active
+   country recolours via CSS variables (a class flip, never animated
+   geometry) set from COUNTRY_INKS in app/geo.ts. */
+.worldmap-countries {
+  pointer-events: none;
+}
+
+.worldmap-country {
+  fill: rgba(148, 163, 184, 0.03);
+  stroke: rgba(148, 163, 184, 0.09);
+  stroke-width: 0.5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.worldmap-country-active {
+  fill: var(--cf);
+  stroke: var(--cs);
+  stroke-width: 1.1;
+}
+
+/* city-state marker for focus countries with no 1:110m outline */
+.worldmap-micro {
+  fill: var(--cf);
+  stroke: var(--cs);
+  stroke-width: 0.8;
+  vector-effect: non-scaling-stroke;
+}
+
+/* the active route: origin → current section focus */
+.worldmap-active-route {
+  fill: none;
+  stroke: rgba(234, 179, 8, 0.16);
+  stroke-width: 0.8;
+  stroke-dasharray: 3 6;
+  vector-effect: non-scaling-stroke;
+}
+
+.worldmap-packet-active {
+  fill: rgba(234, 179, 8, 0.55);
+}
+
+/* L2 focus glow — a soft radial wash centred on the current page's
    geographic focus; it is panned by the camera like everything else. */
 .worldmap-focus {
   pointer-events: none;
