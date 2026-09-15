@@ -310,6 +310,63 @@ a, button {
   fill: rgba(74, 222, 128, 0.5);
 }
 
+/* ── the arrival label: the focus, named on screen ──
+   HTML in screen space, not SVG text — text inside the viewBox scales
+   with the camera and would be illegible on a phone-sized map. Its
+   position is computed by app/geo.ts → projectToScreen() and written by
+   the same rAF that moves the camera. Nothing here carries an animation
+   or a transition: the map's geometry stays painted once. The label is
+   decoration inside an aria-hidden layer; the same place is announced as
+   real text by the map's sr-only line, so it never exists only here. */
+.worldmap-pin {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  opacity: 0;
+  color: rgba(228, 226, 223, 0.86);
+  /* keep the focus country's hue, at a weight that stays legible */
+  color: color-mix(in srgb, var(--pin-ink, #94a3b8) 70%, #e4e2df);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Bengali reads in the Bengali face, exactly like .font-mono does */
+body.lang-bn .worldmap-pin {
+  font-family: var(--font-bengali), var(--font-inter), system-ui, sans-serif;
+  letter-spacing: 0;
+}
+
+/* shown only once the screen point has been placed — never at 0,0 */
+.worldmap-pin[data-on='true'] { opacity: 1; }
+
+/* the exact projected point */
+.worldmap-pin-mark {
+  position: absolute;
+  left: -3.5px;
+  top: -3.5px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: rgba(5, 5, 7, 0.85);
+}
+
+.worldmap-pin-body {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -162%);
+  padding: 0.3rem 0.6rem;
+  border: 1px solid rgba(228, 226, 223, 0.16);
+  border-color: color-mix(in srgb, var(--pin-ink, #94a3b8) 45%, transparent);
+  border-radius: 999px;
+  background: rgba(5, 5, 7, 0.78);
+}
+
 /* L4 technical vector motifs — screen-space, decorative, static.
    Circuit traces, orbits, a waveform fragment, network nodes,
    coordinate ticks: discovered, never shouted. */

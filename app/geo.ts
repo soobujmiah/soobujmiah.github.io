@@ -78,6 +78,12 @@ export const HUB_POINTS = HUBS.map((h) => projectPoint(h.lon, h.lat));
 export interface PageFocus {
   section: string;
   place: string;
+  /**
+   * The same place in Bengali. The map's arrival label is real text on
+   * screen, so it has to speak the reader's language — the sr-only line
+   * already did, and now both come from this one field.
+   */
+  placeBn: string;
   /** ISO 3166-1 alpha-3 of the active country for this section. */
   country: string;
   lon: number;
@@ -86,15 +92,15 @@ export interface PageFocus {
 }
 
 export const GEO_FOCUS: readonly PageFocus[] = [
-  { section: 'home', place: 'Dhaka, Bangladesh', country: 'BGD', lon: 90.4, lat: 23.8, zoom: 2.1 },
-  { section: 'presence', place: 'Riyadh, Arabia', country: 'SAU', lon: 46.7, lat: 24.7, zoom: 2.8 },
-  { section: 'about', place: 'Jeddah, Arabia', country: 'SAU', lon: 39.2, lat: 21.5, zoom: 2.8 },
-  { section: 'work', place: 'London', country: 'GBR', lon: 0.1, lat: 51.5, zoom: 3.0 },
-  { section: 'research', place: 'Toronto', country: 'CAN', lon: -79.4, lat: 43.7, zoom: 2.9 },
-  { section: 'stack', place: 'Bengaluru', country: 'IND', lon: 77.6, lat: 12.97, zoom: 3.0 },
-  { section: 'open-source', place: 'Shenzhen', country: 'CHN', lon: 114.1, lat: 22.5, zoom: 3.0 },
-  { section: 'experience', place: 'São Paulo', country: 'BRA', lon: -46.6, lat: -23.5, zoom: 2.9 },
-  { section: 'contact', place: 'Singapore', country: 'SGP', lon: 103.8, lat: 1.4, zoom: 3.1 },
+  { section: 'home', place: 'Dhaka, Bangladesh', country: 'BGD', lon: 90.4, lat: 23.8, zoom: 2.1, placeBn: 'ঢাকা, বাংলাদেশ' },
+  { section: 'presence', place: 'Riyadh, Saudi Arabia', country: 'SAU', lon: 46.7, lat: 24.7, zoom: 2.8, placeBn: 'রিয়াদ, সৌদি আরব' },
+  { section: 'about', place: 'Jeddah, Saudi Arabia', country: 'SAU', lon: 39.2, lat: 21.5, zoom: 2.8, placeBn: 'জেদ্দা, সৌদি আরব' },
+  { section: 'work', place: 'London', country: 'GBR', lon: 0.1, lat: 51.5, zoom: 3.0, placeBn: 'লন্ডন' },
+  { section: 'research', place: 'Toronto', country: 'CAN', lon: -79.4, lat: 43.7, zoom: 2.9, placeBn: 'টরন্টো' },
+  { section: 'stack', place: 'Bengaluru', country: 'IND', lon: 77.6, lat: 12.97, zoom: 3.0, placeBn: 'বেঙ্গালুরু' },
+  { section: 'open-source', place: 'Shenzhen', country: 'CHN', lon: 114.1, lat: 22.5, zoom: 3.0, placeBn: 'শেনচেন' },
+  { section: 'experience', place: 'São Paulo', country: 'BRA', lon: -46.6, lat: -23.5, zoom: 2.9, placeBn: 'সাও পাওলো' },
+  { section: 'contact', place: 'Singapore', country: 'SGP', lon: 103.8, lat: 1.4, zoom: 3.1, placeBn: 'সিঙ্গাপুর' },
 ] as const;
 
 /* ── active-country inks ──
@@ -136,20 +142,85 @@ export function focusCamera(f: PageFocus) {
 }
 
 /**
- * Clamp a camera centre so the aperture stays on the map. Vertically it
- * never leaves the projected latitudes; horizontally it may overshoot a
- * little (the atmosphere gradient continues past the map's edge), which
- * is what keeps Dhaka centred on Home despite the Pacific margin.
+ * Clamp a camera centre so the aperture stays on the map — but never at
+ * the cost of the page's own focus.
+ *
+ * The frame is a square aperture of half-width `hw`, and what has to be
+ * visible inside it is the page's geography: a focus pinned to the map's
+ * edge reads as a page that never arrived. So the vertical axis now gets
+ * the same licence the horizontal axis always had — a quarter of the
+ * aperture may hang past the map's edge, where the atmosphere gradient
+ * simply continues — and inside that slack the camera centres the focus
+ * exactly: São Paulo used to sit 33% off centre because the frame was
+ * pinned to the southern crop, and every other page sat wherever the
+ * clamp left it. `check-units` now asserts the focus lands on the
+ * frame's centre — within a pixel, on phone and desktop viewports — for
+ * all nine sections.
+ *
+ * If a future zoom were wide enough that even the slack cannot cover the
+ * projected latitudes, the frame centres on the map instead of clamping
+ * into emptiness — deterministic either way.
  */
 export function clampCamera(cx: number, cy: number, hw: number) {
   const over = hw * 0.25;
-  /* when the aperture is taller than the projected map (the Home-wide
-     view), centre it vertically instead of clamping into emptiness */
-  const y = TOP + hw > BOTTOM - hw ? (TOP + BOTTOM) / 2 : Math.min(Math.max(cy, TOP + hw), BOTTOM - hw);
+  /* Vertical slack is larger than horizontal on purpose. The horizontal
+     overshoot exists so Home can keep Dhaka centred across the Pacific
+     margin; vertically the map is cropped through open ocean at both
+     ends (the Antarctic crop is sea, not coastline), so a frame that
+     hangs past it shows more atmosphere and no cut edge. It buys the one
+     thing that matters here: the focus can be centred exactly. */
+  const overY = hw * 0.35;
+  const yLo = TOP + hw - overY;
+  const yHi = BOTTOM - hw + overY;
+  const y = yLo > yHi ? (TOP + BOTTOM) / 2 : Math.min(Math.max(cy, yLo), yHi);
   return {
     x: Math.min(Math.max(cx, hw - over), MAP_WIDTH - hw + over),
     y,
     hw,
+  };
+}
+
+/** A camera is the map-unit rectangle the SVG viewBox shows. */
+export interface Camera {
+  x: number;
+  y: number;
+  hw: number;
+}
+
+/**
+ * THE camera for a section.
+ *
+ * One derivation, consumed by the component that renders the map and by
+ * the checks that assert its framing, so the rendered state and the
+ * promised state cannot drift apart — and nothing else is allowed to
+ * compute a camera.
+ */
+export function cameraFor(index: number): Camera {
+  const f = GEO_FOCUS[index] ?? GEO_FOCUS[0];
+  const c = focusCamera(f);
+  return clampCamera(c.cx, c.cy, c.hw);
+}
+
+/**
+ * Project a map-unit point into screen pixels for a camera.
+ *
+ * The map is an SVG with `preserveAspectRatio="xMidYMid meet"`, so the
+ * square aperture scales to fit the smaller side of the container and is
+ * centred in it. This is the one place that mapping is written down; the
+ * arrival label uses it to sit on the real coordinates, and `check-units`
+ * asserts that every section's focus lands on the frame's centre through
+ * it — which is what "correctly framed" means for this site.
+ */
+export function projectToScreen(
+  cam: Camera,
+  point: { x: number; y: number },
+  size: { width: number; height: number }
+): { x: number; y: number } {
+  const side = Math.min(size.width, size.height);
+  const scale = side / (cam.hw * 2);
+  return {
+    x: (size.width - side) / 2 + (point.x - (cam.x - cam.hw)) * scale,
+    y: (size.height - side) / 2 + (point.y - (cam.y - cam.hw)) * scale,
   };
 }
 
