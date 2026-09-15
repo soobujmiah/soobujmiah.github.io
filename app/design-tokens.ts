@@ -42,6 +42,19 @@ export const MOTION = {
   reveal: { seconds: 0.7, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' },
   /** Magnetic link pointer-follow / release. */
   magnetic: { followSeconds: 0.12, releaseSeconds: 0.5, pressSeconds: 0.1 },
+  /** Living identity — the glitch/reconstruct cycle is deterministic:
+      one shared clock, per-glyph stagger, fixed phase boundaries. */
+  nameCycle: {
+    cycleSeconds: 5.2,
+    holdSeconds: 1.15,
+    unstableSeconds: 0.55,
+    scrambleSeconds: 1.05,
+    rebuildSeconds: 0.7,
+    staggerSeconds: 0.22,
+    scrambleStepMs: 62,
+    jitterPx: 1.6,
+    boostSeconds: 1.4,
+  },
   /** Pull-to-refresh gesture. */
   pullToRefresh: {
     /** Raw pixels the finger must travel before the gesture arms. */

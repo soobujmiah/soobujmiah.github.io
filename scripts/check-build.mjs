@@ -203,6 +203,40 @@ if (homeHtml) {
       ok('Bangladesh origin is server-rendered (outline + projected pin)');
     }
 
+    /* The page-aware camera must be server-rendered: Home carries its own
+       viewBox + data-cam + data-section, so deep links and crawlers see
+       the geography that belongs to the route (Bangladesh, focused). */
+    if (!homeHtml.includes('data-cam')) {
+      fail('out/index.html has no camera state (data-cam) — the map must be page-aware');
+    }
+    if (!homeHtml.includes('data-section="home"')) {
+      fail('out/index.html does not declare its focus section');
+    }
+    if (!homeHtml.includes('worldmap-focus')) {
+      fail('out/index.html has no focus glow — the current page geography must be highlighted');
+    }
+    /* data flow: packets travel the arcs via SMIL in the default render */
+    if (!homeHtml.includes('worldmap-packet') || !homeHtml.includes('animateMotion')) {
+      fail('out/index.html has no data-flow packets — the map must show restrained travelling signals');
+    } else {
+      ok('page-aware camera + focus glow + data-flow packets are server-rendered');
+    }
+
+    /* every route pre-renders its own camera position */
+    const homeCam = (homeHtml.match(/data-cam="([^"]*)"/) || [])[1];
+    const cams = new Set([homeCam]);
+    for (const slug of SECTIONS) {
+      const html = slug === 'home' ? homeHtml : existsSync(routeFile(slug)) ? readFileSync(routeFile(slug), 'utf8') : '';
+      const cam = (html.match(/data-cam="([^"]*)"/) || [])[1];
+      if (!cam) fail(`route "${slug}" ships no camera state — every page needs its own map position`);
+      else cams.add(cam);
+    }
+    if (cams.size < SECTIONS.length) {
+      fail(`only ${cams.size} distinct camera positions across ${SECTIONS.length} routes — each page must focus its own geography`);
+    } else {
+      ok(`${cams.size} distinct server-rendered camera positions, one per page`);
+    }
+
     /* The identity must stay REAL TEXT. If a future change swaps the
        glyphs for a canvas or an image, the name becomes unselectable and
        invisible to assistive tech — that is the end of the site's premise. */

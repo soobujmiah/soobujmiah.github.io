@@ -166,10 +166,21 @@ try {
     ['orb-2', 'the blurred glow orb layer'],
     ['TechBackground', 'the removed particle canvas'],
     ['MatrixName', 'the removed name implementation'],
+    ['HeroName', 'the retired floating-wave wordmark'],
+    ['.sig-in,', 'the retired wordmark entrance animation'],
+    ['.sig-in {', 'the retired wordmark entrance animation'],
+    ['"sig-in"', 'the retired wordmark entrance class'],
+    ['sig-glyph"', 'the retired wordmark glyph wrapper class'],
+    ['sig-wander', 'the retired wordmark ink-wander keyframes'],
+    ['sig-live', 'the retired wordmark float keyframes'],
+    ['--mag-x', 'the retired wordmark magnetism variable'],
+    ['--mag-y', 'the retired wordmark magnetism variable'],
+    ['--mag-r', 'the retired wordmark magnetism variable'],
+    ['--mag-s', 'the retired wordmark magnetism variable'],
   ];
   for (const rel of [
     'app/globals.css',
-    'components/HeroName.tsx',
+    'components/GlitchName.tsx',
     'components/WorldMap.tsx',
     'components/Pager.tsx',
     'components/sections.tsx',
@@ -262,35 +273,65 @@ try {
     fail('app/globals.css still uses mix-blend-mode — it re-composites the page per frame and is off-brand over the name');
   }
 
-/* ── 6. the name animates per glyph, never as one lump ──
+/* ── 6. the name is a deterministic glitch/reconstruct cycle ──
    The identity implementation may be replaced, but the engineering
-   contract survives: motion is per-glyph and transform-driven, the
-   interaction loop writes CSS variables (never React re-renders),
-   graphemes are never split, and a reduced-motion path exists. */
-const nameComp = tryRead('components/HeroName.tsx');
-if (nameComp) {
-  for (const v of ['--mag-x', '--mag-y', '--mag-r', '--mag-s']) {
-    if (!nameComp.includes(`'${v}'`) && !nameComp.includes(`"${v}"`)) {
-      fail(`components/HeroName.tsx never writes ${v} — each glyph must carry its own transform`);
-    }
-  }
+   contract survives: the name is real DOM text in both scripts, split
+   grapheme-safely; the cycle is deterministic (no Math.random); jitter
+   touches transforms only; Bengali is never letter-scrambled; a
+   reduced-motion path exists; and the word itself is never the
+   animated object. */
+const nameComp = tryRead('components/GlitchName.tsx');
+if (!nameComp) {
+  fail('components/GlitchName.tsx is missing — the hero identity must be the living glitch wordmark');
+} else {
   if (!/segmentGraphemes/.test(nameComp)) {
-    fail('components/HeroName.tsx must split the name grapheme-safely — Bengali clusters can never be broken');
+    fail('components/GlitchName.tsx must split the name grapheme-safely — Bengali clusters can never be broken');
   }
   if (!/reducedMotion/.test(nameComp)) {
-    fail('components/HeroName.tsx has no reduced-motion path');
+    fail('components/GlitchName.tsx has no reduced-motion path');
   }
   if (!/aria-hidden/.test(nameComp) || !/sr-only/.test(nameComp)) {
-    fail('components/HeroName.tsx must keep the name as real accessible text (sr-only copy, decorative glyphs hidden)');
+    fail('components/GlitchName.tsx must keep the name as real accessible text (sr-only copy, decorative cells hidden)');
+  }
+  /* comments are stripped so the gate tests code, not prose */
+  const nameCode = nameComp.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  if (/Math\.random/.test(nameCode)) {
+    fail('components/GlitchName.tsx uses Math.random — the cycle must be deterministic so SSR and client render identically');
+  }
+  if (/\.style\.left|\.style\.top|\.style\.margin|\.style\.padding/.test(nameComp)) {
+    fail('components/GlitchName.tsx writes layout properties in its loop — jitter must be transform-only');
+  }
+  /* Bengali clusters keep their exact text: only Latin marks scramble */
+  if (!/SCRAMBLABLE/.test(nameComp)) {
+    fail('components/GlitchName.tsx must gate scrambling to Latin characters — Bengali shaping can never be scrambled');
+  }
+  /* the scramble vocabulary: technical marks only, no emoji ranges */
+  const pools = nameComp.match(/(?:LATIN_POOL|GLYPH_POOL)\s*=\s*\[([^\]]*)\]/g) ?? [];
+  if (pools.length < 2) {
+    fail('components/GlitchName.tsx must define both scramble pools (Latin letters + technical glyphs)');
+  }
+  for (const pool of pools) {
+    for (const ch of pool.matchAll(/'([^']+)'/g)) {
+      const cp = ch[1].codePointAt(0);
+      const ok =
+        /^[0-9A-Za-z]$/.test(ch[1]) ||
+        (cp >= 0x0391 && cp <= 0x03c9) || /* Greek */
+        (cp >= 0x2200 && cp <= 0x22ff) || /* math operators */
+        (cp >= 0x25a0 && cp <= 0x25ff) || /* geometric shapes */
+        '/|+×◦'.includes(ch[1]);
+      if (!ok) {
+        fail(`components/GlitchName.tsx scramble pool contains a disallowed glyph "${ch[1]}" (U+${cp.toString(16)}) — technical marks only, never emoji`);
+      }
+    }
   }
   /* the word itself must not be the animated object */
   const nameRule = css.match(/\.sig-name\s*\{([^}]*)\}/);
   if (nameRule && /(^|[;\s])animation\s*:/.test(nameRule[1])) {
-    fail('app/globals.css animates .sig-name as a whole — that is the "one sweep over the whole word" effect');
+    fail('app/globals.css animates .sig-name as a whole — the cycle must run per cell, never as one sweep');
   }
 }
 
-/* ── 7. the palette stays in the brand's greens ── */
+/* ── 7. the palette stays in the brand's greens + restrained accents ── */
   const hue = (hex) => {
     const m = /^#([0-9a-f]{6})$/i.exec(hex);
     if (!m) return null;
@@ -300,26 +341,85 @@ if (nameComp) {
     const b = n & 255;
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
-    if (max === min) return { h: 0, r, g, b };
+    const l = (max + min) / 510;
+    const sL = max === min ? 0 : (max - min) / (1 - Math.abs(2 * l - 1)) / 255;
+    if (max === min) return { h: 0, l, s: 0, r, g, b };
     let h;
     if (max === g) h = 60 * (2 + (b - r) / (max - min));
     else if (max === r) h = 60 * (((g - b) / (max - min) + 6) % 6);
     else h = 60 * (4 + (r - g) / (max - min));
-    return { h, r, g, b };
+    return { h, l, s: sL, r, g, b };
   };
 if (nameComp) {
   const inks = [...(nameComp.match(/INKS\s*=\s*\[([^\]]*)\]/)?.[1].match(/#[0-9a-f]{6}/gi) ?? [])];
   if (inks.length < 4) {
-    fail('components/HeroName.tsx no longer defines a spread of inks — every letter needs its own colour');
+    fail('components/GlitchName.tsx no longer defines a spread of inks — every letter needs its own colour');
   }
   for (const hex of inks) {
     const c = hue(hex);
     if (!c) continue;
     /* green family: hue 75..190 (lime → teal), green dominant */
     if (c.h < 75 || c.h > 190 || c.g < c.r || c.g < c.b) {
-      fail(`components/HeroName.tsx uses an off-family ink ${hex} (hue ${Math.round(c.h)}) — the identity is green, not a rainbow`);
+      fail(`components/GlitchName.tsx uses an off-family ink ${hex} (hue ${Math.round(c.h)}) — the identity is green, not a rainbow`);
     }
   }
+  /* scramble inks: cool technical tones — cyan→blue band, light, restrained */
+  const scramble = [...(nameComp.match(/SCRAMBLE_INKS\s*=\s*\[([^\]]*)\]/)?.[1].match(/#[0-9a-f]{6}/gi) ?? [])];
+  if (scramble.length < 2) {
+    fail('components/GlitchName.tsx must define scramble inks for the transformation phase');
+  }
+  for (const hex of scramble) {
+    const c = hue(hex);
+    if (!c) continue;
+    if (c.h < 180 || c.h > 265 || c.l < 0.55 || c.l > 0.95) {
+      fail(`components/GlitchName.tsx scramble ink ${hex} leaves the restrained cool band (hue ${Math.round(c.h)}, lightness ${c.l.toFixed(2)})`);
+    }
+  }
+  /* the reconstruction flash: one warm highlight, nothing else */
+  const warm = nameComp.match(/REBUILD_INK\s*=\s*'(#[0-9a-f]{6})'/i)?.[1];
+  if (!warm) {
+    fail('components/GlitchName.tsx must define the warm reconstruction ink');
+  } else {
+    const c = hue(warm);
+    if (!c || c.h < 20 || c.h > 70) {
+      fail(`components/GlitchName.tsx reconstruction ink ${warm} must stay in the warm amber band (hue 20..70)`);
+    }
+  }
+}
+
+/* ── 8. the map is page-aware: nine deterministic camera positions ──
+   One focus per section, indexed by the sections registry; Home is
+   Bangladesh; WorldMap flies the viewBox between them. */
+const geo = tryRead('app/geo.ts');
+if (!geo) {
+  fail('app/geo.ts is missing — the camera mapping must live with the projection');
+} else {
+  const block = geo.slice(geo.indexOf('GEO_FOCUS'), geo.indexOf('export const HALF_WORLD'));
+  const entries = [...block.matchAll(/\{\s*section:\s*'([^']+)',\s*place:\s*'([^']*)',\s*lon:\s*(-?[\d.]+),\s*lat:\s*(-?[\d.]+),\s*zoom:\s*([\d.]+)\s*\}/g)];
+  if (entries.length !== 9) {
+    fail(`app/geo.ts GEO_FOCUS must define exactly one camera position per section (found ${entries.length}, need 9)`);
+  }
+  if (entries[0]) {
+    const [, section, , lon, lat] = entries[0];
+    if (section !== 'home') fail(`GEO_FOCUS[0] must be section "home" (found "${section}")`);
+    if (Math.abs(Number(lon) - 90.4) > 1 || Math.abs(Number(lat) - 23.8) > 1) {
+      fail(`GEO_FOCUS[0] must stay on Bangladesh (Dhaka ≈ 90.4E 23.8N) — got ${lon}, ${lat}`);
+    }
+  }
+  if (new Set(entries.map((e) => `${e[3]},${e[4]}`)).size !== entries.length) {
+    fail('GEO_FOCUS positions must be distinct — nine pages, nine geographies');
+  }
+}
+const worldMap2 = tryRead('components/WorldMap.tsx');
+if (worldMap2) {
+  if (!/GEO_FOCUS/.test(worldMap2)) fail('components/WorldMap.tsx must consume the GEO_FOCUS registry — one mapping, one source');
+  if (!/sectionIndex/.test(worldMap2)) fail('components/WorldMap.tsx must receive the active section index from the pager');
+  if (!/setAttribute\('viewBox'/.test(worldMap2)) fail('components/WorldMap.tsx must fly the camera via the viewBox attribute — no CSS transform on map geometry');
+  if (!/data-cam/.test(worldMap2)) fail('components/WorldMap.tsx must expose its camera state via data-cam for observability');
+  if (!/animateMotion/.test(worldMap2)) fail('components/WorldMap.tsx must keep the data-flow packets');
+}
+if (!/sectionIndex=\{index\}/.test(tryRead('components/Pager.tsx'))) {
+  fail('components/Pager.tsx must pass the active section index to WorldMap');
 }
 } finally {
   rmSync(tmp, { recursive: true, force: true });

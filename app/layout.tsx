@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, JetBrains_Mono, Noto_Sans_Bengali, Space_Grotesk } from 'next/font/google';
+import { Chakra_Petch, Inter, JetBrains_Mono, Noto_Sans_Bengali, Space_Grotesk } from 'next/font/google';
 import { BRAND } from './design-tokens';
 import { content } from './content';
 import './globals.css';
@@ -36,6 +36,18 @@ const bengali = Noto_Sans_Bengali({
 const display = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-display',
+  display: 'swap',
+});
+
+/* The identity wordmark gets its own display face: Chakra Petch is a
+   squared, technical face built for exactly this register — signal
+   systems, terminals, experimental work. Latin-only subset here too,
+   so Bengali falls through to `--font-bengali`. Self-hosted woff2 via
+   next/font: no runtime third-party request. */
+const wordmark = Chakra_Petch({
+  subsets: ['latin'],
+  weight: ['500', '700'],
+  variable: '--font-wordmark',
   display: 'swap',
 });
 
@@ -196,7 +208,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${inter.variable} ${jetbrains.variable} ${bengali.variable} ${display.variable} noise`}>
+      <body className={`${inter.variable} ${jetbrains.variable} ${bengali.variable} ${display.variable} ${wordmark.variable} noise`}>
         {children}
       </body>
     </html>

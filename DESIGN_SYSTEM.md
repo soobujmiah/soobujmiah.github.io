@@ -68,6 +68,17 @@ below verbatim. Both stay correct — the gate guarantees it.
       "releaseSeconds": 0.5,
       "pressSeconds": 0.1
     },
+    "nameCycle": {
+      "cycleSeconds": 5.2,
+      "holdSeconds": 1.15,
+      "unstableSeconds": 0.55,
+      "scrambleSeconds": 1.05,
+      "rebuildSeconds": 0.7,
+      "staggerSeconds": 0.22,
+      "scrambleStepMs": 62,
+      "jitterPx": 1.6,
+      "boostSeconds": 1.4
+    },
     "pullToRefresh": {
       "armPx": 12,
       "thresholdPx": 76,
@@ -111,6 +122,9 @@ recognizable but never flood the interface — no neon cyberpunk.
 - Latin/UI: Inter (`--font-inter`). Bangla: **Noto Sans Bengali**
   (`--font-bengali`), loaded as a real webfont through `next/font/google`.
 - Mono/labels/eyebrows/counters: JetBrains Mono (`--font-mono`).
+- Identity wordmark: **Chakra Petch** (`--font-wordmark`, 500/700, Latin
+  subset) — a squared technical face, self-hosted woff2 via `next/font`, no
+  runtime third-party request. Bengali falls through to `--font-bengali`.
 - Eyebrow: 10px mono, uppercase, `tracking-[0.3em]`, accent color.
 - Headings: tight (`tracking-tight`, leading 1.1–1.12), fluid `clamp()`.
 - Body: 13–14px, relaxed leading (1.7–1.75), 55–65% white.
@@ -152,49 +166,65 @@ English tree. Neither language borrows the other's script.
 - Reveals: `0.7s cubic-bezier(0.16, 1, 0.3, 1)` fade-up; pages remount, so
   reveals replay on each entry.
 - Micro: 0.1–0.5s; magnetic links ease-out 0.12s, release 0.5s expo.
-- Environment responds to paging: the map drifts on a 150s cycle at a fixed
-  rate and the progress bar springs forward.
+- Environment responds to paging: the map camera flies to each page's
+  geographic focus (~1.25s ease-in-out viewBox flight) and the progress bar
+  springs forward.
 - Animate **transform + opacity only** (compositor-friendly). The identity
   mark's continuous life is pure CSS; its pointer loop writes CSS variables
   and stops itself the moment nothing is moving.
-- `prefers-reduced-motion`: instant transitions, a fully static environment,
-  no auto-advance, no glitch loops, and the signature name becomes a calm
-  static mark. Reduced motion removes animation, never functionality.
+- `prefers-reduced-motion`: instant transitions, a fully static environment
+  (no camera flight, no packets), no auto-advance, and the identity name
+  becomes a calm static wordmark. Reduced motion removes animation, never
+  functionality.
 
-## 5b. Living identity mark (`components/HeroName.tsx`)
+## 5b. Living identity mark (`components/GlitchName.tsx`)
 
-The hero name is the portfolio's centrepiece: a **living signal wordmark**.
-The name is a cast of characters, not animated text — every grapheme carries
-its own ink from the lime → teal brand ramp, its own stance (tilt, scale,
-baseline), and its own phase inside one shared floating wave.
+The hero name is the portfolio's centrepiece: a **glitch identity** — a
+signal that destabilises and rebuilds itself. One deterministic clock runs a
+five-phase cycle through the wordmark:
 
-- **Continuous, calm life — pure CSS.** A staggered one-time entrance
-  (`sig-in`: rise, un-tilt, settle into stance) followed by an infinite
-  gentle drift (`sig-live`: ±0.05em float, sub-degree rotation sway, ≤3.5%
-  breathing scale). Negative per-glyph delays make the drift travel through
-  the word as a wave, so there is never a visible start or end state. Every
-  third glyph also wanders slowly between adjacent inks (`sig-wander`).
-- **Glyph-local interaction.** Pointer proximity leans nearby characters
-  gently toward the cursor (≤5px, ≤2.4°) and neighbours feel a falloff share
-  of it; a tap gives the nearest character a short scale kick. One
-  self-stopping rAF writes `--mag-x/--mag-y/--mag-r/--mag-s` on the glyph
-  wrappers — no React re-render, no per-frame layout reads, nothing running
-  in a hidden tab.
+1. **Hold** (~1.15s) — the correct name, at rest, in its own inks.
+2. **Instability** (~0.55s) — a subtle pre-break lean: micro-jitter ramps up,
+   glyphs stay correct.
+3. **Scramble** (~1.05s) — rapid glyph transformation: each character cycles
+   through a curated technical vocabulary (ASCII, Greek, math/geometric
+   marks) at a fixed step cadence, in restrained cool inks.
+4. **Reconstruct** (~0.7s) — characters lock back into the correct name one
+   by one, left to right, each landing with a brief warm flash that settles
+   into its own ink.
+5. **Hold** again — the cycle repeats; the name is always recoverable and
+   always resolves to the correct spelling.
+
+Each glyph runs the same cycle with an index stagger, so instability and
+rebuilding travel through the word as a wave — intentional transformation,
+never random flicker.
+
+- **Deterministic.** Scramble choices derive from (cycle count, glyph index,
+  step) — no `Math.random`. Server and client renders are identical.
+- **Glyph-local interaction (secondary).** Pointer proximity raises the local
+  signal (brief local scramble); a tap fires a burst on the nearest cell. The
+  cycle runs without any input.
 - **Legibility first.** The name is real DOM text twice over — a
-  screen-reader-only copy plus the visible glyphs (`aria-hidden`), so it is
+  screen-reader-only copy plus the visible cells (`aria-hidden`), so it is
   announced once, as a word. It is never canvas or image.
 - **Grapheme-safe.** Clusters come from `Intl.Segmenter` with a
   combining-mark-aware fallback (`app/graphemes.ts`), so Bengali conjuncts
-  and matras (`মি`, `ক্ষ`) are never split. Splitting them by code point
-  would corrupt the shaping.
-- **Bounded cost.** Transform + opacity only (compositor), a static
-  text-shadow glow per glyph, no canvas, no filter, no mix-blend. Determinism
-  (every colour, tilt, delay and duration derives from the glyph index) keeps
-  server and client renders identical.
-- **Palette** — green family only: a lime → teal band, ≥4 inks, deterministic
-  order. No near-white, no cyan, no rainbow.
-- **Reduced motion** — a calm, fully designed static mark: every character
-  keeps its ink, stance and glow; no animation and no listeners run.
+  and matras (`মি`, `ক্ষ`) are never split. Bengali mode never letter-scrambles:
+  clusters keep their exact text and live through the cycle with colour and
+  jitter only — scrambling conjuncts would corrupt the shaping.
+- **Bounded cost.** Jitter is transform-only at a fixed cadence; colour/glow
+  are class flips on coarse phase boundaries; glyph swaps write `textContent`
+  on width-locked cells (measured once), so the cycle never reflows the hero.
+  No canvas, no filter, no mix-blend; nothing runs in a hidden tab.
+- **Wordmark face.** Chakra Petch (squared, technical) via `next/font`
+  self-hosted woff2, Latin subset; Bengali falls through to the project's
+  Bengali webfont. Both scripts get a deliberate display treatment.
+- **Palette** — resolved name in the green family only (lime → teal band,
+  ≥4 inks, deterministic order). Scramble stays in a restrained cool band
+  (cyan → blue, lightness 0.55–0.95); reconstruction uses one warm amber
+  flash. No near-white, no rainbow.
+- **Reduced motion** — a calm, fully designed static wordmark: every cell
+  keeps its ink and glow; no cycle and no listeners run.
 
 ## 6. Interaction states
 
@@ -249,7 +279,31 @@ no model change needed.
 A **dark, deep-green global map** (`components/WorldMap.tsx`): Natural Earth
 1:110m land contours in a Miller projection, cropped to the inhabited
 latitudes and simplified by `tools/make-worldmap.py`. It is an environment,
-not a spectacle.
+not a spectacle — and it **travels with the story**.
+
+**Page-aware camera.** Each of the nine sections owns one deterministic
+geographic focus (`app/geo.ts` → `GEO_FOCUS`, aligned with `SECTION_IDS` by
+index; Home is Bangladesh). When the pager turns a page, the camera flies to
+the new focus by interpolating the SVG **viewBox attribute** (~1.25s,
+ease-in-out, rAF) — never a CSS transform on map geometry. Deep links and
+crawlers get the route's own camera server-rendered. Under reduced motion
+the camera snaps instead of flying.
+
+Layers, back to front (content always wins):
+
+1. **Land** — contours only: fill `rgba(16,185,129,0.055)`, coastline
+   hairline `rgba(52,211,153,0.16)`, crisp at every zoom via
+   `vector-effect: non-scaling-stroke`.
+2. **Focus glow** — a soft radial wash centred on the current page's
+   geographic focus; panned by the camera like everything else.
+3. **Data flow** — origin→hub arcs (static geometry, faint dashes) with a
+   handful of travelling packets (SMIL `animateMotion`, ≤4 on screen,
+   staggered cadence). Elegant technical, never radar, never a trading
+   floor. Hidden entirely under reduced motion.
+4. **Technical vector motifs** — circuit traces, orbital arcs, a waveform
+   fragment, network nodes, coordinate ticks. Screen-space, decorative,
+   static, very low ink: discovered, never shouted.
+5. **Atmosphere** — the deep-green radial wash behind the land.
 
 Rules, so this never drifts back:
 
@@ -259,14 +313,19 @@ Rules, so this never drifts back:
 - **No light layer.** Nothing behind the name may flash, panel, or bloom. The
   previous near-white sweep band (`.sig-sweep`) and the `#86efac` page-change
   flash were removed with their keyframes, not hidden.
-- **Contours only** — land fill `rgba(16,185,129,0.055)`, coastline hairline
-  `rgba(52,211,153,0.16)`. Contrast stays far below the name's.
-- **Signals, not noise** — nine projected network hubs and three faint links.
+- **Stability contract** — the map flickered before because geometry
+  re-rasterised every frame (scaled land with `non-scaling-stroke`, scaled
+  stroked circles, animated `stroke-dashoffset`). So: no CSS animation or
+  transform on map geometry, ever. The origin halo pulses opacity only; the
+  camera rewrites the viewBox attribute; packets follow SMIL motion paths.
+- **Signals, not noise** — nine projected network hubs and four faint links.
   No pointer repulsion, no ripples, no scanline: the background must never
   compete with the name for attention.
-- **Cost** — one inline SVG, zero canvas, zero rAF. Motion is CSS
-  transform/opacity, paused via `data-paused` when the tab is hidden and
-  disabled entirely under reduced motion.
+- **Cost** — one inline map SVG plus one inline motif SVG, zero canvas, zero
+  WebGL. The only rAF is the ~1.25s camera flight during page changes
+  (self-stopping, snaps to destination if the tab hides mid-flight).
+  Motion pauses via `data-paused` when the tab is hidden and the camera +
+  packets are disabled entirely under reduced motion.
 
 ## 10. Accessibility
 
@@ -332,8 +391,8 @@ app/globals.css          tokens (§1), pager, overlay, name, carousels, a11y
 components/Pager.tsx     discrete pager, gestures, paper-turn, route sync
 components/NavOverlay.tsx  the section index dialog
 components/PullToRefresh.tsx  real mobile pull-to-refresh gesture
-components/HeroName.tsx       the hero identity mark (§5b)
-components/WorldMap.tsx   dark-green global map environment (§9)
+components/GlitchName.tsx     the hero identity mark (§5b)
+components/WorldMap.tsx   dark-green page-aware map environment (§9)
 components/world-map-path.ts  generated land contours (do not edit)
 tools/make-worldmap.py    regenerates the contours from Natural Earth
 components/sections.tsx  the nine curated pages

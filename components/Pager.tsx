@@ -339,7 +339,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        <WorldMap reducedMotion={reducedMotion} />
+        <WorldMap sectionIndex={index} reducedMotion={reducedMotion} />
         <div className="pager-vignette" aria-hidden />
 
         <AnimatePresence custom={dir} initial={false} mode="sync">

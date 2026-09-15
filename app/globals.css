@@ -153,10 +153,14 @@ a, button {
    `vector-effect: non-scaling-stroke` was set, scaled stroked hub
    circles, and animated `stroke-dashoffset` on the arcs. Each of those
    forces the renderer to re-tessellate a 29 KB vector path every
-   frame, which is exactly what shimmered. The only animation left is
-   the OPACITY of one small ring, which cannot re-tessellate anything.
-   Anything added here must obey the same rule; `check-design` enforces
-   it by inspecting every keyframe the map references. */
+   frame, which is exactly what shimmered. The map still obeys that
+   rule: no CSS geometry animation here. The camera flies by rewriting
+   the SVG viewBox attribute during page transitions (strokes stay
+   crisp via non-scaling-stroke), the origin halo pulses opacity only,
+   and a handful of data packets travel along the arcs via SMIL motion
+   paths — geometry attributes, never CSS transforms. Anything added
+   must obey the same rule; `check-design` enforces it by inspecting
+   every keyframe the map references. */
 .worldmap {
   position: absolute;
   inset: 0;
@@ -244,6 +248,52 @@ a, button {
 
 /* suspension: the map is decoration, so it stops when unseen */
 .worldmap[data-paused='true'] .worldmap-origin-halo { animation-play-state: paused; }
+
+/* ── the page-aware camera system ──
+   L2 focus glow — a soft radial wash centred on the current page's
+   geographic focus; it is panned by the camera like everything else. */
+.worldmap-focus {
+  pointer-events: none;
+}
+
+/* L3 data flow — the geometry stays static; the packets travel.
+   SMIL animateMotion on tiny circles: no CSS animation, no filter,
+   and only ever four packets on screen. */
+.worldmap-flow {
+  pointer-events: none;
+}
+
+.worldmap-packet {
+  fill: rgba(74, 222, 128, 0.5);
+}
+
+/* L4 technical vector motifs — screen-space, decorative, static.
+   Circuit traces, orbits, a waveform fragment, network nodes,
+   coordinate ticks: discovered, never shouted. */
+.maptech {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+.maptech path,
+.maptech circle {
+  fill: none;
+  stroke: rgba(148, 163, 184, 0.07);
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.maptech .maptech-orbit circle,
+.maptech .maptech-net circle,
+.maptech .maptech-circuit circle,
+.maptech .maptech-wave circle {
+  stroke: rgba(34, 197, 94, 0.09);
+}
 
 .pager-vignette {
   position: absolute;
@@ -533,24 +583,20 @@ a, button {
   min-width: 0;
 }
 
-/* ── living signal wordmark — the name as a cast of characters ──
-   Each grapheme has its own ink (the lime → teal brand ramp), its own
-   stance (tilt, scale, baseline), and its own phase inside one shared
-   floating wave. Continuous life is pure CSS on transform/opacity only
-   (compositor-friendly): a one-time staggered entrance (`sig-in`) and an
-   infinite gentle drift (`sig-live`), with a slow ink wander on every
-   third glyph. Negative per-glyph delays make the drift travel through
-   the word, so there is never a visible start or end state.
+/* ── glitch identity — a signal that breaks and rebuilds itself ──
+   The wordmark cycles through four phases on one shared deterministic
+   clock: the correct name at rest, a subtle pre-break instability, a
+   rapid glyph scramble, and a left-to-right reconstruction. Each glyph
+   runs the same cycle with an index stagger, so the wave travels
+   through the word instead of flickering in unison.
 
-   Pointer magnetism and tap kicks write four custom properties
-   (--mag-x/--mag-y/--mag-r/--mag-s) on the glyph wrappers from a single
-   self-stopping rAF — no React re-render per frame, no per-frame layout
-   reads, and nothing runs while the tab is hidden.
-
-   There is no panel, no background, no filter and no full-word sweep
-   behind the name: the life belongs to the letters. The name itself is
-   real DOM text — a screen-reader copy plus the visible glyphs — so the
-   identity is never only pixels. */
+   Everything the loop touches is compositor-friendly: jitter is a
+   transform variable, colour/glow are class flips, and glyph swaps
+   write textContent on width-locked cells (measured once), so the
+   cycle never reflows the hero. There is no CSS animation on the name
+   at all — the life is a deliberate, recoverable transformation, not a
+   flicker. The name itself is real DOM text (a screen-reader copy plus
+   the visible cells), so the identity is never only pixels. */
 .sig-name {
   position: relative;
   display: inline-block;
@@ -562,11 +608,12 @@ a, button {
   align-items: baseline;
 }
 
-.sig-glyph {
+/* one width-locked cell per grapheme; --ink is the character's own
+   colour in the brand ramp */
+.sig-cell {
   display: inline-block;
-  transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0)
-    rotate(var(--mag-r, 0deg))
-    scale(var(--mag-s, 1));
+  position: relative;
+  color: var(--ink, var(--fg));
   will-change: transform;
 }
 
@@ -575,80 +622,28 @@ a, button {
   width: 0.28em;
 }
 
-/* One-time entrance: rise, un-tilt, and settle into the character's
-   stance. `both` holds the first frame during the stagger delay, so the
-   finished name never flashes before its own entrance. */
-.sig-in {
-  display: inline-block;
-  animation: sig-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: var(--in-delay, 0s);
-}
-
-/* Continuous life: a calm float + breath around the stance. The stagger
-   of negative per-glyph delays turns it into a slow travelling wave. */
+/* the leaf span that actually carries the glyph — React renders it
+   once; the loop rewrites only its textContent */
 .sig-ink {
   display: inline-block;
-  color: var(--ink, var(--fg));
-  text-shadow: 0 0 18px var(--glow, rgba(34, 197, 94, 0.22));
-  transform-origin: 50% 78%;
-  animation: sig-live var(--live-dur, 6s) ease-in-out var(--live-delay, 0s) infinite alternate;
-  will-change: transform;
+  min-width: 100%;
+  text-align: center;
+  color: inherit;
+  text-shadow: 0 0 18px rgba(34, 197, 94, 0.22);
 }
 
-/* Every third character also wanders slowly between adjacent inks —
-   colour life that never touches layout. */
-.sig-wanderer {
-  animation: sig-live var(--live-dur, 6s) ease-in-out var(--live-delay, 0s) infinite alternate,
-    sig-wander 9.5s ease-in-out infinite;
+/* phase colour language: scramble reads cool and technical,
+   reconstruction reads warm — both stay in the restrained palette */
+.sig-cell.sig-scramble .sig-ink {
+  text-shadow: 0 0 14px rgba(125, 211, 252, 0.34);
 }
 
-@keyframes sig-in {
-  from {
-    opacity: 0;
-    transform: translateY(0.45em) rotate(calc(var(--tilt, 0deg) * 2.4)) scale(0.86);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) rotate(0deg) scale(1);
-  }
+.sig-cell.sig-rebuild .sig-ink {
+  text-shadow: 0 0 16px rgba(234, 179, 8, 0.4);
 }
 
-@keyframes sig-live {
-  from {
-    transform: translateY(calc(0.022em + var(--base, 0em))) rotate(calc(var(--tilt, 0deg) * -0.45)) scale(var(--sc, 1));
-  }
-  to {
-    transform: translateY(calc(-0.045em + var(--base, 0em))) rotate(calc(var(--tilt, 0deg) * 0.85)) scale(calc(var(--sc, 1) * 1.035));
-  }
-}
-
-@keyframes sig-wander {
-  0%,
-  100% {
-    color: var(--ink, var(--fg));
-  }
-  50% {
-    color: var(--ink2, var(--ink, var(--fg)));
-  }
-}
-
-/* reduced motion: a calm, fully designed multi-tone mark — every
-   character keeps its ink, stance and glow, and all motion stops */
-.sig-static .sig-in,
-.sig-static .sig-ink {
-  animation: none;
-}
-
-.sig-static .sig-in {
-  opacity: 1;
-}
-
-.sig-static .sig-ink {
-  transform: translateY(var(--base, 0em)) rotate(var(--tilt, 0deg)) scale(var(--sc, 1));
-  will-change: auto;
-}
-
-.sig-static .sig-glyph {
+/* reduced motion: a calm, fully designed multi-tone wordmark at rest */
+.sig-static .sig-cell {
   transform: none;
   will-change: auto;
 }
@@ -716,15 +711,16 @@ body.lang-bn span {
 }
 
 /* ── the identity mark's own typography ──
-   The name is a brand mark, not UI text, so it gets a display face.
-   Space Grotesk is Latin-only by design: Bengali codepoints are not in
-   its subset, so Bangla falls through to the project's Bengali webfont
-   on the next line of the stack. Both scripts therefore get a deliberate
-   display treatment instead of a Latin default stretched over Bengali. */
+   The name is a brand mark, not UI text, so it gets its own display
+   face: Chakra Petch, a squared technical face. Both display faces are
+   Latin-only by design, so Bengali codepoints fall through to the
+   project's Bengali webfont further down the stack. Both scripts
+   therefore get a deliberate display treatment instead of a Latin
+   default stretched over Bengali. */
 .hero-name {
-  font-family: var(--font-display), var(--font-bengali), var(--font-inter), system-ui, sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.028em;
+  font-family: var(--font-wordmark), var(--font-display), var(--font-bengali), var(--font-inter), system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.012em;
   font-feature-settings: 'ss01' 1;
 }
 
@@ -1059,22 +1055,19 @@ body.lang-bn span {
   }
   .worldmap-origin-halo { opacity: 0.3; }
 
-  /* the name stays fully legible and still. Every animation stops and
-     each glyph keeps the ink it was given, so the static mark is still
-     the multi-tone identity — just at rest. */
-  .sig-in,
-  .sig-ink {
-    animation: none !important;
+  /* the map does not travel: no camera flight, no packets */
+  .worldmap-packet {
+    display: none !important;
+  }
+
+  /* the name stays fully legible and still. No cycle runs — the static
+     multi-tone wordmark keeps its colour, typography and accessibility. */
+  .sig-cell {
+    transform: none !important;
+    will-change: auto;
   }
   .sig-ink {
-    opacity: 1 !important;
     transform: none !important;
     transition: none !important;
-    text-shadow: none !important;
-    will-change: auto;
-  }
-  .sig-glyph {
-    transform: none !important;
-    will-change: auto;
   }
 }

@@ -64,6 +64,65 @@ export const HUBS = [
 
 export const HUB_POINTS = HUBS.map((h) => projectPoint(h.lon, h.lat));
 
+/* ═══════════════════════════════════════════════════════════════
+   PAGE-TO-MAP CAMERA — one deterministic geographic focus per
+   section, aligned with SECTION_IDS (app/sections.ts) by index.
+
+   Home is Bangladesh (the origin). The other eight positions are
+   chosen for meaningful global coverage AND for the owner's real
+   geography: his work history in Saudi Arabia, freelance/remote
+   ties toward North America and Europe, and the technology hubs
+   his engineering work points at. Reordering sections reorders the
+   camera with them — the mapping lives in one place.
+   ═══════════════════════════════════════════════════════════════ */
+export interface PageFocus {
+  section: string;
+  place: string;
+  lon: number;
+  lat: number;
+  zoom: number;
+}
+
+export const GEO_FOCUS: readonly PageFocus[] = [
+  { section: 'home', place: 'Dhaka, Bangladesh', lon: 90.4, lat: 23.8, zoom: 1.5 },
+  { section: 'presence', place: 'Riyadh, Arabia', lon: 46.7, lat: 24.7, zoom: 2.8 },
+  { section: 'about', place: 'Jeddah, Arabia', lon: 39.2, lat: 21.5, zoom: 2.8 },
+  { section: 'work', place: 'London', lon: 0.1, lat: 51.5, zoom: 3.0 },
+  { section: 'research', place: 'Toronto', lon: -79.4, lat: 43.7, zoom: 2.9 },
+  { section: 'stack', place: 'Bengaluru', lon: 77.6, lat: 12.97, zoom: 3.0 },
+  { section: 'open-source', place: 'Shenzhen', lon: 114.1, lat: 22.5, zoom: 3.0 },
+  { section: 'experience', place: 'São Paulo', lon: -46.6, lat: -23.5, zoom: 2.9 },
+  { section: 'contact', place: 'Singapore', lon: 103.8, lat: 1.4, zoom: 3.1 },
+] as const;
+
+/** Half the full map width; the camera aperture is derived from it. */
+export const HALF_WORLD = MAP_WIDTH / 2;
+
+/** Projected focus centre plus the camera aperture for a page focus. */
+export function focusCamera(f: PageFocus) {
+  const p = projectPoint(f.lon, f.lat);
+  const hw = HALF_WORLD / f.zoom;
+  return { cx: p.x, cy: p.y, hw };
+}
+
+/**
+ * Clamp a camera centre so the aperture stays on the map. Vertically it
+ * never leaves the projected latitudes; horizontally it may overshoot a
+ * little (the atmosphere gradient continues past the map's edge), which
+ * is what keeps Dhaka centred on Home despite the Pacific margin.
+ */
+export function clampCamera(cx: number, cy: number, hw: number) {
+  const over = hw * 0.25;
+  /* when the aperture is taller than the projected map (the Home-wide
+     view), centre it vertically instead of clamping into emptiness */
+  const y = TOP + hw > BOTTOM - hw ? (TOP + BOTTOM) / 2 : Math.min(Math.max(cy, TOP + hw), BOTTOM - hw);
+  return {
+    x: Math.min(Math.max(cx, hw - over), MAP_WIDTH - hw + over),
+    y,
+    hw,
+  };
+}
+
 /** True when (x, y) lies inside the closed ring of `[x, y, x, y, …]` pairs. */
 export function pointInRing(x: number, y: number, ring: readonly number[]): boolean {
   let inside = false;

@@ -3,7 +3,7 @@
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { Magnetic, Reveal, SnapCarousel, useNav } from './ui';
-import { HeroName } from './HeroName';
+import { GlitchName } from './GlitchName';
 import { sectionHref } from '@/app/sections';
 import { useLang, localizeDigits } from '@/app/language';
 import type { Project, Repo } from '@/app/content';
@@ -57,7 +57,7 @@ export function HeroScene({ reducedMotion }: { reducedMotion: boolean }) {
 
         {/* 2 · who I am — the identity mark dominates */}
         <h1 className="hero-name text-[clamp(2.85rem,9vw,6.5rem)] font-semibold leading-[1.02] tracking-tight">
-          <HeroName text={t.profile.nameFull} reducedMotion={reducedMotion} />
+          <GlitchName text={t.profile.nameFull} reducedMotion={reducedMotion} />
         </h1>
 
         {/* 3 · what I am — exactly one professional identity treatment */}
