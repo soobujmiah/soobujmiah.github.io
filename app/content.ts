@@ -149,6 +149,26 @@ export interface Content {
       cta: string;
       url: string;
     };
+    /* ADT ↔ Ternux: two layers of one Android/ARM64 workflow. Prose
+       only — the two repository/website links are identifiers, so they
+       are declared in IDENTIFIER_PATHS alongside work.projects[].* */
+    relationship: {
+      eyebrow: string;
+      heading: string;
+      body: string;
+      deviceLabel: string;
+      layers: {
+        name: string;
+        role: string;
+        note: string;
+        websiteUrl: string;
+        repo: string;
+      }[];
+      verifiedLabel: string;
+      verified: string;
+      experimentalLabel: string;
+      experimental: string;
+    };
   };
   research: {
     eyebrow: string;
@@ -326,7 +346,7 @@ const en: Content = {
         description:
           'Installs a real Debian ARM64 userspace, Xfce4 desktop, Termux:X11 display, PulseAudio bridge, and Zink/Turnip GPU route — one command, no root.',
         evidence:
-          'Zink/Turnip renderer confirmed on Adreno 825: glmark2 score 140 (OpenGL 4.6). Blender 4.3.2 launched with Zink/Adreno/Turnip renderer.',
+          'Zink/Turnip renderer confirmed on Adreno 825: glmark2 score 140 (OpenGL 4.6), with a documented compatibility fallback route. Blender 4.3.2 launched, but its own report still named device type SOFTWARE — only the viewport OpenGL path through Zink/Turnip is proven, not Cycles GPU rendering.',
         topics: ['Debian', 'Vulkan', 'Turnip', 'Zink', 'Adreno', 'PRoot'],
         repo: 'https://github.com/soobujmiah/ternux',
         websiteUrl: 'https://soobujmiah.github.io/ternux/',
@@ -341,6 +361,32 @@ const en: Content = {
       testsNote: '94 tests green on CI · export/diagnostics device-validated on the Redmi Turbo 4 Pro',
       cta: 'Follow the build ↗',
       url: 'https://github.com/soobujmiah/songjog',
+    },
+    relationship: {
+      eyebrow: 'Ecosystem — two layers, one device',
+      heading: 'ADT and Ternux are two halves of the same Android/ARM64 workflow.',
+      body: 'One physical Android device, two complementary toolchains. ADT turns it into an Android development workstation — build, sign, install, debug. Ternux turns it into a Linux ARM64 desktop — Debian, Xfce4, GPU acceleration. Neither needs a conventional PC, and both are maintained as independent repositories with their own documentation and evidence.',
+      deviceLabel: 'One physical Android device',
+      layers: [
+        {
+          name: 'ADT',
+          role: 'Android development layer',
+          note: 'Native aarch64 build-tools and platform-tools from AOSP source: build, sign, install and inspect real APKs from the phone itself.',
+          websiteUrl: 'https://soobujmiah.github.io/adt/',
+          repo: 'https://github.com/soobujmiah/adt',
+        },
+        {
+          name: 'Ternux',
+          role: 'Linux desktop layer',
+          note: 'A real Debian ARM64 userspace with an Xfce4 desktop and an explicit graphics route, installed on the same device with no root.',
+          websiteUrl: 'https://soobujmiah.github.io/ternux/',
+          repo: 'https://github.com/soobujmiah/ternux',
+        },
+      ],
+      verifiedLabel: 'Verified: ',
+      verified: 'Both toolchains were validated on the same physical device — a Redmi Turbo 4 Pro running Termux and PRoot Debian. Ternux installs that Debian desktop; ADT runs inside it and produced, signed and installed a real APK end to end.',
+      experimentalLabel: 'Not yet proven: ',
+      experimental: 'No joint automation, no shared build orchestration and no GPU-assisted build path. Each project stands on its own evidence rather than on a combined pipeline.',
     },
   },
   research: {
@@ -705,7 +751,7 @@ const bn: Content = {
         description:
           'এক কমান্ডে আসল ডেবিয়ান এআরএম ৬৪ ইউজারস্পেস, এক্সএফসিই৪ ডেস্কটপ, টারমাক্স:এক্স১১ ডিসপ্লে, পালসঅডিও ব্রিজ ও জিংক/টার্নিপ জিপিইউ রুট — রুট ছাড়াই।',
         evidence:
-          'অ্যাড্রেনো ৮২৫-এ জিংক/টার্নিপ রেন্ডারার নিশ্চিত: গ্লমার্ক২ স্কোর ১৪০ (ওপেনজিএল ৪.৬)। জিংক/অ্যাড্রেনো/টার্নিপ রেন্ডারারে ব্লেন্ডার ৪.৩.২ চালু হয়েছে।',
+          'অ্যাড্রেনো ৮২৫-এ জিংক/টার্নিপ রেন্ডারার নিশ্চিত: গ্লমার্ক২ স্কোর ১৪০ (ওপেনজিএল ৪.৬), সঙ্গে নথিভুক্ত সামঞ্জস্য-ফলব্যাক রুট। ব্লেন্ডার ৪.৩.২ চালু হয়েছে, তবে তার নিজের রিপোর্টে ডিভাইস টাইপ সফটওয়্যার ছিল — কেবল জিংক/টার্নিপ দিয়ে ভিউপোর্ট ওপেনজিএল পথটিই প্রমাণিত, সাইকেলস জিপিইউ রেন্ডারিং নয়।',
         topics: ['ডেবিয়ান', 'ভলকান', 'টার্নিপ', 'জিংক', 'অ্যাড্রেনো', 'পিআরুট'],
         repo: 'https://github.com/soobujmiah/ternux',
         websiteUrl: 'https://soobujmiah.github.io/ternux/',
@@ -720,6 +766,32 @@ const bn: Content = {
       testsNote: 'সিআই-তে ৯৪টি টেস্ট সবুজ · রেডমি টার্বো ৪ প্রো-তে এক্সপোর্ট ও ডায়াগনস্টিক ডিভাইস-যাচাইকৃত',
       cta: 'বিল্ড অনুসরণ করুন ↗',
       url: 'https://github.com/soobujmiah/songjog',
+    },
+    relationship: {
+      eyebrow: 'ইকোসিস্টেম — এক ডিভাইস, দুই স্তর',
+      heading: 'এডিটি ও টার্নাক্স — একই অ্যান্ড্রয়েড/এআরএম ৬৪ কর্মপ্রবাহের দুই অর্ধ।',
+      body: 'একটিই ভৌত অ্যান্ড্রয়েড ডিভাইস, দুটি পরস্পর পূরক টুলচেইন। এডিটি তা অ্যান্ড্রয়েড ডেভেলপমেন্ট ওয়ার্কস্টেশনে বদলে দেয় — বিল্ড, সাইন, ইনস্টল, ডিবাগ। টার্নাক্স তা লিনাক্স এআরএম ৬৪ ডেস্কটপে বদলায় — ডেবিয়ান, এক্সএফসিই৪ ডেস্কটপ, জিপিইউ ত্বরণ। কোনোটিই প্রচলিত পিসির উপর নির্ভর করে না; দুটিই স্বতন্ত্র রিপোজিটরি হিসেবে নিজস্ব ডকুমেন্টেশন ও প্রমাণসহ রক্ষিত।',
+      deviceLabel: 'একটিই ভৌত অ্যান্ড্রয়েড ডিভাইস',
+      layers: [
+        {
+          name: 'ADT',
+          role: 'অ্যান্ড্রয়েড ডেভেলপমেন্ট স্তর',
+          note: 'এওএসপি সোর্স থেকে নেটিভ এআরএম ৬৪ বিল্ড-টুলস ও প্লাটফর্ম-টুলস: ফোন থেকেই আসল এপিকে বিল্ড, সাইন, ইনস্টল ও পরিদর্শন।',
+          websiteUrl: 'https://soobujmiah.github.io/adt/',
+          repo: 'https://github.com/soobujmiah/adt',
+        },
+        {
+          name: 'Ternux',
+          role: 'লিনাক্স ডেস্কটপ স্তর',
+          note: 'আসল ডেবিয়ান এআরএম ৬৪ ইউজারস্পেস ও এক্সএফসিই৪ ডেস্কটপ, সঙ্গে স্পষ্ট গ্রাফিক্স রুট — একই ডিভাইসে, রুট ছাড়াই।',
+          websiteUrl: 'https://soobujmiah.github.io/ternux/',
+          repo: 'https://github.com/soobujmiah/ternux',
+        },
+      ],
+      verifiedLabel: 'যাচাইকৃত: ',
+      verified: 'দুটি টুলচেইনই একই ভৌত ডিভাইসে যাচাই করা হয়েছে — টারমাক্স ও পিআরুট ডেবিয়ানে চলা একটি রেডমি টার্বো ৪ প্রো। টার্নাক্স সেই ডেবিয়ান ডেস্কটপ ইনস্টল করে; এডিটি তার ভেতরেই চলে এবং একটি আসল এপিকে শুরু থেকে শেষ পর্যন্ত তৈরি, সাইন ও ইনস্টল করেছে।',
+      experimentalLabel: 'এখনো প্রমাণিত নয়: ',
+      experimental: 'কোনো যৌথ অটোমেশন নেই, সাধারণ বিল্ড অর্কেস্ট্রেশন নেই, জিপিইউ-সহায়ক বিল্ড পথও নেই। প্রতিটি প্রকল্প নিজস্ব প্রমাণে দাঁড়ায় — মিলিত পাইপলাইনে নয়।',
     },
   },
   research: {
