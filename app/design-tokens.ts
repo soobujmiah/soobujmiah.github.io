@@ -42,37 +42,6 @@ export const MOTION = {
   reveal: { seconds: 0.7, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' },
   /** Magnetic link pointer-follow / release. */
   magnetic: { followSeconds: 0.12, releaseSeconds: 0.5, pressSeconds: 0.1 },
-  /** Canvas budget. */
-  canvas: { maxDpr: 1.5 },
-  /** Signature name — per-glyph state machine + diffusion budget. */
-  name: {
-    /** Reveal: fragment field → independent per-letter reconstruction. */
-    revealSeconds: 1.9,
-    lockSeconds: 0.55,
-    lockStaggerSeconds: 0.09,
-    /** State durations, seconds. STABLE → SIGNAL → DIFFUSING →
-        FRAGMENTED → RECONSTRUCTING → STABLE. */
-    signalSeconds: 0.5,
-    diffuseSeconds: 0.55,
-    fragmentSeconds: 0.75,
-    rebuildSeconds: 0.6,
-    /** Idle scheduler: one glyph at a time, unhurried. */
-    idleGapMinSeconds: 2.8,
-    idleGapMaxSeconds: 5.4,
-    /** Pointer proximity field. */
-    pointerRadiusPx: 130,
-    pointerMaxShiftPx: 6,
-    /** Fragments scattered inside one glyph on reveal / tap. */
-    fragmentsPerGlyph: 6,
-    /** Hard ceiling on live fragments across the whole name. */
-    maxFragments: 84,
-    /** Fragment lifetime in animation ticks (~60/s). */
-    fragmentLifeTicks: 36,
-    /** Minimum ms between trail bursts on the same glyph. */
-    fragmentCooldownMs: 140,
-    /** Glyphs destabilised by a page change. */
-    pulseGlyphs: 3,
-  },
   /** Pull-to-refresh gesture. */
   pullToRefresh: {
     /** Raw pixels the finger must travel before the gesture arms. */

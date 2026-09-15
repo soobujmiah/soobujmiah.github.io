@@ -169,7 +169,7 @@ try {
   ];
   for (const rel of [
     'app/globals.css',
-    'components/SignatureName.tsx',
+    'components/HeroName.tsx',
     'components/WorldMap.tsx',
     'components/Pager.tsx',
     'components/sections.tsx',
@@ -262,30 +262,35 @@ try {
     fail('app/globals.css still uses mix-blend-mode — it re-composites the page per frame and is off-brand over the name');
   }
 
-  /* ── 6. the name animates per glyph, never as one lump ── */
-  const sigComp = tryRead('components/SignatureName.tsx');
-  if (sigComp) {
-    for (const v of ['--tx', '--ty', '--rot', '--sc', '--go']) {
-      if (!sigComp.includes(`'${v}'`) && !sigComp.includes(`"${v}"`)) {
-        fail(`components/SignatureName.tsx never writes ${v} — each glyph must carry its own transform`);
-      }
-    }
-    for (const st of ['SIGNAL', 'DIFFUSING', 'FRAGMENTED', 'RECONSTRUCTING']) {
-      if (!sigComp.includes(`'${st}'`)) {
-        fail(`components/SignatureName.tsx has no ${st} state — the per-glyph state machine is the requirement`);
-      }
-    }
-    if (!/data-state/.test(sigComp)) {
-      fail('components/SignatureName.tsx does not publish per-glyph state — the CSS cannot vary one letter from another');
-    }
-    /* the word itself must not be the animated object */
-    const nameRule = css.match(/\.sig-name\s*\{([^}]*)\}/);
-    if (nameRule && /(^|[;\s])animation\s*:/.test(nameRule[1])) {
-      fail('app/globals.css animates .sig-name as a whole — that is the "one sweep over the whole word" effect');
+/* ── 6. the name animates per glyph, never as one lump ──
+   The identity implementation may be replaced, but the engineering
+   contract survives: motion is per-glyph and transform-driven, the
+   interaction loop writes CSS variables (never React re-renders),
+   graphemes are never split, and a reduced-motion path exists. */
+const nameComp = tryRead('components/HeroName.tsx');
+if (nameComp) {
+  for (const v of ['--mag-x', '--mag-y', '--mag-r', '--mag-s']) {
+    if (!nameComp.includes(`'${v}'`) && !nameComp.includes(`"${v}"`)) {
+      fail(`components/HeroName.tsx never writes ${v} — each glyph must carry its own transform`);
     }
   }
+  if (!/segmentGraphemes/.test(nameComp)) {
+    fail('components/HeroName.tsx must split the name grapheme-safely — Bengali clusters can never be broken');
+  }
+  if (!/reducedMotion/.test(nameComp)) {
+    fail('components/HeroName.tsx has no reduced-motion path');
+  }
+  if (!/aria-hidden/.test(nameComp) || !/sr-only/.test(nameComp)) {
+    fail('components/HeroName.tsx must keep the name as real accessible text (sr-only copy, decorative glyphs hidden)');
+  }
+  /* the word itself must not be the animated object */
+  const nameRule = css.match(/\.sig-name\s*\{([^}]*)\}/);
+  if (nameRule && /(^|[;\s])animation\s*:/.test(nameRule[1])) {
+    fail('app/globals.css animates .sig-name as a whole — that is the "one sweep over the whole word" effect');
+  }
+}
 
-  /* ── 7. the palette stays in the brand's greens ── */
+/* ── 7. the palette stays in the brand's greens ── */
   const hue = (hex) => {
     const m = /^#([0-9a-f]{6})$/i.exec(hex);
     if (!m) return null;
@@ -302,23 +307,20 @@ try {
     else h = 60 * (4 + (r - g) / (max - min));
     return { h, r, g, b };
   };
-  if (sigComp) {
-    const inks = [
-      ...(sigComp.match(/INK_RAMP\s*=\s*\[([^\]]*)\]/)?.[1].match(/#[0-9a-f]{6}/gi) ?? []),
-      ...(sigComp.match(/INK_LIT\s*=\s*'(#[0-9a-f]{6})'/i) ?? []).slice(1),
-    ];
-    if (inks.length < 4) {
-      fail('components/SignatureName.tsx no longer defines a spread of inks — every letter needs its own colour');
-    }
-    for (const hex of inks) {
-      const c = hue(hex);
-      if (!c) continue;
-      /* green family: hue 75..190 (lime → teal), green dominant */
-      if (c.h < 75 || c.h > 190 || c.g < c.r || c.g < c.b) {
-        fail(`components/SignatureName.tsx uses an off-family ink ${hex} (hue ${Math.round(c.h)}) — the identity is green, not a rainbow`);
-      }
+if (nameComp) {
+  const inks = [...(nameComp.match(/INKS\s*=\s*\[([^\]]*)\]/)?.[1].match(/#[0-9a-f]{6}/gi) ?? [])];
+  if (inks.length < 4) {
+    fail('components/HeroName.tsx no longer defines a spread of inks — every letter needs its own colour');
+  }
+  for (const hex of inks) {
+    const c = hue(hex);
+    if (!c) continue;
+    /* green family: hue 75..190 (lime → teal), green dominant */
+    if (c.h < 75 || c.h > 190 || c.g < c.r || c.g < c.b) {
+      fail(`components/HeroName.tsx uses an off-family ink ${hex} (hue ${Math.round(c.h)}) — the identity is green, not a rainbow`);
     }
   }
+}
 } finally {
   rmSync(tmp, { recursive: true, force: true });
 }

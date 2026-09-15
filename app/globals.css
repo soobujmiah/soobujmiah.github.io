@@ -533,76 +533,123 @@ a, button {
   min-width: 0;
 }
 
-/* ── signature name — every glyph is its own living entity ──
-   Each grapheme is a separate object with its own state machine
-   (STABLE → SIGNAL → DIFFUSING → FRAGMENTED → RECONSTRUCTING), its own
-   ink from the brand green ramp, and its own geometry. Neighbours run
-   on different clocks, so the word reads as alive rather than as one
-   synchronised animation.
+/* ── living signal wordmark — the name as a cast of characters ──
+   Each grapheme has its own ink (the lime → teal brand ramp), its own
+   stance (tilt, scale, baseline), and its own phase inside one shared
+   floating wave. Continuous life is pure CSS on transform/opacity only
+   (compositor-friendly): a one-time staggered entrance (`sig-in`) and an
+   infinite gentle drift (`sig-live`), with a slow ink wander on every
+   third glyph. Negative per-glyph delays make the drift travel through
+   the word, so there is never a visible start or end state.
 
-   The loop writes CSS custom properties directly on the glyph
-   (transform/opacity variables only — compositor-friendly), so there is
-   never a React re-render per frame. `--ink` is written ONLY on a state
-   change, and the CSS transition does the colour blending, which keeps
-   colour work off the animation path.
+   Pointer magnetism and tap kicks write four custom properties
+   (--mag-x/--mag-y/--mag-r/--mag-s) on the glyph wrappers from a single
+   self-stopping rAF — no React re-render per frame, no per-frame layout
+   reads, and nothing runs while the tab is hidden.
 
-   There is still no sweep, no panel, no full-width overlay and no light
-   behind the name: the energy comes from the letters. The real name is
-   real DOM text on top (z-index 1); the fragment canvas sits underneath
-   (z-index 0) and can never obscure it. */
+   There is no panel, no background, no filter and no full-word sweep
+   behind the name: the life belongs to the letters. The name itself is
+   real DOM text — a screen-reader copy plus the visible glyphs — so the
+   identity is never only pixels. */
 .sig-name {
   position: relative;
-  display: inline-flex;
-  align-items: baseline;
-  isolation: isolate;
-}
-
-.sig-canvas {
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 0;
-  pointer-events: none;
+  display: inline-block;
 }
 
 .sig-glyphs {
   position: relative;
-  z-index: 1;
   display: inline-flex;
+  align-items: baseline;
 }
 
-.sig-cell {
+.sig-glyph {
   display: inline-block;
-  position: relative;
+  transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0)
+    rotate(var(--mag-r, 0deg))
+    scale(var(--mag-s, 1));
+  will-change: transform;
 }
 
 .sig-space {
-  width: 0.26em;
+  display: inline-block;
+  width: 0.28em;
 }
 
-/* One element carries one transform. Default opacity is 0 so the
-   server-rendered markup never flashes the finished name before the
-   reveal starts; the loop raises `--go`. */
+/* One-time entrance: rise, un-tilt, and settle into the character's
+   stance. `both` holds the first frame during the stagger delay, so the
+   finished name never flashes before its own entrance. */
+.sig-in {
+  display: inline-block;
+  animation: sig-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--in-delay, 0s);
+}
+
+/* Continuous life: a calm float + breath around the stance. The stagger
+   of negative per-glyph delays turns it into a slow travelling wave. */
 .sig-ink {
   display: inline-block;
   color: var(--ink, var(--fg));
-  opacity: var(--go, 0);
-  transform: translate3d(var(--tx, 0px), var(--ty, 0.2em), 0) rotate(var(--rot, 0deg)) scale(var(--sc, 1));
-  will-change: transform, opacity;
-  transition: color 0.6s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.45s ease;
+  text-shadow: 0 0 18px var(--glow, rgba(34, 197, 94, 0.22));
+  transform-origin: 50% 78%;
+  animation: sig-live var(--live-dur, 6s) ease-in-out var(--live-delay, 0s) infinite alternate;
+  will-change: transform;
 }
 
-/* a disturbed glyph blooms — tight and green, never a generic glow */
-.sig-cell[data-state='FRAGMENTED'] .sig-ink,
-.sig-cell[data-state='DIFFUSING'] .sig-ink {
-  text-shadow: 0 0 12px rgba(74, 222, 128, 0.26);
+/* Every third character also wanders slowly between adjacent inks —
+   colour life that never touches layout. */
+.sig-wanderer {
+  animation: sig-live var(--live-dur, 6s) ease-in-out var(--live-delay, 0s) infinite alternate,
+    sig-wander 9.5s ease-in-out infinite;
 }
 
-/* reduced motion: a calm, fully designed multi-tone mark */
+@keyframes sig-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.45em) rotate(calc(var(--tilt, 0deg) * 2.4)) scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes sig-live {
+  from {
+    transform: translateY(calc(0.022em + var(--base, 0em))) rotate(calc(var(--tilt, 0deg) * -0.45)) scale(var(--sc, 1));
+  }
+  to {
+    transform: translateY(calc(-0.045em + var(--base, 0em))) rotate(calc(var(--tilt, 0deg) * 0.85)) scale(calc(var(--sc, 1) * 1.035));
+  }
+}
+
+@keyframes sig-wander {
+  0%,
+  100% {
+    color: var(--ink, var(--fg));
+  }
+  50% {
+    color: var(--ink2, var(--ink, var(--fg)));
+  }
+}
+
+/* reduced motion: a calm, fully designed multi-tone mark — every
+   character keeps its ink, stance and glow, and all motion stops */
+.sig-static .sig-in,
 .sig-static .sig-ink {
+  animation: none;
+}
+
+.sig-static .sig-in {
   opacity: 1;
+}
+
+.sig-static .sig-ink {
+  transform: translateY(var(--base, 0em)) rotate(var(--tilt, 0deg)) scale(var(--sc, 1));
+  will-change: auto;
+}
+
+.sig-static .sig-glyph {
   transform: none;
-  transition: none;
   will-change: auto;
 }
 
@@ -1012,14 +1059,22 @@ body.lang-bn span {
   }
   .worldmap-origin-halo { opacity: 0.3; }
 
-  /* the name stays fully legible and still. Every per-glyph variable is
-     pinned, so no stray value can shift or dim a letter; each glyph
-     keeps the ink it was given, so the static mark is still multi-tone. */
+  /* the name stays fully legible and still. Every animation stops and
+     each glyph keeps the ink it was given, so the static mark is still
+     the multi-tone identity — just at rest. */
+  .sig-in,
+  .sig-ink {
+    animation: none !important;
+  }
   .sig-ink {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
     text-shadow: none !important;
+    will-change: auto;
+  }
+  .sig-glyph {
+    transform: none !important;
     will-change: auto;
   }
 }

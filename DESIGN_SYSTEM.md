@@ -68,27 +68,6 @@ below verbatim. Both stay correct — the gate guarantees it.
       "releaseSeconds": 0.5,
       "pressSeconds": 0.1
     },
-    "canvas": {
-      "maxDpr": 1.5
-    },
-    "name": {
-      "revealSeconds": 1.9,
-      "lockSeconds": 0.55,
-      "lockStaggerSeconds": 0.09,
-      "signalSeconds": 0.5,
-      "diffuseSeconds": 0.55,
-      "fragmentSeconds": 0.75,
-      "rebuildSeconds": 0.6,
-      "idleGapMinSeconds": 2.8,
-      "idleGapMaxSeconds": 5.4,
-      "pointerRadiusPx": 130,
-      "pointerMaxShiftPx": 6,
-      "fragmentsPerGlyph": 6,
-      "maxFragments": 84,
-      "fragmentLifeTicks": 36,
-      "fragmentCooldownMs": 140,
-      "pulseGlyphs": 3
-    },
     "pullToRefresh": {
       "armPx": 12,
       "thresholdPx": 76,
@@ -174,48 +153,48 @@ English tree. Neither language borrows the other's script.
   reveals replay on each entry.
 - Micro: 0.1–0.5s; magnetic links ease-out 0.12s, release 0.5s expo.
 - Environment responds to paging: the map drifts on a 150s cycle at a fixed
-  rate, progress bar springs forward, and the name takes one short *local*
-  decode pulse (never a full replay).
-- Animate **transform + opacity only** (compositor-friendly). The fragment
-  canvas is capped in DPR (≤1.5), fragment count and lifetime, and stops
-  entirely when nothing is disturbed.
+  rate and the progress bar springs forward.
+- Animate **transform + opacity only** (compositor-friendly). The identity
+  mark's continuous life is pure CSS; its pointer loop writes CSS variables
+  and stops itself the moment nothing is moving.
 - `prefers-reduced-motion`: instant transitions, a fully static environment,
   no auto-advance, no glitch loops, and the signature name becomes a calm
   static mark. Reduced motion removes animation, never functionality.
 
-## 5b. Signature name (`components/SignatureName.tsx`)
+## 5b. Living identity mark (`components/HeroName.tsx`)
 
-The identity mark is the portfolio's centrepiece and follows its own rules.
-**The letters are the living object** — every effect is glyph-local.
+The hero name is the portfolio's centrepiece: a **living signal wordmark**.
+The name is a cast of characters, not animated text — every grapheme carries
+its own ink from the lime → teal brand ramp, its own stance (tilt, scale,
+baseline), and its own phase inside one shared floating wave.
 
-- **Concept** — `digital signal → diffusion → reconstruction → stable
-  identity`. A disturbed letter fades and drifts, hands over to Matrix-style
-  glyph fragments drawn *inside its own box*, then intelligently settles back
-  into exact typography.
-- **Nothing sweeps across the name.** There is no full-width overlay, no scan
-  bar, no panel and no light flash. Idle life is per-glyph (`sigSignal`, a slow
-  signal travelling letter to letter, colour/opacity only).
-- **Legibility first.** The real name is always real DOM text in the correct
-  font, selectable, painted *above* the fragment canvas (canvas `z-index: 0`,
-  glyphs `z-index: 1`). The canvas can never obscure it, and a dissolving glyph
-  only ever dips to ~32% opacity while its own fragments stand in.
-- **Grapheme-safe.** Clusters are produced by `Intl.Segmenter`, with a
-  combining-mark-aware fallback, so Bengali conjuncts and matras (`মি`, `ক্ষ`)
-  are never split. Splitting them by code point would corrupt the shaping.
-- **Bounded cost.** One canvas sized to the name, DPR ≤1.5, a hard cap of 72
-  live fragments, per-glyph spawn cooldown, and an rAF loop that stops itself
-  the moment nothing is disturbed. The pointer writes CSS custom properties
-  (`--sx`, `--sy`, `--d`) and never re-renders React.
-- **Interaction states** — reveal (per-letter stabilisation out of its own
-  fragments), idle (glyph-local breathing), pointer proximity (local
-  diffusion that converges back), tap/drag (localised disturbance and a
-  rate-limited trail), page change (a short *local* decode pulse on a few
-  letters, never a full replay), and recovery (pointer leave, cancel, up,
-  blur, resize and tab-hide all reset every glyph).
-- **Palette** — green family only: `--accent`, `--accent-bright`, `--signal`,
-  and a single adjacent emerald. No near-white, no cyan, no rainbow.
-- Matrix influence is carried by **motion language**, not by rain: the fragment
-  set is digits plus a few katakana.
+- **Continuous, calm life — pure CSS.** A staggered one-time entrance
+  (`sig-in`: rise, un-tilt, settle into stance) followed by an infinite
+  gentle drift (`sig-live`: ±0.05em float, sub-degree rotation sway, ≤3.5%
+  breathing scale). Negative per-glyph delays make the drift travel through
+  the word as a wave, so there is never a visible start or end state. Every
+  third glyph also wanders slowly between adjacent inks (`sig-wander`).
+- **Glyph-local interaction.** Pointer proximity leans nearby characters
+  gently toward the cursor (≤5px, ≤2.4°) and neighbours feel a falloff share
+  of it; a tap gives the nearest character a short scale kick. One
+  self-stopping rAF writes `--mag-x/--mag-y/--mag-r/--mag-s` on the glyph
+  wrappers — no React re-render, no per-frame layout reads, nothing running
+  in a hidden tab.
+- **Legibility first.** The name is real DOM text twice over — a
+  screen-reader-only copy plus the visible glyphs (`aria-hidden`), so it is
+  announced once, as a word. It is never canvas or image.
+- **Grapheme-safe.** Clusters come from `Intl.Segmenter` with a
+  combining-mark-aware fallback (`app/graphemes.ts`), so Bengali conjuncts
+  and matras (`মি`, `ক্ষ`) are never split. Splitting them by code point
+  would corrupt the shaping.
+- **Bounded cost.** Transform + opacity only (compositor), a static
+  text-shadow glow per glyph, no canvas, no filter, no mix-blend. Determinism
+  (every colour, tilt, delay and duration derives from the glyph index) keeps
+  server and client renders identical.
+- **Palette** — green family only: a lime → teal band, ≥4 inks, deterministic
+  order. No near-white, no cyan, no rainbow.
+- **Reduced motion** — a calm, fully designed static mark: every character
+  keeps its ink, stance and glow; no animation and no listeners run.
 
 ## 6. Interaction states
 
@@ -353,7 +332,7 @@ app/globals.css          tokens (§1), pager, overlay, name, carousels, a11y
 components/Pager.tsx     discrete pager, gestures, paper-turn, route sync
 components/NavOverlay.tsx  the section index dialog
 components/PullToRefresh.tsx  real mobile pull-to-refresh gesture
-components/SignatureName.tsx  the hero identity mark (§5b)
+components/HeroName.tsx       the hero identity mark (§5b)
 components/WorldMap.tsx   dark-green global map environment (§9)
 components/world-map-path.ts  generated land contours (do not edit)
 tools/make-worldmap.py    regenerates the contours from Natural Earth

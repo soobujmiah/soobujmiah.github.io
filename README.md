@@ -147,7 +147,7 @@ components/
   Pager.tsx           discrete pager, gestures, paper-turn, route sync
   NavOverlay.tsx      the section index dialog (role=dialog, focus-managed)
   PullToRefresh.tsx   real mobile pull-to-refresh
-  SignatureName.tsx   the hero identity mark (glyph-local diffusion)
+  HeroName.tsx        the hero identity mark (living signal wordmark)
   WorldMap.tsx        the dark-green global map environment
   world-map-path.ts   generated land contours (do not edit by hand)
   sections.tsx        the nine curated pages (spotlight, carousels, accordion)
