@@ -77,6 +77,7 @@ const OG_IMAGE = { url: '/og.png', width: 1200, height: 630, alt: 'Sobuj Miah â€
 
 export const metadata: Metadata = {
   metadataBase: new URL(ORIGIN),
+  verification: { google: 'Z7hOImSydB4nMFUCSyYaLVRpIPHu8FJBlIbfVSbhWs8' },
   /* Home carries the full identity title; section routes return their
      topic title and the template appends the name, so every route's
      <title> names the author (a rule check-build enforces). */

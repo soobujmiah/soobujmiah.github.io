@@ -117,6 +117,13 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
           >
             {t.hero.ctaGithub}
           </Magnetic>
+          <Magnetic
+            href={serviceHref()}
+            className="rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300 backdrop-blur-md"
+            style={{ border: '1px solid rgba(228,226,223,0.15)', color: '#e4e2df', background: 'rgba(8,10,8,0.5)' }}
+          >
+            {t.hero.ctaServices}
+          </Magnetic>
         </motion.div>
       </div>
 

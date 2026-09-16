@@ -134,6 +134,7 @@ export interface Content {
     availability: string;
     ctaWork: string;
     ctaGithub: string;
+    ctaServices: string;
     scrollHint: string;
   };
   presence: {
@@ -281,10 +282,11 @@ const en: Content = {
     availability: 'Open to remote',
     ctaWork: 'Explore my work',
     ctaGithub: 'View GitHub ↗',
+    ctaServices: 'View All Services',
     scrollHint: 'Open index',
   },
   presence: {
-    eyebrow: '02 — What I actually do',
+    eyebrow: '02 — What I Build',
     heading: 'On-device AI, Android systems, ARM64 Linux, native tooling.',
     items: [
       { label: 'On-Device AI', detail: 'LLM inference, NPU/GPU qualification' },
@@ -295,11 +297,11 @@ const en: Content = {
   },
   about: {
     eyebrow: '03 — About',
-    heading: 'Self-taught systems builder working from constraints most people treat as blockers.',
+    heading: 'Self-taught systems engineer, building from constraints rather than around them.',
     paragraphs: [
-      'I am a self-taught systems builder based in Dhaka, Bangladesh. My work sits at the intersection of on-device AI, Android systems, and ARM64 Linux — problems I pursue because the tools I needed did not exist yet on the hardware I had.',
-      'A defining constraint: I develop, build, and validate software primarily from an Android phone running Termux and PRoot Debian, not a conventional PC. This shapes everything — tooling, CI architecture, how I verify claims.',
-      'My learning philosophy: living till learning, dead upon stop learning. I learn through real problems — hypothesis, test, observation, formal theory, compare, iterate. Mechanism-first, evidence-backed.',
+      'I am a self-taught systems engineer based in Dhaka, Bangladesh. My work sits at the intersection of on-device AI, Android systems, and ARM64 Linux — areas I entered because the tools I needed did not yet exist on the hardware I had.',
+      'A defining constraint: I develop, build, and validate software primarily from an Android phone running Termux and PRoot Debian rather than a conventional PC. This shapes my tooling, my CI architecture, and how I verify results.',
+      'I learn through real problems: hypothesis, test, observation, formal theory, comparison, iteration. Mechanism-first and evidence-backed — a working principle I summarise as “living till learning.”',
     ],
     principles: [
       'Built under constraint',
@@ -318,7 +320,7 @@ const en: Content = {
   },
   work: {
     eyebrow: '04 — Featured Work',
-    heading: 'The strongest work — not every repository.',
+    heading: 'Selected projects with CI and device evidence.',
     evidenceLabel: 'Evidence: ',
     liveLabel: 'Explore ↗',
     codeLabel: 'Code ↗',
@@ -409,12 +411,12 @@ const en: Content = {
       verifiedLabel: 'Verified: ',
       verified: 'Both toolchains were validated on the same physical device — a Redmi Turbo 4 Pro running Termux and PRoot Debian. Ternux installs that Debian desktop; ADT runs inside it and produced, signed and installed a real APK end to end.',
       experimentalLabel: 'Not yet proven: ',
-      experimental: 'No joint automation, no shared build orchestration and no GPU-assisted build path. Each project stands on its own evidence rather than on a combined pipeline.',
+      experimental: 'Joint automation, shared build orchestration and a GPU-assisted build path are not yet in place. Each project is validated on its own evidence rather than on a combined pipeline.',
     },
   },
   research: {
     eyebrow: '05 — Research & Experiments',
-    heading: 'Honest about what is proven vs. experimental.',
+    heading: 'Validated results and open experiments, clearly separated.',
     entries: [
       {
         title: 'On-device LLM inference',
@@ -462,7 +464,7 @@ const en: Content = {
   },
   stack: {
     eyebrow: '06 — Technical Focus',
-    heading: 'Technologies I actually work with.',
+    heading: 'Core technologies in day-to-day use.',
     domains: [
       { name: 'On-Device AI', items: ['llama.cpp', 'GGUF', 'KV-cache', 'CPU/GPU/NPU routing'] },
       { name: 'Android Systems', items: ['Kotlin', 'Compose', 'Accessibility', 'Shizuku', 'JNI/C++'] },
@@ -579,9 +581,9 @@ const en: Content = {
     eyebrow: '09 — Contact',
     headingA: 'Open to freelance,',
     headingB: 'remote, and collaboration.',
-    sub: 'On-device AI, Android systems, ARM64 tooling, or local-first products — happy to talk. Also available for practical work: website development, custom software, and computer or Android troubleshooting. Based in Dhaka, Bangladesh; remote support worldwide.',
+    sub: 'Available for on-device AI, Android systems, ARM64 tooling and local-first products, as well as practical technology work: website development, custom software, and computer or Android support. Based in Dhaka, Bangladesh; remote worldwide.',
     email: { label: 'Email', value: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
-    servicesLink: 'See the full list of services →',
+    servicesLink: 'View all services →',
     groupsHeading: 'Find me online',
     groupsNote: 'One handle across every platform.',
     groups: [
@@ -745,10 +747,11 @@ const bn: Content = {
     availability: 'রিমোটে উন্মুক্ত',
     ctaWork: 'আমার কাজ দেখুন',
     ctaGithub: 'গিটহাব দেখুন ↗',
+    ctaServices: 'সব সেবা দেখুন',
     scrollHint: 'সূচি দেখুন',
   },
   presence: {
-    eyebrow: '০২ — আমি আসলে যা করি',
+    eyebrow: '০২ — আমি যা তৈরি করি',
     heading: 'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ লিনাক্স, নেটিভ টুলিং।',
     items: [
       { label: 'অন-ডিভাইস এআই', detail: 'এলএলএম ইনফারেন্স, এনপিইউ/জিপিইউ যোগ্যতা-পরীক্ষা' },
@@ -759,11 +762,11 @@ const bn: Content = {
   },
   about: {
     eyebrow: '০৩ — পরিচিতি',
-    heading: 'স্ব-শিক্ষিত সিস্টেম নির্মাতা — সীমাবদ্ধতাকে বাধা নয়, ভিত্তি ধরে কাজ করি।',
+    heading: 'স্ব-শিক্ষিত সিস্টেম ইঞ্জিনিয়ার — সীমাবদ্ধতা এড়িয়ে নয়, তাকে ভিত্তি করে কাজ করি।',
     paragraphs: [
-      'আমি ঢাকা, বাংলাদেশের একজন স্ব-শিক্ষিত সিস্টেম নির্মাতা। আমার কাজের কেন্দ্রে আছে অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম ও এআরএম ৬৪ লিনাক্স — এই সমস্যাগুলোর পেছনে লেগে আছি কারণ আমার হাতে থাকা হার্ডওয়্যারে প্রয়োজনীয় টুলগুলো তখন ছিলই না।',
-      'একটি নির্ধারক সীমাবদ্ধতা: প্রচলিত পিসি নয় — মূলত একটি অ্যান্ড্রয়েড ফোনে টারমাক্স ও পিআরুট ডেবিয়ান চালিয়ে আমি সফটওয়্যার তৈরি, বিল্ড ও যাচাই করি। এটাই গড়ে দিয়েছে আমার টুলিং, সিআই আর্কিটেকচার, আর দাবি যাচাইয়ের পদ্ধতি।',
-      'আমার শেখার দর্শন: যতদিন শিখি ততদিন বাঁচি, শেখা থামলেই মৃত্যু। শিখি বাস্তব সমস্যার মধ্য দিয়ে — প্রকল্প, পরীক্ষা, পর্যবেক্ষণ, প্রাতিষ্ঠানিক তত্ত্ব, তুলনা, পুনরাবৃত্তি। মেকানিজম-ফার্স্ট, প্রমাণ-ভিত্তিক।',
+      'আমি ঢাকা, বাংলাদেশের একজন স্ব-শিক্ষিত সিস্টেম ইঞ্জিনিয়ার। আমার কাজের কেন্দ্রে আছে অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম ও এআরএম ৬৪ লিনাক্স — এই ক্ষেত্রগুলোতে এসেছি কারণ আমার হাতে থাকা হার্ডওয়্যারে প্রয়োজনীয় টুলগুলো তখনো ছিল না।',
+      'একটি নির্ধারক সীমাবদ্ধতা: প্রচলিত পিসি নয়, মূলত একটি অ্যান্ড্রয়েড ফোনে টারমাক্স ও পিআরুট ডেবিয়ান চালিয়ে আমি সফটওয়্যার তৈরি, বিল্ড ও যাচাই করি। এটিই গড়ে দিয়েছে আমার টুলিং, সিআই আর্কিটেকচার ও ফলাফল যাচাইয়ের পদ্ধতি।',
+      'আমি শিখি বাস্তব সমস্যার মধ্য দিয়ে: প্রকল্প, পরীক্ষা, পর্যবেক্ষণ, প্রাতিষ্ঠানিক তত্ত্ব, তুলনা, পুনরাবৃত্তি। মেকানিজম-ফার্স্ট ও প্রমাণ-ভিত্তিক — একটি কর্মনীতি, যাকে সংক্ষেপে বলি “যতদিন শিখি, ততদিন বাঁচি”।',
     ],
     principles: [
       'সীমাবদ্ধতার মধ্যে নির্মাণ',
@@ -782,7 +785,7 @@ const bn: Content = {
   },
   work: {
     eyebrow: '০৪ — নির্বাচিত কাজ',
-    heading: 'সব রিপোজিটরি নয় — সবচেয়ে শক্তিশালী কাজ।',
+    heading: 'সিআই ও ডিভাইস প্রমাণসহ নির্বাচিত প্রজেক্ট।',
     evidenceLabel: 'প্রমাণ: ',
     liveLabel: 'ঘুরে দেখুন ↗',
     codeLabel: 'কোড ↗',
@@ -878,7 +881,7 @@ const bn: Content = {
   },
   research: {
     eyebrow: '০৫ — গবেষণা ও পরীক্ষা',
-    heading: 'কোনটা প্রমাণিত, কোনটা পরীক্ষামূলক — সৎভাবে বলা।',
+    heading: 'যাচাইকৃত ফলাফল ও চলমান পরীক্ষা — স্পষ্টভাবে আলাদা।',
     entries: [
       {
         title: 'অন-ডিভাইস এলএলএম ইনফারেন্স',
@@ -926,7 +929,7 @@ const bn: Content = {
   },
   stack: {
     eyebrow: '০৬ — প্রযুক্তিগত ফোকাস',
-    heading: 'যেসব প্রযুক্তি নিয়ে আমি আসলেই কাজ করি।',
+    heading: 'দৈনন্দিন কাজের মূল প্রযুক্তি।',
     domains: [
       { name: 'অন-ডিভাইস এআই', items: ['লামা.সিপিপি', 'জিজিইউএফ', 'কেভি-ক্যাশ', 'সিপিইউ/জিপিইউ/এনপিইউ রাউটিং'] },
       { name: 'অ্যান্ড্রয়েড সিস্টেমস', items: ['কোটলিন', 'কম্পোজ', 'অ্যাক্সেসিবিলিটি', 'শিজুকু', 'জেএনআই/সি++'] },
@@ -1043,7 +1046,7 @@ const bn: Content = {
     eyebrow: '০৯ — যোগাযোগ',
     headingA: 'ফ্রিল্যান্স,',
     headingB: 'রিমোট ও কোলাবরেশনে উন্মুক্ত।',
-    sub: 'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ টুলিং বা লোকাল-ফার্স্ট প্রোডাক্ট — কথা বলতে আগ্রহী। ব্যবহারিক কাজেও পাওয়া যাবে: ওয়েবসাইট তৈরি, কাস্টম সফটওয়্যার, কম্পিউটার বা অ্যান্ড্রয়েড সমস্যা সমাধান। ঢাকা, বাংলাদেশে অবস্থিত; বিশ্বব্যাপী রিমোট সহায়তা।',
+    sub: 'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ টুলিং ও লোকাল-ফার্স্ট প্রোডাক্টের পাশাপাশি ব্যবহারিক প্রযুক্তি কাজেও পাওয়া যাবে: ওয়েবসাইট তৈরি, কাস্টম সফটওয়্যার, কম্পিউটার বা অ্যান্ড্রয়েড সহায়তা। ঢাকা, বাংলাদেশে অবস্থিত; বিশ্বব্যাপী রিমোট।',
     email: { label: 'ইমেইল', value: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
     servicesLink: 'সব সেবার পূর্ণ তালিকা দেখুন →',
     groupsHeading: 'অনলাইনে আমাকে পাবেন',

@@ -70,7 +70,7 @@ const en: ServicesContent = {
   eyebrow: 'Services',
   heading: 'Software engineering, practical technology services, and digital office support.',
   intro:
-    'I build on-device AI runtimes, Android systems and ARM64 Linux tooling — and I also take on the practical work that most people and small businesses actually need: a website that works, a tool that fits the job, a computer or phone that behaves, and documents and data that are in order. Every service below is one I genuinely offer; nothing is listed for search engines alone.',
+    'Alongside my engineering work in on-device AI, Android systems and ARM64 Linux tooling, I provide practical technology services for individuals, small businesses and institutions — from websites and custom software to computer and Android support, business technology, design, administration and data work. Each service below describes its scope, what it includes and what it does not.',
   pillars: [
     { label: 'Software engineering', slugs: ['web-development', 'software-development'] },
     { label: 'Practical technology services', slugs: ['computer-support', 'android-support', 'business-technology'] },
@@ -80,7 +80,7 @@ const en: ServicesContent = {
   hubSeoDescription:
     'Services by Sobuj Miah: website development, custom software, computer and Android support, business technology, graphics design, office administration and data entry. Based in Dhaka, Bangladesh; remote worldwide.',
   labels: {
-    hub: 'All services',
+    hub: 'Services',
     forWho: 'Who it is for',
     problems: 'Problems it addresses',
     included: 'What is included',
@@ -89,7 +89,7 @@ const en: ServicesContent = {
     evidence: 'Public evidence',
     availability: 'Availability',
     contact: 'How to get in touch',
-    faq: 'Questions people ask',
+    faq: 'Frequently asked questions',
     related: 'Related services',
     backHome: 'Back to portfolio',
     allServices: 'Browse all services',
@@ -97,7 +97,7 @@ const en: ServicesContent = {
     breadcrumbHome: 'Sobuj Miah',
   },
   availability: 'Based in Dhaka, Bangladesh · remote worldwide. Work is delivered remotely; on-site visits are not offered as a standard service.',
-  contactCta: 'Email is the primary channel. Describe the problem, the deadline if there is one, and what “done” looks like — I reply with questions or a plan, not a sales pitch.',
+  contactCta: 'Email is the primary channel. Describe the problem, the desired outcome and the timeline if there is one; I will respond with the relevant questions and a practical next step.',
   pages: [
     {
       slug: 'web-development',
@@ -114,11 +114,11 @@ const en: ServicesContent = {
       problems: [
         'No website, or a template site that no longer reflects the business',
         'Slow pages, broken layouts on phones, missing HTTPS',
-        'Pages that search engines cannot understand: no titles, descriptions, sitemap or structured data',
+        'Missing page titles, descriptions, sitemap or structured data',
         'Content that exists only in English when customers read Bangla — or the reverse',
       ],
       included: [
-        'Planning the pages around what visitors actually need to find',
+        'Planning the pages around what visitors need to find',
         'Building the site (static-first: Next.js, plain HTML/CSS/JS, or Jekyll for documentation sites)',
         'Mobile-first, accessible layout; bilingual English/Bangla content when needed',
         'Technical SEO: titles, descriptions, canonical URLs, Open Graph cards, sitemap, robots, JSON-LD',
@@ -137,7 +137,7 @@ const en: ServicesContent = {
         { name: 'ADT site', note: 'Project site with documentation hub and release evidence', url: 'https://soobujmiah.github.io/adt/' },
       ],
       faq: [
-        { q: 'Do you build WordPress sites?', a: 'I can maintain and fix existing WordPress sites. For new builds I recommend static-first sites: they are faster, cheaper to host and far harder to hack.' },
+        { q: 'Do you build WordPress sites?', a: 'I maintain and repair existing WordPress sites. For new builds I generally recommend static-first sites: they are fast, simple to host and easier to maintain over time.' },
         { q: 'Can the site be in Bangla?', a: 'Yes — English, Bangla, or both with a proper language switch, as this portfolio does.' },
       ],
     },
@@ -155,9 +155,9 @@ const en: ServicesContent = {
       ],
       problems: [
         'A repetitive manual process that should be a script or an app',
-        'Data trapped in several places that needs one honest source of truth',
-        'An Android app idea that needs an engineer who tests on real devices, not only emulators',
-        'Existing software that nobody can maintain or explain',
+        'Data spread across several places that needs a single source of truth',
+        'An Android application that needs to be validated on real devices, not only emulators',
+        'Existing software without documentation or a maintainer',
       ],
       included: [
         'Requirements written down in plain language before any code',
@@ -179,7 +179,7 @@ const en: ServicesContent = {
         { name: 'ApiLoop', note: 'Supporting tooling repository', url: 'https://github.com/soobujmiah/apiloop' },
       ],
       faq: [
-        { q: 'Can you add AI to my app?', a: 'Yes, where it is useful — including fully local, offline AI on the device. I will also tell you plainly when a simpler rule-based solution is the better choice.' },
+        { q: 'Can you add AI to my app?', a: 'Yes, where it adds value — including fully local, offline AI on the device. Where a simpler rule-based solution is the better fit, I will recommend that instead.' },
       ],
     },
     {
@@ -190,14 +190,14 @@ const en: ServicesContent = {
       seoDescription:
         'Remote computer support by Sobuj Miah: Windows and Linux setup, troubleshooting, software configuration, performance clean-up, backups and developer environments. Dhaka, Bangladesh; remote worldwide.',
       forWho: [
-        'Home users and small offices with a computer that is slow, misbehaving or freshly bought',
+        'Home users and small offices with a computer that is slow, unstable or newly purchased',
         'People moving to Linux, or running Linux and Windows side by side',
         'Students and developers who need a working development environment',
       ],
       problems: [
         'Slow start-up, pop-ups, unwanted software, full disks',
         'Operating system installation, upgrades, drivers, dual boot',
-        'Software that will not install, update or open',
+        'Software that fails to install, update or open',
         'No backup, or a backup nobody has ever tested',
         'Setting up compilers, package managers, Git, SSH and editors',
       ],
@@ -211,7 +211,7 @@ const en: ServicesContent = {
       notIncluded: [
         'Physical hardware repair (screens, boards, soldering) — this is software and configuration support',
         'On-site visits as a standard service',
-        'Bypassing licences, passwords or activation you are not entitled to',
+        'Circumventing software licences, passwords or activation',
       ],
       capabilities: ['Windows 10/11', 'Debian / Ubuntu Linux', 'Termux & PRoot environments', 'Shell scripting', 'Backup tooling', 'Developer toolchains'],
       evidence: [
@@ -219,21 +219,21 @@ const en: ServicesContent = {
         { name: 'ADT', note: 'Native ARM64 Android toolchain for Linux with a “doctor” command that pinpoints broken pieces', url: 'https://github.com/soobujmiah/adt' },
       ],
       faq: [
-        { q: 'Can you fix a broken laptop screen?', a: 'No — that is hardware repair. I handle the software side: the operating system, drivers, configuration, performance and data.' },
+        { q: 'Can you fix a broken laptop screen?', a: 'No. Hardware repair is outside this service; I handle the software side — operating system, drivers, configuration, performance and data.' },
         { q: 'How does remote support work?', a: 'A screen-sharing session or a message thread with exact steps. You stay in control of your computer the whole time.' },
       ],
     },
     {
       slug: 'android-support',
       title: 'Android & Phone Software Support',
-      short: 'Android configuration, software troubleshooting, ADB and device setup, and honest performance tuning.',
+      short: 'Android configuration, software troubleshooting, ADB and device setup, and realistic performance tuning.',
       seoTitle: 'Android Support — Phone Setup, Software Troubleshooting & ADB',
       seoDescription:
         'Android phone software support by Sobuj Miah: setup and configuration, troubleshooting, ADB and wireless debugging, developer options, storage and battery optimisation, Termux and Linux on Android. Dhaka, Bangladesh; remote worldwide.',
       forWho: [
-        'Anyone whose Android phone is slow, full, misconfigured or behaving strangely',
+        'Anyone whose Android phone is slow, out of storage, misconfigured or unstable',
         'People who want a clean, private, well-organised phone without root',
-        'Developers and tinkerers who need ADB, wireless debugging, Termux or a Linux environment working',
+        'Developers and advanced users who need ADB, wireless debugging, Termux or a Linux environment configured',
       ],
       problems: [
         'Storage full, battery draining, apps crashing or not updating',
@@ -251,7 +251,7 @@ const en: ServicesContent = {
       ],
       notIncluded: [
         'Screen, battery or board repair',
-        'Unlocking phones you do not own, bypassing FRP/activation locks, or any warranty-voiding modification you have not asked for',
+        'Unlocking devices without proof of ownership, bypassing FRP or activation locks, and warranty-voiding modifications',
         'Performance claims that have not been measured on the device',
       ],
       capabilities: ['ADB & fastboot (built from source for ARM64)', 'Android developer options', 'Shizuku & Accessibility (consent-based)', 'Termux / PRoot Debian', 'GGUF local models on-device'],
@@ -261,7 +261,7 @@ const en: ServicesContent = {
         { name: 'Ternux', note: 'No-root Linux desktop on Android with measured GPU routes', url: 'https://github.com/soobujmiah/ternux' },
       ],
       faq: [
-        { q: 'Do you root phones?', a: 'No. Everything I set up works without root; that keeps your warranty, banking apps and security intact.' },
+        { q: 'Do you root phones?', a: 'No. Everything I configure works without root, which keeps the warranty, banking applications and device security intact.' },
       ],
     },
     {
@@ -273,7 +273,7 @@ const en: ServicesContent = {
         'Small-business technology support by Sobuj Miah: choosing and setting up tools, workflow automation, digital records, simple business software, websites and staff onboarding. Dhaka, Bangladesh; remote worldwide.',
       forWho: [
         'Shops, agencies, schools, coaching centres and family businesses',
-        'Owners who know the work well but do not have anyone to own the technology',
+        'Owners who know their operations well but have no one responsible for the technology',
         'Institutions moving from paper and chat messages to digital records',
       ],
       problems: [
@@ -283,7 +283,7 @@ const en: ServicesContent = {
         'Software bought but never set up properly',
       ],
       included: [
-        'An honest assessment of what the business actually needs — often less than it thinks',
+        'A clear assessment of what the business needs — frequently less than expected',
         'Setting up and configuring the right tools (Google Workspace, Microsoft 365, spreadsheets, forms)',
         'Automating repetitive reporting; connecting the pieces that should talk to each other',
         'Simple custom software when nothing off-the-shelf fits (see Custom Software)',
@@ -292,7 +292,7 @@ const en: ServicesContent = {
       notIncluded: [
         'Accounting or legal advice',
         'Enterprise ERP roll-outs',
-        'Fake reviews, growth hacks or anything that misleads customers',
+        'Practices that mislead customers, including fabricated reviews',
       ],
       capabilities: ['Google Workspace & Microsoft 365', 'Spreadsheet systems & automation', 'Bangla-first business software', 'SQLite-backed local records', 'Documentation & process design'],
       evidence: [
@@ -300,7 +300,7 @@ const en: ServicesContent = {
         { name: 'DataKhoj', note: 'Data lookup tooling', url: 'https://github.com/soobujmiah/datakhoj' },
       ],
       faq: [
-        { q: 'We are a very small business. Is this for us?', a: 'Especially for you. The first goal is usually to remove friction with what you already have, not to buy more software.' },
+        { q: 'We are a very small business. Is this for us?', a: 'Yes. The first goal is usually to reduce friction with the tools already in place before introducing new software.' },
       ],
     },
     {
@@ -332,7 +332,7 @@ const en: ServicesContent = {
       capabilities: ['Canva & GIMP', 'Inkscape (vector)', 'Bangla/English typography', 'Print and social export presets'],
       evidence: [
         { name: 'Experience', note: 'Promotional graphics and social media as part of the Office Administrator role at Rabeya Education Family (2025–present)', url: 'https://soobujmiah.github.io/experience/' },
-        { name: 'GGEN', note: 'I am also building an Android-first creative and document studio (Flutter/Dart)', url: 'https://github.com/soobujmiah/ggen' },
+        { name: 'GGEN', note: 'An Android-first creative and document studio in development (Flutter/Dart)', url: 'https://github.com/soobujmiah/ggen' },
       ],
       faq: [],
     },
@@ -352,13 +352,13 @@ const en: ServicesContent = {
         'Documents that cannot be found when they are needed',
         'Registrations, records and correspondence handled inconsistently',
         'Reports assembled by hand from several sources every week',
-        'No standard procedure, so everything depends on one person’s memory',
+        'No standard procedures, leaving operations dependent on individual memory',
       ],
       included: [
         'Document processing, digital filing systems and records organisation',
         'Registration, scheduling, correspondence and follow-up',
         'Structured reporting and simple dashboards',
-        'Writing down procedures so the office runs without heroics',
+        'Documented procedures so the office runs consistently',
         'Google Workspace / Microsoft Office set-up for the team',
       ],
       notIncluded: [
@@ -406,7 +406,7 @@ const en: ServicesContent = {
         { name: 'DataKhoj', note: 'Data lookup and processing tooling', url: 'https://github.com/soobujmiah/datakhoj' },
       ],
       faq: [
-        { q: 'Is my data safe?', a: 'Work is done inside your own accounts and files wherever possible, and nothing is kept after handover unless you ask. I only work with data you are authorised to use.' },
+        { q: 'Is my data safe?', a: 'Work is carried out within your own accounts and files wherever possible, and nothing is retained after handover unless you request it. I work only with data you are authorised to use.' },
       ],
     },
   ],
@@ -416,7 +416,7 @@ const bn: ServicesContent = {
   eyebrow: 'সেবাসমূহ',
   heading: 'সফটওয়্যার ইঞ্জিনিয়ারিং, ব্যবহারিক প্রযুক্তি সেবা ও ডিজিটাল অফিস সহায়তা।',
   intro:
-    'আমি অন-ডিভাইস এআই রানটাইম, অ্যান্ড্রয়েড সিস্টেম ও এআরএম৬৪ লিনাক্স টুলিং তৈরি করি — পাশাপাশি সেই ব্যবহারিক কাজগুলোও করি যা বেশিরভাগ মানুষ ও ছোট ব্যবসার সত্যিই দরকার: একটি ওয়েবসাইট যা কাজ করে, একটি টুল যা কাজের সাথে মানানসই, একটি কম্পিউটার বা ফোন যা ঠিকমতো চলে, আর গোছানো ডকুমেন্ট ও ডেটা। নিচের প্রতিটি সেবা আমি সত্যিই দিই; শুধু সার্চ ইঞ্জিনের জন্য কিছু তালিকাভুক্ত করা হয়নি।',
+    'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম ও এআরএম৬৪ লিনাক্স টুলিংয়ে আমার ইঞ্জিনিয়ারিং কাজের পাশাপাশি আমি ব্যক্তি, ছোট ব্যবসা ও প্রতিষ্ঠানের জন্য ব্যবহারিক প্রযুক্তি সেবা দিই — ওয়েবসাইট ও কাস্টম সফটওয়্যার থেকে শুরু করে কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, ব্যবসার প্রযুক্তি, ডিজাইন, প্রশাসন ও ডেটা কাজ পর্যন্ত। নিচের প্রতিটি সেবায় তার পরিধি, কী অন্তর্ভুক্ত এবং কী নয় — তা বলা আছে।',
   pillars: [
     { label: 'সফটওয়্যার ইঞ্জিনিয়ারিং', slugs: ['web-development', 'software-development'] },
     { label: 'ব্যবহারিক প্রযুক্তি সেবা', slugs: ['computer-support', 'android-support', 'business-technology'] },
@@ -426,7 +426,7 @@ const bn: ServicesContent = {
   hubSeoDescription:
     'সবুজ মিয়ার সেবাসমূহ: ওয়েবসাইট তৈরি, কাস্টম সফটওয়্যার, কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, ব্যবসার প্রযুক্তি, গ্রাফিক্স ডিজাইন, অফিস অ্যাডমিনিস্ট্রেশন ও ডেটা এন্ট্রি। ঢাকা, বাংলাদেশে অবস্থিত; বিশ্বব্যাপী রিমোট।',
   labels: {
-    hub: 'সব সেবা',
+    hub: 'সেবাসমূহ',
     forWho: 'কাদের জন্য',
     problems: 'যেসব সমস্যার সমাধান',
     included: 'যা অন্তর্ভুক্ত',
@@ -443,7 +443,7 @@ const bn: ServicesContent = {
     breadcrumbHome: 'সবুজ মিয়া',
   },
   availability: 'ঢাকা, বাংলাদেশে অবস্থিত · বিশ্বব্যাপী রিমোট। কাজ রিমোটে সম্পন্ন হয়; সরেজমিন পরিদর্শন নিয়মিত সেবা হিসেবে দেওয়া হয় না।',
-  contactCta: 'ইমেইলই প্রধান মাধ্যম। সমস্যাটি, সময়সীমা থাকলে সেটি, আর “শেষ হয়েছে” বলতে আপনি কী বোঝেন — লিখে পাঠান; আমি প্রশ্ন বা পরিকল্পনা নিয়ে উত্তর দিই, বিক্রির বক্তৃতা নয়।',
+  contactCta: 'ইমেইলই প্রধান মাধ্যম। সমস্যাটি, কাঙ্ক্ষিত ফলাফল এবং সময়সীমা থাকলে সেটি লিখে পাঠান; আমি প্রাসঙ্গিক প্রশ্ন ও একটি বাস্তব পরবর্তী ধাপ নিয়ে উত্তর দেব।',
   pages: [
     {
       slug: 'web-development',
@@ -460,11 +460,11 @@ const bn: ServicesContent = {
       problems: [
         'ওয়েবসাইট নেই, অথবা টেমপ্লেট সাইট যা আর ব্যবসাকে প্রতিফলিত করে না',
         'ধীর পেজ, ফোনে ভাঙা লেআউট, এইচটিটিপিএস নেই',
-        'সার্চ ইঞ্জিন বুঝতে পারে না এমন পেজ: টাইটেল, বিবরণ, সাইটম্যাপ বা স্ট্রাকচার্ড ডেটা নেই',
+        'পেজের টাইটেল, বিবরণ, সাইটম্যাপ বা স্ট্রাকচার্ড ডেটা অনুপস্থিত',
         'গ্রাহক বাংলা পড়লেও কনটেন্ট শুধু ইংরেজিতে — বা উল্টোটা',
       ],
       included: [
-        'দর্শক আসলে কী খুঁজবে তার ভিত্তিতে পেজ পরিকল্পনা',
+        'দর্শক কী খুঁজবে তার ভিত্তিতে পেজ পরিকল্পনা',
         'সাইট তৈরি (স্ট্যাটিক-ফার্স্ট: নেক্সট.জেএস, সাধারণ এইচটিএমএল/সিএসএস/জেএস, বা ডকুমেন্টেশন সাইটের জন্য জেকিল)',
         'মোবাইল-ফার্স্ট, অ্যাক্সেসযোগ্য লেআউট; প্রয়োজনে ইংরেজি/বাংলা দ্বিভাষিক কনটেন্ট',
         'টেকনিক্যাল এসইও: টাইটেল, বিবরণ, ক্যানোনিক্যাল ইউআরএল, ওপেন গ্রাফ কার্ড, সাইটম্যাপ, রোবটস, জেসন-এলডি',
@@ -483,7 +483,7 @@ const bn: ServicesContent = {
         { name: 'ADT site', note: 'ডকুমেন্টেশন হাব ও রিলিজ প্রমাণসহ প্রজেক্ট সাইট', url: 'https://soobujmiah.github.io/adt/' },
       ],
       faq: [
-        { q: 'আপনি কি ওয়ার্ডপ্রেস সাইট বানান?', a: 'বিদ্যমান ওয়ার্ডপ্রেস সাইট রক্ষণাবেক্ষণ ও সমাধান করতে পারি। নতুন সাইটের জন্য স্ট্যাটিক-ফার্স্ট সাইটের পরামর্শ দিই: দ্রুততর, হোস্টিং সস্তা, আর হ্যাক করা অনেক কঠিন।' },
+        { q: 'আপনি কি ওয়ার্ডপ্রেস সাইট বানান?', a: 'বিদ্যমান ওয়ার্ডপ্রেস সাইট রক্ষণাবেক্ষণ ও মেরামত করি। নতুন সাইটের জন্য সাধারণত স্ট্যাটিক-ফার্স্ট সাইটের পরামর্শ দিই: দ্রুত, হোস্ট করা সহজ, আর দীর্ঘমেয়াদে রক্ষণাবেক্ষণ সহজতর।' },
         { q: 'সাইট কি বাংলায় হতে পারে?', a: 'হ্যাঁ — ইংরেজি, বাংলা, বা এই পোর্টফোলিওর মতো যথাযথ ভাষা সুইচসহ দুটোই।' },
       ],
     },
@@ -501,9 +501,9 @@ const bn: ServicesContent = {
       ],
       problems: [
         'একটি পুনরাবৃত্ত ম্যানুয়াল প্রক্রিয়া যা স্ক্রিপ্ট বা অ্যাপ হওয়া উচিত',
-        'কয়েক জায়গায় আটকে থাকা ডেটা যার একটি সৎ উৎস দরকার',
-        'একটি অ্যান্ড্রয়েড অ্যাপের ধারণা যার জন্য এমন ইঞ্জিনিয়ার দরকার যিনি শুধু এমুলেটরে নয়, আসল ডিভাইসে পরীক্ষা করেন',
-        'বিদ্যমান সফটওয়্যার যা কেউ রক্ষণাবেক্ষণ বা ব্যাখ্যা করতে পারে না',
+        'কয়েক জায়গায় ছড়িয়ে থাকা ডেটা যার একটি অভিন্ন উৎস দরকার',
+        'একটি অ্যান্ড্রয়েড অ্যাপ্লিকেশন যা শুধু এমুলেটরে নয়, আসল ডিভাইসে যাচাই করা প্রয়োজন',
+        'ডকুমেন্টেশন বা রক্ষণাবেক্ষণকারী ছাড়া বিদ্যমান সফটওয়্যার',
       ],
       included: [
         'কোড লেখার আগে সহজ ভাষায় প্রয়োজনীয়তা লিখে নেওয়া',
@@ -525,7 +525,7 @@ const bn: ServicesContent = {
         { name: 'ApiLoop', note: 'সহায়ক টুলিং রিপোজিটরি', url: 'https://github.com/soobujmiah/apiloop' },
       ],
       faq: [
-        { q: 'আমার অ্যাপে কি এআই যোগ করতে পারবেন?', a: 'হ্যাঁ, যেখানে কাজে লাগে — ডিভাইসেই সম্পূর্ণ লোকাল, অফলাইন এআইসহ। আর যখন সরল নিয়মভিত্তিক সমাধানই ভালো, সেটাও স্পষ্ট করে বলব।' },
+        { q: 'আমার অ্যাপে কি এআই যোগ করতে পারবেন?', a: 'হ্যাঁ, যেখানে এটি মূল্য যোগ করে — ডিভাইসেই সম্পূর্ণ লোকাল, অফলাইন এআইসহ। যেখানে সরল নিয়মভিত্তিক সমাধানই বেশি উপযুক্ত, সেখানে সেটিরই পরামর্শ দেব।' },
       ],
     },
     {
@@ -536,7 +536,7 @@ const bn: ServicesContent = {
       seoDescription:
         'সবুজ মিয়ার রিমোট কম্পিউটার সহায়তা: উইন্ডোজ ও লিনাক্স সেটআপ, সমস্যা সমাধান, সফটওয়্যার কনফিগারেশন, পারফরম্যান্স ক্লিন-আপ, ব্যাকআপ ও ডেভেলপার এনভায়রনমেন্ট। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
       forWho: [
-        'বাড়ির ব্যবহারকারী ও ছোট অফিস যাদের কম্পিউটার ধীর, গোলমেলে বা সদ্য কেনা',
+        'বাড়ির ব্যবহারকারী ও ছোট অফিস যাদের কম্পিউটার ধীর, অস্থিতিশীল বা নতুন কেনা',
         'যারা লিনাক্সে যাচ্ছেন, বা লিনাক্স ও উইন্ডোজ পাশাপাশি চালান',
         'ছাত্র ও ডেভেলপার যাদের একটি কার্যকর ডেভেলপমেন্ট এনভায়রনমেন্ট দরকার',
       ],
@@ -557,7 +557,7 @@ const bn: ServicesContent = {
       notIncluded: [
         'ফিজিক্যাল হার্ডওয়্যার মেরামত (স্ক্রিন, বোর্ড, সোল্ডারিং) — এটি সফটওয়্যার ও কনফিগারেশন সহায়তা',
         'নিয়মিত সেবা হিসেবে সরেজমিন পরিদর্শন',
-        'আপনার অধিকার নেই এমন লাইসেন্স, পাসওয়ার্ড বা অ্যাক্টিভেশন বাইপাস',
+        'সফটওয়্যার লাইসেন্স, পাসওয়ার্ড বা অ্যাক্টিভেশন বাইপাস',
       ],
       capabilities: ['উইন্ডোজ ১০/১১', 'ডেবিয়ান / উবুন্টু লিনাক্স', 'টার্মাক্স ও পিরুট এনভায়রনমেন্ট', 'শেল স্ক্রিপ্টিং', 'ব্যাকআপ টুলিং', 'ডেভেলপার টুলচেইন'],
       evidence: [
@@ -565,21 +565,21 @@ const bn: ServicesContent = {
         { name: 'ADT', note: 'লিনাক্সের জন্য নেটিভ এআরএম৬৪ অ্যান্ড্রয়েড টুলচেইন — ভাঙা অংশ চিহ্নিত করার “ডক্টর” কমান্ডসহ', url: 'https://github.com/soobujmiah/adt' },
       ],
       faq: [
-        { q: 'ভাঙা ল্যাপটপ স্ক্রিন ঠিক করতে পারবেন?', a: 'না — সেটি হার্ডওয়্যার মেরামত। আমি সফটওয়্যারের দিকটা দেখি: অপারেটিং সিস্টেম, ড্রাইভার, কনফিগারেশন, পারফরম্যান্স ও ডেটা।' },
+        { q: 'ভাঙা ল্যাপটপ স্ক্রিন ঠিক করতে পারবেন?', a: 'না। হার্ডওয়্যার মেরামত এই সেবার বাইরে; আমি সফটওয়্যারের দিকটি দেখি — অপারেটিং সিস্টেম, ড্রাইভার, কনফিগারেশন, পারফরম্যান্স ও ডেটা।' },
         { q: 'রিমোট সহায়তা কীভাবে কাজ করে?', a: 'স্ক্রিন-শেয়ারিং সেশন বা সঠিক ধাপসহ মেসেজ থ্রেড। পুরো সময় আপনার কম্পিউটারের নিয়ন্ত্রণ আপনার হাতেই থাকে।' },
       ],
     },
     {
       slug: 'android-support',
       title: 'অ্যান্ড্রয়েড ও ফোন সফটওয়্যার সহায়তা',
-      short: 'অ্যান্ড্রয়েড কনফিগারেশন, সফটওয়্যার সমস্যা সমাধান, এডিবি ও ডিভাইস সেটআপ, আর সৎ পারফরম্যান্স টিউনিং।',
+      short: 'অ্যান্ড্রয়েড কনফিগারেশন, সফটওয়্যার সমস্যা সমাধান, এডিবি ও ডিভাইস সেটআপ, আর বাস্তবসম্মত পারফরম্যান্স টিউনিং।',
       seoTitle: 'অ্যান্ড্রয়েড সহায়তা — ফোন সেটআপ, সফটওয়্যার সমস্যা সমাধান ও এডিবি',
       seoDescription:
         'সবুজ মিয়ার অ্যান্ড্রয়েড ফোন সফটওয়্যার সহায়তা: সেটআপ ও কনফিগারেশন, সমস্যা সমাধান, এডিবি ও ওয়্যারলেস ডিবাগিং, ডেভেলপার অপশন, স্টোরেজ ও ব্যাটারি অপ্টিমাইজেশন, টার্মাক্স ও অ্যান্ড্রয়েডে লিনাক্স। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
       forWho: [
-        'যার অ্যান্ড্রয়েড ফোন ধীর, ভরা, ভুল কনফিগার করা বা অদ্ভুত আচরণ করছে',
+        'যার অ্যান্ড্রয়েড ফোন ধীর, স্টোরেজ ভরা, ভুল কনফিগার করা বা অস্থিতিশীল',
         'যারা রুট ছাড়াই পরিষ্কার, গোপনীয়তা-রক্ষাকারী, সুসংগঠিত ফোন চান',
-        'ডেভেলপার ও টিঙ্কারার যাদের এডিবি, ওয়্যারলেস ডিবাগিং, টার্মাক্স বা লিনাক্স এনভায়রনমেন্ট চালু করা দরকার',
+        'ডেভেলপার ও অগ্রসর ব্যবহারকারী যাদের এডিবি, ওয়্যারলেস ডিবাগিং, টার্মাক্স বা লিনাক্স এনভায়রনমেন্ট কনফিগার করা দরকার',
       ],
       problems: [
         'স্টোরেজ ভরা, ব্যাটারি দ্রুত শেষ, অ্যাপ ক্র্যাশ বা আপডেট হচ্ছে না',
@@ -597,7 +597,7 @@ const bn: ServicesContent = {
       ],
       notIncluded: [
         'স্ক্রিন, ব্যাটারি বা বোর্ড মেরামত',
-        'আপনার মালিকানাধীন নয় এমন ফোন আনলক, এফআরপি/অ্যাক্টিভেশন লক বাইপাস, বা আপনি চাননি এমন ওয়ারেন্টি-বাতিলকারী পরিবর্তন',
+        'মালিকানার প্রমাণ ছাড়া ডিভাইস আনলক, এফআরপি বা অ্যাক্টিভেশন লক বাইপাস, এবং ওয়ারেন্টি-বাতিলকারী পরিবর্তন',
         'ডিভাইসে পরিমাপ করা হয়নি এমন পারফরম্যান্সের দাবি',
       ],
       capabilities: ['এডিবি ও ফাস্টবুট (এআরএম৬৪-এর জন্য সোর্স থেকে বিল্ড)', 'অ্যান্ড্রয়েড ডেভেলপার অপশন', 'শিজুকু ও অ্যাক্সেসিবিলিটি (সম্মতিভিত্তিক)', 'টার্মাক্স / পিরুট ডেবিয়ান', 'ডিভাইসে জিজিইউএফ লোকাল মডেল'],
@@ -607,7 +607,7 @@ const bn: ServicesContent = {
         { name: 'Ternux', note: 'পরিমাপকৃত জিপিইউ রুটসহ অ্যান্ড্রয়েডে রুট-ছাড়া লিনাক্স ডেস্কটপ', url: 'https://github.com/soobujmiah/ternux' },
       ],
       faq: [
-        { q: 'আপনি কি ফোন রুট করেন?', a: 'না। আমি যা সেটআপ করি সবই রুট ছাড়া কাজ করে; তাতে আপনার ওয়ারেন্টি, ব্যাংকিং অ্যাপ ও নিরাপত্তা অক্ষত থাকে।' },
+        { q: 'আপনি কি ফোন রুট করেন?', a: 'না। আমি যা কনফিগার করি সবই রুট ছাড়া কাজ করে, ফলে ওয়ারেন্টি, ব্যাংকিং অ্যাপ্লিকেশন ও ডিভাইসের নিরাপত্তা অক্ষত থাকে।' },
       ],
     },
     {
@@ -619,7 +619,7 @@ const bn: ServicesContent = {
         'সবুজ মিয়ার ছোট ব্যবসার প্রযুক্তি সহায়তা: টুল নির্বাচন ও সেটআপ, ওয়ার্কফ্লো অটোমেশন, ডিজিটাল রেকর্ড, সহজ ব্যবসায়িক সফটওয়্যার, ওয়েবসাইট ও কর্মী প্রশিক্ষণ। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
       forWho: [
         'দোকান, এজেন্সি, স্কুল, কোচিং সেন্টার ও পারিবারিক ব্যবসা',
-        'মালিক যারা কাজ ভালো জানেন কিন্তু প্রযুক্তির দায়িত্ব নেওয়ার কেউ নেই',
+        'মালিক যারা নিজেদের কার্যক্রম ভালো জানেন, কিন্তু প্রযুক্তির দায়িত্বে কেউ নেই',
         'কাগজ ও চ্যাট মেসেজ থেকে ডিজিটাল রেকর্ডে যাওয়া প্রতিষ্ঠান',
       ],
       problems: [
@@ -629,7 +629,7 @@ const bn: ServicesContent = {
         'কেনা হয়েছে কিন্তু ঠিকমতো সেটআপ হয়নি এমন সফটওয়্যার',
       ],
       included: [
-        'ব্যবসার আসলে কী দরকার তার সৎ মূল্যায়ন — প্রায়ই যা ভাবা হয় তার চেয়ে কম',
+        'ব্যবসার প্রকৃত প্রয়োজনের স্পষ্ট মূল্যায়ন — প্রায়ই প্রত্যাশার চেয়ে কম',
         'সঠিক টুল সেটআপ ও কনফিগারেশন (গুগল ওয়ার্কস্পেস, মাইক্রোসফট ৩৬৫, স্প্রেডশিট, ফর্ম)',
         'পুনরাবৃত্ত রিপোর্টিং স্বয়ংক্রিয়করণ; যেসব অংশের পরস্পর কথা বলা উচিত সেগুলো সংযুক্ত করা',
         'তৈরি কিছু না মিললে সহজ কাস্টম সফটওয়্যার (কাস্টম সফটওয়্যার দেখুন)',
@@ -638,7 +638,7 @@ const bn: ServicesContent = {
       notIncluded: [
         'হিসাবরক্ষণ বা আইনি পরামর্শ',
         'এন্টারপ্রাইজ ইআরপি রোল-আউট',
-        'ভুয়া রিভিউ, গ্রোথ হ্যাক বা গ্রাহককে বিভ্রান্ত করে এমন কিছু',
+        'গ্রাহককে বিভ্রান্ত করে এমন চর্চা, ভুয়া রিভিউসহ',
       ],
       capabilities: ['গুগল ওয়ার্কস্পেস ও মাইক্রোসফট ৩৬৫', 'স্প্রেডশিট সিস্টেম ও অটোমেশন', 'বাংলা-ফার্স্ট ব্যবসায়িক সফটওয়্যার', 'এসকিউলাইট-ভিত্তিক লোকাল রেকর্ড', 'ডকুমেন্টেশন ও প্রক্রিয়া নকশা'],
       evidence: [
@@ -646,7 +646,7 @@ const bn: ServicesContent = {
         { name: 'DataKhoj', note: 'ডেটা অনুসন্ধান টুলিং', url: 'https://github.com/soobujmiah/datakhoj' },
       ],
       faq: [
-        { q: 'আমরা খুবই ছোট ব্যবসা। এটা কি আমাদের জন্য?', a: 'বিশেষ করে আপনাদের জন্যই। প্রথম লক্ষ্য সাধারণত আরও সফটওয়্যার কেনা নয়, বরং যা আছে তা দিয়েই ঝামেলা কমানো।' },
+        { q: 'আমরা খুবই ছোট ব্যবসা। এটা কি আমাদের জন্য?', a: 'হ্যাঁ। নতুন সফটওয়্যার আনার আগে সাধারণত প্রথম লক্ষ্য থাকে বিদ্যমান টুল দিয়েই ঝামেলা কমানো।' },
       ],
     },
     {
@@ -678,7 +678,7 @@ const bn: ServicesContent = {
       capabilities: ['ক্যানভা ও গিম্প', 'ইঙ্কস্কেপ (ভেক্টর)', 'বাংলা/ইংরেজি টাইপোগ্রাফি', 'প্রিন্ট ও সোশ্যাল এক্সপোর্ট প্রিসেট'],
       evidence: [
         { name: 'Experience', note: 'রাবেয়া এডুকেশন ফ্যামিলিতে অফিস অ্যাডমিনিস্ট্রেটর ভূমিকার অংশ হিসেবে প্রচার গ্রাফিক্স ও সোশ্যাল মিডিয়া (২০২৫–বর্তমান)', url: 'https://soobujmiah.github.io/experience/' },
-        { name: 'GGEN', note: 'আমি একটি অ্যান্ড্রয়েড-ফার্স্ট ক্রিয়েটিভ ও ডকুমেন্ট স্টুডিওও তৈরি করছি (ফ্লাটার/ডার্ট)', url: 'https://github.com/soobujmiah/ggen' },
+        { name: 'GGEN', note: 'নির্মাণাধীন একটি অ্যান্ড্রয়েড-ফার্স্ট ক্রিয়েটিভ ও ডকুমেন্ট স্টুডিও (ফ্লাটার/ডার্ট)', url: 'https://github.com/soobujmiah/ggen' },
       ],
       faq: [],
     },
@@ -698,13 +698,13 @@ const bn: ServicesContent = {
         'দরকারের সময় খুঁজে পাওয়া যায় না এমন ডকুমেন্ট',
         'অসামঞ্জস্যপূর্ণভাবে সামলানো রেজিস্ট্রেশন, রেকর্ড ও চিঠিপত্র',
         'প্রতি সপ্তাহে কয়েকটি উৎস থেকে হাতে জোড়া লাগানো রিপোর্ট',
-        'কোনো মানক প্রক্রিয়া নেই, তাই সবকিছু একজনের স্মৃতির ওপর নির্ভরশীল',
+        'কোনো মানক প্রক্রিয়া নেই, ফলে কার্যক্রম ব্যক্তিগত স্মৃতির ওপর নির্ভরশীল',
       ],
       included: [
         'ডকুমেন্ট প্রক্রিয়াকরণ, ডিজিটাল ফাইলিং সিস্টেম ও রেকর্ড সংগঠন',
         'রেজিস্ট্রেশন, সময়সূচি, চিঠিপত্র ও ফলো-আপ',
         'কাঠামোবদ্ধ রিপোর্টিং ও সহজ ড্যাশবোর্ড',
-        'প্রক্রিয়া লিখে রাখা যাতে অফিস বীরত্ব ছাড়াই চলে',
+        'লিখিত প্রক্রিয়া, যাতে অফিস ধারাবাহিকভাবে চলে',
         'টিমের জন্য গুগল ওয়ার্কস্পেস / মাইক্রোসফট অফিস সেটআপ',
       ],
       notIncluded: [
@@ -752,7 +752,7 @@ const bn: ServicesContent = {
         { name: 'DataKhoj', note: 'ডেটা অনুসন্ধান ও প্রক্রিয়াকরণ টুলিং', url: 'https://github.com/soobujmiah/datakhoj' },
       ],
       faq: [
-        { q: 'আমার ডেটা কি নিরাপদ?', a: 'যতটা সম্ভব আপনার নিজের অ্যাকাউন্ট ও ফাইলের ভেতরেই কাজ হয়, আর আপনি না চাইলে হস্তান্তরের পর কিছু রাখা হয় না। আমি শুধু সেই ডেটা নিয়ে কাজ করি যা ব্যবহারের অনুমতি আপনার আছে।' },
+        { q: 'আমার ডেটা কি নিরাপদ?', a: 'যতটা সম্ভব আপনার নিজের অ্যাকাউন্ট ও ফাইলের ভেতরেই কাজ করা হয়, এবং আপনি না চাইলে হস্তান্তরের পর কিছু সংরক্ষণ করা হয় না। আমি শুধু সেই ডেটা নিয়েই কাজ করি যা ব্যবহারের অনুমতি আপনার আছে।' },
       ],
     },
   ],
