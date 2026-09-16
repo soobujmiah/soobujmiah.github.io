@@ -697,13 +697,14 @@ body.lang-bn .worldmap-pin {
    attribute, and the only property that animates is opacity. There is
    no CSS animation on the name at all: the motion is a deliberate
    construction with a defined end, not a cycle. */
+/* Neither wrapper may be a containing block: the construction layer is
+   anchored to the stable .hero-name box (see its rule), so the field can
+   disperse around the word and the layer never resizes with the text. */
 .sig-name {
-  position: relative;
   display: inline-block;
 }
 
 .sig-stage {
-  position: relative;
   display: inline-block;
 }
 
@@ -744,11 +745,14 @@ body.lang-bn .worldmap-pin {
    defaults to zero so that without JavaScript the canvas simply covers the
    (already legible) text. */
 .sig-canvas {
+  /* fills the positioned page container (its containing block): a box
+     that never changes with the text, so the particle field can live on
+     it permanently — dispersing around the word without ever being
+     clipped by the wordmark's bounds, and without ever changing rect */
   position: absolute;
-  top: calc(-1 * var(--sig-pad-y, 0px));
-  left: calc(-1 * var(--sig-pad-x, 0px));
-  width: calc(100% + 2 * var(--sig-pad-x, 0px));
-  height: calc(100% + 2 * var(--sig-pad-y, 0px));
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   opacity: 0;
 }

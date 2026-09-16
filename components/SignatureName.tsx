@@ -109,6 +109,16 @@ type Particle = {
   /** start time and travel duration, as fractions of the assembly */
   at: number;
   dur: number;
+  /** alive-state phases: two micro-drift oscillators and one slow
+      amplitude modulator, radians */
+  ph1: number;
+  ph2: number;
+  ph3: number;
+  /** stagger of the periodic breath wave, 0..1 of the cycle */
+  wph: number;
+  /** unit-ish direction the breath wave carries this particle */
+  bx: number;
+  by: number;
 };
 
 export function SignatureName({
@@ -123,6 +133,15 @@ export function SignatureName({
   armed?: boolean;
 }) {
   const clusters = useMemo(() => segmentGraphemes(text), [text]);
+  /* The animation effect deliberately does NOT re-run when the name
+     changes: one persistent lifecycle retargets in place, so a language
+     switch dissolves the old particle glyphs into the new ones instead of
+     tearing the canvas down (which would flash). These refs hand the
+     fresh text/clusters to the running frame loop. */
+  const textRef = useRef(text);
+  const clustersRef = useRef(clusters);
+  textRef.current = text;
+  clustersRef.current = clusters;
   const stageRef = useRef<HTMLSpanElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   /* one ref per cluster, spaces included: their measured boxes are what
@@ -138,7 +157,8 @@ export function SignatureName({
 
     const T = MOTION.nameAssemble;
     /* The handover duration is read from the token here rather than
-       hard-coded in the stylesheet, so the two cannot drift. */
+       hard-coded in the stylesheet, so the two cannot drift. It now only
+       serves the no-JS/failure fallback cross-fade. */
     stage.style.setProperty('--sig-resolve', `${T.resolveSeconds}s`);
     let cancelled = false;
     let raf = 0;
@@ -154,42 +174,68 @@ export function SignatureName({
       );
     };
 
+    /* Failure fallback only: if the field can never be sampled, the real
+       text is the accessible, legible answer. Normal motion never takes
+       this path — the particle letterform IS the resting state. */
     const giveUpToText = () => {
       stage.dataset.asm = 'done';
-      hasBuilt.current = true;
     };
 
-    /* ── build the field from the rendered wordmark ─────────────── */
-    const build = () => {
+    /* ── the living state machine ───────────────────────────────────
+       forming  : the existing construction — dispersed field seats into
+                  the wordmark, unchanged.
+       alive    : the permanent state. The name stays composed of its
+                  particles: a micro-drift on every seated particle plus a
+                  staggered periodic breath wave (gentle diffusion out,
+                  natural reconvergence). Pure functions of one continuous
+                  clock, so there is no loop point to see.
+       dissolve : a language retarget — the old particle glyphs loosen and
+                  fade while nothing else is on screen, then the new field
+                  is sampled and forms. No solid text, no blank frame.   */
+    let phase: 'forming' | 'alive' | 'dissolve' = 'forming';
+    let particles: Particle[] = [];
+    let builtText: string | null = null;
+    let t0 = 0;
+    let dissolveT0 = 0;
+    let hiddenAt = 0;
+    /* geometry of the current field, in wordmark space */
+    let W = 0;
+    let H = 0;
+    let padX = 0;
+    let padY = 0;
+    let ruleY = 0;
+    let dot = 2;
+    /* stage origin inside the layer, CSS px, plus the layer's CSS size */
+    let ox = 0;
+    let oy = 0;
+    let cssW = 0;
+    let cssH = 0;
+    let edges: number[] = [];
+    let clustersNow: string[] = [];
+    let ramp: string[] = [];
+
+    /* ── sample the rendered wordmark into a particle field ───────── */
+    const build = (textNow: string, clustersIn: string[]) => {
       if (cancelled) return;
       const ctx = canvas.getContext('2d', { alpha: true });
       if (!ctx) return giveUpToText();
 
       const stageBox = stage.getBoundingClientRect();
-      const W = stageBox.width;
-      const H = stageBox.height;
+      W = stageBox.width;
+      H = stageBox.height;
       if (!(W > 4) || !(H > 4)) return giveUpToText();
 
-      /* The field disperses *around* the word, so the construction canvas
-         has to be larger than the wordmark box — otherwise every particle
-         that leaves the text is clipped away and the assembly reads as a
-         shimmer inside the letters instead of a disperse-and-rebuild. The
-         padding is derived from the same token that drives the dispersal,
-         so the two can never disagree. */
-      const padX = Math.ceil(H * T.disperseRadius * 1.5);
-      const padY = Math.ceil(H * T.disperseRadius * 0.62);
-      stage.style.setProperty('--sig-pad-x', `${padX}px`);
-      stage.style.setProperty('--sig-pad-y', `${padY}px`);
-
-      /* Two canvases, two jobs. The sample canvas covers only the
-         wordmark box (that is where the ink is), keeping getImageData
-         small; the display canvas is padded so the field has room. */
+      /* The display layer covers the stable hero-name box; the sample
+         canvas covers only the wordmark box (that is where the ink is),
+         keeping getImageData small. */
+      const layerBox = canvas.getBoundingClientRect();
       let dpr = Math.min(window.devicePixelRatio || 1, T.maxDpr);
-      /* Fill-rate guard: the padded canvas is much bigger than the text,
-         so cap its total device pixels and trade resolution for area
-         rather than letting a phone allocate a huge backing store. */
-      const maxArea = 2.4e6;
-      const areaAt = (d: number) => (W + 2 * padX) * d * ((H + 2 * padY) * d);
+      /* Fill-rate guard: the layer covers the whole page box, so cap its
+         total device pixels and trade resolution for area rather than
+         letting a phone allocate an outsized backing store. 4 Mpx is the
+         budget of an ordinary full-screen dpr-3 phone canvas. */
+      const maxArea = 4.0e6;
+      const areaAt = (d: number) => layerBox.width * d * (layerBox.height * d);
       while (dpr > 1 && areaAt(dpr) > maxArea) dpr -= 0.25;
       const cw = Math.max(1, Math.round(W * dpr));
       const chh = Math.max(1, Math.round(H * dpr));
@@ -199,7 +245,9 @@ export function SignatureName({
       const fontSize = parseFloat(cs.fontSize) || 64;
 
       /* Render the clusters exactly where the DOM puts them; the lit
-         pixels become the particle targets. */
+         pixels become the particle targets. Shaping is the browser's:
+         clusters are drawn as whole grapheme clusters, never code points,
+         so কার/মাত্রা/যুক্তাক্ষর arrive here already correct. */
       const sample = document.createElement('canvas');
       sample.width = cw;
       sample.height = chh;
@@ -213,9 +261,9 @@ export function SignatureName({
 
       /* Left edge of every cluster, and the baseline the rule sits on.
          Both come from the same metrics the browser used. */
-      const edges: number[] = [];
-      let ruleY = 0;
-      clusters.forEach((cluster, i) => {
+      edges = [];
+      ruleY = 0;
+      clustersIn.forEach((cluster, i) => {
         const cell = cellRefs.current[i];
         if (!cell) {
           edges.push(0);
@@ -264,9 +312,9 @@ export function SignatureName({
         return idx;
       };
 
-      const rnd = mulberry32(hashSeed(text));
-      const particles: Particle[] = [];
-      const clusterCount = clusters.length;
+      const rnd = mulberry32(hashSeed(textNow));
+      const next: Particle[] = [];
+      const clusterCount = clustersIn.length;
 
       for (let y = 0; y < chh; y += step) {
         for (let x = 0; x < cw; x += step) {
@@ -274,206 +322,208 @@ export function SignatureName({
           const tx = (x + step / 2) / dpr;
           const ty = (y + step / 2) / dpr;
           const o = disperseOrigin(tx, ty, W, H, rnd, T.disperseRadius);
-          particles.push({
+          /* breath direction: biased outward from the word's centre, so a
+             loosening glyph exhales rather than sliding sideways */
+          const ang = Math.atan2(ty - H / 2, tx - W / 2) + (rnd() - 0.5) * 1.6;
+          next.push({
             tx,
             ty,
             ox: o.x,
             oy: o.y,
             at: startOffset(clusterOf(tx), clusterCount, rnd, T.clusterShare, T.jitterShare),
             dur: T.travelShare,
+            ph1: rnd() * Math.PI * 2,
+            ph2: rnd() * Math.PI * 2,
+            ph3: rnd() * Math.PI * 2,
+            wph: rnd(),
+            bx: Math.cos(ang),
+            by: Math.sin(ang),
           });
         }
       }
 
       /* Nothing lit (font not ready, or a zero-width box): do not leave
          the hero empty — hand straight over to the real text. */
-      if (particles.length === 0) return giveUpToText();
+      if (next.length === 0) return giveUpToText();
 
-      const ramp = rampPalette(ASSEMBLE_INKS[0], LOCK_INK, RESOLVED_INK, RAMP_BUCKETS, WARM_AT);
-      const dot = Math.max(1.1, Math.min(2.3, W / 250));
+      particles = next;
+      clustersNow = clustersIn;
+      ramp = rampPalette(ASSEMBLE_INKS[0], LOCK_INK, RESOLVED_INK, RAMP_BUCKETS, WARM_AT);
+      dot = Math.max(1.1, Math.min(2.3, W / 250));
 
-      const dw = Math.max(1, Math.round((W + 2 * padX) * dpr));
-      const dh = Math.max(1, Math.round((H + 2 * padY) * dpr));
-      canvas.width = dw;
-      canvas.height = dh;
-      ctx.scale(dpr, dpr);
-      /* draw in wordmark-space: the canvas origin is one padding away */
-      ctx.translate(padX, padY);
+      /* wordmark space: the layer's origin sits one stage-offset away, so
+         every coordinate below stays relative to the rendered letters */
+      ox = stageBox.left - layerBox.left;
+      oy = stageBox.top - layerBox.top;
+      cssW = layerBox.width;
+      cssH = layerBox.height;
+      canvas.width = Math.max(1, Math.round(cssW * dpr));
+      canvas.height = Math.max(1, Math.round(cssH * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, ox * dpr, oy * dpr);
+      /* the particle letterform is the only visual from here on: the DOM
+         cells stay hidden for the whole life of the animation */
       stage.dataset.asm = 'run';
+      builtText = textNow;
+      phase = 'forming';
+    };
 
-      const totalMs = T.totalSeconds * 1000;
-      const disperseMs = T.disperseSeconds * 1000;
-      let t0 = performance.now();
-      let hiddenAt = 0;
-      let settled = false;
-      /* 'in' is the existing construction: the dispersed field seats into
-         the wordmark. 'out' is the same particle math played the other
-         way, so a formed wordmark lifts off into the field instead of
-         popping back to scatter — the loop's decomposition beat. Same
-         particles, same paths, same palette, same easing: nothing new is
-         drawn, the existing timeline is simply traversed in reverse. */
-      let phase: 'in' | 'out' = 'in';
-
-      const release = () => {
-        /* Hand over to the real typography, hold the formed wordmark for
-           the token's pause, then hand back to the particles: the
-           construction is the identity mark, so it repeats for as long as
-           the page lives. One controlled lifecycle — the same particle
-           array, the same canvas, the same rAF slot — restarts per cycle;
-           nothing is re-allocated and nothing accumulates.
-
-           The backing store now stays allocated across cycles (the next
-           cycle draws into it); teardown releases it. The padded CSS box
-           is deliberately left in place for the component's lifetime:
-           `data-asm="done"` has already faded the canvas to opacity 0, so
-           shrinking the element back to the wordmark box would buy nothing
-           visually, while changing its rect is exactly the kind of
-           invisible geometry change that browsers can book as a layout
-           shift. Keeping the box constant means the identity mark never
-           moves anything, ever.
-
-           The overhang is safe: every ancestor of the stage up to <body>
-           clips overflow-x, so the padded box cannot introduce a
-           horizontal scrollbar even when it extends past a narrow
-           viewport (verified: documentElement.scrollWidth === innerWidth
-           at 390px with the pad live). */
-        settled = true;
-        giveUpToText();
-        later(() => {
-          later(beginCycle, T.holdSeconds * 1000);
-        }, T.resolveSeconds * 1000 + 60);
-      };
-
-      const beginCycle = () => {
-        if (cancelled || raf) return;
-        settled = false;
+    const frame = (now: number) => {
+      raf = 0;
+      if (cancelled) return;
+      if (document.hidden) {
+        /* stop the clock as well as the loop, so returning to the tab
+           resumes the motion instead of skipping ahead in it */
+        if (!hiddenAt) hiddenAt = now;
+        return;
+      }
+      if (hiddenAt) {
+        t0 += now - hiddenAt;
+        dissolveT0 += now - hiddenAt;
         hiddenAt = 0;
-        phase = 'out';
-        /* The canvas still holds the seated field from the last cycle, so
-           swapping text→canvas on this frame reads as the wordmark
-           beginning to lift, not as a flicker. Cells hide on the same
-           frame, exactly as they did on the very first construction. */
-        stage.dataset.asm = 'run';
-        t0 = performance.now();
-        raf = requestAnimationFrame(frame);
-      };
+      }
 
-      const frame = (now: number) => {
-        raf = 0;
-        if (cancelled || settled) return;
-        if (document.hidden) {
-          /* stop the clock as well as the loop, so returning to the tab
-             resumes the construction instead of skipping to the end */
-          if (!hiddenAt) hiddenAt = now;
-          return;
-        }
-        if (hiddenAt) {
-          t0 += now - hiddenAt;
-          hiddenAt = 0;
-        }
+      /* a language changed while we were living: dissolve, then rebuild */
+      if (phase !== 'dissolve' && builtText !== null && builtText !== textRef.current) {
+        phase = 'dissolve';
+        dissolveT0 = now;
+      }
 
-        const elapsed = now - t0;
-        if (phase === 'out' && elapsed >= disperseMs) {
-          /* decomposition complete: the field is floating again — now run
-             the existing construction forward, unchanged */
-          phase = 'in';
-          t0 = now;
-        }
-        const t =
-          phase === 'out' ? 1 - Math.min(1, elapsed / disperseMs) : elapsed / totalMs;
-        ctx.clearRect(-padX, -padY, W + 2 * padX, H + 2 * padY);
+      const ctx = canvas.getContext('2d', { alpha: true });
+      if (!ctx) return;
+      ctx.clearRect(-ox - 4, -oy - 4, cssW + 8, cssH + 8);
 
-        /* construction guides: one baseline rule, one tick per cluster.
-           They exist while the word is being built and leave with it. */
-        const guideFade = Math.max(0, 1 - t / T.guideShare);
-        if (guideFade > 0.01) {
-          ctx.globalCompositeOperation = 'source-over';
-          ctx.lineWidth = 1;
-          const gy = Math.round(ruleY) + 0.5;
-          ctx.strokeStyle = `rgba(34,197,94,${(0.2 * guideFade).toFixed(3)})`;
-          ctx.beginPath();
-          ctx.moveTo(0, gy);
-          ctx.lineTo(W, gy);
-          ctx.stroke();
-          ctx.strokeStyle = `rgba(165,180,252,${(0.34 * guideFade).toFixed(3)})`;
-          ctx.beginPath();
-          edges.forEach((bx, i) => {
-            if (clusters[i] === ' ') return;
-            const gx = Math.round(bx) + 0.5;
-            ctx.moveTo(gx, ruleY - 3.5);
-            ctx.lineTo(gx, ruleY + 3.5);
-          });
-          ctx.stroke();
-        }
-
-        /* particles: one path for material still waiting, then one per
-           ramp bucket — at most RAMP_BUCKETS + 1 fills a frame */
-        ctx.globalCompositeOperation = 'lighter';
-        const waiting = new Path2D();
+      if (phase === 'dissolve') {
+        /* the old glyphs loosen outward and fade — particles leaving, not
+           a cut. When they are gone the new field is sampled and forms. */
+        const prog = Math.min(1, (now - dissolveT0) / (T.dissolveSeconds * 1000));
+        const ease = prog * prog * (3 - 2 * prog);
         const buckets: Path2D[] = [];
         for (let b = 0; b < RAMP_BUCKETS; b += 1) buckets.push(new Path2D());
-
-        let arrived = 0;
         for (let i = 0; i < particles.length; i += 1) {
           const p = particles[i];
-          const local = (t - p.at) / p.dur;
-          if (local <= 0) {
-            const s = dot * 0.75;
-            waiting.rect(p.ox - s / 2, p.oy - s / 2, s, s);
-            continue;
-          }
-          const lc = local > 1 ? 1 : local;
-          if (local >= 1) arrived += 1;
-          const e = easeOutSettle(lc, T.settleBack);
-          const x = p.ox + (p.tx - p.ox) * e;
-          const y = p.oy + (p.ty - p.oy) * e;
-          /* slightly larger in flight, condensing as it seats */
-          const s = dot * (1.5 - 0.5 * lc);
-          const path = buckets[bucketFor(lc, RAMP_BUCKETS)];
-          path.rect(x - s / 2, y - s / 2, s, s);
-          /* a short tail while the particle is genuinely in flight */
-          if (lc > 0.12 && lc < 0.78) {
-            const bx = x + (p.ox - x) * 0.22;
-            const by = y + (p.oy - y) * 0.22;
-            path.rect(bx - s * 0.3, by - s * 0.3, s * 0.6, s * 0.6);
-          }
+          const x = p.tx + p.bx * ease * 16;
+          const y = p.ty + p.by * ease * 16;
+          const s = dot * (1 + 0.35 * ease);
+          buckets[bucketFor(1, RAMP_BUCKETS - (i % 3))].rect(x - s / 2, y - s / 2, s, s);
         }
-
-        ctx.fillStyle = WAITING_INK;
-        ctx.fill(waiting);
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = 1 - ease;
         for (let b = 0; b < RAMP_BUCKETS; b += 1) {
           ctx.fillStyle = ramp[b];
           ctx.fill(buckets[b]);
         }
-
-        if (phase === 'in' && (t >= 1 || arrived === particles.length)) {
-          release();
-          return;
-        }
+        ctx.globalAlpha = 1;
+        if (prog >= 1) build(textRef.current, clustersRef.current);
         raf = requestAnimationFrame(frame);
-      };
+        return;
+      }
 
-      resume = () => {
-        if (cancelled || settled) return;
-        if (!raf) raf = requestAnimationFrame(frame);
-      };
+      const ts = (now - t0) / 1000;
+      const totalMs = T.totalSeconds * 1000;
+      const t = (now - t0) / totalMs;
+      if (t >= 1 && phase === 'forming') phase = 'alive';
 
-      raf = requestAnimationFrame((now) => {
-        t0 = now;
-        frame(now);
-      });
+      /* construction guides: one baseline rule, one tick per cluster.
+         They exist while the word is being built and leave with it. */
+      const guideFade = Math.max(0, 1 - t / T.guideShare);
+      if (guideFade > 0.01) {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.lineWidth = 1;
+        const gy = Math.round(ruleY) + 0.5;
+        ctx.strokeStyle = `rgba(34,197,94,${(0.2 * guideFade).toFixed(3)})`;
+        ctx.beginPath();
+        ctx.moveTo(0, gy);
+        ctx.lineTo(W, gy);
+        ctx.stroke();
+        ctx.strokeStyle = `rgba(165,180,252,${(0.34 * guideFade).toFixed(3)})`;
+        ctx.beginPath();
+        edges.forEach((bx, i) => {
+          if (clustersNow[i] === ' ') return;
+          const gx = Math.round(bx) + 0.5;
+          ctx.moveTo(gx, ruleY - 3.5);
+          ctx.lineTo(gx, ruleY + 3.5);
+        });
+        ctx.stroke();
+      }
+
+      /* particles: one path for material still waiting, then one per
+         ramp bucket — at most RAMP_BUCKETS + 1 fills a frame */
+      ctx.globalCompositeOperation = 'lighter';
+      const waiting = new Path2D();
+      const buckets: Path2D[] = [];
+      for (let b = 0; b < RAMP_BUCKETS; b += 1) buckets.push(new Path2D());
+
+      for (let i = 0; i < particles.length; i += 1) {
+        const p = particles[i];
+        const local = (t - p.at) / p.dur;
+        if (local <= 0) {
+          const s = dot * 0.75;
+          waiting.rect(p.ox - s / 2, p.oy - s / 2, s, s);
+          continue;
+        }
+        const lc = local > 1 ? 1 : local;
+        const e = easeOutSettle(lc, T.settleBack);
+        let x = p.ox + (p.tx - p.ox) * e;
+        let y = p.oy + (p.ty - p.oy) * e;
+        if (lc >= 1) {
+          /* ── alive: the letterform stays particles, forever ──
+             micro-drift on every seated particle, ramped in over the
+             first quarter-step so seating hands over without a jump… */
+          const q = Math.min(1, (local - 1) / 0.25);
+          x += T.microPx * q * Math.sin(ts * 1.7 + p.ph1);
+          y += T.microPx * q * Math.cos(ts * 1.3 + p.ph2);
+          /* …plus the staggered breath wave: each particle periodically
+             loosens a few px along its own outward direction and returns.
+             The envelope is a sine pulse (0→1→0) on a continuous clock, so
+             every cycle ends exactly where it began and there is no frame
+             at which the loop can be seen to restart. The slow modulator
+             keeps successive breaths from feeling like a fixed timer. */
+          const c = (ts / T.breathSeconds + p.wph) % 1;
+          if (c < T.breathWindow) {
+            const env = Math.sin(Math.PI * (c / T.breathWindow));
+            const slow = 0.6 + 0.4 * Math.sin(ts * 0.35 + p.ph3);
+            const amp = T.breathPx * env * slow * q;
+            x += p.bx * amp;
+            y += p.by * amp;
+          }
+        }
+        /* slightly larger in flight, condensing as it seats */
+        const s = dot * (1.5 - 0.5 * lc);
+        const path = buckets[bucketFor(lc, RAMP_BUCKETS)];
+        path.rect(x - s / 2, y - s / 2, s, s);
+        /* a short tail while the particle is genuinely in flight */
+        if (lc > 0.12 && lc < 0.78) {
+          const bx = x + (p.ox - x) * 0.22;
+          const by = y + (p.oy - y) * 0.22;
+          path.rect(bx - s * 0.3, by - s * 0.3, s * 0.6, s * 0.6);
+        }
+      }
+
+      ctx.fillStyle = WAITING_INK;
+      ctx.fill(waiting);
+      for (let b = 0; b < RAMP_BUCKETS; b += 1) {
+        ctx.fillStyle = ramp[b];
+        ctx.fill(buckets[b]);
+      }
+
+      raf = requestAnimationFrame(frame);
     };
 
-    /* ── start: fonts first, and a graceful exit for the outgoing name ── */
+    resume = () => {
+      if (cancelled) return;
+      if (!raf) raf = requestAnimationFrame(frame);
+    };
+
+    /* ── start: fonts first, then one persistent lifecycle ── */
     const start = () => {
       if (cancelled) return;
-      if (hasBuilt.current) {
-        /* a language switch: the outgoing wordmark leaves before the new
-           one is constructed, so the two scripts never overlap */
-        stage.dataset.asm = 'out';
-        later(build, T.outgoingSeconds * 1000);
-      } else {
-        build();
+      build(textRef.current, clustersRef.current);
+      if (!raf) {
+        raf = requestAnimationFrame((now) => {
+          t0 = now;
+          dissolveT0 = now;
+          frame(now);
+        });
       }
     };
 
@@ -482,7 +532,7 @@ export function SignatureName({
       try {
         const cs = window.getComputedStyle(stage);
         const fontStr = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-        const loaded = document.fonts?.load(fontStr, text);
+        const loaded = document.fonts?.load(fontStr, textRef.current);
         if (loaded && typeof loaded.then === 'function') {
           loaded.then(() => document.fonts.ready).then(start, start);
         } else {
@@ -497,7 +547,7 @@ export function SignatureName({
       if (cancelled) return;
       if (document.hidden) return; /* the frame loop parks itself */
       /* the clock was stopped with the loop; shift the origin by the
-         hidden duration so the construction resumes where it left off */
+         hidden duration so the motion resumes where it left off */
       resume?.();
     };
 
@@ -519,10 +569,8 @@ export function SignatureName({
       canvas.height = 0;
       delete stage.dataset.asm;
       stage.style.removeProperty('--sig-resolve');
-      stage.style.removeProperty('--sig-pad-x');
-      stage.style.removeProperty('--sig-pad-y');
     };
-  }, [reducedMotion, armed, clusters, text]);
+  }, [reducedMotion, armed]);
 
   /* The stage is decoration; the accessible name is the sr-only copy —
      always the correct spelling, in the current language. */
@@ -544,12 +592,7 @@ export function SignatureName({
             </span>
           ))}
         </span>
-        {/* Keyed by the rendered name so a language change mounts a
-            *fresh* canvas instead of resizing the one that is already
-            there. Inserting and removing a node is never booked as a
-            layout shift; changing the box of a node that has already
-            painted can be, when the main thread is busy. */}
-        <canvas key={text} className="sig-canvas" ref={canvasRef} />
+        <canvas className="sig-canvas" ref={canvasRef} />
       </span>
     </span>
   );

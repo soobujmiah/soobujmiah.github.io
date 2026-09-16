@@ -58,12 +58,17 @@ export const MOTION = {
     outgoingSeconds: 0.22,
     /** Cross-fade from particles to the real DOM text, seconds. */
     resolveSeconds: 0.34,
-    /** Loop decomposition pass: the formed wordmark lifts back into the
-        field over this many seconds, traversing the existing particle
-        math in reverse. */
-    disperseSeconds: 0.9,
-    /** Stable pause of the formed wordmark between cycles, seconds. */
-    holdSeconds: 1.6,
+    /** Language retarget: the old particle glyphs loosen and fade over
+        this many seconds while the new field prepares to form. */
+    dissolveSeconds: 0.45,
+    /** Alive state: amplitude of the permanent micro-drift, CSS px. */
+    microPx: 0.55,
+    /** Alive state: period of one staggered breath wave, seconds. */
+    breathSeconds: 6.5,
+    /** Alive state: share of the breath period one wave occupies. */
+    breathWindow: 0.42,
+    /** Alive state: peak displacement of a breath wave, CSS px. */
+    breathPx: 4.5,
     /** Baseline rule + cluster ticks fade out over this share. */
     guideShare: 0.62,
     /** Left-to-right stagger across the grapheme clusters. */
