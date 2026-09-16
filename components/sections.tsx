@@ -3,7 +3,7 @@
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { Magnetic, Reveal, SnapCarousel, useNav } from './ui';
-import { GlitchName } from './GlitchName';
+import { SignatureName } from './SignatureName';
 import { sectionHref } from '@/app/sections';
 import { useLang, localizeDigits } from '@/app/language';
 import type { Project, Repo } from '@/app/content';
@@ -35,7 +35,7 @@ function PageNumeral({ index }: { index: number }) {
 
 /* ── 01 · HERO ───────────────────────────────────────────────── */
 
-export function HeroScene({ reducedMotion }: { reducedMotion: boolean }) {
+export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: boolean; armed?: boolean }) {
   const { t, lang } = useLang();
   const { goToScene, openNav } = useNav();
 
@@ -57,7 +57,7 @@ export function HeroScene({ reducedMotion }: { reducedMotion: boolean }) {
 
         {/* 2 · who I am — the identity mark dominates */}
         <h1 className="hero-name text-[clamp(3.05rem,10vw,7.4rem)] font-semibold leading-[1.06] tracking-tight">
-          <GlitchName text={t.profile.nameFull} reducedMotion={reducedMotion} />
+          <SignatureName text={t.profile.nameFull} reducedMotion={reducedMotion} armed={armed} />
         </h1>
 
         {/* 3 · what I am — exactly one professional identity treatment */}
@@ -940,7 +940,7 @@ export function ContactScene() {
     <div className="page-fill">
       <PageNumeral index={8} />
       <div className="page-content page-content-wide">
-        <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-center">
+        <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-start">
           <div className="text-center lg:text-left">
             <Reveal>
               <p className="ph-e font-mono text-[10px] uppercase tracking-[0.3em] mb-3" style={{ color: '#22c55e' }}>
@@ -959,24 +959,61 @@ export function ContactScene() {
                 {t.contact.sub}
               </p>
             </Reveal>
+
+            {/* The one primary channel, visually first and on its own —
+                it is a way to reach a person, not a platform profile. */}
+            <Reveal delay={0.18}>
+              <Magnetic
+                href={t.contact.email.href}
+                ariaLabel={`${t.contact.email.label}: ${t.contact.email.value}`}
+                className="group mt-6 flex flex-col gap-1 rounded-xl p-4 backdrop-blur-md transition-all duration-500 sm:max-w-sm lg:mt-8"
+                style={{ border: '1px solid rgba(34,197,94,0.22)', background: 'rgba(8,14,10,0.6)' }}
+                strength={0.12}
+              >
+                <span className="text-sm font-semibold transition-colors duration-300" style={{ color: '#e4e2df' }}>
+                  {t.contact.email.label}
+                </span>
+                <span className="font-mono text-[11px] truncate" style={{ color: 'rgba(228,226,223,0.5)' }}>
+                  {t.contact.email.value}
+                </span>
+              </Magnetic>
+            </Reveal>
           </div>
 
-          <Reveal delay={0.18}>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {t.contact.channels.map((c) => (
-                <Magnetic
-                  key={c.label}
-                  href={c.href}
-                  ariaLabel={`${c.label}: ${c.value}`}
-                  className="group flex flex-col gap-1 rounded-xl p-4 backdrop-blur-md transition-all duration-500"
-                  style={{ border: '1px solid rgba(228,226,223,0.1)', background: 'rgba(8,10,8,0.55)' }}
-                  strength={0.12}
-                >
-                  <span className="text-sm font-semibold transition-colors duration-300" style={{ color: '#e4e2df' }}>{c.label}</span>
-                  <span className="font-mono text-[11px] truncate" style={{ color: 'rgba(228,226,223,0.45)' }}>{c.value}</span>
-                </Magnetic>
+          {/* The complete ecosystem: 17 canonical links, grouped, one
+              line each. Deliberately typographic rather than a wall of
+              platform icons — these are navigation, not content, and
+              they stay inside the green-on-black system. The handle is
+              carried in the accessible name and on hover, so the row
+              stays quiet without hiding anything. */}
+          <Reveal delay={0.22}>
+            <dl className="social-grid">
+              {t.contact.groups.map((g) => (
+                <div key={g.label} className="social-row">
+                  <dt className="social-group">{g.label}</dt>
+                  <dd className="social-links">
+                    {g.links.map((l, i) => (
+                      <span key={l.href} className="social-item">
+                        {i > 0 && <span className="social-sep" aria-hidden="true">·</span>}
+                        <a
+                          href={l.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          data-magnetic
+                          title={`${l.label} — ${l.handle}`}
+                          aria-label={`${l.label}: ${l.handle}`}
+                        >
+                          {l.label}
+                        </a>
+                      </span>
+                    ))}
+                  </dd>
+                </div>
               ))}
-            </div>
+            </dl>
+            <p className="mt-5 font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.3)' }}>
+              {t.contact.groupsNote}
+            </p>
           </Reveal>
         </div>
       </div>

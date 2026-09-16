@@ -683,21 +683,26 @@ body.lang-bn .worldmap-pin {
   min-width: 0;
 }
 
-/* ── glitch identity — a signal that breaks and rebuilds itself ──
-   The wordmark cycles through four phases on one shared deterministic
-   clock: the correct name at rest, a subtle pre-break instability, a
-   rapid glyph scramble, and a left-to-right reconstruction. Each glyph
-   runs the same cycle with an index stagger, so the wave travels
-   through the word instead of flickering in unison.
+/* ── signature identity — a wordmark that is constructed, not revealed ──
+   The rendered ink of the name is sampled into a dispersed particle
+   field, which travels home grapheme cluster by grapheme cluster and
+   resolves into the real DOM text. The canvas is scaffolding: it exists
+   only while the word is being built, then fades out and releases its
+   backing store. The resting state is typography — the brand wordmark
+   faces, the same multi-tone green ramp the identity has always
+   carried, and the same two-layer halo.
 
-   Everything the loop touches is compositor-friendly: jitter is a
-   transform variable, colour/glow are class flips, and glyph swaps
-   write textContent on width-locked cells (measured once), so the
-   cycle never reflows the hero. There is no CSS animation on the name
-   at all — the life is a deliberate, recoverable transformation, not a
-   flicker. The name itself is real DOM text (a screen-reader copy plus
-   the visible cells), so the identity is never only pixels. */
+   Nothing here reflows. The cells are static from first paint, the
+   construction loop writes only to the canvas and to one `data-asm`
+   attribute, and the only property that animates is opacity. There is
+   no CSS animation on the name at all: the motion is a deliberate
+   construction with a defined end, not a cycle. */
 .sig-name {
+  position: relative;
+  display: inline-block;
+}
+
+.sig-stage {
   position: relative;
   display: inline-block;
 }
@@ -708,13 +713,14 @@ body.lang-bn .worldmap-pin {
   align-items: baseline;
 }
 
-/* one width-locked cell per grapheme; --ink is the character's own
-   colour in the brand ramp */
+/* One cell per grapheme cluster — never per code point, so a Bengali
+   cluster (মি, বু, য়া) is one indivisible cell. --ink is that
+   cluster's colour in the brand ramp. Static: nothing here is ever
+   rewritten at runtime. */
 .sig-cell {
   display: inline-block;
   position: relative;
   color: var(--ink, var(--fg));
-  will-change: transform;
 }
 
 .sig-space {
@@ -722,32 +728,65 @@ body.lang-bn .worldmap-pin {
   width: 0.28em;
 }
 
-/* the leaf span that actually carries the glyph — React renders it
-   once; the loop rewrites only its textContent */
-.sig-ink {
-  display: inline-block;
-  min-width: 100%;
-  text-align: center;
-  color: inherit;
-  /* two-layer halo: a tight rim that defines the glyph edge, and a wide
-     bloom that carries the name — the identity mark reads first */
-  text-shadow: 0 0 1px rgba(74, 222, 128, 0.30), 0 0 26px rgba(34, 197, 94, 0.34);
+/* two-layer halo: a tight rim that defines the glyph edge, and a wide
+   bloom that carries the name — the identity mark reads first */
+.sig-cell,
+.sig-space {
+  text-shadow: 0 0 1px rgba(74, 222, 128, 0.3), 0 0 26px rgba(34, 197, 94, 0.34);
 }
 
-/* phase colour language: scramble reads cool and technical,
-   reconstruction reads warm — both stay in the restrained palette */
-.sig-cell.sig-scramble .sig-ink {
-  text-shadow: 0 0 14px rgba(125, 211, 252, 0.34);
+/* The construction canvas: exactly over the wordmark, never
+   interactive, invisible unless a construction is running. */
+/* The construction canvas deliberately overhangs the wordmark: the field
+   disperses around the word, and a canvas clipped to the text box would
+   throw away every particle that leaves the letters. The padding is
+   written by the component from MOTION.nameAssemble.disperseRadius, and
+   defaults to zero so that without JavaScript the canvas simply covers the
+   (already legible) text. */
+.sig-canvas {
+  position: absolute;
+  top: calc(-1 * var(--sig-pad-y, 0px));
+  left: calc(-1 * var(--sig-pad-x, 0px));
+  width: calc(100% + 2 * var(--sig-pad-x, 0px));
+  height: calc(100% + 2 * var(--sig-pad-y, 0px));
+  pointer-events: none;
+  opacity: 0;
 }
 
-.sig-cell.sig-rebuild .sig-ink {
-  text-shadow: 0 0 16px rgba(234, 179, 8, 0.4);
+/* Phase states, driven by one attribute on the stage. The attribute
+   being *absent* is the legible state — no JavaScript, or nothing to
+   run, and the real text is simply there. */
+.sig-stage[data-asm='run'] .sig-canvas,
+.sig-stage[data-asm='out'] .sig-canvas {
+  opacity: 1;
 }
 
-/* reduced motion: a calm, fully designed multi-tone wordmark at rest */
+.sig-stage[data-asm='run'] .sig-cell {
+  opacity: 0;
+}
+
+/* The handover: the particle field condenses into typography. The
+   duration is written by the component from
+   MOTION.nameAssemble.resolveSeconds, so the token stays the single
+   source of truth and this rule cannot drift from it. */
+.sig-stage[data-asm='done'] .sig-cell {
+  opacity: 1;
+  transition: opacity var(--sig-resolve, 0.34s) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sig-stage[data-asm='done'] .sig-canvas {
+  opacity: 0;
+  transition: opacity var(--sig-resolve, 0.34s) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* reduced motion: a calm, fully designed multi-tone wordmark at rest.
+   No canvas is drawn and no timer is ever set. */
 .sig-static .sig-cell {
-  transform: none;
-  will-change: auto;
+  opacity: 1;
+}
+
+.sig-static .sig-canvas {
+  display: none;
 }
 
 /* ── keyboard focus ── */
@@ -1145,6 +1184,94 @@ body.lang-bn span {
   text-decoration-color: rgba(34, 197, 94, 0.55);
 }
 
+
+/* ── the social ecosystem (contact page) ─────────────────────────
+   Seventeen canonical links, grouped, one typographic line each.
+   Deliberately not a wall of platform icons: these are navigation
+   rather than content, they stay inside the green-on-black system,
+   and no platform gets its own brand colour. The group label carries
+   the structure; the links stay quiet until they are wanted. */
+.social-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin: 0;
+}
+
+.social-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.3rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(228, 226, 223, 0.06);
+}
+
+.social-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+@media (min-width: 560px) {
+  .social-row {
+    grid-template-columns: 8.5rem 1fr;
+    gap: 1rem;
+    align-items: baseline;
+  }
+}
+
+.social-group {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(74, 222, 128, 0.55);
+}
+
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.social-item {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.social-sep {
+  margin: 0 0.5rem;
+  color: rgba(228, 226, 223, 0.18);
+}
+
+.social-links a {
+  color: rgba(228, 226, 223, 0.78);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition:
+    color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.social-links a:hover,
+.social-links a:focus-visible {
+  color: #4ade80;
+  border-bottom-color: rgba(74, 222, 128, 0.4);
+}
+
+/* Bangla: the group label is a word, not a code token. A Latin-only
+   mono face has no Bengali glyphs, and wide tracking breaks Indic
+   shaping — so both are corrected here, matching the rule the rest of
+   `body.lang-bn` already enforces. */
+body.lang-bn .social-group {
+  font-family: var(--font-bengali), var(--font-inter), system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -1166,14 +1293,14 @@ body.lang-bn span {
     display: none !important;
   }
 
-  /* the name stays fully legible and still. No cycle runs — the static
-     multi-tone wordmark keeps its colour, typography and accessibility. */
+  /* the name stays fully legible and still. No construction runs — the
+     static multi-tone wordmark keeps its colour, typography and
+     accessibility, and the canvas never exists. */
   .sig-cell {
-    transform: none !important;
-    will-change: auto;
-  }
-  .sig-ink {
-    transform: none !important;
+    opacity: 1 !important;
     transition: none !important;
+  }
+  .sig-canvas {
+    display: none !important;
   }
 }

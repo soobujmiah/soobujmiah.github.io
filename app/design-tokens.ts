@@ -42,18 +42,40 @@ export const MOTION = {
   reveal: { seconds: 0.7, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' },
   /** Magnetic link pointer-follow / release. */
   magnetic: { followSeconds: 0.12, releaseSeconds: 0.5, pressSeconds: 0.1 },
-  /** Living identity — the glitch/reconstruct cycle is deterministic:
-      one shared clock, per-glyph stagger, fixed phase boundaries. */
-  nameCycle: {
-    cycleSeconds: 5.2,
-    holdSeconds: 1.15,
-    unstableSeconds: 0.55,
-    scrambleSeconds: 1.05,
-    rebuildSeconds: 0.7,
-    staggerSeconds: 0.22,
-    scrambleStepMs: 62,
-    jitterPx: 1.6,
-    boostSeconds: 1.4,
+  /** Signature identity — the wordmark is *constructed*, not revealed:
+      its own rendered ink is sampled into a dispersed particle field
+      that travels home and resolves into real typography. One-shot and
+      deterministic (seeded from the name); nothing loops afterwards.
+
+      Shares are fractions of `totalSeconds`, and they are a budget that
+      must sum to 1: the last cluster starts at clusterShare +
+      jitterShare and travels for travelShare, so
+      `clusterShare + jitterShare + travelShare === 1`. */
+  nameAssemble: {
+    /** Whole construction, seconds. */
+    totalSeconds: 1.6,
+    /** Outgoing wordmark's exit when the language changes, seconds. */
+    outgoingSeconds: 0.22,
+    /** Cross-fade from particles to the real DOM text, seconds. */
+    resolveSeconds: 0.34,
+    /** Baseline rule + cluster ticks fade out over this share. */
+    guideShare: 0.62,
+    /** Left-to-right stagger across the grapheme clusters. */
+    clusterShare: 0.3,
+    /** Deterministic timing spread inside one cluster. */
+    jitterShare: 0.15,
+    /** Each particle's travel time. */
+    travelShare: 0.55,
+    /** Ease-out overshoot strength — 0 is plain, 0.7 seats subtly. */
+    settleBack: 0.7,
+    /** Dispersal radius, as a multiple of the wordmark box height. */
+    disperseRadius: 1.35,
+    /** Hard ceiling on live particles — a budget, not a target. */
+    maxParticles: 1700,
+    /** Sampling grid step in CSS px before the budget adapts it. */
+    sampleStepPx: 2.6,
+    /** Device-pixel-ratio cap for the construction canvas. */
+    maxDpr: 2,
   },
   /** Pull-to-refresh gesture. */
   pullToRefresh: {

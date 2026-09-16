@@ -62,7 +62,7 @@ writeFileSync(
         strict: false,
         plugins: [],
       },
-      include: ['app/graphemes.ts', 'app/sections.ts', 'app/language.tsx', 'app/geo.ts'],
+      include: ['app/graphemes.ts', 'app/sections.ts', 'app/language.tsx', 'app/geo.ts', 'app/name-motion.ts', 'app/design-tokens.ts'],
     },
     null,
     2
@@ -82,8 +82,10 @@ const sigPath = pick('graphemes.js', 'app/graphemes.js');
 const sectionsPath = pick('app/sections.js', 'sections.js');
 const langPath = pick('app/language.js', 'language.js');
 const geoPath = pick('app/geo.js', 'geo.js');
+const motionPath = pick('app/name-motion.js', 'name-motion.js');
+const tokensPath = pick('app/design-tokens.js', 'design-tokens.js');
 
-if (!sigPath || !sectionsPath || !langPath || !geoPath) {
+if (!sigPath || !sectionsPath || !langPath || !geoPath || !motionPath || !tokensPath) {
   console.error(`check-units FAIL: compiled output not found under ${tmp}`);
   console.log(existsSync(tmp) ? execSync(`find "${tmp}" -name '*.js'`, { encoding: 'utf8' }) : '');
   process.exit(1);
@@ -97,6 +99,22 @@ const { localizeDigits } = await import(pathToFileURL(langPath).href);
 const { GEO_FOCUS, cameraFor, clampCamera, projectPoint, projectToScreen } = await import(
   pathToFileURL(geoPath).href
 );
+const {
+  hashSeed,
+  mulberry32,
+  easeOutSettle,
+  baselineWithinBox,
+  sampleStepFor,
+  startOffset,
+  disperseOrigin,
+  rampPalette,
+  bucketFor,
+  particleBudget,
+  hexToRgb,
+  mixRgb,
+  rgbToCss,
+} = await import(pathToFileURL(motionPath).href);
+const { MOTION } = await import(pathToFileURL(tokensPath).href);
 
 console.log('\nBengali grapheme segmentation (Intl.Segmenter path)');
 eq('সবুজ মিয়া → 6 clusters, not 9 code points', segmentGraphemes('সবুজ মিয়া'), ['স', 'বু', 'জ', ' ', 'মি', 'য়া']);
@@ -170,6 +188,113 @@ console.log('\nBengali digits');
 eq('English digits unchanged', localizeDigits('2026', 'en'), '2026');
 eq('Bengali digits', localizeDigits('2026', 'bn'), '২০২৬');
 eq('padded counter', localizeDigits('03', 'bn'), '০৩');
+
+console.log('\nSignature name — determinism (the construction must be reproducible)');
+eq('the same name always seeds the same', hashSeed('Sobuj Miah'), hashSeed('Sobuj Miah'));
+eq('a different name seeds differently', hashSeed('Sobuj Miah') !== hashSeed('সবুজ মিয়া'), true);
+eq('the seed is a 32-bit unsigned integer', Number.isInteger(hashSeed('সবুজ মিয়া')) && hashSeed('সবুজ মিয়া') >= 0, true);
+const r1 = mulberry32(hashSeed('Sobuj Miah'));
+const r2 = mulberry32(hashSeed('Sobuj Miah'));
+const seq1 = [r1(), r1(), r1()];
+const seq2 = [r2(), r2(), r2()];
+eq('the same seed replays the same sequence', seq1, seq2);
+eq('every value is in [0, 1)', seq1.every((v) => v >= 0 && v < 1), true);
+eq('successive values differ (the generator is not stuck)', new Set(seq1).size, 3);
+
+console.log('\nSignature name — the settle curve must land exactly on target');
+eq('starts at 0', easeOutSettle(0, 0.7), 0);
+eq('lands at exactly 1 — a particle can never stop short of its glyph', easeOutSettle(1, 0.7), 1);
+eq('overshoots once, so the particle seats rather than stops', (() => {
+  let max = 0;
+  for (let i = 0; i <= 200; i += 1) max = Math.max(max, easeOutSettle(i / 200, 0.7));
+  return max > 1 && max < 1.12;
+})(), true);
+eq('back=0 is a plain ease-out with no overshoot', (() => {
+  let max = 0;
+  for (let i = 0; i <= 200; i += 1) max = Math.max(max, easeOutSettle(i / 200, 0));
+  return Math.abs(max - 1) < 1e-9;
+})(), true);
+eq('clamps below zero', easeOutSettle(-3, 0.7), 0);
+eq('clamps above one', easeOutSettle(7, 0.7), 1);
+eq('is monotonic enough to never travel backwards visually', (() => {
+  let prev = -1;
+  let regressions = 0;
+  for (let i = 0; i <= 100; i += 1) {
+    const v = easeOutSettle(i / 100, 0.7);
+    if (v < prev - 0.02) regressions += 1;
+    prev = v;
+  }
+  return regressions;
+})(), 0);
+
+console.log('\nSignature name — baseline derivation (particles must land on the glyphs)');
+eq('centres the em box in the line box: no leading', baselineWithinBox(0, 100, 80, 20), 80);
+eq('splits half-leading above the ascent', baselineWithinBox(0, 140, 80, 20), 100);
+eq('respects the box offset', baselineWithinBox(25, 140, 80, 20), 125);
+eq('degenerate metrics fall back instead of returning NaN', Number.isFinite(baselineWithinBox(0, 0, 0, 0)), true);
+eq('the fallback sits inside the box', baselineWithinBox(0, 0, 0, 0), 0);
+
+console.log('\nSignature name — the particle budget is a ceiling');
+eq('under budget keeps the crisp base step', sampleStepFor(400, 3, 1700), 3);
+eq('over budget widens the step', sampleStepFor(6800, 2, 1700), 4);
+eq('the widened step actually brings the count under the ceiling', (() => {
+  const step = sampleStepFor(6800, 2, 1700);
+  return Math.round(6800 * (2 * 2) / (step * step)) <= 1700;
+})(), true);
+eq('never goes below the base step', sampleStepFor(999999, 5, 10) >= 5, true);
+eq('degenerate input returns the base step', sampleStepFor(0, 3, 1700), 3);
+eq('a phone gets a smaller field than the cap', particleBudget(390, 8, 1700) < 1700, true);
+eq('a desktop keeps the full cap', particleBudget(1440, 8, 1700), 1700);
+eq('few cores trim the budget further', particleBudget(390, 4, 1700) < particleBudget(390, 8, 1700), true);
+eq('an unknown core count is treated as a hint, not a veto', particleBudget(1440, 0, 1700), 1700);
+eq('the budget never collapses to nothing', particleBudget(200, 2, 1700) >= 180, true);
+
+console.log('\nSignature name — cluster-ordered assembly');
+const offs = [0, 1, 2, 3, 4, 5].map((i) => startOffset(i, 6, mulberry32(7), 0.3, 0.15));
+eq('every start is inside the stagger budget', offs.every((o) => o >= 0 && o <= 0.45 + 1e-9), true);
+eq('the last cluster starts no earlier than the first', offs[5] >= offs[0] - 0.15, true);
+eq('a single cluster still yields a valid start', Number.isFinite(startOffset(0, 1, mulberry32(3), 0.3, 0.15)), true);
+eq('the same seed gives the same schedule', startOffset(2, 6, mulberry32(11), 0.3, 0.15), startOffset(2, 6, mulberry32(11), 0.3, 0.15));
+eq('dispersed origins are finite', (() => {
+  const o = disperseOrigin(50, 20, 300, 90, mulberry32(5), 1.35);
+  return Number.isFinite(o.x) && Number.isFinite(o.y);
+})(), true);
+eq('dispersal actually moves the particle off its target', (() => {
+  const o = disperseOrigin(50, 20, 300, 90, mulberry32(5), 1.35);
+  return Math.hypot(o.x - 50, o.y - 20) > 1;
+})(), true);
+eq('an edge particle disperses further than a central one', (() => {
+  const edge = disperseOrigin(299, 20, 300, 90, mulberry32(5), 1.35);
+  const mid = disperseOrigin(150, 20, 300, 90, mulberry32(5), 1.35);
+  return Math.hypot(edge.x - 299, edge.y - 20) >= Math.hypot(mid.x - 150, mid.y - 20);
+})(), true);
+
+console.log('\nSignature name — the colour ramp');
+const ramp = rampPalette('#7dd3fc', '#eab308', '#4ade80', 8, 0.72);
+eq('the ramp has one entry per bucket', ramp.length, 8);
+eq('it starts on the cool assembly ink', ramp[0], 'rgba(125,211,252,1)');
+eq('it ends on the resolved green', ramp[7], 'rgba(74,222,128,1)');
+eq('every stop is a valid rgba()', ramp.every((c) => /^rgba\(\d+,\d+,\d+,1\)$/.test(c)), true);
+eq('a two-bucket ramp still spans cool to green', rampPalette('#7dd3fc', '#eab308', '#4ade80', 2, 0.72), ['rgba(125,211,252,1)', 'rgba(74,222,128,1)']);
+eq('bucketFor clamps low', bucketFor(-1, 8), 0);
+eq('bucketFor clamps high', bucketFor(4, 8), 7);
+eq('bucketFor maps arrival to the last bucket', bucketFor(1, 8), 7);
+eq('hexToRgb parses brand green', hexToRgb('#22c55e'), { r: 34, g: 197, b: 94 });
+eq('hexToRgb rejects junk instead of throwing', hexToRgb('not-a-colour'), { r: 0, g: 0, b: 0 });
+eq('mixRgb at the ends returns the endpoints', [mixRgb({r:0,g:0,b:0},{r:10,g:20,b:30},0), mixRgb({r:0,g:0,b:0},{r:10,g:20,b:30},1)], [{r:0,g:0,b:0},{r:10,g:20,b:30}]);
+eq('rgbToCss rounds and keeps alpha readable', rgbToCss({ r: 74.4, g: 222.1, b: 128.9 }, 0.5), 'rgba(74,222,129,0.5)');
+
+console.log('\nSignature name — the motion token budget must add up');
+const NA = MOTION.nameAssemble;
+eq('the last particle arrives exactly at the end of the assembly',
+  Number((NA.clusterShare + NA.jitterShare + NA.travelShare).toFixed(10)), 1);
+eq('the construction is short enough to read and long enough to stage',
+  NA.totalSeconds >= 1.0 && NA.totalSeconds <= 2.6, true);
+eq('the outgoing name leaves before the new one is built', NA.outgoingSeconds > 0 && NA.outgoingSeconds < NA.totalSeconds, true);
+eq('the guides are gone before the name resolves', NA.guideShare > 0 && NA.guideShare < 1, true);
+eq('the particle ceiling is a real ceiling', NA.maxParticles >= 400 && NA.maxParticles <= 4000, true);
+eq('the device-pixel ratio is capped for mobile fill rate', NA.maxDpr <= 2, true);
+eq('the settle overshoot stays subtle', NA.settleBack > 0 && NA.settleBack <= 1.2, true);
 
 rmSync(cfgPath, { force: true });
 rmSync(tmp, { recursive: true, force: true });

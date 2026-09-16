@@ -53,8 +53,13 @@ const IDENTIFIER_PATHS = new Set([
   'profile.github',
   'profile.telegram',
   'profile.linkedin',
-  'contact.channels[].value',
-  'contact.channels[].href',
+  'contact.email.value',
+  'contact.email.href',
+  /* the social ecosystem: handles and URLs are verbatim data in both
+     languages, while every group label and platform name stays prose
+     and therefore stays under the purity rule (গিটহাব, not GitHub) */
+  'contact.groups[].links[].handle',
+  'contact.groups[].links[].href',
   'work.projects[].name',
   'work.projects[].repo',
   'work.projects[].websiteUrl',
@@ -232,7 +237,92 @@ try {
     fail('openSource.selected order differs between en and bn');
   }
 
-  /* 4 ── labels, nav, accents, URLs ── */
+  /* 4 ── canonical professional identity ──
+     One identity across the portfolio, the profile README and the JSON-LD.
+     The owner set this wording explicitly; a silent rewording here would
+     drift every surface that inherits it, so it is asserted rather than
+     trusted. Retired positioning is asserted *absent*, not merely unused. */
+  const CANONICAL_TITLE = 'Independent Software & AI Systems Engineer';
+  const RETIRED_POSITIONING = ['Self-Taught Technology Builder'];
+  if (content.en.profile.title !== CANONICAL_TITLE) {
+    fail(`en.profile.title is "${content.en.profile.title}", expected the canonical "${CANONICAL_TITLE}"`);
+  }
+  for (const lang of ['en', 'bn']) {
+    const hay = JSON.stringify(content[lang]);
+    for (const retired of RETIRED_POSITIONING) {
+      if (hay.includes(retired)) fail(`${lang} tree still carries retired positioning "${retired}"`);
+    }
+  }
+  /* the Bangla title must be Bangla prose, not the English string */
+  if (content.bn.profile.title === content.en.profile.title) {
+    fail('bn.profile.title is identical to en — the Bangla tree must translate the identity');
+  }
+
+  /* 4b ── the canonical social ecosystem ──
+     Seventeen links, supplied by the owner, exact and complete. This is
+     the audit the brief asks for, made repeatable: a link can never go
+     missing, duplicated, re-pointed at a different handle, or diverge
+     between the two language trees without failing the build. */
+  const CANONICAL_SOCIAL = [
+    'https://github.com/soobujmiah',
+    'https://soobujmiah.github.io',
+    'https://linkedin.com/in/soobujmiah',
+    'https://peerlist.io/soobujmiah',
+    'https://www.producthunt.com/@soobujmiah',
+    'https://huggingface.co/soobujmiah',
+    'https://dev.to/soobujmiah',
+    'https://hashnode.com/@soobujmiah',
+    'https://medium.com/@soobujmiah',
+    'https://x.com/soobujmiah',
+    'https://instagram.com/soobujmiah',
+    'https://threads.net/@soobujmiah',
+    'https://facebook.com/soobujmiah',
+    'https://youtube.com/@soobujmiah',
+    'https://t.me/soobujmiah',
+    'https://wa.me/soobujmiah',
+    'https://about.me/soobujmiah',
+  ];
+  const flat = (lang) => content[lang].contact.groups.flatMap((g) => g.links);
+  const shapes = {};
+  for (const lang of ['en', 'bn']) {
+    const links = flat(lang);
+    shapes[lang] = links;
+    if (links.length !== CANONICAL_SOCIAL.length) {
+      fail(`${lang}.contact.groups carries ${links.length} links, expected ${CANONICAL_SOCIAL.length}`);
+    }
+    const hrefs = links.map((l) => l.href);
+    if (new Set(hrefs).size !== hrefs.length) fail(`${lang}.contact.groups has a duplicate href`);
+    for (const want of CANONICAL_SOCIAL) {
+      if (!hrefs.includes(want)) fail(`${lang}.contact.groups is missing the canonical link ${want}`);
+    }
+    for (const got of hrefs) {
+      if (!CANONICAL_SOCIAL.includes(got)) fail(`${lang}.contact.groups has a non-canonical link ${got}`);
+    }
+    for (const l of links) {
+      if (!/^https:\/\//.test(l.href)) fail(`${lang}.contact.groups link must be https: ${l.href}`);
+      if (!l.handle || !l.label) fail(`${lang}.contact.groups link missing handle/label: ${l.href}`);
+    }
+    if (!content[lang].contact.email.href.startsWith('mailto:')) {
+      fail(`${lang}.contact.email.href must be a mailto: URL`);
+    }
+    if (content[lang].contact.groups.length < 2) {
+      fail(`${lang}.contact.groups must stay grouped — a flat list of 17 is a wall, not navigation`);
+    }
+  }
+  /* the two trees must describe the same ecosystem in the same order,
+     differing only in the words */
+  if (JSON.stringify(shapes.en.map((l) => l.href)) !== JSON.stringify(shapes.bn.map((l) => l.href))) {
+    fail('social hrefs differ in content or order between en and bn');
+  }
+  if (JSON.stringify(shapes.en.map((l) => l.handle)) !== JSON.stringify(shapes.bn.map((l) => l.handle))) {
+    fail('social handles differ between en and bn — handles are verbatim data');
+  }
+  if (JSON.stringify(content.en.contact.groups.map((g) => g.links.length)) !==
+      JSON.stringify(content.bn.contact.groups.map((g) => g.links.length))) {
+    fail('social group sizes differ between en and bn');
+  }
+
+  /* 5 ── labels, nav, accents, URLs ── */
   for (const lang of ['en', 'bn']) {
     const tree = content[lang];
     if (tree.ui.pageLabels.length !== 9) fail(`${lang}.ui.pageLabels length != 9`);

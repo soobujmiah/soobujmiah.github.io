@@ -250,11 +250,33 @@ if (homeHtml) {
       ok(`${cams.size} distinct server-rendered camera positions, one per page`);
     }
 
-    /* The identity must stay REAL TEXT. If a future change swaps the
-       glyphs for a canvas or an image, the name becomes unselectable and
-       invisible to assistive tech — that is the end of the site's premise. */
-    const ink = (homeHtml.match(/class="sig-ink"/g) || []).length;
-    if (ink < 6) fail(`out/index.html ships only ${ink} real glyph text nodes (expected >= 6)`);
+    /* The identity must stay REAL TEXT. The construction is painted on a
+       canvas, which makes this check more load-bearing than before: it is
+       what stops the canvas from ever becoming the *only* representation
+       of the name. If the glyphs were swapped for pixels or an image, the
+       name would be unselectable and invisible to assistive tech — that is
+       the end of the site's premise. Three things must all hold. */
+    const ink = (homeHtml.match(/class="sig-cell"/g) || []).length;
+    if (ink < 6) {
+      fail(`out/index.html ships only ${ink} real glyph text nodes (expected >= 6)`);
+    } else {
+      ok(`${ink} real glyph text nodes server-rendered in the identity mark`);
+    }
+    /* the accessible name must not depend on the canvas either */
+    if (!/<span class="sr-only">Sobuj Miah<\/span>/.test(homeHtml)) {
+      fail('out/index.html has no screen-reader copy of the name — the accessible name cannot depend on JavaScript');
+    } else {
+      ok('the accessible name ships as real text, independent of the construction');
+    }
+    /* the canvas is scaffolding: it must ship empty, never as the name */
+    if (/<canvas[^>]*sig-canvas[^>]*>\s*[^<\s]/.test(homeHtml)) {
+      fail('the construction canvas ships content — the name must live in the DOM, not in the canvas');
+    }
+    /* and the legible state must be the one that needs no JavaScript:
+       no phase attribute may be baked into the server render */
+    if (/data-asm=/.test(homeHtml)) {
+      fail('out/index.html bakes in a construction phase — without JavaScript the name must simply be present');
+    }
     else ok(`identity mark is real DOM text (${ink} glyphs), not a canvas or image`);
   }
 }

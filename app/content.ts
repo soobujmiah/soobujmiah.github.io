@@ -79,6 +79,20 @@ export interface Repo {
   tier: 'flagship' | 'applied' | 'supporting';
 }
 
+export interface SocialLink {
+  /** Platform name — a word, so it is transliterated in Bangla. */
+  label: string;
+  /** Account handle: verbatim data, identical in both languages. */
+  handle: string;
+  /** Canonical URL: verbatim data, identical in both languages. */
+  href: string;
+}
+
+export interface SocialGroup {
+  label: string;
+  links: SocialLink[];
+}
+
 export interface WorkEntry {
   period: string;
   role: string;
@@ -203,7 +217,14 @@ export interface Content {
     headingA: string;
     headingB: string;
     sub: string;
-    channels: { label: string; value: string; href: string }[];
+    /** The one primary channel, kept visually first and separate from
+        the platform ecosystem below it. */
+    email: { label: string; value: string; href: string };
+    groupsHeading: string;
+    groupsNote: string;
+    /** The complete ecosystem: 17 canonical links in six groups. One
+        system, rendered once — never a second wall of icons elsewhere. */
+    groups: SocialGroup[];
   };
   nav: { scene: number; label: string }[];
   header: { homeLabel: string; githubLabel: string; langLabel: string; langAria: string; githubAria: string };
@@ -239,7 +260,7 @@ const en: Content = {
   profile: {
     name: 'Sobuj',
     nameFull: 'Sobuj Miah',
-    title: 'Independent Systems Builder',
+    title: 'Independent Software & AI Systems Engineer',
     tagline: 'On-Device AI · Android · ARM64 Linux · Native Tooling · Software Systems',
     location: 'Dhaka, Bangladesh',
     github: 'https://github.com/soobujmiah',
@@ -248,13 +269,13 @@ const en: Content = {
     linkedin: 'https://linkedin.com/in/soobujmiah',
   },
   meta: {
-    title: 'Sobuj Miah — Independent Systems Builder · On-Device AI & ARM64 Systems',
+    title: 'Sobuj Miah — Independent Software & AI Systems Engineer',
     description:
       'On-device AI, Android, ARM64 Linux, native tooling. Built under constraint. Verified on real hardware with CI builds, tests, and physical-device evidence.',
   },
   hero: {
     intro:
-      'Self-taught systems builder at the intersection of on-device AI, Android systems, and ARM64 Linux. Built under constraint — every build runs on CI, every claim checked against a physical device.',
+      'Independent software and AI systems engineer at the intersection of on-device AI, Android systems, and ARM64 Linux. Self-taught, and built under constraint — every build runs on CI, every claim checked against a physical device.',
     availability: 'Open to remote',
     ctaWork: 'Explore my work',
     ctaGithub: 'View GitHub ↗',
@@ -552,11 +573,57 @@ const en: Content = {
     headingA: 'Open to freelance,',
     headingB: 'remote, and collaboration.',
     sub: 'On-device AI, Android systems, ARM64 tooling, or local-first products — happy to talk.',
-    channels: [
-      { label: 'Email', value: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
-      { label: 'GitHub', value: 'soobujmiah', href: 'https://github.com/soobujmiah' },
-      { label: 'Telegram', value: '@soobujmiah', href: 'https://t.me/soobujmiah' },
-      { label: 'LinkedIn', value: 'in/soobujmiah', href: 'https://linkedin.com/in/soobujmiah' },
+    email: { label: 'Email', value: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
+    groupsHeading: 'Find me online',
+    groupsNote: 'One handle across every platform.',
+    groups: [
+      {
+        label: 'Core',
+        links: [
+          { label: 'GitHub', handle: 'soobujmiah', href: 'https://github.com/soobujmiah' },
+          { label: 'Portfolio', handle: 'soobujmiah.github.io', href: 'https://soobujmiah.github.io' },
+        ],
+      },
+      {
+        label: 'Professional',
+        links: [
+          { label: 'LinkedIn', handle: 'in/soobujmiah', href: 'https://linkedin.com/in/soobujmiah' },
+          { label: 'Peerlist', handle: 'soobujmiah', href: 'https://peerlist.io/soobujmiah' },
+          { label: 'Product Hunt', handle: '@soobujmiah', href: 'https://www.producthunt.com/@soobujmiah' },
+        ],
+      },
+      {
+        label: 'AI / Developer',
+        links: [
+          { label: 'Hugging Face', handle: 'soobujmiah', href: 'https://huggingface.co/soobujmiah' },
+          { label: 'DEV.to', handle: 'soobujmiah', href: 'https://dev.to/soobujmiah' },
+          { label: 'Hashnode', handle: '@soobujmiah', href: 'https://hashnode.com/@soobujmiah' },
+          { label: 'Medium', handle: '@soobujmiah', href: 'https://medium.com/@soobujmiah' },
+        ],
+      },
+      {
+        label: 'Social',
+        links: [
+          { label: 'X', handle: '@soobujmiah', href: 'https://x.com/soobujmiah' },
+          { label: 'Instagram', handle: '@soobujmiah', href: 'https://instagram.com/soobujmiah' },
+          { label: 'Threads', handle: '@soobujmiah', href: 'https://threads.net/@soobujmiah' },
+          { label: 'Facebook', handle: 'soobujmiah', href: 'https://facebook.com/soobujmiah' },
+          { label: 'YouTube', handle: '@soobujmiah', href: 'https://youtube.com/@soobujmiah' },
+        ],
+      },
+      {
+        label: 'Direct',
+        links: [
+          { label: 'Telegram', handle: '@soobujmiah', href: 'https://t.me/soobujmiah' },
+          { label: 'WhatsApp', handle: 'soobujmiah', href: 'https://wa.me/soobujmiah' },
+        ],
+      },
+      {
+        label: 'Personal',
+        links: [
+          { label: 'About.me', handle: 'soobujmiah', href: 'https://about.me/soobujmiah' },
+        ],
+      },
     ],
   },
   nav: [
@@ -593,7 +660,7 @@ const en: Content = {
        descriptions are factual, unique, and written from real content. */
     sections: [
       {
-        title: 'Sobuj Miah — Independent Systems Builder · On-Device AI & ARM64 Systems',
+        title: 'Sobuj Miah — Independent Software & AI Systems Engineer',
         description:
           'On-device AI, Android, ARM64 Linux, native tooling. Built under constraint. Verified on real hardware with CI builds, tests, and physical-device evidence.',
       },
@@ -651,7 +718,7 @@ const bn: Content = {
   profile: {
     name: 'সবুজ',
     nameFull: 'সবুজ মিয়া',
-    title: 'স্বাধীন সিস্টেম নির্মাতা',
+    title: 'স্বাধীন সফটওয়্যার ও এআই সিস্টেম ইঞ্জিনিয়ার',
     tagline: 'অন-ডিভাইস এআই · অ্যান্ড্রয়েড · এআরএম ৬৪ লিনাক্স · নেটিভ টুলিং · সফটওয়্যার সিস্টেম',
     location: 'ঢাকা, বাংলাদেশ',
     github: 'https://github.com/soobujmiah',
@@ -660,13 +727,13 @@ const bn: Content = {
     linkedin: 'https://linkedin.com/in/soobujmiah',
   },
   meta: {
-    title: 'সবুজ মিয়া — স্বাধীন সিস্টেম নির্মাতা · অন-ডিভাইস এআই ও এআরএম ৬৪ সিস্টেম',
+    title: 'সবুজ মিয়া — স্বাধীন সফটওয়্যার ও এআই সিস্টেম ইঞ্জিনিয়ার',
     description:
       'অন-ডিভাইস এআই, অ্যান্ড্রয়েড, এআরএম ৬৪ লিনাক্স, নেটিভ টুলিং। সীমাবদ্ধতার মধ্যে নির্মিত, বাস্তব হার্ডওয়্যারে যাচাইকৃত — সিআই বিল্ড, টেস্ট ও ফিজিক্যাল-ডিভাইস প্রমাণ।',
   },
   hero: {
     intro:
-      'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম ও এআরএম ৬৪ লিনাক্সের সংযোগস্থলে কাজ করা স্ব-শিক্ষিত সিস্টেম নির্মাতা। সীমাবদ্ধতার মধ্যে নির্মিত — প্রতিটি বিল্ড চলে সিআই-তে, প্রতিটি দাবি যাচাই হয় বাস্তব ফিজিক্যাল ডিভাইসে।',
+      'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম ও এআরএম ৬৪ লিনাক্সের সংযোগস্থলে কাজ করা স্বাধীন সফটওয়্যার ও এআই সিস্টেম ইঞ্জিনিয়ার। স্ব-শিক্ষিত, এবং সীমাবদ্ধতার মধ্যে নির্মিত — প্রতিটি বিল্ড চলে সিআই-তে, প্রতিটি দাবি যাচাই হয় বাস্তব ফিজিক্যাল ডিভাইসে।',
     availability: 'রিমোটে উন্মুক্ত',
     ctaWork: 'আমার কাজ দেখুন',
     ctaGithub: 'গিটহাব দেখুন ↗',
@@ -964,11 +1031,57 @@ const bn: Content = {
     headingA: 'ফ্রিল্যান্স,',
     headingB: 'রিমোট ও কোলাবরেশনে উন্মুক্ত।',
     sub: 'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ টুলিং বা লোকাল-ফার্স্ট প্রোডাক্ট — কথা বলতে আগ্রহী।',
-    channels: [
-      { label: 'ইমেইল', value: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
-      { label: 'গিটহাব', value: 'soobujmiah', href: 'https://github.com/soobujmiah' },
-      { label: 'টেলিগ্রাম', value: '@soobujmiah', href: 'https://t.me/soobujmiah' },
-      { label: 'লিংকডইন', value: 'in/soobujmiah', href: 'https://linkedin.com/in/soobujmiah' },
+    email: { label: 'ইমেইল', value: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
+    groupsHeading: 'অনলাইনে আমাকে পাবেন',
+    groupsNote: 'সব প্ল্যাটফর্মে একই হ্যান্ডেল।',
+    groups: [
+      {
+        label: 'মূল',
+        links: [
+          { label: 'গিটহাব', handle: 'soobujmiah', href: 'https://github.com/soobujmiah' },
+          { label: 'পোর্টফোলিও', handle: 'soobujmiah.github.io', href: 'https://soobujmiah.github.io' },
+        ],
+      },
+      {
+        label: 'পেশাগত',
+        links: [
+          { label: 'লিংকডইন', handle: 'in/soobujmiah', href: 'https://linkedin.com/in/soobujmiah' },
+          { label: 'পিয়ারলিস্ট', handle: 'soobujmiah', href: 'https://peerlist.io/soobujmiah' },
+          { label: 'প্রোডাক্ট হান্ট', handle: '@soobujmiah', href: 'https://www.producthunt.com/@soobujmiah' },
+        ],
+      },
+      {
+        label: 'এআই ও ডেভেলপার',
+        links: [
+          { label: 'হাগিং ফেস', handle: 'soobujmiah', href: 'https://huggingface.co/soobujmiah' },
+          { label: 'ডেভ.টু', handle: 'soobujmiah', href: 'https://dev.to/soobujmiah' },
+          { label: 'হ্যাশনোড', handle: '@soobujmiah', href: 'https://hashnode.com/@soobujmiah' },
+          { label: 'মিডিয়াম', handle: '@soobujmiah', href: 'https://medium.com/@soobujmiah' },
+        ],
+      },
+      {
+        label: 'সামাজিক',
+        links: [
+          { label: 'এক্স', handle: '@soobujmiah', href: 'https://x.com/soobujmiah' },
+          { label: 'ইনস্টাগ্রাম', handle: '@soobujmiah', href: 'https://instagram.com/soobujmiah' },
+          { label: 'থ্রেডস', handle: '@soobujmiah', href: 'https://threads.net/@soobujmiah' },
+          { label: 'ফেসবুক', handle: 'soobujmiah', href: 'https://facebook.com/soobujmiah' },
+          { label: 'ইউটিউব', handle: '@soobujmiah', href: 'https://youtube.com/@soobujmiah' },
+        ],
+      },
+      {
+        label: 'সরাসরি',
+        links: [
+          { label: 'টেলিগ্রাম', handle: '@soobujmiah', href: 'https://t.me/soobujmiah' },
+          { label: 'হোয়াটসঅ্যাপ', handle: 'soobujmiah', href: 'https://wa.me/soobujmiah' },
+        ],
+      },
+      {
+        label: 'ব্যক্তিগত',
+        links: [
+          { label: 'অ্যাবাউট.মি', handle: 'soobujmiah', href: 'https://about.me/soobujmiah' },
+        ],
+      },
     ],
   },
   nav: [
@@ -1008,7 +1121,7 @@ const bn: Content = {
   seo: {
     sections: [
       {
-        title: 'সবুজ মিয়া — স্বাধীন সিস্টেম নির্মাতা · অন-ডিভাইস এআই ও এআরএম ৬৪ সিস্টেম',
+        title: 'সবুজ মিয়া — স্বাধীন সফটওয়্যার ও এআই সিস্টেম ইঞ্জিনিয়ার',
         description:
           'অন-ডিভাইস এআই, অ্যান্ড্রয়েড, এআরএম ৬৪ লিনাক্স, নেটিভ টুলিং। সীমাবদ্ধতার মধ্যে নির্মিত, বাস্তব হার্ডওয়্যারে যাচাইকৃত — সিআই বিল্ড, টেস্ট ও ফিজিক্যাল-ডিভাইস প্রমাণ।',
       },

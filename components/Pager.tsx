@@ -45,10 +45,10 @@ const WHEEL_THRESHOLD = 24;
 const SWIPE_THRESHOLD = 60;
 const EDGE_SLACK = 2; // px tolerance for scroll-edge detection
 
-type PageProps = { reducedMotion: boolean; pageIndex: number };
+type PageProps = { reducedMotion: boolean; pageIndex: number; armed: boolean };
 
-function PageBody({ index, reducedMotion }: { index: number; reducedMotion: boolean }) {
-  const props: PageProps = { reducedMotion, pageIndex: index };
+function PageBody({ index, reducedMotion, armed }: { index: number; reducedMotion: boolean; armed: boolean }) {
+  const props: PageProps = { reducedMotion, pageIndex: index, armed };
   switch (index) {
     case 0:
       return <HeroScene {...props} />;
@@ -112,6 +112,12 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
   const reducedMotion = prefersReduced ?? false;
   const { t } = useLang();
   const [ready, setReady] = useState(false);
+  /* True only while the boot splash is actually covering the page. The
+     hero's signature construction waits for this to clear, so the
+     wordmark is not assembled behind an opaque splash where nobody can
+     see it. False for deep links and for reduced-motion users, who
+     never get a splash at all. */
+  const splashActive = !ready && !reducedMotion && initialIndex === 0;
   const [index, setIndex] = useState(initialIndex);
   const [dir, setDir] = useState(1);
   const [navOpen, setNavOpen] = useState(false);
@@ -324,7 +330,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
       {/* boot splash — only on the true entry point; deep links land
           straight on their section instead of waiting for a splash */}
       <AnimatePresence>
-        {!ready && !reducedMotion && initialIndex === 0 && (
+        {splashActive && (
           <Preloader key="preloader" onComplete={() => setReady(true)} />
         )}
       </AnimatePresence>
@@ -372,7 +378,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
               aria-label={t.ui.pageLabels[index]}
               className="page-scroll"
             >
-              <PageBody index={index} reducedMotion={reducedMotion} />
+              <PageBody index={index} reducedMotion={reducedMotion} armed={!splashActive} />
             </div>
           </motion.div>
         </AnimatePresence>

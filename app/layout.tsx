@@ -162,11 +162,18 @@ const jsonLd = {
         addressLocality: 'Dhaka',
         addressCountry: 'BD',
       },
-      sameAs: [
-        en.profile.github,
-        en.profile.linkedin,
-        `https://t.me/${en.profile.telegram.replace(/^@/, '')}`,
-      ],
+      /* Derived from the same content tree the contact page renders, so
+         structured data and the visible ecosystem can never disagree.
+         De-duplicated: GitHub, LinkedIn and Telegram are both primary
+         fields and members of a group. */
+      sameAs: Array.from(
+        new Set([
+          en.profile.github,
+          en.profile.linkedin,
+          `https://t.me/${en.profile.telegram.replace(/^@/, '')}`,
+          ...en.contact.groups.flatMap((g) => g.links.map((l) => l.href)),
+        ])
+      ),
       knowsLanguage: ['bn', 'en', 'hi', 'ur', 'ar'],
       knowsAbout: [
         'On-device AI',
