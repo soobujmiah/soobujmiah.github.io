@@ -95,6 +95,14 @@ export const metadata: Metadata = {
     'llama.cpp', 'GGUF', 'Vulkan', 'Mesa', 'Turnip', 'Adreno',
     'Qualcomm', 'Hexagon', 'QNN', 'Termux', 'PRoot', 'Debian',
     'Flutter', 'Dart', 'Kotlin', 'JNI', 'Android NDK', 'GitHub Actions',
+    /* Practical technology services — genuinely offered (see /experience
+       and /contact); Dhaka, Bangladesh base with remote support worldwide. */
+    'software developer Bangladesh', 'website developer Bangladesh',
+    'website development', 'website maintenance', 'custom software development',
+    'computer troubleshooting', 'computer setup', 'Linux setup', 'Windows troubleshooting',
+    'Android troubleshooting', 'Android setup', 'ADB setup', 'phone optimization',
+    'small business website', 'remote technical support',
+    'ওয়েবসাইট তৈরি', 'কম্পিউটার সমস্যা সমাধান', 'অ্যান্ড্রয়েড সমস্যা সমাধান', 'প্রযুক্তি সেবা',
   ],
   authors: [{ name: en.profile.nameFull, url: ORIGIN }],
   creator: en.profile.nameFull,
@@ -198,6 +206,11 @@ const jsonLd = {
         'Kotlin',
         'Android NDK',
         'GitHub Actions',
+        'Website development and maintenance',
+        'Custom software development',
+        'Computer setup and troubleshooting',
+        'Android device configuration and ADB',
+        'Remote technical support',
       ],
     },
     {

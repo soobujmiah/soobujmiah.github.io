@@ -3,6 +3,8 @@
 Personal portfolio of **Sobuj Miah**, Independent Software & AI Systems Engineer.
 Live at **https://soobujmiah.github.io**.
 
+[![SEO audited](https://img.shields.io/badge/SEO-audited%202026--09--16-22c55e?style=flat-square)](docs/SEO.md)
+
 Discrete paper-turn pager (Next.js static export + framer-motion),
 fully bilingual **English / বাংলা**, green-on-black theme. The hero name is
 **constructed, not revealed**: its own rendered ink is sampled into a

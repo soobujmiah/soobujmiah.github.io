@@ -505,8 +505,13 @@ const en: Content = {
         'Records & data organization',
         'Spreadsheet & workflow support',
         'Website & content management',
+        'Website development & maintenance',
+        'Custom software & small-business tools',
         'Digital workflow automation',
         'IT & software support',
+        'Computer setup & troubleshooting (Windows / Linux)',
+        'Android & phone software support (setup, ADB, optimization)',
+        'Remote technical support — Bangladesh & worldwide',
       ],
     },
     entries: [
@@ -572,7 +577,7 @@ const en: Content = {
     eyebrow: '09 — Contact',
     headingA: 'Open to freelance,',
     headingB: 'remote, and collaboration.',
-    sub: 'On-device AI, Android systems, ARM64 tooling, or local-first products — happy to talk.',
+    sub: 'On-device AI, Android systems, ARM64 tooling, or local-first products — happy to talk. Also available for practical work: website development, custom software, and computer or Android troubleshooting. Based in Dhaka, Bangladesh; remote support worldwide.',
     email: { label: 'Email', value: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
     groupsHeading: 'Find me online',
     groupsNote: 'One handle across every platform.',
@@ -697,12 +702,12 @@ const en: Content = {
       {
         title: 'Experience — Operations, Administration & Engineering',
         description:
-          '8+ years across operations, administration, and engineering: office administration, digital documentation, records and data organization, coordination, electrical work, and systems building.',
+          '8+ years across operations, administration, and engineering — plus practical technology services: website development and maintenance, custom software, computer setup and troubleshooting (Windows/Linux), and Android phone software support. Dhaka, Bangladesh; remote worldwide.',
       },
       {
         title: 'Contact — Freelance, Remote & Collaboration',
         description:
-          'Contact Sobuj Miah — open to freelance, remote, and collaboration on on-device AI, Android systems, ARM64 tooling, and local-first products.',
+          'Contact Sobuj Miah — open to freelance, remote, and collaboration on on-device AI, Android systems, ARM64 tooling, and local-first products. Also for website development, custom software, and computer or Android troubleshooting from Dhaka, Bangladesh.',
       },
     ],
   },
@@ -963,8 +968,13 @@ const bn: Content = {
         'রেকর্ড ও ডেটা ব্যবস্থাপনা',
         'স্প্রেডশিট ও ওয়ার্কফ্লো সহায়তা',
         'ওয়েবসাইট ও কনটেন্ট ব্যবস্থাপনা',
+        'ওয়েবসাইট তৈরি ও রক্ষণাবেক্ষণ',
+        'কাস্টম সফটওয়্যার ও ছোট ব্যবসার টুল',
         'ডিজিটাল ওয়ার্কফ্লো অটোমেশন',
         'আইটি ও সফটওয়্যার সহায়তা',
+        'কম্পিউটার সেটআপ ও সমস্যা সমাধান (উইন্ডোজ / লিনাক্স)',
+        'অ্যান্ড্রয়েড ও মোবাইল সফটওয়্যার সহায়তা (সেটআপ, এডিবি, অপ্টিমাইজেশন)',
+        'রিমোট প্রযুক্তিগত সহায়তা — বাংলাদেশ ও বিশ্বব্যাপী',
       ],
     },
     entries: [
@@ -1030,7 +1040,7 @@ const bn: Content = {
     eyebrow: '০৯ — যোগাযোগ',
     headingA: 'ফ্রিল্যান্স,',
     headingB: 'রিমোট ও কোলাবরেশনে উন্মুক্ত।',
-    sub: 'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ টুলিং বা লোকাল-ফার্স্ট প্রোডাক্ট — কথা বলতে আগ্রহী।',
+    sub: 'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ টুলিং বা লোকাল-ফার্স্ট প্রোডাক্ট — কথা বলতে আগ্রহী। ব্যবহারিক কাজেও পাওয়া যাবে: ওয়েবসাইট তৈরি, কাস্টম সফটওয়্যার, কম্পিউটার বা অ্যান্ড্রয়েড সমস্যা সমাধান। ঢাকা, বাংলাদেশে অবস্থিত; বিশ্বব্যাপী রিমোট সহায়তা।',
     email: { label: 'ইমেইল', value: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
     groupsHeading: 'অনলাইনে আমাকে পাবেন',
     groupsNote: 'সব প্ল্যাটফর্মে একই হ্যান্ডেল।',
@@ -1158,12 +1168,12 @@ const bn: Content = {
       {
         title: 'অভিজ্ঞতা — অপারেশন, প্রশাসন ও ইঞ্জিনিয়ারিং',
         description:
-          'অপারেশন, প্রশাসন ও ইঞ্জিনিয়ারিং জুড়ে ৮+ বছর: অফিস অ্যাডমিনিস্ট্রেশন, ডিজিটাল ডকুমেন্টেশন, রেকর্ড ও ডেটা ব্যবস্থাপনা, সমন্বয়, ইলেকট্রিক্যাল কাজ ও সিস্টেম নির্মাণ।',
+          'অপারেশন, প্রশাসন ও ইঞ্জিনিয়ারিং জুড়ে ৮+ বছর — সঙ্গে ব্যবহারিক প্রযুক্তি সেবা: ওয়েবসাইট তৈরি ও রক্ষণাবেক্ষণ, কাস্টম সফটওয়্যার, কম্পিউটার সেটআপ ও সমস্যা সমাধান (উইন্ডোজ/লিনাক্স), অ্যান্ড্রয়েড মোবাইল সফটওয়্যার সহায়তা। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
       },
       {
         title: 'যোগাযোগ — ফ্রিল্যান্স, রিমোট ও কোলাবরেশন',
         description:
-          'সবুজ মিয়ার সঙ্গে যোগাযোগ করুন — অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ টুলিং ও লোকাল-ফার্স্ট প্রোডাক্ট নিয়ে ফ্রিল্যান্স, রিমোট ও কোলাবরেশনে উন্মুক্ত।',
+          'সবুজ মিয়ার সঙ্গে যোগাযোগ করুন — অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ টুলিং ও লোকাল-ফার্স্ট প্রোডাক্ট নিয়ে ফ্রিল্যান্স, রিমোট ও কোলাবরেশনে উন্মুক্ত। ওয়েবসাইট তৈরি, কাস্টম সফটওয়্যার এবং কম্পিউটার বা অ্যান্ড্রয়েড সমস্যা সমাধানেও — ঢাকা, বাংলাদেশ থেকে।',
       },
     ],
   },
