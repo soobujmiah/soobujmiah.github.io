@@ -72,8 +72,11 @@ below verbatim. Both stay correct — the gate guarantees it.
       "totalSeconds": 1.6,
       "outgoingSeconds": 0.22,
       "resolveSeconds": 0.34,
-      "disperseSeconds": 0.9,
-      "holdSeconds": 1.6,
+      "dissolveSeconds": 0.45,
+      "microPx": 0.55,
+      "breathSeconds": 6.5,
+      "breathWindow": 0.42,
+      "breathPx": 4.5,
       "guideShare": 0.62,
       "clusterShare": 0.3,
       "jitterShare": 0.15,
@@ -207,16 +210,20 @@ Stages, all inside one `MOTION.nameAssemble.totalSeconds` (1.6 s):
 4. **Seating** — one warm highlight at `WARM_AT` (0.72) of each particle's
    arrival, as material locks into place.
 
-**The loop.** The construction is the identity mark, so it repeats for as
-long as the page lives, as one controlled lifecycle: seating → cross-fade
-to the real DOM text (`resolveSeconds`) → a stable formed pause
-(`holdSeconds`) → a decomposition pass (`disperseSeconds`) that traverses
-the *same* particle math in reverse, so the formed wordmark lifts off into
-the field → reconstruction. No second particle array, canvas or rAF chain
-is ever created; the cycle restarts the existing timeline, and teardown
-cancels timers, frames and listeners and releases the backing store.
-`prefers-reduced-motion` never enters the loop: the static designed
-wordmark is rendered instead.
+**The living mark.** The particle letterform is the *permanent* visual
+state — there is no solid-text resting phase and therefore no loop point:
+after the construction seats, every particle keeps a micro-drift
+(`microPx`) and a staggered periodic breath wave (`breathSeconds`,
+`breathWindow`, `breathPx`) that loosens it a few px along its own outward
+direction and returns it on a sine-pulse envelope of one continuous clock.
+Each breath ends exactly where it began, so the viewer can never identify
+a restart frame. A language change dissolves the old particle glyphs
+(`dissolveSeconds`) and samples the new ones — particles to particles,
+never particles to text. One particle array, one canvas, one rAF chain for
+the life of the component; teardown cancels frames, timers and listeners
+and releases the backing store. `prefers-reduced-motion` never enters this
+state: the static designed wordmark is rendered instead, and the DOM cells
+remain the no-JS and accessible representation throughout.
 5. **Resolve** — the canvas fades out over `resolveSeconds` (0.34) and the
    real DOM text fades in through the same duration, then the canvas
    releases its backing store. **The last frame is typography, not pixels.**
