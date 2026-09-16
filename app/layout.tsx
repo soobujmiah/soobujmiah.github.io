@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Chakra_Petch, Inter, JetBrains_Mono, Noto_Sans_Bengali, Space_Grotesk } from 'next/font/google';
+import { Anek_Bangla, Chakra_Petch, Inter, JetBrains_Mono, Noto_Sans_Bengali, Space_Grotesk } from 'next/font/google';
 import { BRAND } from './design-tokens';
 import { content } from './content';
 import './globals.css';
@@ -48,6 +48,20 @@ const wordmark = Chakra_Petch({
   subsets: ['latin'],
   weight: ['500', '700'],
   variable: '--font-wordmark',
+  display: 'swap',
+});
+
+/* The Bengali half of the identity mark gets a display face of its own.
+   Without it the English name is a brand mark while the Bengali name is
+   body copy — the same word in two different registers. Anek Bangla is a
+   contemporary geometric Bengali family, deliberately not the body face
+   (Noto Sans Bengali), so both scripts carry the same "this is the name"
+   weight. 600/700 are real instances: synthetic bold is what smears
+   Indic shaping. */
+const wordmarkBn = Anek_Bangla({
+  subsets: ['bengali'],
+  weight: ['600', '700'],
+  variable: '--font-wordmark-bn',
   display: 'swap',
 });
 
@@ -208,7 +222,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${inter.variable} ${jetbrains.variable} ${bengali.variable} ${display.variable} ${wordmark.variable} noise`}>
+      <body className={`${inter.variable} ${jetbrains.variable} ${bengali.variable} ${display.variable} ${wordmark.variable} ${wordmarkBn.variable} noise`}>
         {children}
       </body>
     </html>

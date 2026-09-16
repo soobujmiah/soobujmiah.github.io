@@ -729,7 +729,9 @@ body.lang-bn .worldmap-pin {
   min-width: 100%;
   text-align: center;
   color: inherit;
-  text-shadow: 0 0 18px rgba(34, 197, 94, 0.22);
+  /* two-layer halo: a tight rim that defines the glyph edge, and a wide
+     bloom that carries the name — the identity mark reads first */
+  text-shadow: 0 0 1px rgba(74, 222, 128, 0.30), 0 0 26px rgba(34, 197, 94, 0.34);
 }
 
 /* phase colour language: scramble reads cool and technical,
@@ -793,7 +795,11 @@ body.lang-bn h3 {
 }
 
 body.lang-bn .hero-name {
-  line-height: 1.34;
+  /* the Bengali name is a brand mark too — its own display face, not the
+     face the prose uses */
+  font-family: var(--font-wordmark-bn), var(--font-bengali), var(--font-inter), system-ui, sans-serif;
+  /* the Latin mark's stylistic set must not reach Bengali shaping */
+  font-feature-settings: normal;
   /* Bangla needs the shoulder weight and none of the Latin tracking:
      negative tracking breaks Indic shaping. */
   font-weight: 700;
@@ -818,7 +824,7 @@ body.lang-bn span {
    therefore get a deliberate display treatment instead of a Latin
    default stretched over Bengali. */
 .hero-name {
-  font-family: var(--font-wordmark), var(--font-display), var(--font-bengali), var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-wordmark), var(--font-display), var(--font-wordmark-bn), var(--font-bengali), var(--font-inter), system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: 0.012em;
   font-feature-settings: 'ss01' 1;
