@@ -166,6 +166,14 @@ try {
     ['orb-2', 'the blurred glow orb layer'],
     ['TechBackground', 'the removed particle canvas'],
     ['MatrixName', 'the removed name implementation'],
+    ['GlitchName', 'the retired character-substitution wordmark'],
+    ['sig-scramble', 'the retired substitution phase class'],
+    ['sig-rebuild', 'the retired substitution phase class'],
+    ['sig-ink', 'the retired per-glyph leaf span'],
+    ['LATIN_POOL', 'the retired substitution alphabet'],
+    ['GLYPH_POOL', 'the retired substitution alphabet'],
+    ['SCRAMBLABLE', 'the retired substitution gate'],
+    ['nameCycle', 'the retired idle-cycle motion tokens'],
     ['HeroName', 'the retired floating-wave wordmark'],
     ['.sig-in,', 'the retired wordmark entrance animation'],
     ['.sig-in {', 'the retired wordmark entrance animation'],
@@ -180,7 +188,7 @@ try {
   ];
   for (const rel of [
     'app/globals.css',
-    'components/GlitchName.tsx',
+    'components/SignatureName.tsx',
     'components/WorldMap.tsx',
     'components/Pager.tsx',
     'components/sections.tsx',
@@ -273,61 +281,112 @@ try {
     fail('app/globals.css still uses mix-blend-mode — it re-composites the page per frame and is off-brand over the name');
   }
 
-/* ── 6. the name is a deterministic glitch/reconstruct cycle ──
-   The identity implementation may be replaced, but the engineering
-   contract survives: the name is real DOM text in both scripts, split
-   grapheme-safely; the cycle is deterministic (no Math.random); jitter
-   touches transforms only; Bengali is never letter-scrambled; a
-   reduced-motion path exists; and the word itself is never the
-   animated object. */
-const nameComp = tryRead('components/GlitchName.tsx');
+/* ── 6. the name is a constructed identity, not a revealed one ──
+   The owner replaced the implementation: the wordmark now disassembles
+   into a sampled particle field and reconstructs into real typography,
+   instead of substituting characters in place. The engineering contract
+   survives that change and is asserted against the new implementation —
+   and the retired mechanism is asserted *absent*, so it cannot return
+   unnoticed the way the motifs in section 4 cannot. */
+const NAME_COMPONENT = 'components/SignatureName.tsx';
+const nameComp = tryRead(NAME_COMPONENT);
 if (!nameComp) {
-  fail('components/GlitchName.tsx is missing — the hero identity must be the living glitch wordmark');
+  fail(`${NAME_COMPONENT} is missing — the hero identity must be the constructed wordmark`);
 } else {
-  if (!/segmentGraphemes/.test(nameComp)) {
-    fail('components/GlitchName.tsx must split the name grapheme-safely — Bengali clusters can never be broken');
-  }
-  if (!/reducedMotion/.test(nameComp)) {
-    fail('components/GlitchName.tsx has no reduced-motion path');
-  }
-  if (!/aria-hidden/.test(nameComp) || !/sr-only/.test(nameComp)) {
-    fail('components/GlitchName.tsx must keep the name as real accessible text (sr-only copy, decorative cells hidden)');
-  }
   /* comments are stripped so the gate tests code, not prose */
   const nameCode = nameComp.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+
+  if (!/segmentGraphemes/.test(nameComp)) {
+    fail(`${NAME_COMPONENT} must split the name grapheme-safely — Bengali clusters can never be broken`);
+  }
+  if (!/reducedMotion/.test(nameComp)) fail(`${NAME_COMPONENT} has no reduced-motion path`);
+  if (!/aria-hidden/.test(nameComp) || !/sr-only/.test(nameComp)) {
+    fail(`${NAME_COMPONENT} must keep the name as real accessible text (sr-only copy, decorative stage hidden)`);
+  }
   if (/Math\.random/.test(nameCode)) {
-    fail('components/GlitchName.tsx uses Math.random — the cycle must be deterministic so SSR and client render identically');
+    fail(`${NAME_COMPONENT} uses Math.random — the construction must be deterministic (seeded from the name) so every run is reproducible`);
   }
   if (/\.style\.left|\.style\.top|\.style\.margin|\.style\.padding/.test(nameComp)) {
-    fail('components/GlitchName.tsx writes layout properties in its loop — jitter must be transform-only');
+    fail(`${NAME_COMPONENT} writes layout properties — the construction must never reflow the hero`);
   }
-  /* Bengali clusters keep their exact text: only Latin marks scramble */
-  if (!/SCRAMBLABLE/.test(nameComp)) {
-    fail('components/GlitchName.tsx must gate scrambling to Latin characters — Bengali shaping can never be scrambled');
-  }
-  /* the scramble vocabulary: technical marks only, no emoji ranges */
-  const pools = nameComp.match(/(?:LATIN_POOL|GLYPH_POOL)\s*=\s*\[([^\]]*)\]/g) ?? [];
-  if (pools.length < 2) {
-    fail('components/GlitchName.tsx must define both scramble pools (Latin letters + technical glyphs)');
-  }
-  for (const pool of pools) {
-    for (const ch of pool.matchAll(/'([^']+)'/g)) {
-      const cp = ch[1].codePointAt(0);
-      const ok =
-        /^[0-9A-Za-z]$/.test(ch[1]) ||
-        (cp >= 0x0391 && cp <= 0x03c9) || /* Greek */
-        (cp >= 0x2200 && cp <= 0x22ff) || /* math operators */
-        (cp >= 0x25a0 && cp <= 0x25ff) || /* geometric shapes */
-        '/|+×◦'.includes(ch[1]);
-      if (!ok) {
-        fail(`components/GlitchName.tsx scramble pool contains a disallowed glyph "${ch[1]}" (U+${cp.toString(16)}) — technical marks only, never emoji`);
-      }
+
+  /* the retired mechanism must not come back in any form */
+  for (const retired of ['LATIN_POOL', 'GLYPH_POOL', 'SCRAMBLABLE', 'textContent']) {
+    if (nameCode.includes(retired)) {
+      fail(`${NAME_COMPONENT} reintroduces "${retired}" — the identity is built from sampled ink, never by substituting characters`);
     }
   }
-  /* the word itself must not be the animated object */
+  if (/\.split\(\s*['"]['"]\s*\)|Array\.from\(\s*text\s*\)/.test(nameCode)) {
+    fail(`${NAME_COMPONENT} splits the name into code points — a Bengali matra or conjunct would be addressed directly and could tear`);
+  }
+  if (/for\s*\(\s*(const|let)\s+\w+\s+of\s+text\s*\)/.test(nameCode)) {
+    fail(`${NAME_COMPONENT} iterates the name's code points — shaping must stay with the text engine`);
+  }
+
+  /* shaping is delegated, never re-implemented */
+  if (!/fillText\(/.test(nameComp)) {
+    fail(`${NAME_COMPONENT} must render whole grapheme clusters with fillText so the browser performs the shaping`);
+  }
+  if (!/measureText\(/.test(nameComp)) {
+    fail(`${NAME_COMPONENT} must measure with the same font metrics it renders with, or the particles will not land on the glyphs`);
+  }
+  if (!/getImageData\(/.test(nameComp)) {
+    fail(`${NAME_COMPONENT} must sample the rendered ink — particle targets have to be real glyph pixels`);
+  }
+  if (!/baselineWithinBox/.test(nameComp)) {
+    fail(`${NAME_COMPONENT} must derive the baseline from the inline-box metrics (app/name-motion.ts) rather than guessing it`);
+  }
+
+  /* one-shot, budgeted, and fully torn down */
+  if (!/maxParticles/.test(nameComp)) {
+    fail(`${NAME_COMPONENT} must read its particle ceiling from MOTION.nameAssemble.maxParticles`);
+  }
+  if (!/particleBudget\(/.test(nameComp)) {
+    fail(`${NAME_COMPONENT} must derive the field size from the device (viewport + cores), not hard-code it`);
+  }
+  if (!/sampleStepFor\(/.test(nameComp)) {
+    fail(`${NAME_COMPONENT} must adapt its sampling step to the budget`);
+  }
+  if (/setInterval\(/.test(nameCode)) {
+    fail(`${NAME_COMPONENT} uses setInterval — the construction is one-shot; an interval means an idle cycle running forever`);
+  }
+  if (!/cancelAnimationFrame/.test(nameComp)) fail(`${NAME_COMPONENT} must cancel its frame loop on teardown`);
+  if (!/clearTimeout/.test(nameComp)) fail(`${NAME_COMPONENT} must clear its timers on teardown`);
+  if (!/removeEventListener/.test(nameComp)) fail(`${NAME_COMPONENT} must remove its listeners on teardown`);
+  if (!/document\.hidden/.test(nameComp)) fail(`${NAME_COMPONENT} must not animate in a hidden tab`);
+  if (!/canvas\.width = 0/.test(nameComp)) {
+    fail(`${NAME_COMPONENT} must release the canvas backing store once the name has resolved`);
+  }
+
+  /* the resting state is typography, and the phases come from one attribute */
+  if (!/sig-cell/.test(nameComp)) {
+    fail(`${NAME_COMPONENT} must keep the resolved name as real DOM text, not as a painted canvas`);
+  }
+  if (!/dataset\.asm/.test(nameComp)) {
+    fail(`${NAME_COMPONENT} must drive its phases from one stage attribute so CSS owns the handover`);
+  }
+  if (!/sig-resolve/.test(nameComp)) {
+    fail(`${NAME_COMPONENT} must publish the handover duration from the motion token instead of letting the stylesheet hard-code it`);
+  }
+
+  const canvasRule = css.match(/\.sig-canvas\s*\{([^}]*)\}/);
+  if (!canvasRule) {
+    fail('app/globals.css has no .sig-canvas rule');
+  } else {
+    if (!/pointer-events:\s*none/.test(canvasRule[1])) {
+      fail('.sig-canvas must be pointer-events: none — the construction must never intercept the hero');
+    }
+    if (!/opacity:\s*0/.test(canvasRule[1])) {
+      fail('.sig-canvas must be invisible by default, so the legible state is the one that needs no JavaScript');
+    }
+  }
   const nameRule = css.match(/\.sig-name\s*\{([^}]*)\}/);
   if (nameRule && /(^|[;\s])animation\s*:/.test(nameRule[1])) {
-    fail('app/globals.css animates .sig-name as a whole — the cycle must run per cell, never as one sweep');
+    fail('app/globals.css animates .sig-name as a whole — the construction is per particle, never one sweep');
+  }
+  if (!/\.sig-static \.sig-canvas\s*\{[^}]*display:\s*none/.test(css.replace(/\n/g, ' ')) &&
+      !/\.sig-static \.sig-canvas/.test(css)) {
+    fail('app/globals.css must hide the construction canvas entirely for reduced motion');
   }
 }
 
@@ -351,38 +410,61 @@ if (!nameComp) {
     return { h, l, s: sL, r, g, b };
   };
 if (nameComp) {
-  const inks = [...(nameComp.match(/INKS\s*=\s*\[([^\]]*)\]/)?.[1].match(/#[0-9a-f]{6}/gi) ?? [])];
+  const inks = [...(nameComp.match(/\bINKS\s*=\s*\[([^\]]*)\]/)?.[1].match(/#[0-9a-f]{6}/gi) ?? [])];
   if (inks.length < 4) {
-    fail('components/GlitchName.tsx no longer defines a spread of inks — every letter needs its own colour');
+    fail(`${NAME_COMPONENT} no longer defines a spread of inks — every grapheme cluster needs its own colour`);
   }
   for (const hex of inks) {
     const c = hue(hex);
     if (!c) continue;
     /* green family: hue 75..190 (lime → teal), green dominant */
     if (c.h < 75 || c.h > 190 || c.g < c.r || c.g < c.b) {
-      fail(`components/GlitchName.tsx uses an off-family ink ${hex} (hue ${Math.round(c.h)}) — the identity is green, not a rainbow`);
+      fail(`${NAME_COMPONENT} uses an off-family ink ${hex} (hue ${Math.round(c.h)}) — the identity is green, not a rainbow`);
     }
   }
-  /* scramble inks: cool technical tones — cyan→blue band, light, restrained */
-  const scramble = [...(nameComp.match(/SCRAMBLE_INKS\s*=\s*\[([^\]]*)\]/)?.[1].match(/#[0-9a-f]{6}/gi) ?? [])];
-  if (scramble.length < 2) {
-    fail('components/GlitchName.tsx must define scramble inks for the transformation phase');
+  /* assembly inks: cool technical tones — cyan→blue band, light, restrained */
+  const assembly = [...(nameComp.match(/ASSEMBLE_INKS\s*=\s*\[([^\]]*)\]/)?.[1].match(/#[0-9a-f]{6}/gi) ?? [])];
+  if (assembly.length < 2) {
+    fail(`${NAME_COMPONENT} must define assembly inks for material still in motion`);
   }
-  for (const hex of scramble) {
+  for (const hex of assembly) {
     const c = hue(hex);
     if (!c) continue;
     if (c.h < 180 || c.h > 265 || c.l < 0.55 || c.l > 0.95) {
-      fail(`components/GlitchName.tsx scramble ink ${hex} leaves the restrained cool band (hue ${Math.round(c.h)}, lightness ${c.l.toFixed(2)})`);
+      fail(`${NAME_COMPONENT} assembly ink ${hex} leaves the restrained cool band (hue ${Math.round(c.h)}, lightness ${c.l.toFixed(2)})`);
     }
   }
-  /* the reconstruction flash: one warm highlight, nothing else */
-  const warm = nameComp.match(/REBUILD_INK\s*=\s*'(#[0-9a-f]{6})'/i)?.[1];
+  /* the seating highlight: one warm accent, nothing else */
+  const warm = nameComp.match(/LOCK_INK\s*=\s*'(#[0-9a-f]{6})'/i)?.[1];
   if (!warm) {
-    fail('components/GlitchName.tsx must define the warm reconstruction ink');
+    fail(`${NAME_COMPONENT} must define the warm seating ink`);
   } else {
     const c = hue(warm);
     if (!c || c.h < 20 || c.h > 70) {
-      fail(`components/GlitchName.tsx reconstruction ink ${warm} must stay in the warm amber band (hue 20..70)`);
+      fail(`${NAME_COMPONENT} seating ink ${warm} must stay in the warm amber band (hue 20..70)`);
+    }
+  }
+  /* what the field condenses into must still be a brand green */
+  const resolved = nameComp.match(/RESOLVED_INK\s*=\s*'(#[0-9a-f]{6})'/i)?.[1];
+  if (!resolved) {
+    fail(`${NAME_COMPONENT} must define the resolved ink the particle ramp ends on`);
+  } else {
+    const c = hue(resolved);
+    if (!c || c.h < 75 || c.h > 190 || c.g < c.r || c.g < c.b) {
+      fail(`${NAME_COMPONENT} resolved ink ${resolved} is off-family — the field must condense into the brand green`);
+    }
+  }
+  /* waiting material stays faint: it is a field, not a light show */
+  const waiting = nameComp.match(/WAITING_INK\s*=\s*'rgba\((\d+),(\d+),(\d+),([\d.]+)\)'/i);
+  if (!waiting) {
+    fail(`${NAME_COMPONENT} must define the waiting-material ink as an rgba() value`);
+  } else {
+    const c = hue(`#${[waiting[1], waiting[2], waiting[3]].map((n) => Number(n).toString(16).padStart(2, '0')).join('')}`);
+    if (Number(waiting[4]) > 0.35) {
+      fail(`${NAME_COMPONENT} waiting ink alpha ${waiting[4]} is too strong — dispersed material must stay restrained`);
+    }
+    if (!c || c.h < 180 || c.h > 265) {
+      fail(`${NAME_COMPONENT} waiting ink must stay in the same cool band as the assembly inks`);
     }
   }
 }

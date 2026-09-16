@@ -68,16 +68,19 @@ below verbatim. Both stay correct — the gate guarantees it.
       "releaseSeconds": 0.5,
       "pressSeconds": 0.1
     },
-    "nameCycle": {
-      "cycleSeconds": 5.2,
-      "holdSeconds": 1.15,
-      "unstableSeconds": 0.55,
-      "scrambleSeconds": 1.05,
-      "rebuildSeconds": 0.7,
-      "staggerSeconds": 0.22,
-      "scrambleStepMs": 62,
-      "jitterPx": 1.6,
-      "boostSeconds": 1.4
+    "nameAssemble": {
+      "totalSeconds": 1.6,
+      "outgoingSeconds": 0.22,
+      "resolveSeconds": 0.34,
+      "guideShare": 0.62,
+      "clusterShare": 0.3,
+      "jitterShare": 0.15,
+      "travelShare": 0.55,
+      "settleBack": 0.7,
+      "disperseRadius": 1.35,
+      "maxParticles": 1700,
+      "sampleStepPx": 2.6,
+      "maxDpr": 2
     },
     "pullToRefresh": {
       "armPx": 12,
@@ -177,54 +180,115 @@ English tree. Neither language borrows the other's script.
   becomes a calm static wordmark. Reduced motion removes animation, never
   functionality.
 
-## 5b. Living identity mark (`components/GlitchName.tsx`)
+## 5b. Signature identity mark (`components/SignatureName.tsx`)
 
-The hero name is the portfolio's centrepiece: a **glitch identity** — a
-signal that destabilises and rebuilds itself. One deterministic clock runs a
-five-phase cycle through the wordmark:
+The hero name is the portfolio's centrepiece, and it is **constructed
+rather than revealed**. The wordmark's own rendered ink is sampled into a
+particle field, the field is dispersed, and every particle travels home to
+the exact pixel it was sampled from — so the viewer watches the name being
+computed into existence, then reads it as typography.
 
-1. **Hold** (~1.15s) — the correct name, at rest, in its own inks.
-2. **Instability** (~0.55s) — a subtle pre-break lean: micro-jitter ramps up,
-   glyphs stay correct.
-3. **Scramble** (~1.05s) — rapid glyph transformation: each character cycles
-   through a curated technical vocabulary (ASCII, Greek, math/geometric
-   marks) at a fixed step cadence, in restrained cool inks.
-4. **Reconstruct** (~0.7s) — characters lock back into the correct name one
-   by one, left to right, each landing with a brief warm flash that settles
-   into its own ink.
-5. **Hold** again — the cycle repeats; the name is always recoverable and
-   always resolves to the correct spelling.
+Stages, all inside one `MOTION.nameAssemble.totalSeconds` (1.6 s):
 
-Each glyph runs the same cycle with an index stagger, so instability and
-rebuilding travel through the word as a wave — intentional transformation,
-never random flicker.
+1. **Guides** — a hairline rule on the baseline with one tick per grapheme
+   cluster: the construction frame the word is about to be built inside.
+   Fades out over `guideShare` (0.62) of the assembly.
+2. **Dispersed field** — every particle sits at its origin, faint and cool.
+   Displacement grows with distance from the word's centre, so the outer
+   letters travel furthest and the assembly sweeps inward.
+3. **Convergence** — particles travel on `easeOutSettle` with a single
+   controlled overshoot (`settleBack` 0.7) and land *exactly* on target.
+   Clusters start left to right (`clusterShare` 0.3) with a deterministic
+   spread inside each cluster (`jitterShare` 0.15); each travels for
+   `travelShare` (0.55). The three shares sum to 1, so the last particle
+   arrives precisely at the end.
+4. **Seating** — one warm highlight at `WARM_AT` (0.72) of each particle's
+   arrival, as material locks into place.
+5. **Resolve** — the canvas fades out over `resolveSeconds` (0.34) and the
+   real DOM text fades in through the same duration, then the canvas
+   releases its backing store. **The last frame is typography, not pixels.**
 
-- **Deterministic.** Scramble choices derive from (cycle count, glyph index,
-  step) — no `Math.random`. Server and client renders are identical.
-- **Glyph-local interaction (secondary).** Pointer proximity raises the local
-  signal (brief local scramble); a tap fires a burst on the nearest cell. The
-  cycle runs without any input.
-- **Legibility first.** The name is real DOM text twice over — a
-  screen-reader-only copy plus the visible cells (`aria-hidden`), so it is
-  announced once, as a word. It is never canvas or image.
-- **Grapheme-safe.** Clusters come from `Intl.Segmenter` with a
-  combining-mark-aware fallback (`app/graphemes.ts`), so Bengali conjuncts
-  and matras (`মি`, `ক্ষ`) are never split. Bengali mode never letter-scrambles:
-  clusters keep their exact text and live through the cycle with colour and
-  jitter only — scrambling conjuncts would corrupt the shaping.
-- **Bounded cost.** Jitter is transform-only at a fixed cadence; colour/glow
-  are class flips on coarse phase boundaries; glyph swaps write `textContent`
-  on width-locked cells (measured once), so the cycle never reflows the hero.
-  No canvas, no filter, no mix-blend; nothing runs in a hidden tab.
-- **Wordmark face.** Chakra Petch (squared, technical) via `next/font`
-  self-hosted woff2, Latin subset; Bengali falls through to the project's
-  Bengali webfont. Both scripts get a deliberate display treatment.
-- **Palette** — resolved name in the green family only (lime → teal band,
-  ≥4 inks, deterministic order). Scramble stays in a restrained cool band
-  (cyan → blue, lightness 0.55–0.95); reconstruction uses one warm amber
-  flash. No near-white, no rainbow.
-- **Reduced motion** — a calm, fully designed static wordmark: every cell
-  keeps its ink and glow; no cycle and no listeners run.
+### Why the resting state is DOM text
+
+The final name is real, selectable, crawlable text in the brand wordmark
+faces. The canvas is scaffolding that exists only during construction. The
+most important frame is the last one, and the cost of painting it as canvas
+would be permanent: no selection, no crisp subpixel rendering, no text at
+all for a crawler that does not run JavaScript.
+
+### Why Bengali shaping cannot break
+
+Nothing in this system addresses a character. The renderer draws whole
+grapheme clusters (`app/graphemes.ts` → `Intl.Segmenter`, with a
+combining-mark-aware fallback) and samples the pixels the browser produced,
+so কার, মাত্রা, হসন্ত and যুক্তাক্ষর are correct by construction — there is no
+code path that could detach a matra, because no code path ever refers to
+one. The cluster strings drawn into the sample canvas are the same strings
+the DOM renders, at positions measured from the DOM, so particle targets and
+resolved glyphs coincide. `সবুজ মিয়া` is six clusters (`স` `বু` `জ` ` ` `মি`
+`য়া`), never nine code points, and always resolves to exactly that text.
+
+### Engineering contract (asserted by `scripts/check-design.mjs`)
+
+- **Deterministic.** The seed derives from the name (FNV-1a) and every
+  random value comes from `mulberry32`. No `Math.random`: a re-run after a
+  language switch rebuilds the same wordmark, and server and client markup
+  stay identical.
+- **One-shot.** The loop ends. No `setInterval`, no idle cycle, no residual
+  `requestAnimationFrame`; the canvas backing store is released on resolve.
+- **Reflow-free.** The loop writes only to the canvas and to one `data-asm`
+  attribute on the stage. It never touches text content and never writes a
+  layout property, and the DOM cells are static from first paint — so there
+  is no layout shift and no cumulative-shift risk from the identity.
+- **Batched.** Particles are quantised into an eight-step colour ramp, so a
+  frame is at most a dozen draw calls whatever the particle count, and the
+  ramp doubles as the arrival signal.
+- **Budgeted.** `particleBudget()` derives the field size from viewport
+  width and `hardwareConcurrency` under the hard `maxParticles` ceiling
+  (1700), and `sampleStepFor()` adapts the sampling step to meet it. A phone
+  gets a smaller field, not a slower one. `maxDpr` caps the canvas at 2×.
+- **Paused, not skipped.** A hidden tab stops the loop *and* the clock, so
+  returning resumes the construction instead of jumping to the end.
+- **Progressive.** `data-asm` absent is the legible state: with no
+  JavaScript, or if the 2D context is unavailable, the real text is simply
+  there.
+- **Reduced motion.** No canvas is drawn and no timer is set; the wordmark
+  is present with the same faces, inks and halo.
+- **Never behind the splash.** The pager passes `armed`, false while the
+  boot splash covers the page, so the construction is not spent unseen.
+
+### Typography
+
+Two deliberate display faces, both self-hosted woff2 through `next/font`
+(no runtime third-party request), both **SIL Open Font License 1.1**:
+
+| Face | Variable | Scripts | Weights | Role |
+|---|---|---|---|---|
+| [Chakra Petch](https://fonts.google.com/specimen/Chakra+Petch) | `--font-wordmark` | Latin | 500, 700 | squared technical face for `Sobuj Miah` |
+| [Anek Bangla](https://fonts.google.com/specimen/Anek+Bangla) | `--font-wordmark-bn` | Bengali | 600, 700 | contemporary geometric face for `সবুজ মিয়া` |
+
+Anek Bangla is deliberately *not* the body face (Noto Sans Bengali,
+`--font-bengali`), so both scripts carry the same "this is the name" weight
+rather than the English name being a brand mark and the Bengali name being
+body copy. 600/700 are real instances: synthetic bold is what smears Indic
+shaping. `body.lang-bn .hero-name` also resets `font-feature-settings` and
+`letter-spacing`, because the Latin mark's stylistic set and negative
+tracking both break Bengali shaping.
+
+### Palette
+
+| Role | Tokens | Band |
+|---|---|---|
+| Resolved name | `INKS` — 8 greens, one per cluster | hue 75–190, green-dominant |
+| Material in motion | `ASSEMBLE_INKS` — 4 cool tones | hue 180–265, lightness 0.55–0.95 |
+| Seating highlight | `LOCK_INK` — one amber | hue 20–70 |
+| Condensation target | `RESOLVED_INK` | green family |
+| Waiting material | `WAITING_INK` | cool band, alpha ≤ 0.35 |
+
+No near-white ink, no rainbow, and no platform or effect colour outside
+these bands. The construction canvas is `pointer-events: none` and paints no
+surface of its own — the identity sits on the world-map environment, never
+on a panel, and no `filter` is stacked on it.
 
 ## 6. Interaction states
 
@@ -404,7 +468,7 @@ app/globals.css          tokens (§1), pager, overlay, name, carousels, a11y
 components/Pager.tsx     discrete pager, gestures, paper-turn, route sync
 components/NavOverlay.tsx  the section index dialog
 components/PullToRefresh.tsx  real mobile pull-to-refresh gesture
-components/GlitchName.tsx     the hero identity mark (§5b)
+components/SignatureName.tsx  the signature identity mark (§5b)
 components/WorldMap.tsx   dark-green page-aware map environment (§9)
 components/world-map-path.ts  generated land contours (do not edit)
 components/world-map-countries.ts  generated per-country shapes (do not edit)

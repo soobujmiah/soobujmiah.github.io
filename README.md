@@ -1,10 +1,12 @@
 # Sobuj Miah — Portfolio
 
-Personal portfolio of **Sobuj Miah**, Independent Software Developer & On-Device AI
-Systems Builder. Live at **https://soobujmiah.github.io**.
+Personal portfolio of **Sobuj Miah**, Independent Software & AI Systems Engineer.
+Live at **https://soobujmiah.github.io**.
 
 Discrete paper-turn pager (Next.js static export + framer-motion),
-fully bilingual **English / বাংলা**, green-on-black theme.
+fully bilingual **English / বাংলা**, green-on-black theme. The hero name is
+**constructed, not revealed**: its own rendered ink is sampled into a
+particle field that travels home and resolves into real typography.
 
 ## Stack
 
@@ -33,10 +35,10 @@ artifact.
 
 | Script | Proves |
 |---|---|
-| `check:content` | en/bn key parity, **two-way language purity**, `selected` ⊆ repos, labels/nav/URL sanity. Self-tests its own predicates every run. |
+| `check:content` | en/bn key parity, **two-way language purity**, `selected` ⊆ repos, labels/nav/URL sanity, the **canonical professional title** (and the absence of retired positioning), and the **complete 17-link social ecosystem** — exact, de-duplicated, identical in both trees. Self-tests its own predicates every run. |
 | `check:purity` | Adversarial suite — injects `"এটি AI Work Section GitHub"` and `"This is বাংলা বিভাগ"` into copies of the real content and asserts the gate rejects each, with an unmodified control that must pass. |
-| `check:design` | `app/design-tokens.ts` = `DESIGN_SYSTEM.md` = `globals.css :root` = browser `themeColor`. Documentation drift fails the build. |
-| `check:units` | Bengali grapheme segmentation (both the `Intl.Segmenter` path and the fallback), section routing, digit localisation. |
+| `check:design` | `app/design-tokens.ts` = `DESIGN_SYSTEM.md` = `globals.css :root` = browser `themeColor`. Documentation drift fails the build. Also asserts the identity mark's engineering contract (§6) and palette family (§7), and guards retired hero motifs — including the character-substitution wordmark — against returning. |
+| `check:units` | Bengali grapheme segmentation (both the `Intl.Segmenter` path and the fallback), section routing, digit localisation, and the signature-name motion logic: determinism, exact landing, baseline derivation, particle budget, cluster ordering, colour ramp, and the motion-token budget adding up to 1. |
 | `check:build` | From the built `out/`: 9 real routes with server-rendered text, per-route title/canonical/social card, `robots.txt`/`sitemap.xml`/`og.png`, and the JavaScript budget. |
 
 ## Content model
@@ -119,6 +121,42 @@ below were last re-verified **2026-09-13** against live repository state:
 
 Re-verify before reusing any figure professionally if significant time has passed.
 
+## Signature identity
+
+`components/SignatureName.tsx` builds the hero name instead of revealing it:
+the wordmark's own rendered ink is sampled into a dispersed particle field,
+which travels home grapheme cluster by grapheme cluster and resolves into the
+real DOM text. Full specification — stages, typography, palette, and the
+engineering contract the gates assert — is in `DESIGN_SYSTEM.md` §5b.
+
+The two properties that matter most are structural:
+
+- **Bengali shaping cannot break.** Nothing addresses a character. Whole
+  grapheme clusters (`app/graphemes.ts`) are drawn by the browser's text
+  engine and their pixels sampled, so কার / মাত্রা / হসন্ত / যুক্তাক্ষর are
+  correct by construction. `সবুজ মিয়া` is six clusters, never nine code
+  points, and always resolves to exactly that text.
+- **The last frame is typography.** The canvas is scaffolding: it fades out,
+  releases its backing store, and leaves a real, selectable, crawlable name
+  in the brand wordmark faces. The loop is one-shot — no idle cycle, no
+  residual `requestAnimationFrame`.
+
+The pager passes `armed`, false while the boot splash covers the page, so the
+construction is never spent unseen. A language switch fades the outgoing name
+out first, then builds the new one — the two scripts never overlap.
+
+## Social ecosystem
+
+`content.ts` → `contact.groups` holds all 17 canonical links in six groups
+(Core · Professional · AI / Developer · Social · Direct · Personal), rendered
+once on `/contact/` as a typographic definition list — never a wall of
+platform icons, and no platform brand colours. Group labels and platform
+names are prose and therefore translated (গিটহাব, লিংকডইন); handles and URLs
+are verbatim data and are enumerated in `IDENTIFIER_PATHS`. `layout.tsx`
+derives the JSON-LD `sameAs` from the same array, so structured data and the
+visible ecosystem cannot disagree. `check:content` asserts the set is exact,
+complete, de-duplicated and identical across both language trees.
+
 ## Routes
 
 Every section is a real static page. The pager is the presentation; the
@@ -141,8 +179,10 @@ app/
   sections.ts        the one section list driving routes, sitemap, overlay
   content.ts         bilingual copy (en/bn trees) + curated structure
   graphemes.ts       grapheme segmentation (Bengali-safe)
+  name-motion.ts     pure motion logic for the identity construction
   language.tsx       language provider + hook + digit localization
-  layout.tsx         metadata, JSON-LD, fonts (Inter/JetBrains/Noto BN)
+  layout.tsx         metadata, JSON-LD, fonts (Inter/JetBrains/Noto BN,
+                     + Chakra Petch and Anek Bangla as the wordmark faces)
   robots.ts          robots.txt
   sitemap.ts         sitemap.xml, one line per section
   page.tsx           home route (section 0)
@@ -154,7 +194,7 @@ components/
   Pager.tsx           discrete pager, gestures, paper-turn, route sync
   NavOverlay.tsx      the section index dialog (role=dialog, focus-managed)
   PullToRefresh.tsx   real mobile pull-to-refresh
-  GlitchName.tsx      the hero identity mark (glitch/reconstruct wordmark)
+  SignatureName.tsx   the signature identity mark (sampled-ink construction)
   WorldMap.tsx        the page-aware world map environment (camera + flow)
   world-map-path.ts   generated land contours (do not edit by hand)
   world-map-countries.ts  generated per-country shapes (do not edit by hand)
@@ -164,7 +204,8 @@ scripts/
   check-content.mjs         parity + two-way purity gate
   check-purity-adversarial.mjs  adversarial purity suite
   check-design.mjs          token/document/CSS drift gate
-  check-units.mjs           logic checks (segmentation, routing, digits)
+  check-units.mjs           logic checks (segmentation, routing, digits,
+                            name-motion determinism and budget)
   check-build.mjs           artifact validation (routes, deep links, budget)
 tools/
   make-og.py          generates public/og.png (run manually; see its header)
