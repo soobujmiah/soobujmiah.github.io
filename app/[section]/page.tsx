@@ -22,8 +22,15 @@ export function generateStaticParams() {
   return SECTION_IDS.filter((id) => id !== 'home').map((id) => ({ section: id as string }));
 }
 
-export function generateMetadata({ params }: { params: { section: string } }): Metadata {
-  const i = indexForSlug(params.section);
+/* Next 15 made route params asynchronous: await them once, at the top,
+   and everything below stays exactly as it was. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ section: string }>;
+}): Promise<Metadata> {
+  const { section } = await params;
+  const i = indexForSlug(section);
   if (i === null) return {};
   /* Unique, factual per-route metadata. Titles and descriptions are
      authored once in app/content.ts (seo.sections, aligned with
@@ -56,8 +63,13 @@ export function generateMetadata({ params }: { params: { section: string } }): M
   };
 }
 
-export default function SectionPage({ params }: { params: { section: string } }) {
-  const i = indexForSlug(params.section);
+export default async function SectionPage({
+  params,
+}: {
+  params: Promise<{ section: string }>;
+}) {
+  const { section } = await params;
+  const i = indexForSlug(section);
   if (i === null) notFound();
   return <Pager initialIndex={i} />;
 }
