@@ -80,6 +80,12 @@ const IDENTIFIER_PATHS = new Set([
   'openSource.repos[].url',
   'openSource.repos[].websiteUrl',
   'openSource.repos[].tier',
+  /* the service-intent layer: the URL slug is the route, and evidence
+     entries repeat the project name + URL shape of work.projects[] */
+  'services.pillars[].slugs[]',
+  'services.pages[].slug',
+  'services.pages[].evidence[].name',
+  'services.pages[].evidence[].url',
 ]);
 
 /* Self-test: if either predicate ever stops catching its own
@@ -175,6 +181,33 @@ function checkPurity(tree, lang) {
   });
 }
 
+
+/* service-intent layer contract (app/services-content.ts) */
+function checkServices(svc, lang) {
+  if (!svc || svc.pages.length !== 8) fail(`${lang}.services.pages length != 8`);
+  const slugs = new Set();
+  const seoTitles = new Set();
+  for (const pg of svc?.pages ?? []) {
+    if (slugs.has(pg.slug)) fail(`${lang}.services duplicate slug ${pg.slug}`);
+    slugs.add(pg.slug);
+    if (seoTitles.has(pg.seoTitle)) fail(`${lang}.services duplicate seoTitle ${pg.seoTitle}`);
+    seoTitles.add(pg.seoTitle);
+    for (const k of ['title', 'short', 'seoTitle', 'seoDescription']) if (!pg[k]) fail(`${lang}.services.${pg.slug} missing ${k}`);
+    for (const k of ['forWho', 'problems', 'included', 'notIncluded', 'capabilities', 'evidence']) {
+      if (!Array.isArray(pg[k]) || pg[k].length === 0) fail(`${lang}.services.${pg.slug}.${k} is empty`);
+    }
+    for (const e of pg.evidence) {
+      if (!/^https:\/\/(github\.com\/soobujmiah\/|soobujmiah\.github\.io\/)/.test(e.url)) {
+        fail(`${lang}.services.${pg.slug} evidence URL must be an owner surface: ${e.url}`);
+      }
+    }
+  }
+  const pillarSlugs = (svc?.pillars ?? []).flatMap((p) => p.slugs);
+  if (pillarSlugs.length !== 8 || new Set(pillarSlugs).size !== 8 || !pillarSlugs.every((x) => slugs.has(x))) {
+    fail(`${lang}.services.pillars must reference each of the 8 service slugs exactly once`);
+  }
+}
+
 /* ── run ──────────────────────────────────────────────────────── */
 
 selfTest();
@@ -221,6 +254,38 @@ try {
   checkParity(content.en, content.bn, '');
   checkPurity(content.en, 'en');
   checkPurity(content.bn, 'bn');
+
+  /* The service-intent layer is a second bilingual module with the
+     same contract. Compile it the same way and hold it to the same
+     parity + purity rules under the `services.` path prefix so the
+     IDENTIFIER_PATHS exceptions apply verbatim. */
+  const svcSource = join(ROOT, 'app', 'services-content.ts');
+  let services = null;
+  if (!OVERRIDE) {
+    if (!existsSync(svcSource)) fail(`services content not found: ${svcSource}`);
+    else {
+      try {
+        execSync(
+          `node "${tscBin}" "${svcSource}" "${source}" --outDir "${tmp}" --module commonjs --target es2020 --skipLibCheck --strict false`,
+          { cwd: ROOT, stdio: 'pipe' }
+        );
+      } catch (e) {
+        fail(`could not compile ${svcSource}:\n${(e?.stderr?.toString() || e?.message || 'unknown').slice(0, 2000)}`);
+      }
+      const svcCompiled = [join(tmp, 'services-content.js'), join(tmp, 'app', 'services-content.js')].find((p) => existsSync(p));
+      if (!svcCompiled) fail('tsc produced no output for services-content.ts');
+      else {
+        const svcMod = await import(pathToFileURL(svcCompiled).href);
+        services = svcMod.servicesContent;
+        if (!services?.en || !services?.bn) fail('servicesContent export must have en and bn trees');
+        else {
+          checkParity(services.en, services.bn, 'services');
+          checkPurity({ services: services.en }, 'en');
+          checkPurity({ services: services.bn }, 'bn');
+        }
+      }
+    }
+  }
 
   /* 3 ── selected ⊆ repos, same order both languages ── */
   for (const lang of ['en', 'bn']) {
@@ -331,6 +396,12 @@ try {
     for (const s of tree.seo.sections) {
       if (!s.title || !s.description) fail(`${lang}.seo.sections has an entry missing title/description`);
     }
+    /* service-intent layer: 8 pages, unique slugs, one search intent each,
+       every section populated, evidence limited to the owner's own public
+       surfaces (no fabricated case studies) */
+    const svc = services?.[lang];
+    /* adversarial copies (CONTENT_FILE) exercise the main tree only */
+    if (!OVERRIDE) checkServices(svc, lang);
     for (const l of tree.nav) {
       if (!Number.isInteger(l.scene) || l.scene < 0 || l.scene > 8) {
         fail(`${lang}.nav scene out of range: ${l.scene}`);

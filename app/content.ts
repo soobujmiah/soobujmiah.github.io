@@ -225,6 +225,8 @@ export interface Content {
     /** The complete ecosystem: 17 canonical links in six groups. One
         system, rendered once — never a second wall of icons elsewhere. */
     groups: SocialGroup[];
+    /** Discovery link into the service-intent layer (/services/). */
+    servicesLink: string;
   };
   nav: { scene: number; label: string }[];
   header: { homeLabel: string; githubLabel: string; langLabel: string; langAria: string; githubAria: string };
@@ -579,6 +581,7 @@ const en: Content = {
     headingB: 'remote, and collaboration.',
     sub: 'On-device AI, Android systems, ARM64 tooling, or local-first products — happy to talk. Also available for practical work: website development, custom software, and computer or Android troubleshooting. Based in Dhaka, Bangladesh; remote support worldwide.',
     email: { label: 'Email', value: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
+    servicesLink: 'See the full list of services →',
     groupsHeading: 'Find me online',
     groupsNote: 'One handle across every platform.',
     groups: [
@@ -1042,6 +1045,7 @@ const bn: Content = {
     headingB: 'রিমোট ও কোলাবরেশনে উন্মুক্ত।',
     sub: 'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ টুলিং বা লোকাল-ফার্স্ট প্রোডাক্ট — কথা বলতে আগ্রহী। ব্যবহারিক কাজেও পাওয়া যাবে: ওয়েবসাইট তৈরি, কাস্টম সফটওয়্যার, কম্পিউটার বা অ্যান্ড্রয়েড সমস্যা সমাধান। ঢাকা, বাংলাদেশে অবস্থিত; বিশ্বব্যাপী রিমোট সহায়তা।',
     email: { label: 'ইমেইল', value: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
+    servicesLink: 'সব সেবার পূর্ণ তালিকা দেখুন →',
     groupsHeading: 'অনলাইনে আমাকে পাবেন',
     groupsNote: 'সব প্ল্যাটফর্মে একই হ্যান্ডেল।',
     groups: [

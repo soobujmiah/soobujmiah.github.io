@@ -31,11 +31,29 @@ const ORIGIN = 'https://soobujmiah.github.io';
 const SECTIONS = [
   'home', 'presence', 'about', 'work', 'research', 'stack', 'open-source', 'experience', 'contact',
 ];
+/* The service-intent layer (app/services.ts): hub + eight pages. Kept
+   separate from SECTIONS on purpose — these are documents outside the
+   pager, so they are held to the metadata/content bar but not to the
+   world-map/camera invariants that belong to the nine scenes. */
+const SERVICE_ROUTES = [
+  '/services/',
+  '/services/web-development/', '/services/software-development/', '/services/computer-support/',
+  '/services/android-support/', '/services/business-technology/', '/services/graphics-design/',
+  '/services/office-administration/', '/services/data-entry/',
+];
+const EXPECTED_PUBLIC_ROUTES = SECTIONS.length + SERVICE_ROUTES.length; // 9 + 9 = 18
 
 /** Minimum visible server-rendered characters per route. */
 const MIN_VISIBLE_CHARS = 220;
-/** Total gzipped JS ceiling for the whole site (audit baseline: 262 KB). */
-const MAX_TOTAL_JS_GZIP = 340 * 1024;
+/** Total gzipped JS ceiling for the whole site (audit baseline: 262 KB;
+    329 KB before the service layer; the layer adds one ~18 KB chunk that
+    only /services/* routes load — so the site-wide sum moves to 360 KB
+    while the per-route ceilings below stay where the pager was). */
+const MAX_TOTAL_JS_GZIP = 360 * 1024;
+/** Per-route payload ceiling: the gzipped sum of every script a single
+    HTML page references. The home page measured ~250 KB before the
+    service layer; this holds every route — pager and services — there. */
+const MAX_ROUTE_JS_GZIP = 265 * 1024;
 /** Per-route ceiling on the largest single gzipped chunk group. */
 const MAX_PAGE_JS_GZIP = 190 * 1024;
 
@@ -103,6 +121,64 @@ for (const slug of SECTIONS) {
 }
 ok(`${SECTIONS.length} section routes present with server-rendered HTML`);
 
+/* ── 1b. service routes: same bar (real HTML, title names the author,
+       description, exact canonical, og:image, EN-only default render)
+       plus Service/BreadcrumbList structured data ── */
+const titles = new Set();
+const descs = new Set();
+for (const route of SERVICE_ROUTES) {
+  const file = join(OUT, ...route.split('/').filter(Boolean), 'index.html');
+  if (!existsSync(file)) {
+    fail(`missing static service route ${route} — expected ${file.replace(ROOT, 'out')}`);
+    continue;
+  }
+  const html = readFileSync(file, 'utf8');
+  const text = visibleText(html);
+  if (text.length < MIN_VISIBLE_CHARS) fail(`service route ${route} ships only ${text.length} visible chars`);
+  const bengali = (text.match(/[\u0980-\u09FF]/g) || []).length;
+  if (bengali > 0) fail(`service route ${route} ships ${bengali} Bengali char(s) in its default (English) render`);
+  const title = html.match(/<title>([^<]*)<\/title>/);
+  if (!title) fail(`service route ${route} has no <title>`);
+  else {
+    if (!title[1].includes('Sobuj Miah')) fail(`service route ${route} title does not name the author: "${title[1]}"`);
+    if (titles.has(title[1])) fail(`duplicate <title> on ${route}: "${title[1]}"`);
+    titles.add(title[1]);
+  }
+  const desc = html.match(/<meta name="description" content="([^"]*)"/);
+  if (!desc) fail(`service route ${route} has no meta description`);
+  else {
+    if (descs.has(desc[1])) fail(`duplicate meta description on ${route}`);
+    descs.add(desc[1]);
+  }
+  const canonical = html.match(/<link rel="canonical" href="([^"]*)"/);
+  const want = new URL(route, ORIGIN).href;
+  if (!canonical) fail(`service route ${route} has no canonical link`);
+  else if (canonical[1] !== want) fail(`service route ${route} canonical is ${canonical[1]}, expected ${want}`);
+  if (!html.match(/<meta property="og:image" content="([^"]*)"/)) fail(`service route ${route} has no og:image`);
+  if (/noindex/i.test(html)) fail(`service route ${route} carries a noindex directive`);
+  const ld = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+  let hasBreadcrumb = false;
+  let hasService = false;
+  for (const raw of ld) {
+    try {
+      const doc = JSON.parse(raw);
+      const nodes = doc['@graph'] ?? [doc];
+      for (const n of nodes) {
+        if (n['@type'] === 'BreadcrumbList') hasBreadcrumb = true;
+        if (n['@type'] === 'Service' || n['@type'] === 'CollectionPage') hasService = true;
+        if (n['@type'] === 'LocalBusiness' || n.aggregateRating || n.review) fail(`service route ${route} carries forbidden LocalBusiness/rating/review schema`);
+      }
+    } catch (e) {
+      fail(`service route ${route} has invalid JSON-LD: ${e.message}`);
+    }
+  }
+  if (!hasBreadcrumb) fail(`service route ${route} has no BreadcrumbList JSON-LD`);
+  if (!hasService) fail(`service route ${route} has no Service/CollectionPage JSON-LD`);
+  if (!html.includes('href="/services/"') && route !== '/services/') fail(`service route ${route} does not link back to the hub`);
+}
+ok(`${SERVICE_ROUTES.length} service routes present with unique title/description, exact canonical, valid Service + BreadcrumbList JSON-LD`);
+ok(`${EXPECTED_PUBLIC_ROUTES} public routes in total: ${SECTIONS.length} pager sections + ${SERVICE_ROUTES.length} service pages`);
+
 if (textByRoute['home']) ok(`home ships ${textByRoute['home'].length} visible chars without JavaScript (audit baseline: 226)`);
 
 /* ── 4. static assets ── */
@@ -142,6 +218,13 @@ if (existsSync(join(OUT, 'sitemap.xml'))) {
     if (!xml.includes(url)) fail(`sitemap.xml is missing ${url}`);
   }
   ok('sitemap.xml lists every section route');
+  for (const route of SERVICE_ROUTES) {
+    const url = new URL(route, ORIGIN).href;
+    if (!xml.includes(url)) fail(`sitemap.xml is missing ${url}`);
+  }
+  const locs = (xml.match(/<loc>/g) || []).length;
+  if (locs !== EXPECTED_PUBLIC_ROUTES) fail(`sitemap.xml lists ${locs} URLs, expected exactly ${EXPECTED_PUBLIC_ROUTES}`);
+  else ok(`sitemap.xml lists exactly ${EXPECTED_PUBLIC_ROUTES} URLs (${SECTIONS.length} sections + ${SERVICE_ROUTES.length} services)`);
 }
 
 /* ── 5. JavaScript budget ── */
@@ -172,6 +255,23 @@ if (existsSync(chunksDir)) {
   else ok(`total JS ${kb(gz)} gzipped across ${files.length} chunks (${kb(raw)} raw, budget ${kb(MAX_TOTAL_JS_GZIP)})`);
   if (largest > MAX_PAGE_JS_GZIP) fail(`largest chunk ${kb(largest)} gzipped exceeds the ${kb(MAX_PAGE_JS_GZIP)} budget`);
   else ok(`largest single chunk ${kb(largest)} gzipped (budget ${kb(MAX_PAGE_JS_GZIP)})`);
+
+  /* per-route payload: what one page actually loads, not the site sum */
+  const gzByFile = new Map(files.map((f) => [f.replace(OUT, '').replace(/\\/g, '/'), gzipSync(readFileSync(f), { level: 6 }).length]));
+  const routeHtml = [
+    ...SECTIONS.map((slug) => [routePath(slug), routeFile(slug)]),
+    ...SERVICE_ROUTES.map((r) => [r, join(OUT, ...r.split('/').filter(Boolean), 'index.html')]),
+  ];
+  let heaviest = ['', 0];
+  for (const [route, file] of routeHtml) {
+    if (!existsSync(file)) continue;
+    const html = readFileSync(file, 'utf8');
+    const srcs = [...html.matchAll(/<script[^>]+src="([^"]+\.js)[^"]*"/g)].map((m) => m[1].replace(/\?.*$/, ''));
+    const total = [...new Set(srcs)].reduce((n, src) => n + (gzByFile.get(src) ?? 0), 0);
+    if (total > MAX_ROUTE_JS_GZIP) fail(`route ${route} loads ${kb(total)} gzipped JS, over the ${kb(MAX_ROUTE_JS_GZIP)} per-route ceiling`);
+    if (total > heaviest[1]) heaviest = [route, total];
+  }
+  ok(`heaviest route ${heaviest[0]} loads ${kb(heaviest[1])} gzipped JS (per-route ceiling ${kb(MAX_ROUTE_JS_GZIP)})`);
 } else {
   fail('out/_next/static not found');
 }

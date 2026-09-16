@@ -6,6 +6,13 @@ import { indexFromPathname } from './sections';
 
 const STORAGE_KEY = 'sobuj-portfolio-lang';
 
+/** Service routes own their document metadata (components/services);
+    the pager's title swap must leave them alone — and must not pull the
+    services copy into the pager bundle. */
+export function isServicePathname(pathname: string): boolean {
+  return /^\/services(\/|$)/.test(pathname);
+}
+
 interface LanguageValue {
   lang: Lang;
   t: Content;
@@ -49,9 +56,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     try {
       document.documentElement.lang = lang === 'bn' ? 'bn' : 'en';
       document.body.classList.toggle('lang-bn', lang === 'bn');
+      const pathname = window.location.pathname;
+      /* The service-intent layer lives outside the pager and re-titles
+         itself (ServicesShell); never re-title a service page as Home. */
+      if (isServicePathname(pathname)) return;
       let i = 0;
       try {
-        i = indexFromPathname(window.location.pathname);
+        i = indexFromPathname(pathname);
       } catch {
         /* fall back to home metadata */
       }

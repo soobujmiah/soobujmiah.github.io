@@ -1,0 +1,761 @@
+/* ═══════════════════════════════════════════════════════════════
+   SERVICES CONTENT — the service-intent layer's copy, bilingual.
+
+   Kept in its own module (not inside content.ts) so the nine pager
+   routes never download it: only /services/* imports this file. The
+   same parity/purity contract applies — scripts/check-content.mjs
+   loads this module too and holds it to the identical rules
+   (EN pure, BN pure, identical keys, enumerated verbatim fields).
+   Evidence links point only at the owner's public repositories or
+   verified live sites. No customers, reviews, prices or offices.
+   ═══════════════════════════════════════════════════════════════ */
+
+import type { Lang } from './content';
+
+export interface ServiceFaq {
+  q: string;
+  a: string;
+}
+
+/** One search intent per page. Every field renders; nothing here is
+    a claim the page does not make. Evidence links point only at
+    public repositories or verified live sites. */
+export interface ServicePage {
+  slug: string;
+  title: string;
+  short: string;
+  seoTitle: string;
+  seoDescription: string;
+  forWho: string[];
+  problems: string[];
+  included: string[];
+  notIncluded: string[];
+  capabilities: string[];
+  evidence: { name: string; note: string; url: string }[];
+  faq: ServiceFaq[];
+}
+
+export interface ServicesContent {
+  eyebrow: string;
+  heading: string;
+  intro: string;
+  /** Pillar → service slugs; labels are prose, slugs are verbatim routes. */
+  pillars: { label: string; slugs: string[] }[];
+  hubSeoTitle: string;
+  hubSeoDescription: string;
+  labels: {
+    hub: string;
+    forWho: string;
+    problems: string;
+    included: string;
+    notIncluded: string;
+    capabilities: string;
+    evidence: string;
+    availability: string;
+    contact: string;
+    faq: string;
+    related: string;
+    backHome: string;
+    allServices: string;
+    viewSource: string;
+    breadcrumbHome: string;
+  };
+  availability: string;
+  contactCta: string;
+  pages: ServicePage[];
+}
+
+
+const en: ServicesContent = {
+  eyebrow: 'Services',
+  heading: 'Software engineering, practical technology services, and digital office support.',
+  intro:
+    'I build on-device AI runtimes, Android systems and ARM64 Linux tooling — and I also take on the practical work that most people and small businesses actually need: a website that works, a tool that fits the job, a computer or phone that behaves, and documents and data that are in order. Every service below is one I genuinely offer; nothing is listed for search engines alone.',
+  pillars: [
+    { label: 'Software engineering', slugs: ['web-development', 'software-development'] },
+    { label: 'Practical technology services', slugs: ['computer-support', 'android-support', 'business-technology'] },
+    { label: 'Digital & administrative support', slugs: ['graphics-design', 'office-administration', 'data-entry'] },
+  ],
+  hubSeoTitle: 'Services — Web, Software, Computer & Android Support, Design, Admin, Data',
+  hubSeoDescription:
+    'Services by Sobuj Miah: website development, custom software, computer and Android support, business technology, graphics design, office administration and data entry. Based in Dhaka, Bangladesh; remote worldwide.',
+  labels: {
+    hub: 'All services',
+    forWho: 'Who it is for',
+    problems: 'Problems it addresses',
+    included: 'What is included',
+    notIncluded: 'What is not included',
+    capabilities: 'Tools & capabilities',
+    evidence: 'Public evidence',
+    availability: 'Availability',
+    contact: 'How to get in touch',
+    faq: 'Questions people ask',
+    related: 'Related services',
+    backHome: 'Back to portfolio',
+    allServices: 'Browse all services',
+    viewSource: 'View on GitHub',
+    breadcrumbHome: 'Sobuj Miah',
+  },
+  availability: 'Based in Dhaka, Bangladesh · remote worldwide. Work is delivered remotely; on-site visits are not offered as a standard service.',
+  contactCta: 'Email is the primary channel. Describe the problem, the deadline if there is one, and what “done” looks like — I reply with questions or a plan, not a sales pitch.',
+  pages: [
+    {
+      slug: 'web-development',
+      title: 'Website Development',
+      short: 'Fast, static-first websites for individuals and small businesses — built, deployed and kept working.',
+      seoTitle: 'Website Development & Maintenance — Small-Business Websites',
+      seoDescription:
+        'Website development, design and maintenance by Sobuj Miah: fast static sites, bilingual English/Bangla content, search-ready metadata, hosting on GitHub Pages or your host. Dhaka, Bangladesh; remote worldwide.',
+      forWho: [
+        'Small businesses, shops, schools and institutions that need a clear, trustworthy web presence',
+        'Individuals and professionals who need a portfolio or profile site',
+        'Owners of an existing site that is slow, broken, outdated or invisible in search',
+      ],
+      problems: [
+        'No website, or a template site that no longer reflects the business',
+        'Slow pages, broken layouts on phones, missing HTTPS',
+        'Pages that search engines cannot understand: no titles, descriptions, sitemap or structured data',
+        'Content that exists only in English when customers read Bangla — or the reverse',
+      ],
+      included: [
+        'Planning the pages around what visitors actually need to find',
+        'Building the site (static-first: Next.js, plain HTML/CSS/JS, or Jekyll for documentation sites)',
+        'Mobile-first, accessible layout; bilingual English/Bangla content when needed',
+        'Technical SEO: titles, descriptions, canonical URLs, Open Graph cards, sitemap, robots, JSON-LD',
+        'Deployment (GitHub Pages or your own hosting) and a written handover',
+        'Ongoing maintenance: content updates, fixes, dependency and security updates',
+      ],
+      notIncluded: [
+        'Paid advertising management or guaranteed search rankings',
+        'Copywriting in languages other than English and Bangla',
+        'Large e-commerce platforms with custom payment integration (discussed case by case)',
+      ],
+      capabilities: ['Next.js / React / TypeScript', 'Tailwind CSS', 'Jekyll & GitHub Pages', 'HTML / CSS / JavaScript', 'Technical SEO & structured data', 'GitHub Actions deployment'],
+      evidence: [
+        { name: 'soobujmiah.github.io', note: 'This portfolio — Next.js static export, fully bilingual, per-route metadata, build-time content gates', url: 'https://github.com/soobujmiah/soobujmiah.github.io' },
+        { name: 'Ternux site', note: 'Bilingual Jekyll documentation site with sitemap, hreflang and structured data', url: 'https://soobujmiah.github.io/ternux/' },
+        { name: 'ADT site', note: 'Project site with documentation hub and release evidence', url: 'https://soobujmiah.github.io/adt/' },
+      ],
+      faq: [
+        { q: 'Do you build WordPress sites?', a: 'I can maintain and fix existing WordPress sites. For new builds I recommend static-first sites: they are faster, cheaper to host and far harder to hack.' },
+        { q: 'Can the site be in Bangla?', a: 'Yes — English, Bangla, or both with a proper language switch, as this portfolio does.' },
+      ],
+    },
+    {
+      slug: 'software-development',
+      title: 'Custom Software Development',
+      short: 'Purpose-built tools, Android apps and automation — when off-the-shelf software does not fit the job.',
+      seoTitle: 'Custom Software & Android App Development — Tools and Automation',
+      seoDescription:
+        'Custom software development by Sobuj Miah: Android apps (Kotlin, Flutter), command-line tools, workflow automation and local-first applications with CI builds and real-device testing. Dhaka, Bangladesh; remote worldwide.',
+      forWho: [
+        'Small businesses that run on spreadsheets and chat messages and need one reliable tool instead',
+        'Teams that need an internal utility, a data pipeline or an automated report',
+        'Product owners who want a local-first Android application built carefully',
+      ],
+      problems: [
+        'A repetitive manual process that should be a script or an app',
+        'Data trapped in several places that needs one honest source of truth',
+        'An Android app idea that needs an engineer who tests on real devices, not only emulators',
+        'Existing software that nobody can maintain or explain',
+      ],
+      included: [
+        'Requirements written down in plain language before any code',
+        'Android applications in Kotlin or Flutter, command-line tools in Python or Shell, small web services',
+        'Local-first and privacy-respecting defaults; explicit user consent for anything powerful',
+        'Automated builds and tests on GitHub Actions; releases with checksums',
+        'Documentation that lets someone else maintain the software',
+      ],
+      notIncluded: [
+        'Software that requires collecting data without the user’s knowledge',
+        'Claims of hardware acceleration or performance that have not been measured',
+        'Large enterprise systems needing a full team',
+      ],
+      capabilities: ['Kotlin & Android SDK', 'Flutter / Dart', 'Python & Shell', 'C/C++ & JNI', 'SQLite', 'GitHub Actions CI', 'llama.cpp / GGUF (local AI)'],
+      evidence: [
+        { name: 'LAI', note: 'Bangla-first local AI and consent-driven Android automation runtime (Kotlin, C++)', url: 'https://github.com/soobujmiah/lai' },
+        { name: 'GGEN', note: 'Android-first creative and document studio (Flutter/Dart), 380+ automated tests', url: 'https://github.com/soobujmiah/ggen' },
+        { name: 'Songjog', note: 'Bangla-first business and institution operations app with local SQLite records', url: 'https://github.com/soobujmiah/songjog' },
+        { name: 'ApiLoop', note: 'Supporting tooling repository', url: 'https://github.com/soobujmiah/apiloop' },
+      ],
+      faq: [
+        { q: 'Can you add AI to my app?', a: 'Yes, where it is useful — including fully local, offline AI on the device. I will also tell you plainly when a simpler rule-based solution is the better choice.' },
+      ],
+    },
+    {
+      slug: 'computer-support',
+      title: 'Computer Setup & Troubleshooting',
+      short: 'Windows and Linux setup, configuration and problem-solving — done remotely, explained clearly.',
+      seoTitle: 'Computer Setup & Troubleshooting — Windows and Linux Support',
+      seoDescription:
+        'Remote computer support by Sobuj Miah: Windows and Linux setup, troubleshooting, software configuration, performance clean-up, backups and developer environments. Dhaka, Bangladesh; remote worldwide.',
+      forWho: [
+        'Home users and small offices with a computer that is slow, misbehaving or freshly bought',
+        'People moving to Linux, or running Linux and Windows side by side',
+        'Students and developers who need a working development environment',
+      ],
+      problems: [
+        'Slow start-up, pop-ups, unwanted software, full disks',
+        'Operating system installation, upgrades, drivers, dual boot',
+        'Software that will not install, update or open',
+        'No backup, or a backup nobody has ever tested',
+        'Setting up compilers, package managers, Git, SSH and editors',
+      ],
+      included: [
+        'Remote diagnosis over screen sharing or step-by-step chat instructions',
+        'Windows and Linux (Debian/Ubuntu family) installation, configuration and clean-up',
+        'Software installation and configuration; browser, email and office tools',
+        'Backup strategy set up and verified',
+        'A short written note of what was changed and why',
+      ],
+      notIncluded: [
+        'Physical hardware repair (screens, boards, soldering) — this is software and configuration support',
+        'On-site visits as a standard service',
+        'Bypassing licences, passwords or activation you are not entitled to',
+      ],
+      capabilities: ['Windows 10/11', 'Debian / Ubuntu Linux', 'Termux & PRoot environments', 'Shell scripting', 'Backup tooling', 'Developer toolchains'],
+      evidence: [
+        { name: 'Ternux', note: 'A complete Debian desktop with GPU route installed on Android — diagnostic, repair and benchmark tooling included', url: 'https://github.com/soobujmiah/ternux' },
+        { name: 'ADT', note: 'Native ARM64 Android toolchain for Linux with a “doctor” command that pinpoints broken pieces', url: 'https://github.com/soobujmiah/adt' },
+      ],
+      faq: [
+        { q: 'Can you fix a broken laptop screen?', a: 'No — that is hardware repair. I handle the software side: the operating system, drivers, configuration, performance and data.' },
+        { q: 'How does remote support work?', a: 'A screen-sharing session or a message thread with exact steps. You stay in control of your computer the whole time.' },
+      ],
+    },
+    {
+      slug: 'android-support',
+      title: 'Android & Phone Software Support',
+      short: 'Android configuration, software troubleshooting, ADB and device setup, and honest performance tuning.',
+      seoTitle: 'Android Support — Phone Setup, Software Troubleshooting & ADB',
+      seoDescription:
+        'Android phone software support by Sobuj Miah: setup and configuration, troubleshooting, ADB and wireless debugging, developer options, storage and battery optimisation, Termux and Linux on Android. Dhaka, Bangladesh; remote worldwide.',
+      forWho: [
+        'Anyone whose Android phone is slow, full, misconfigured or behaving strangely',
+        'People who want a clean, private, well-organised phone without root',
+        'Developers and tinkerers who need ADB, wireless debugging, Termux or a Linux environment working',
+      ],
+      problems: [
+        'Storage full, battery draining, apps crashing or not updating',
+        'Migrating to a new phone without losing data',
+        'ADB not detecting the device; pairing and wireless debugging',
+        'Setting up Termux, PRoot Debian or a full Linux desktop on the phone',
+        'Understanding which permissions and background apps are really needed',
+      ],
+      included: [
+        'Guided remote setup and clean-up (no root required)',
+        'ADB and developer-options configuration; app installation and inspection via ADB',
+        'Privacy-conscious defaults: permissions, backups, account hygiene',
+        'Termux, PRoot and Linux-on-Android environments',
+        'Plain-language explanation of what was changed',
+      ],
+      notIncluded: [
+        'Screen, battery or board repair',
+        'Unlocking phones you do not own, bypassing FRP/activation locks, or any warranty-voiding modification you have not asked for',
+        'Performance claims that have not been measured on the device',
+      ],
+      capabilities: ['ADB & fastboot (built from source for ARM64)', 'Android developer options', 'Shizuku & Accessibility (consent-based)', 'Termux / PRoot Debian', 'GGUF local models on-device'],
+      evidence: [
+        { name: 'ADT', note: 'Native ARM64 adb/fastboot and build-tools compiled from AOSP source, validated on a real device', url: 'https://github.com/soobujmiah/adt' },
+        { name: 'LAI', note: 'Device-verified local AI on Android with consent-gated automation', url: 'https://github.com/soobujmiah/lai' },
+        { name: 'Ternux', note: 'No-root Linux desktop on Android with measured GPU routes', url: 'https://github.com/soobujmiah/ternux' },
+      ],
+      faq: [
+        { q: 'Do you root phones?', a: 'No. Everything I set up works without root; that keeps your warranty, banking apps and security intact.' },
+      ],
+    },
+    {
+      slug: 'business-technology',
+      title: 'Small-Business Technology Support',
+      short: 'Practical technology for small businesses and institutions — from the first spreadsheet to a real workflow tool.',
+      seoTitle: 'Small-Business Technology Support — Workflow Tools & Automation',
+      seoDescription:
+        'Small-business technology support by Sobuj Miah: choosing and setting up tools, workflow automation, digital records, simple business software, websites and staff onboarding. Dhaka, Bangladesh; remote worldwide.',
+      forWho: [
+        'Shops, agencies, schools, coaching centres and family businesses',
+        'Owners who know the work well but do not have anyone to own the technology',
+        'Institutions moving from paper and chat messages to digital records',
+      ],
+      problems: [
+        'Records spread across notebooks, phones and messaging apps',
+        'Daily reports that take hours to assemble by hand',
+        'No clear system for invoices, registrations, attendance or inventory',
+        'Software bought but never set up properly',
+      ],
+      included: [
+        'An honest assessment of what the business actually needs — often less than it thinks',
+        'Setting up and configuring the right tools (Google Workspace, Microsoft 365, spreadsheets, forms)',
+        'Automating repetitive reporting; connecting the pieces that should talk to each other',
+        'Simple custom software when nothing off-the-shelf fits (see Custom Software)',
+        'Training notes so staff can keep it running',
+      ],
+      notIncluded: [
+        'Accounting or legal advice',
+        'Enterprise ERP roll-outs',
+        'Fake reviews, growth hacks or anything that misleads customers',
+      ],
+      capabilities: ['Google Workspace & Microsoft 365', 'Spreadsheet systems & automation', 'Bangla-first business software', 'SQLite-backed local records', 'Documentation & process design'],
+      evidence: [
+        { name: 'Songjog', note: 'Bangla-first business & institution operations app — fast daily entry, local records, auditable corrections', url: 'https://github.com/soobujmiah/songjog' },
+        { name: 'DataKhoj', note: 'Data lookup tooling', url: 'https://github.com/soobujmiah/datakhoj' },
+      ],
+      faq: [
+        { q: 'We are a very small business. Is this for us?', a: 'Especially for you. The first goal is usually to remove friction with what you already have, not to buy more software.' },
+      ],
+    },
+    {
+      slug: 'graphics-design',
+      title: 'Graphics Design',
+      short: 'Clean, practical digital graphics — social media posts, posters, banners and promotional materials for everyday use.',
+      seoTitle: 'Graphics Design — Social Media Graphics, Posters & Promotional Materials',
+      seoDescription:
+        'Practical graphics design by Sobuj Miah: social media graphics, posters, banners, notices and promotional materials in Bangla and English for small businesses and institutions. Dhaka, Bangladesh; remote worldwide.',
+      forWho: [
+        'Small businesses, schools and institutions that need regular, tidy visual materials',
+        'Anyone who needs a poster, banner or announcement graphic done properly and quickly',
+      ],
+      problems: [
+        'Announcements and offers posted as plain text or blurry photos',
+        'Inconsistent fonts, colours and logos across posts',
+        'Bangla text that renders badly in design tools',
+      ],
+      included: [
+        'Social media graphics, posters, banners, notices, simple flyers and certificates',
+        'Bangla and English typography handled correctly',
+        'Consistent use of your existing logo and colours; simple reusable templates',
+        'Export in the right sizes and formats for print or each platform',
+      ],
+      notIncluded: [
+        'Brand identity systems, logo design from scratch, illustration or 3D work',
+        'Video production (basic edits only, discussed case by case)',
+      ],
+      capabilities: ['Canva & GIMP', 'Inkscape (vector)', 'Bangla/English typography', 'Print and social export presets'],
+      evidence: [
+        { name: 'Experience', note: 'Promotional graphics and social media as part of the Office Administrator role at Rabeya Education Family (2025–present)', url: 'https://soobujmiah.github.io/experience/' },
+        { name: 'GGEN', note: 'I am also building an Android-first creative and document studio (Flutter/Dart)', url: 'https://github.com/soobujmiah/ggen' },
+      ],
+      faq: [],
+    },
+    {
+      slug: 'office-administration',
+      title: 'Office Administration & Operations Support',
+      short: 'Organised, digital-first administrative support backed by years of real office and site-operations experience.',
+      seoTitle: 'Office Administration & Operations Support — Remote Administrative Services',
+      seoDescription:
+        'Office administration support by Sobuj Miah: document management, records and filing systems, registrations, scheduling, reporting and digital office workflows — 8+ years of operations experience. Dhaka, Bangladesh; remote worldwide.',
+      forWho: [
+        'Small offices, schools and institutions without a dedicated administrator',
+        'Business owners who need reliable back-office follow-through',
+        'Teams that need their documents, records and routines put in order',
+      ],
+      problems: [
+        'Documents that cannot be found when they are needed',
+        'Registrations, records and correspondence handled inconsistently',
+        'Reports assembled by hand from several sources every week',
+        'No standard procedure, so everything depends on one person’s memory',
+      ],
+      included: [
+        'Document processing, digital filing systems and records organisation',
+        'Registration, scheduling, correspondence and follow-up',
+        'Structured reporting and simple dashboards',
+        'Writing down procedures so the office runs without heroics',
+        'Google Workspace / Microsoft Office set-up for the team',
+      ],
+      notIncluded: [
+        'Legal, HR-compliance or accounting responsibility',
+        'Physical reception or on-site presence as a standard service',
+      ],
+      capabilities: ['Microsoft Office & Google Workspace', 'Document management', 'Records & filing systems', 'Structured reporting', 'Bangla and English correspondence'],
+      evidence: [
+        { name: 'Experience', note: 'Office Administrator (Rabeya Education Family, 2025–present); Computer Operator; Coordinator and Progress Reporter on industrial sites in Saudi Arabia', url: 'https://soobujmiah.github.io/experience/' },
+      ],
+      faq: [],
+    },
+    {
+      slug: 'data-entry',
+      title: 'Data Entry & Data Work',
+      short: 'Accurate data entry, clean-up and structuring — from paper and PDFs to spreadsheets and databases you can trust.',
+      seoTitle: 'Data Entry & Data Work — Data Cleanup, Spreadsheets and Structured Data',
+      seoDescription:
+        'Data entry and data work by Sobuj Miah: bulk data entry, digitisation, cleanup and de-duplication, format conversion, spreadsheet structuring and preparation for databases — accurate and confidential. Dhaka, Bangladesh; remote worldwide.',
+      forWho: [
+        'Businesses and institutions with paper records, PDFs or scans that need to become usable data',
+        'Teams with messy spreadsheets: duplicates, inconsistent formats, missing fields',
+        'Researchers and analysts who need data prepared before analysis',
+      ],
+      problems: [
+        'Backlogs of forms, invoices or registers waiting to be typed in',
+        'Spreadsheets with inconsistent spellings, dates and numbers',
+        'Data in one format that another system needs in a different one',
+        'Bangla text data that must be entered and stored correctly (Unicode)',
+      ],
+      included: [
+        'Bulk data entry from paper, images and PDFs, with a verification pass',
+        'Cleanup: de-duplication, normalisation, validation rules, consistent formats',
+        'Format conversion (CSV, Excel, JSON, SQLite) and preparation for databases',
+        'Scripted processing (Python) for large or repeated jobs — faster and more consistent than manual re-typing',
+        'Confidential handling: your data stays in your accounts and systems wherever possible',
+      ],
+      notIncluded: [
+        'Collecting data from sources you are not authorised to use; scraping restricted or personal data; anything that breaks a service’s terms or the law',
+        'Statistical analysis or interpretation (data preparation only, unless agreed otherwise)',
+      ],
+      capabilities: ['Excel & Google Sheets', 'Python (pandas, CSV/JSON tooling)', 'SQLite', 'OCR-assisted digitisation', 'Bangla Unicode data'],
+      evidence: [
+        { name: 'Experience', note: 'Progress Reporter (daily progress data, digitisation, structured reporting) and Computer Operator roles', url: 'https://soobujmiah.github.io/experience/' },
+        { name: 'DataKhoj', note: 'Data lookup and processing tooling', url: 'https://github.com/soobujmiah/datakhoj' },
+      ],
+      faq: [
+        { q: 'Is my data safe?', a: 'Work is done inside your own accounts and files wherever possible, and nothing is kept after handover unless you ask. I only work with data you are authorised to use.' },
+      ],
+    },
+  ],
+};
+
+const bn: ServicesContent = {
+  eyebrow: 'সেবাসমূহ',
+  heading: 'সফটওয়্যার ইঞ্জিনিয়ারিং, ব্যবহারিক প্রযুক্তি সেবা ও ডিজিটাল অফিস সহায়তা।',
+  intro:
+    'আমি অন-ডিভাইস এআই রানটাইম, অ্যান্ড্রয়েড সিস্টেম ও এআরএম৬৪ লিনাক্স টুলিং তৈরি করি — পাশাপাশি সেই ব্যবহারিক কাজগুলোও করি যা বেশিরভাগ মানুষ ও ছোট ব্যবসার সত্যিই দরকার: একটি ওয়েবসাইট যা কাজ করে, একটি টুল যা কাজের সাথে মানানসই, একটি কম্পিউটার বা ফোন যা ঠিকমতো চলে, আর গোছানো ডকুমেন্ট ও ডেটা। নিচের প্রতিটি সেবা আমি সত্যিই দিই; শুধু সার্চ ইঞ্জিনের জন্য কিছু তালিকাভুক্ত করা হয়নি।',
+  pillars: [
+    { label: 'সফটওয়্যার ইঞ্জিনিয়ারিং', slugs: ['web-development', 'software-development'] },
+    { label: 'ব্যবহারিক প্রযুক্তি সেবা', slugs: ['computer-support', 'android-support', 'business-technology'] },
+    { label: 'ডিজিটাল ও প্রশাসনিক সহায়তা', slugs: ['graphics-design', 'office-administration', 'data-entry'] },
+  ],
+  hubSeoTitle: 'সেবাসমূহ — ওয়েব, সফটওয়্যার, কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, ডিজাইন, প্রশাসন, ডেটা',
+  hubSeoDescription:
+    'সবুজ মিয়ার সেবাসমূহ: ওয়েবসাইট তৈরি, কাস্টম সফটওয়্যার, কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, ব্যবসার প্রযুক্তি, গ্রাফিক্স ডিজাইন, অফিস অ্যাডমিনিস্ট্রেশন ও ডেটা এন্ট্রি। ঢাকা, বাংলাদেশে অবস্থিত; বিশ্বব্যাপী রিমোট।',
+  labels: {
+    hub: 'সব সেবা',
+    forWho: 'কাদের জন্য',
+    problems: 'যেসব সমস্যার সমাধান',
+    included: 'যা অন্তর্ভুক্ত',
+    notIncluded: 'যা অন্তর্ভুক্ত নয়',
+    capabilities: 'টুল ও দক্ষতা',
+    evidence: 'প্রকাশ্য প্রমাণ',
+    availability: 'প্রাপ্যতা',
+    contact: 'যোগাযোগের উপায়',
+    faq: 'সচরাচর জিজ্ঞাসা',
+    related: 'সম্পর্কিত সেবা',
+    backHome: 'পোর্টফোলিওতে ফিরুন',
+    allServices: 'সব সেবা দেখুন',
+    viewSource: 'গিটহাবে দেখুন',
+    breadcrumbHome: 'সবুজ মিয়া',
+  },
+  availability: 'ঢাকা, বাংলাদেশে অবস্থিত · বিশ্বব্যাপী রিমোট। কাজ রিমোটে সম্পন্ন হয়; সরেজমিন পরিদর্শন নিয়মিত সেবা হিসেবে দেওয়া হয় না।',
+  contactCta: 'ইমেইলই প্রধান মাধ্যম। সমস্যাটি, সময়সীমা থাকলে সেটি, আর “শেষ হয়েছে” বলতে আপনি কী বোঝেন — লিখে পাঠান; আমি প্রশ্ন বা পরিকল্পনা নিয়ে উত্তর দিই, বিক্রির বক্তৃতা নয়।',
+  pages: [
+    {
+      slug: 'web-development',
+      title: 'ওয়েবসাইট তৈরি',
+      short: 'ব্যক্তি ও ছোট ব্যবসার জন্য দ্রুত, স্ট্যাটিক-ফার্স্ট ওয়েবসাইট — তৈরি, ডিপ্লয় ও সচল রাখা।',
+      seoTitle: 'ওয়েবসাইট তৈরি ও রক্ষণাবেক্ষণ — ছোট ব্যবসার ওয়েবসাইট',
+      seoDescription:
+        'সবুজ মিয়ার ওয়েবসাইট তৈরি, ডিজাইন ও রক্ষণাবেক্ষণ: দ্রুত স্ট্যাটিক সাইট, ইংরেজি/বাংলা দ্বিভাষিক কনটেন্ট, সার্চ-প্রস্তুত মেটাডেটা, গিটহাব পেজেস বা আপনার হোস্টে হোস্টিং। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+      forWho: [
+        'ছোট ব্যবসা, দোকান, স্কুল ও প্রতিষ্ঠান যাদের একটি স্পষ্ট, বিশ্বাসযোগ্য ওয়েব উপস্থিতি দরকার',
+        'ব্যক্তি ও পেশাজীবী যাদের পোর্টফোলিও বা প্রোফাইল সাইট দরকার',
+        'যাদের বিদ্যমান সাইট ধীর, ভাঙা, পুরোনো বা সার্চে অদৃশ্য',
+      ],
+      problems: [
+        'ওয়েবসাইট নেই, অথবা টেমপ্লেট সাইট যা আর ব্যবসাকে প্রতিফলিত করে না',
+        'ধীর পেজ, ফোনে ভাঙা লেআউট, এইচটিটিপিএস নেই',
+        'সার্চ ইঞ্জিন বুঝতে পারে না এমন পেজ: টাইটেল, বিবরণ, সাইটম্যাপ বা স্ট্রাকচার্ড ডেটা নেই',
+        'গ্রাহক বাংলা পড়লেও কনটেন্ট শুধু ইংরেজিতে — বা উল্টোটা',
+      ],
+      included: [
+        'দর্শক আসলে কী খুঁজবে তার ভিত্তিতে পেজ পরিকল্পনা',
+        'সাইট তৈরি (স্ট্যাটিক-ফার্স্ট: নেক্সট.জেএস, সাধারণ এইচটিএমএল/সিএসএস/জেএস, বা ডকুমেন্টেশন সাইটের জন্য জেকিল)',
+        'মোবাইল-ফার্স্ট, অ্যাক্সেসযোগ্য লেআউট; প্রয়োজনে ইংরেজি/বাংলা দ্বিভাষিক কনটেন্ট',
+        'টেকনিক্যাল এসইও: টাইটেল, বিবরণ, ক্যানোনিক্যাল ইউআরএল, ওপেন গ্রাফ কার্ড, সাইটম্যাপ, রোবটস, জেসন-এলডি',
+        'ডিপ্লয়মেন্ট (গিটহাব পেজেস বা আপনার হোস্টিং) ও লিখিত হস্তান্তর',
+        'চলমান রক্ষণাবেক্ষণ: কনটেন্ট আপডেট, সমাধান, ডিপেন্ডেন্সি ও নিরাপত্তা আপডেট',
+      ],
+      notIncluded: [
+        'পেইড বিজ্ঞাপন ব্যবস্থাপনা বা সার্চ র‍্যাঙ্কিংয়ের নিশ্চয়তা',
+        'ইংরেজি ও বাংলা ছাড়া অন্য ভাষায় কপিরাইটিং',
+        'কাস্টম পেমেন্ট ইন্টিগ্রেশনসহ বড় ই-কমার্স প্ল্যাটফর্ম (ক্ষেত্রবিশেষে আলোচনা সাপেক্ষ)',
+      ],
+      capabilities: ['নেক্সট.জেএস / রিঅ্যাক্ট / টাইপস্ক্রিপ্ট', 'টেইলউইন্ড সিএসএস', 'জেকিল ও গিটহাব পেজেস', 'এইচটিএমএল / সিএসএস / জাভাস্ক্রিপ্ট', 'টেকনিক্যাল এসইও ও স্ট্রাকচার্ড ডেটা', 'গিটহাব অ্যাকশনস ডিপ্লয়মেন্ট'],
+      evidence: [
+        { name: 'soobujmiah.github.io', note: 'এই পোর্টফোলিও — নেক্সট.জেএস স্ট্যাটিক এক্সপোর্ট, সম্পূর্ণ দ্বিভাষিক, রুটভিত্তিক মেটাডেটা, বিল্ড-টাইম কনটেন্ট গেট', url: 'https://github.com/soobujmiah/soobujmiah.github.io' },
+        { name: 'Ternux site', note: 'সাইটম্যাপ, এইচরেফল্যাং ও স্ট্রাকচার্ড ডেটাসহ দ্বিভাষিক জেকিল ডকুমেন্টেশন সাইট', url: 'https://soobujmiah.github.io/ternux/' },
+        { name: 'ADT site', note: 'ডকুমেন্টেশন হাব ও রিলিজ প্রমাণসহ প্রজেক্ট সাইট', url: 'https://soobujmiah.github.io/adt/' },
+      ],
+      faq: [
+        { q: 'আপনি কি ওয়ার্ডপ্রেস সাইট বানান?', a: 'বিদ্যমান ওয়ার্ডপ্রেস সাইট রক্ষণাবেক্ষণ ও সমাধান করতে পারি। নতুন সাইটের জন্য স্ট্যাটিক-ফার্স্ট সাইটের পরামর্শ দিই: দ্রুততর, হোস্টিং সস্তা, আর হ্যাক করা অনেক কঠিন।' },
+        { q: 'সাইট কি বাংলায় হতে পারে?', a: 'হ্যাঁ — ইংরেজি, বাংলা, বা এই পোর্টফোলিওর মতো যথাযথ ভাষা সুইচসহ দুটোই।' },
+      ],
+    },
+    {
+      slug: 'software-development',
+      title: 'কাস্টম সফটওয়্যার তৈরি',
+      short: 'উদ্দেশ্য-নির্মিত টুল, অ্যান্ড্রয়েড অ্যাপ ও অটোমেশন — যখন তৈরি সফটওয়্যার কাজের সাথে মেলে না।',
+      seoTitle: 'কাস্টম সফটওয়্যার ও অ্যান্ড্রয়েড অ্যাপ তৈরি — টুল ও অটোমেশন',
+      seoDescription:
+        'সবুজ মিয়ার কাস্টম সফটওয়্যার তৈরি: অ্যান্ড্রয়েড অ্যাপ (কোটলিন, ফ্লাটার), কমান্ড-লাইন টুল, ওয়ার্কফ্লো অটোমেশন ও লোকাল-ফার্স্ট অ্যাপ্লিকেশন — সিআই বিল্ড ও আসল ডিভাইসে পরীক্ষাসহ। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+      forWho: [
+        'যেসব ছোট ব্যবসা স্প্রেডশিট ও চ্যাট মেসেজে চলে এবং তার বদলে একটি নির্ভরযোগ্য টুল চায়',
+        'যেসব টিমের একটি অভ্যন্তরীণ ইউটিলিটি, ডেটা পাইপলাইন বা স্বয়ংক্রিয় রিপোর্ট দরকার',
+        'প্রোডাক্ট মালিক যারা যত্নসহকারে তৈরি লোকাল-ফার্স্ট অ্যান্ড্রয়েড অ্যাপ্লিকেশন চান',
+      ],
+      problems: [
+        'একটি পুনরাবৃত্ত ম্যানুয়াল প্রক্রিয়া যা স্ক্রিপ্ট বা অ্যাপ হওয়া উচিত',
+        'কয়েক জায়গায় আটকে থাকা ডেটা যার একটি সৎ উৎস দরকার',
+        'একটি অ্যান্ড্রয়েড অ্যাপের ধারণা যার জন্য এমন ইঞ্জিনিয়ার দরকার যিনি শুধু এমুলেটরে নয়, আসল ডিভাইসে পরীক্ষা করেন',
+        'বিদ্যমান সফটওয়্যার যা কেউ রক্ষণাবেক্ষণ বা ব্যাখ্যা করতে পারে না',
+      ],
+      included: [
+        'কোড লেখার আগে সহজ ভাষায় প্রয়োজনীয়তা লিখে নেওয়া',
+        'কোটলিন বা ফ্লাটারে অ্যান্ড্রয়েড অ্যাপ্লিকেশন, পাইথন বা শেলে কমান্ড-লাইন টুল, ছোট ওয়েব সার্ভিস',
+        'লোকাল-ফার্স্ট ও গোপনীয়তা-সম্মানকারী ডিফল্ট; শক্তিশালী যেকোনো কিছুর জন্য স্পষ্ট ব্যবহারকারী সম্মতি',
+        'গিটহাব অ্যাকশনসে স্বয়ংক্রিয় বিল্ড ও টেস্ট; চেকসামসহ রিলিজ',
+        'এমন ডকুমেন্টেশন যাতে অন্য কেউ সফটওয়্যারটি রক্ষণাবেক্ষণ করতে পারে',
+      ],
+      notIncluded: [
+        'ব্যবহারকারীর অজান্তে ডেটা সংগ্রহ করে এমন সফটওয়্যার',
+        'পরিমাপ করা হয়নি এমন হার্ডওয়্যার অ্যাক্সিলারেশন বা পারফরম্যান্সের দাবি',
+        'পূর্ণ টিম প্রয়োজন এমন বড় এন্টারপ্রাইজ সিস্টেম',
+      ],
+      capabilities: ['কোটলিন ও অ্যান্ড্রয়েড এসডিকে', 'ফ্লাটার / ডার্ট', 'পাইথন ও শেল', 'সি/সি++ ও জেএনআই', 'এসকিউলাইট', 'গিটহাব অ্যাকশনস সিআই', 'লামা.সিপিপি / জিজিইউএফ (লোকাল এআই)'],
+      evidence: [
+        { name: 'LAI', note: 'বাংলা-ফার্স্ট লোকাল এআই ও সম্মতিভিত্তিক অ্যান্ড্রয়েড অটোমেশন রানটাইম (কোটলিন, সি++)', url: 'https://github.com/soobujmiah/lai' },
+        { name: 'GGEN', note: 'অ্যান্ড্রয়েড-ফার্স্ট ক্রিয়েটিভ ও ডকুমেন্ট স্টুডিও (ফ্লাটার/ডার্ট), ৩৮০+ স্বয়ংক্রিয় টেস্ট', url: 'https://github.com/soobujmiah/ggen' },
+        { name: 'Songjog', note: 'লোকাল এসকিউলাইট রেকর্ডসহ বাংলা-ফার্স্ট ব্যবসা ও প্রতিষ্ঠান পরিচালনা অ্যাপ', url: 'https://github.com/soobujmiah/songjog' },
+        { name: 'ApiLoop', note: 'সহায়ক টুলিং রিপোজিটরি', url: 'https://github.com/soobujmiah/apiloop' },
+      ],
+      faq: [
+        { q: 'আমার অ্যাপে কি এআই যোগ করতে পারবেন?', a: 'হ্যাঁ, যেখানে কাজে লাগে — ডিভাইসেই সম্পূর্ণ লোকাল, অফলাইন এআইসহ। আর যখন সরল নিয়মভিত্তিক সমাধানই ভালো, সেটাও স্পষ্ট করে বলব।' },
+      ],
+    },
+    {
+      slug: 'computer-support',
+      title: 'কম্পিউটার সেটআপ ও সমস্যা সমাধান',
+      short: 'উইন্ডোজ ও লিনাক্স সেটআপ, কনফিগারেশন ও সমস্যা সমাধান — রিমোটে, স্পষ্ট ব্যাখ্যাসহ।',
+      seoTitle: 'কম্পিউটার সেটআপ ও সমস্যা সমাধান — উইন্ডোজ ও লিনাক্স সহায়তা',
+      seoDescription:
+        'সবুজ মিয়ার রিমোট কম্পিউটার সহায়তা: উইন্ডোজ ও লিনাক্স সেটআপ, সমস্যা সমাধান, সফটওয়্যার কনফিগারেশন, পারফরম্যান্স ক্লিন-আপ, ব্যাকআপ ও ডেভেলপার এনভায়রনমেন্ট। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+      forWho: [
+        'বাড়ির ব্যবহারকারী ও ছোট অফিস যাদের কম্পিউটার ধীর, গোলমেলে বা সদ্য কেনা',
+        'যারা লিনাক্সে যাচ্ছেন, বা লিনাক্স ও উইন্ডোজ পাশাপাশি চালান',
+        'ছাত্র ও ডেভেলপার যাদের একটি কার্যকর ডেভেলপমেন্ট এনভায়রনমেন্ট দরকার',
+      ],
+      problems: [
+        'ধীর স্টার্ট-আপ, পপ-আপ, অবাঞ্ছিত সফটওয়্যার, ভরা ডিস্ক',
+        'অপারেটিং সিস্টেম ইনস্টল, আপগ্রেড, ড্রাইভার, ডুয়াল বুট',
+        'সফটওয়্যার ইনস্টল, আপডেট বা খুলছে না',
+        'ব্যাকআপ নেই, বা এমন ব্যাকআপ যা কেউ কখনো পরীক্ষা করেনি',
+        'কম্পাইলার, প্যাকেজ ম্যানেজার, গিট, এসএসএইচ ও এডিটর সেটআপ',
+      ],
+      included: [
+        'স্ক্রিন শেয়ারিং বা ধাপে ধাপে চ্যাট নির্দেশনায় রিমোট ডায়াগনসিস',
+        'উইন্ডোজ ও লিনাক্স (ডেবিয়ান/উবুন্টু পরিবার) ইনস্টল, কনফিগারেশন ও ক্লিন-আপ',
+        'সফটওয়্যার ইনস্টল ও কনফিগারেশন; ব্রাউজার, ইমেইল ও অফিস টুল',
+        'ব্যাকআপ কৌশল সেটআপ ও যাচাই',
+        'কী পরিবর্তন করা হয়েছে ও কেন — সংক্ষিপ্ত লিখিত নোট',
+      ],
+      notIncluded: [
+        'ফিজিক্যাল হার্ডওয়্যার মেরামত (স্ক্রিন, বোর্ড, সোল্ডারিং) — এটি সফটওয়্যার ও কনফিগারেশন সহায়তা',
+        'নিয়মিত সেবা হিসেবে সরেজমিন পরিদর্শন',
+        'আপনার অধিকার নেই এমন লাইসেন্স, পাসওয়ার্ড বা অ্যাক্টিভেশন বাইপাস',
+      ],
+      capabilities: ['উইন্ডোজ ১০/১১', 'ডেবিয়ান / উবুন্টু লিনাক্স', 'টার্মাক্স ও পিরুট এনভায়রনমেন্ট', 'শেল স্ক্রিপ্টিং', 'ব্যাকআপ টুলিং', 'ডেভেলপার টুলচেইন'],
+      evidence: [
+        { name: 'Ternux', note: 'অ্যান্ড্রয়েডে জিপিইউ রুটসহ সম্পূর্ণ ডেবিয়ান ডেস্কটপ — ডায়াগনস্টিক, মেরামত ও বেঞ্চমার্ক টুলিংসহ', url: 'https://github.com/soobujmiah/ternux' },
+        { name: 'ADT', note: 'লিনাক্সের জন্য নেটিভ এআরএম৬৪ অ্যান্ড্রয়েড টুলচেইন — ভাঙা অংশ চিহ্নিত করার “ডক্টর” কমান্ডসহ', url: 'https://github.com/soobujmiah/adt' },
+      ],
+      faq: [
+        { q: 'ভাঙা ল্যাপটপ স্ক্রিন ঠিক করতে পারবেন?', a: 'না — সেটি হার্ডওয়্যার মেরামত। আমি সফটওয়্যারের দিকটা দেখি: অপারেটিং সিস্টেম, ড্রাইভার, কনফিগারেশন, পারফরম্যান্স ও ডেটা।' },
+        { q: 'রিমোট সহায়তা কীভাবে কাজ করে?', a: 'স্ক্রিন-শেয়ারিং সেশন বা সঠিক ধাপসহ মেসেজ থ্রেড। পুরো সময় আপনার কম্পিউটারের নিয়ন্ত্রণ আপনার হাতেই থাকে।' },
+      ],
+    },
+    {
+      slug: 'android-support',
+      title: 'অ্যান্ড্রয়েড ও ফোন সফটওয়্যার সহায়তা',
+      short: 'অ্যান্ড্রয়েড কনফিগারেশন, সফটওয়্যার সমস্যা সমাধান, এডিবি ও ডিভাইস সেটআপ, আর সৎ পারফরম্যান্স টিউনিং।',
+      seoTitle: 'অ্যান্ড্রয়েড সহায়তা — ফোন সেটআপ, সফটওয়্যার সমস্যা সমাধান ও এডিবি',
+      seoDescription:
+        'সবুজ মিয়ার অ্যান্ড্রয়েড ফোন সফটওয়্যার সহায়তা: সেটআপ ও কনফিগারেশন, সমস্যা সমাধান, এডিবি ও ওয়্যারলেস ডিবাগিং, ডেভেলপার অপশন, স্টোরেজ ও ব্যাটারি অপ্টিমাইজেশন, টার্মাক্স ও অ্যান্ড্রয়েডে লিনাক্স। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+      forWho: [
+        'যার অ্যান্ড্রয়েড ফোন ধীর, ভরা, ভুল কনফিগার করা বা অদ্ভুত আচরণ করছে',
+        'যারা রুট ছাড়াই পরিষ্কার, গোপনীয়তা-রক্ষাকারী, সুসংগঠিত ফোন চান',
+        'ডেভেলপার ও টিঙ্কারার যাদের এডিবি, ওয়্যারলেস ডিবাগিং, টার্মাক্স বা লিনাক্স এনভায়রনমেন্ট চালু করা দরকার',
+      ],
+      problems: [
+        'স্টোরেজ ভরা, ব্যাটারি দ্রুত শেষ, অ্যাপ ক্র্যাশ বা আপডেট হচ্ছে না',
+        'ডেটা না হারিয়ে নতুন ফোনে স্থানান্তর',
+        'এডিবি ডিভাইস শনাক্ত করছে না; পেয়ারিং ও ওয়্যারলেস ডিবাগিং',
+        'ফোনে টার্মাক্স, পিরুট ডেবিয়ান বা পূর্ণ লিনাক্স ডেস্কটপ সেটআপ',
+        'কোন পারমিশন ও ব্যাকগ্রাউন্ড অ্যাপ সত্যিই দরকার তা বোঝা',
+      ],
+      included: [
+        'নির্দেশিত রিমোট সেটআপ ও ক্লিন-আপ (রুট লাগে না)',
+        'এডিবি ও ডেভেলপার-অপশন কনফিগারেশন; এডিবির মাধ্যমে অ্যাপ ইনস্টল ও পরিদর্শন',
+        'গোপনীয়তা-সচেতন ডিফল্ট: পারমিশন, ব্যাকআপ, অ্যাকাউন্ট পরিচ্ছন্নতা',
+        'টার্মাক্স, পিরুট ও অ্যান্ড্রয়েডে লিনাক্স এনভায়রনমেন্ট',
+        'কী পরিবর্তন করা হয়েছে তার সহজ ভাষায় ব্যাখ্যা',
+      ],
+      notIncluded: [
+        'স্ক্রিন, ব্যাটারি বা বোর্ড মেরামত',
+        'আপনার মালিকানাধীন নয় এমন ফোন আনলক, এফআরপি/অ্যাক্টিভেশন লক বাইপাস, বা আপনি চাননি এমন ওয়ারেন্টি-বাতিলকারী পরিবর্তন',
+        'ডিভাইসে পরিমাপ করা হয়নি এমন পারফরম্যান্সের দাবি',
+      ],
+      capabilities: ['এডিবি ও ফাস্টবুট (এআরএম৬৪-এর জন্য সোর্স থেকে বিল্ড)', 'অ্যান্ড্রয়েড ডেভেলপার অপশন', 'শিজুকু ও অ্যাক্সেসিবিলিটি (সম্মতিভিত্তিক)', 'টার্মাক্স / পিরুট ডেবিয়ান', 'ডিভাইসে জিজিইউএফ লোকাল মডেল'],
+      evidence: [
+        { name: 'ADT', note: 'এওএসপি সোর্স থেকে কম্পাইল করা নেটিভ এআরএম৬৪ এডিবি/ফাস্টবুট ও বিল্ড-টুলস, আসল ডিভাইসে যাচাইকৃত', url: 'https://github.com/soobujmiah/adt' },
+        { name: 'LAI', note: 'সম্মতিভিত্তিক অটোমেশনসহ অ্যান্ড্রয়েডে ডিভাইস-যাচাইকৃত লোকাল এআই', url: 'https://github.com/soobujmiah/lai' },
+        { name: 'Ternux', note: 'পরিমাপকৃত জিপিইউ রুটসহ অ্যান্ড্রয়েডে রুট-ছাড়া লিনাক্স ডেস্কটপ', url: 'https://github.com/soobujmiah/ternux' },
+      ],
+      faq: [
+        { q: 'আপনি কি ফোন রুট করেন?', a: 'না। আমি যা সেটআপ করি সবই রুট ছাড়া কাজ করে; তাতে আপনার ওয়ারেন্টি, ব্যাংকিং অ্যাপ ও নিরাপত্তা অক্ষত থাকে।' },
+      ],
+    },
+    {
+      slug: 'business-technology',
+      title: 'ছোট ব্যবসার প্রযুক্তি সহায়তা',
+      short: 'ছোট ব্যবসা ও প্রতিষ্ঠানের জন্য ব্যবহারিক প্রযুক্তি — প্রথম স্প্রেডশিট থেকে আসল ওয়ার্কফ্লো টুল পর্যন্ত।',
+      seoTitle: 'ছোট ব্যবসার প্রযুক্তি সহায়তা — ওয়ার্কফ্লো টুল ও অটোমেশন',
+      seoDescription:
+        'সবুজ মিয়ার ছোট ব্যবসার প্রযুক্তি সহায়তা: টুল নির্বাচন ও সেটআপ, ওয়ার্কফ্লো অটোমেশন, ডিজিটাল রেকর্ড, সহজ ব্যবসায়িক সফটওয়্যার, ওয়েবসাইট ও কর্মী প্রশিক্ষণ। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+      forWho: [
+        'দোকান, এজেন্সি, স্কুল, কোচিং সেন্টার ও পারিবারিক ব্যবসা',
+        'মালিক যারা কাজ ভালো জানেন কিন্তু প্রযুক্তির দায়িত্ব নেওয়ার কেউ নেই',
+        'কাগজ ও চ্যাট মেসেজ থেকে ডিজিটাল রেকর্ডে যাওয়া প্রতিষ্ঠান',
+      ],
+      problems: [
+        'নোটবুক, ফোন ও মেসেজিং অ্যাপে ছড়িয়ে থাকা রেকর্ড',
+        'হাতে জোড়া লাগাতে ঘণ্টার পর ঘণ্টা লাগে এমন দৈনিক রিপোর্ট',
+        'ইনভয়েস, রেজিস্ট্রেশন, উপস্থিতি বা ইনভেন্টরির স্পষ্ট ব্যবস্থা নেই',
+        'কেনা হয়েছে কিন্তু ঠিকমতো সেটআপ হয়নি এমন সফটওয়্যার',
+      ],
+      included: [
+        'ব্যবসার আসলে কী দরকার তার সৎ মূল্যায়ন — প্রায়ই যা ভাবা হয় তার চেয়ে কম',
+        'সঠিক টুল সেটআপ ও কনফিগারেশন (গুগল ওয়ার্কস্পেস, মাইক্রোসফট ৩৬৫, স্প্রেডশিট, ফর্ম)',
+        'পুনরাবৃত্ত রিপোর্টিং স্বয়ংক্রিয়করণ; যেসব অংশের পরস্পর কথা বলা উচিত সেগুলো সংযুক্ত করা',
+        'তৈরি কিছু না মিললে সহজ কাস্টম সফটওয়্যার (কাস্টম সফটওয়্যার দেখুন)',
+        'প্রশিক্ষণ নোট যাতে কর্মীরা নিজেরাই চালিয়ে নিতে পারেন',
+      ],
+      notIncluded: [
+        'হিসাবরক্ষণ বা আইনি পরামর্শ',
+        'এন্টারপ্রাইজ ইআরপি রোল-আউট',
+        'ভুয়া রিভিউ, গ্রোথ হ্যাক বা গ্রাহককে বিভ্রান্ত করে এমন কিছু',
+      ],
+      capabilities: ['গুগল ওয়ার্কস্পেস ও মাইক্রোসফট ৩৬৫', 'স্প্রেডশিট সিস্টেম ও অটোমেশন', 'বাংলা-ফার্স্ট ব্যবসায়িক সফটওয়্যার', 'এসকিউলাইট-ভিত্তিক লোকাল রেকর্ড', 'ডকুমেন্টেশন ও প্রক্রিয়া নকশা'],
+      evidence: [
+        { name: 'Songjog', note: 'বাংলা-ফার্স্ট ব্যবসা ও প্রতিষ্ঠান পরিচালনা অ্যাপ — দ্রুত দৈনিক এন্ট্রি, লোকাল রেকর্ড, নিরীক্ষাযোগ্য সংশোধন', url: 'https://github.com/soobujmiah/songjog' },
+        { name: 'DataKhoj', note: 'ডেটা অনুসন্ধান টুলিং', url: 'https://github.com/soobujmiah/datakhoj' },
+      ],
+      faq: [
+        { q: 'আমরা খুবই ছোট ব্যবসা। এটা কি আমাদের জন্য?', a: 'বিশেষ করে আপনাদের জন্যই। প্রথম লক্ষ্য সাধারণত আরও সফটওয়্যার কেনা নয়, বরং যা আছে তা দিয়েই ঝামেলা কমানো।' },
+      ],
+    },
+    {
+      slug: 'graphics-design',
+      title: 'গ্রাফিক্স ডিজাইন',
+      short: 'পরিচ্ছন্ন, ব্যবহারিক ডিজিটাল গ্রাফিক্স — দৈনন্দিন ব্যবহারের জন্য সোশ্যাল মিডিয়া পোস্ট, পোস্টার, ব্যানার ও প্রচারসামগ্রী।',
+      seoTitle: 'গ্রাফিক্স ডিজাইন — সোশ্যাল মিডিয়া গ্রাফিক্স, পোস্টার ও প্রচারসামগ্রী',
+      seoDescription:
+        'সবুজ মিয়ার ব্যবহারিক গ্রাফিক্স ডিজাইন: ছোট ব্যবসা ও প্রতিষ্ঠানের জন্য বাংলা ও ইংরেজিতে সোশ্যাল মিডিয়া গ্রাফিক্স, পোস্টার, ব্যানার, নোটিশ ও প্রচারসামগ্রী। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+      forWho: [
+        'ছোট ব্যবসা, স্কুল ও প্রতিষ্ঠান যাদের নিয়মিত, পরিপাটি ভিজ্যুয়াল সামগ্রী দরকার',
+        'যার একটি পোস্টার, ব্যানার বা ঘোষণা গ্রাফিক ঠিকমতো ও দ্রুত দরকার',
+      ],
+      problems: [
+        'সাধারণ টেক্সট বা ঝাপসা ছবি হিসেবে পোস্ট করা ঘোষণা ও অফার',
+        'পোস্টজুড়ে অসামঞ্জস্যপূর্ণ ফন্ট, রং ও লোগো',
+        'ডিজাইন টুলে খারাপভাবে রেন্ডার হওয়া বাংলা টেক্সট',
+      ],
+      included: [
+        'সোশ্যাল মিডিয়া গ্রাফিক্স, পোস্টার, ব্যানার, নোটিশ, সাধারণ ফ্লায়ার ও সার্টিফিকেট',
+        'বাংলা ও ইংরেজি টাইপোগ্রাফি সঠিকভাবে সামলানো',
+        'আপনার বিদ্যমান লোগো ও রঙের সামঞ্জস্যপূর্ণ ব্যবহার; সহজ পুনর্ব্যবহারযোগ্য টেমপ্লেট',
+        'প্রিন্ট বা প্রতিটি প্ল্যাটফর্মের জন্য সঠিক আকার ও ফরম্যাটে এক্সপোর্ট',
+      ],
+      notIncluded: [
+        'ব্র্যান্ড আইডেন্টিটি সিস্টেম, শূন্য থেকে লোগো ডিজাইন, ইলাস্ট্রেশন বা থ্রিডি কাজ',
+        'ভিডিও প্রোডাকশন (শুধু সাধারণ এডিট, ক্ষেত্রবিশেষে আলোচনা সাপেক্ষ)',
+      ],
+      capabilities: ['ক্যানভা ও গিম্প', 'ইঙ্কস্কেপ (ভেক্টর)', 'বাংলা/ইংরেজি টাইপোগ্রাফি', 'প্রিন্ট ও সোশ্যাল এক্সপোর্ট প্রিসেট'],
+      evidence: [
+        { name: 'Experience', note: 'রাবেয়া এডুকেশন ফ্যামিলিতে অফিস অ্যাডমিনিস্ট্রেটর ভূমিকার অংশ হিসেবে প্রচার গ্রাফিক্স ও সোশ্যাল মিডিয়া (২০২৫–বর্তমান)', url: 'https://soobujmiah.github.io/experience/' },
+        { name: 'GGEN', note: 'আমি একটি অ্যান্ড্রয়েড-ফার্স্ট ক্রিয়েটিভ ও ডকুমেন্ট স্টুডিওও তৈরি করছি (ফ্লাটার/ডার্ট)', url: 'https://github.com/soobujmiah/ggen' },
+      ],
+      faq: [],
+    },
+    {
+      slug: 'office-administration',
+      title: 'অফিস অ্যাডমিনিস্ট্রেশন ও অপারেশন সহায়তা',
+      short: 'বছরের পর বছরের বাস্তব অফিস ও সাইট-অপারেশন অভিজ্ঞতায় সমর্থিত সুসংগঠিত, ডিজিটাল-ফার্স্ট প্রশাসনিক সহায়তা।',
+      seoTitle: 'অফিস অ্যাডমিনিস্ট্রেশন ও অপারেশন সহায়তা — রিমোট প্রশাসনিক সেবা',
+      seoDescription:
+        'সবুজ মিয়ার অফিস অ্যাডমিনিস্ট্রেশন সহায়তা: ডকুমেন্ট ব্যবস্থাপনা, রেকর্ড ও ফাইলিং সিস্টেম, রেজিস্ট্রেশন, সময়সূচি, রিপোর্টিং ও ডিজিটাল অফিস ওয়ার্কফ্লো — ৮+ বছরের অপারেশন অভিজ্ঞতা। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+      forWho: [
+        'নিবেদিত অ্যাডমিনিস্ট্রেটর ছাড়া ছোট অফিস, স্কুল ও প্রতিষ্ঠান',
+        'ব্যবসার মালিক যাদের নির্ভরযোগ্য ব্যাক-অফিস ফলো-থ্রু দরকার',
+        'যেসব টিমের ডকুমেন্ট, রেকর্ড ও রুটিন গুছিয়ে দেওয়া দরকার',
+      ],
+      problems: [
+        'দরকারের সময় খুঁজে পাওয়া যায় না এমন ডকুমেন্ট',
+        'অসামঞ্জস্যপূর্ণভাবে সামলানো রেজিস্ট্রেশন, রেকর্ড ও চিঠিপত্র',
+        'প্রতি সপ্তাহে কয়েকটি উৎস থেকে হাতে জোড়া লাগানো রিপোর্ট',
+        'কোনো মানক প্রক্রিয়া নেই, তাই সবকিছু একজনের স্মৃতির ওপর নির্ভরশীল',
+      ],
+      included: [
+        'ডকুমেন্ট প্রক্রিয়াকরণ, ডিজিটাল ফাইলিং সিস্টেম ও রেকর্ড সংগঠন',
+        'রেজিস্ট্রেশন, সময়সূচি, চিঠিপত্র ও ফলো-আপ',
+        'কাঠামোবদ্ধ রিপোর্টিং ও সহজ ড্যাশবোর্ড',
+        'প্রক্রিয়া লিখে রাখা যাতে অফিস বীরত্ব ছাড়াই চলে',
+        'টিমের জন্য গুগল ওয়ার্কস্পেস / মাইক্রোসফট অফিস সেটআপ',
+      ],
+      notIncluded: [
+        'আইনি, এইচআর-কমপ্লায়েন্স বা হিসাবরক্ষণের দায়িত্ব',
+        'নিয়মিত সেবা হিসেবে ফিজিক্যাল রিসেপশন বা সরেজমিন উপস্থিতি',
+      ],
+      capabilities: ['মাইক্রোসফট অফিস ও গুগল ওয়ার্কস্পেস', 'ডকুমেন্ট ব্যবস্থাপনা', 'রেকর্ড ও ফাইলিং সিস্টেম', 'কাঠামোবদ্ধ রিপোর্টিং', 'বাংলা ও ইংরেজি চিঠিপত্র'],
+      evidence: [
+        { name: 'Experience', note: 'অফিস অ্যাডমিনিস্ট্রেটর (রাবেয়া এডুকেশন ফ্যামিলি, ২০২৫–বর্তমান); কম্পিউটার অপারেটর; সৌদি আরবে শিল্প সাইটে কোঅর্ডিনেটর ও প্রগ্রেস রিপোর্টার', url: 'https://soobujmiah.github.io/experience/' },
+      ],
+      faq: [],
+    },
+    {
+      slug: 'data-entry',
+      title: 'ডেটা এন্ট্রি ও ডেটা কাজ',
+      short: 'নির্ভুল ডেটা এন্ট্রি, ক্লিন-আপ ও কাঠামোবদ্ধকরণ — কাগজ ও পিডিএফ থেকে বিশ্বাসযোগ্য স্প্রেডশিট ও ডেটাবেজ পর্যন্ত।',
+      seoTitle: 'ডেটা এন্ট্রি ও ডেটা কাজ — ডেটা ক্লিনআপ, স্প্রেডশিট ও কাঠামোবদ্ধ ডেটা',
+      seoDescription:
+        'সবুজ মিয়ার ডেটা এন্ট্রি ও ডেটা কাজ: বাল্ক ডেটা এন্ট্রি, ডিজিটাইজেশন, ক্লিনআপ ও ডুপ্লিকেট অপসারণ, ফরম্যাট রূপান্তর, স্প্রেডশিট কাঠামোবদ্ধকরণ ও ডেটাবেজের জন্য প্রস্তুতি — নির্ভুল ও গোপনীয়। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+      forWho: [
+        'ব্যবসা ও প্রতিষ্ঠান যাদের কাগজের রেকর্ড, পিডিএফ বা স্ক্যান ব্যবহারযোগ্য ডেটায় পরিণত করা দরকার',
+        'অগোছালো স্প্রেডশিটওয়ালা টিম: ডুপ্লিকেট, অসামঞ্জস্যপূর্ণ ফরম্যাট, অনুপস্থিত ফিল্ড',
+        'গবেষক ও বিশ্লেষক যাদের বিশ্লেষণের আগে ডেটা প্রস্তুত করা দরকার',
+      ],
+      problems: [
+        'টাইপ করার অপেক্ষায় থাকা ফর্ম, ইনভয়েস বা রেজিস্টারের স্তূপ',
+        'অসামঞ্জস্যপূর্ণ বানান, তারিখ ও সংখ্যাসহ স্প্রেডশিট',
+        'এক ফরম্যাটের ডেটা যা অন্য সিস্টেমে ভিন্ন ফরম্যাটে দরকার',
+        'বাংলা টেক্সট ডেটা যা সঠিকভাবে (ইউনিকোডে) এন্ট্রি ও সংরক্ষণ করতে হবে',
+      ],
+      included: [
+        'কাগজ, ছবি ও পিডিএফ থেকে বাল্ক ডেটা এন্ট্রি, যাচাই পাসসহ',
+        'ক্লিনআপ: ডুপ্লিকেট অপসারণ, স্বাভাবিকীকরণ, যাচাই নিয়ম, সামঞ্জস্যপূর্ণ ফরম্যাট',
+        'ফরম্যাট রূপান্তর (সিএসভি, এক্সেল, জেসন, এসকিউলাইট) ও ডেটাবেজের জন্য প্রস্তুতি',
+        'বড় বা পুনরাবৃত্ত কাজের জন্য স্ক্রিপ্টেড প্রক্রিয়াকরণ (পাইথন) — হাতে পুনরায় টাইপের চেয়ে দ্রুত ও সামঞ্জস্যপূর্ণ',
+        'গোপনীয় হ্যান্ডলিং: যতটা সম্ভব আপনার ডেটা আপনার অ্যাকাউন্ট ও সিস্টেমেই থাকে',
+      ],
+      notIncluded: [
+        'আপনার ব্যবহারের অনুমতি নেই এমন উৎস থেকে ডেটা সংগ্রহ; সীমাবদ্ধ বা ব্যক্তিগত ডেটা স্ক্র্যাপিং; কোনো সেবার শর্ত বা আইন ভঙ্গ করে এমন কিছু',
+        'পরিসংখ্যানগত বিশ্লেষণ বা ব্যাখ্যা (অন্যথায় সম্মত না হলে শুধু ডেটা প্রস্তুতি)',
+      ],
+      capabilities: ['এক্সেল ও গুগল শিটস', 'পাইথন (পান্ডাস, সিএসভি/জেসন টুলিং)', 'এসকিউলাইট', 'ওসিআর-সহায়িত ডিজিটাইজেশন', 'বাংলা ইউনিকোড ডেটা'],
+      evidence: [
+        { name: 'Experience', note: 'প্রগ্রেস রিপোর্টার (দৈনিক অগ্রগতি ডেটা, ডিজিটাইজেশন, কাঠামোবদ্ধ রিপোর্টিং) ও কম্পিউটার অপারেটর ভূমিকা', url: 'https://soobujmiah.github.io/experience/' },
+        { name: 'DataKhoj', note: 'ডেটা অনুসন্ধান ও প্রক্রিয়াকরণ টুলিং', url: 'https://github.com/soobujmiah/datakhoj' },
+      ],
+      faq: [
+        { q: 'আমার ডেটা কি নিরাপদ?', a: 'যতটা সম্ভব আপনার নিজের অ্যাকাউন্ট ও ফাইলের ভেতরেই কাজ হয়, আর আপনি না চাইলে হস্তান্তরের পর কিছু রাখা হয় না। আমি শুধু সেই ডেটা নিয়ে কাজ করি যা ব্যবহারের অনুমতি আপনার আছে।' },
+      ],
+    },
+  ],
+};
+
+export const servicesContent: Record<Lang, ServicesContent> = { en, bn };

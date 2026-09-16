@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Magnetic, Reveal, SnapCarousel, useNav } from './ui';
 import { SignatureName } from './SignatureName';
 import { sectionHref } from '@/app/sections';
+import { serviceHref } from '@/app/services';
 import { useLang, localizeDigits } from '@/app/language';
 import type { Project, Repo } from '@/app/content';
 
@@ -898,6 +899,16 @@ export function ExperienceScene() {
                   </span>
                 ))}
               </div>
+              {/* Discovery link into the service-intent layer (/services/),
+                  which lives outside the pager by design. */}
+              <a
+                href={serviceHref()}
+                className="mt-3 inline-block font-mono text-[10px] transition-colors duration-300 hover:text-[#4ade80]"
+                style={{ color: 'rgba(228,226,223,0.5)' }}
+                data-magnetic
+              >
+                {t.contact.servicesLink}
+              </a>
             </Reveal>
           </div>
           <div>
@@ -956,7 +967,15 @@ export function ContactScene() {
             </Reveal>
             <Reveal delay={0.12}>
               <p className="mx-auto lg:mx-0 max-w-md text-sm" style={{ color: 'rgba(228,226,223,0.6)' }}>
-                {t.contact.sub}
+                {t.contact.sub}{' '}
+                <a
+                  href={serviceHref()}
+                  className="transition-colors duration-300 hover:text-[#4ade80]"
+                  style={{ color: 'rgba(228,226,223,0.85)', textDecoration: 'underline', textUnderlineOffset: 3 }}
+                  data-magnetic
+                >
+                  {t.contact.servicesLink}
+                </a>
               </p>
             </Reveal>
 

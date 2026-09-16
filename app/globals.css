@@ -1308,3 +1308,31 @@ body.lang-bn .social-group {
     display: none !important;
   }
 }
+
+/* ── service-intent pages (/services/*) ──
+   Plain, scrollable documents that share the tokens and fonts but
+   live outside the pager. The pager owns `overflow:hidden` and the
+   custom cursor on <body>; these pages opt back into normal document
+   behaviour without touching any pager rule. Scoped by class, so the
+   nine sections are unaffected. */
+html:has(body > .services-doc) {
+  overflow-y: auto;
+}
+body:has(> .services-doc) {
+  overflow: auto;
+  overscroll-behavior: auto;
+  cursor: auto;
+}
+body:has(> .services-doc) a,
+body:has(> .services-doc) button {
+  cursor: pointer;
+}
+.services-doc {
+  min-height: 100vh;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(34, 197, 94, 0.07) 0%, transparent 55%),
+    var(--bg);
+}
+.services-doc .prose-list li + li {
+  margin-top: 0.45rem;
+}
