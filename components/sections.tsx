@@ -56,7 +56,7 @@ export function HeroScene({ reducedMotion }: { reducedMotion: boolean }) {
         </motion.p>
 
         {/* 2 · who I am — the identity mark dominates */}
-        <h1 className="hero-name text-[clamp(2.85rem,9vw,6.5rem)] font-semibold leading-[1.02] tracking-tight">
+        <h1 className="hero-name text-[clamp(3.05rem,10vw,7.4rem)] font-semibold leading-[1.06] tracking-tight">
           <GlitchName text={t.profile.nameFull} reducedMotion={reducedMotion} />
         </h1>
 

@@ -490,6 +490,13 @@ const en: Content = {
     },
     entries: [
       {
+        period: 'Apr 2026 – Present',
+        role: 'Independent Systems Builder & Engineer',
+        company: 'Pro-Jukti Info Tech',
+        location: 'Self-employed',
+        desc: 'Independent systems work — on-device AI, ARM64 Android tooling and Linux systems, delivered through Pro-Jukti Info Tech.',
+      },
+      {
         period: 'Mar 2025 – Present',
         role: 'Office Administrator',
         company: 'Rabeya Education Family',
@@ -894,6 +901,13 @@ const bn: Content = {
       ],
     },
     entries: [
+      {
+        period: 'এপ্রিল ২০২৬ – বর্তমান',
+        role: 'স্বাধীন সিস্টেম নির্মাতা ও ইঞ্জিনিয়ার',
+        company: 'প্রো-জুকতি ইনফো টেক',
+        location: 'স্ব-নিয়োজিত',
+        desc: 'স্বাধীন সিস্টেম কাজ — অন-ডিভাইস এআই, এআরএম ৬৪ অ্যান্ড্রয়েড টুলিং ও লিনাক্স সিস্টেম, প্রো-জুকতি ইনফো টেক-এর মাধ্যমে পরিবেশিত।',
+      },
       {
         period: 'মার্চ ২০২৫ – বর্তমান',
         role: 'অফিস অ্যাডমিনিস্ট্রেটর',
