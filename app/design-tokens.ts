@@ -58,6 +58,12 @@ export const MOTION = {
     outgoingSeconds: 0.22,
     /** Cross-fade from particles to the real DOM text, seconds. */
     resolveSeconds: 0.34,
+    /** Loop decomposition pass: the formed wordmark lifts back into the
+        field over this many seconds, traversing the existing particle
+        math in reverse. */
+    disperseSeconds: 0.9,
+    /** Stable pause of the formed wordmark between cycles, seconds. */
+    holdSeconds: 1.6,
     /** Baseline rule + cluster ticks fade out over this share. */
     guideShare: 0.62,
     /** Left-to-right stagger across the grapheme clusters. */

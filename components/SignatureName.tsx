@@ -302,22 +302,35 @@ export function SignatureName({
       stage.dataset.asm = 'run';
 
       const totalMs = T.totalSeconds * 1000;
+      const disperseMs = T.disperseSeconds * 1000;
       let t0 = performance.now();
       let hiddenAt = 0;
       let settled = false;
+      /* 'in' is the existing construction: the dispersed field seats into
+         the wordmark. 'out' is the same particle math played the other
+         way, so a formed wordmark lifts off into the field instead of
+         popping back to scatter — the loop's decomposition beat. Same
+         particles, same paths, same palette, same easing: nothing new is
+         drawn, the existing timeline is simply traversed in reverse. */
+      let phase: 'in' | 'out' = 'in';
 
       const release = () => {
-        /* hand over to the real typography, then release the canvas.
+        /* Hand over to the real typography, hold the formed wordmark for
+           the token's pause, then hand back to the particles: the
+           construction is the identity mark, so it repeats for as long as
+           the page lives. One controlled lifecycle — the same particle
+           array, the same canvas, the same rAF slot — restarts per cycle;
+           nothing is re-allocated and nothing accumulates.
 
-           Only the *backing store* is released. The padded CSS box is
-           deliberately left in place: `data-asm="done"` has already faded
-           the canvas to opacity 0, so shrinking the element back to the
-           wordmark box would buy nothing visually, while changing its rect
-           is exactly the kind of invisible geometry change that browsers
-           can book as a layout shift (and does, whenever the main thread
-           is busy enough that a stale paint record is still attached to
-           the element). Keeping the box constant means the identity mark
-           never moves anything, ever.
+           The backing store now stays allocated across cycles (the next
+           cycle draws into it); teardown releases it. The padded CSS box
+           is deliberately left in place for the component's lifetime:
+           `data-asm="done"` has already faded the canvas to opacity 0, so
+           shrinking the element back to the wordmark box would buy nothing
+           visually, while changing its rect is exactly the kind of
+           invisible geometry change that browsers can book as a layout
+           shift. Keeping the box constant means the identity mark never
+           moves anything, ever.
 
            The overhang is safe: every ancestor of the stage up to <body>
            clips overflow-x, so the padded box cannot introduce a
@@ -327,10 +340,22 @@ export function SignatureName({
         settled = true;
         giveUpToText();
         later(() => {
-          ctx.clearRect(-padX, -padY, W + 2 * padX, H + 2 * padY);
-          canvas.width = 0;
-          canvas.height = 0;
+          later(beginCycle, T.holdSeconds * 1000);
         }, T.resolveSeconds * 1000 + 60);
+      };
+
+      const beginCycle = () => {
+        if (cancelled || raf) return;
+        settled = false;
+        hiddenAt = 0;
+        phase = 'out';
+        /* The canvas still holds the seated field from the last cycle, so
+           swapping text→canvas on this frame reads as the wordmark
+           beginning to lift, not as a flicker. Cells hide on the same
+           frame, exactly as they did on the very first construction. */
+        stage.dataset.asm = 'run';
+        t0 = performance.now();
+        raf = requestAnimationFrame(frame);
       };
 
       const frame = (now: number) => {
@@ -347,7 +372,15 @@ export function SignatureName({
           hiddenAt = 0;
         }
 
-        const t = (now - t0) / totalMs;
+        const elapsed = now - t0;
+        if (phase === 'out' && elapsed >= disperseMs) {
+          /* decomposition complete: the field is floating again — now run
+             the existing construction forward, unchanged */
+          phase = 'in';
+          t0 = now;
+        }
+        const t =
+          phase === 'out' ? 1 - Math.min(1, elapsed / disperseMs) : elapsed / totalMs;
         ctx.clearRect(-padX, -padY, W + 2 * padX, H + 2 * padY);
 
         /* construction guides: one baseline rule, one tick per cluster.
@@ -413,7 +446,7 @@ export function SignatureName({
           ctx.fill(buckets[b]);
         }
 
-        if (t >= 1 || arrived === particles.length) {
+        if (phase === 'in' && (t >= 1 || arrived === particles.length)) {
           release();
           return;
         }
