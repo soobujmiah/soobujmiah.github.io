@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Magnetic, Reveal, SnapCarousel, useNav } from './ui';
 import { BrandIcon, type BrandIconId } from './social-icons';
 import { SignatureName } from './SignatureName';
+import { IdentityClock } from './IdentityClock';
 import { sectionHref } from '@/app/sections';
 import { serviceHref } from '@/app/services';
 import { useLang, localizeDigits } from '@/app/language';
@@ -32,108 +33,6 @@ function PageNumeral({ index }: { index: number }) {
     <div aria-hidden className="page-numeral">
       {NUMERALS[lang][index]}
     </div>
-  );
-}
-
-/* ── 00 · LIVE LOCAL CLOCK ─────────────────────────────────────
-   Client-only (rendered after mount, so SSR output is unchanged and
-   the no-JS baseline is untouched). Shows Dhaka local time+date in
-   the active language; Intl renders Bengali digits/months in bn. */
-
-function DhakaClock() {
-  const { lang } = useLang();
-  const [now, setNow] = useState<{
-    body: string;
-    ampm: string;
-    date: string;
-    prevBody: string;
-    prevAmpm: string;
-  } | null>(null);
-  useEffect(() => {
-    const locale = lang === 'bn' ? 'bn' : 'en-GB';
-    /* 12-hour wall clock with visible seconds; the meridiem is split off
-       so the digits and the AM/PM token can be styled (and morphed)
-       independently. Locale-appropriate digits in both languages. */
-    const time = new Intl.DateTimeFormat(lang === 'bn' ? 'bn' : 'en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true,
-      timeZone: 'Asia/Dhaka',
-    });
-    const wd = new Intl.DateTimeFormat(locale, { weekday: 'long', timeZone: 'Asia/Dhaka' });
-    const dmy = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Dhaka' });
-    const tick = () => {
-      const d = new Date();
-      const parts = time.format(d).split(' ');
-      const ampm = parts.length > 1 ? parts[parts.length - 1] : '';
-      const body = parts.length > 1 ? parts.slice(0, -1).join(' ') : time.format(d);
-      const date = `${wd.format(d)} · ${dmy.format(d)}`;
-      /* previous frame rides along so render can diff character by
-         character and roll only the glyphs that actually changed */
-      setNow((old) => ({
-        body,
-        ampm,
-        date,
-        prevBody: old ? old.body : body,
-        prevAmpm: old ? old.ampm : ampm,
-      }));
-    };
-    tick();
-    /* one timer, cleaned up on unmount / language change */
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [lang]);
-  if (!now) return null;
-  /* Date/location on one quiet line; the 12-hour clock below it is the
-     focal point. Only changed glyphs animate: a changed character
-     remounts as a two-cell vertical reel that rolls old→new behind a
-     mask (flip-clock character), while stable characters keep their
-     DOM node and stay perfectly still. Tabular digits + fixed cell
-     height ⇒ no layout shift; one timer, cleaned on unmount. */
-  const cells = now.body.split('').map((ch, i) => {
-    const prev = now.prevBody[i];
-    if (prev !== undefined && prev !== ch) {
-      return (
-        <span key={`${i}-${ch}`} className="ck-ch" aria-hidden="true">
-          <span className="ck-reel">
-            <span>{prev}</span>
-            <span>{ch}</span>
-          </span>
-        </span>
-      );
-    }
-    return (
-      <span key={i} className="ck-ch" aria-hidden="true">
-        {ch}
-      </span>
-    );
-  });
-  const ampmRolled = now.prevAmpm !== '' && now.prevAmpm !== now.ampm;
-  return (
-    <span className="hero-clock-block">
-      <span className="hero-clock-date font-mono">
-        {now.date} · {lang === 'bn' ? 'জিএমটি+৬ · ঢাকা' : 'GMT+6 · Dhaka'}
-      </span>
-      <span className="hero-clock-time font-mono">
-        {cells}
-        {now.ampm ? (
-          ampmRolled ? (
-            <span key={`ap-${now.ampm}`} className="ck-ampm">
-              <span className="ck-reel">
-                <span>{now.prevAmpm}</span>
-                <span>{now.ampm}</span>
-              </span>
-            </span>
-          ) : (
-            <span className="ck-ampm">{now.ampm}</span>
-          )
-        ) : null}
-        <span className="sr-only">
-          {now.body} {now.ampm}
-        </span>
-      </span>
-    </span>
   );
 }
 
@@ -180,15 +79,25 @@ function iconFor(href: string): 'portfolio' | BrandIconId {
 /* ── 01 · HERO ───────────────────────────────────────────────── */
 
 export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: boolean; armed?: boolean }) {
-  const { t, lang } = useLang();
-  const { goToScene, openNav } = useNav();
+  const { t } = useLang();
+  const { goToScene } = useNav();
 
   return (
-    <div className="page-fill">
+    <div className="page-fill page-fill--hero">
       <PageNumeral index={0} />
 
       <div className="page-content flex flex-col items-center text-center">
-        {/* 1 · who I am — the identity mark leads; nothing sits above it */}
+        {/* 0 · live local time — the identity system's smaller sibling.
+            It leads the page directly under the header: clock first,
+            then the identity mark. Rendered in the name's own dotted
+            typographic language (components/IdentityClock.tsx); the
+            entrance is pure CSS, disabled under reduced motion. */}
+        <div className="hero-clock-wrap">
+          <IdentityClock />
+        </div>
+
+        {/* 1 · who I am — the identity mark leads the content; only the
+            clock, its sibling instrument, sits above it */}
         <h1 className="hero-name text-[clamp(3.05rem,10vw,7.4rem)] font-semibold leading-[1.06] tracking-tight">
           <SignatureName text={t.profile.nameFull} reducedMotion={reducedMotion} armed={armed} />
         </h1>
@@ -262,18 +171,10 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
             {t.hero.ctaGithub}
           </Magnetic>
         </motion.div>
-
-        {/* 5 · live local time — the identity system's smaller sibling */}
-        <motion.p
-          className="mt-5"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2.3, duration: 0.8 }}
-        >
-          <DhakaClock />
-        </motion.p>
       </div>
 
+      {/* Scroll hint — decoration, not a control. The bottom bar is the
+          sole origin/control for opening the index HUD. */}
       <motion.div
         className="hero-hint absolute bottom-24 left-1/2 -translate-x-1/2"
         initial={{ opacity: 0 }}
@@ -281,10 +182,7 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
         transition={{ delay: 2.5, duration: 1 }}
         aria-hidden
       >
-        <motion.button
-          type="button"
-          onClick={openNav}
-          aria-label={t.ui.navOpen}
+        <motion.span
           className="flex flex-col items-center gap-2"
           animate={reducedMotion ? {} : { y: [0, 6, 0] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
@@ -292,8 +190,8 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
           <span className="font-mono text-[9px] uppercase tracking-[0.2em]" style={{ color: 'rgba(228,226,223,0.4)' }}>
             {t.hero.scrollHint}
           </span>
-          <div className="w-px h-6" style={{ background: 'linear-gradient(to bottom, #22c55e, transparent)' }} />
-        </motion.button>
+          <span className="w-px h-6" style={{ background: 'linear-gradient(to bottom, #22c55e, transparent)' }} />
+        </motion.span>
       </motion.div>
     </div>
   );

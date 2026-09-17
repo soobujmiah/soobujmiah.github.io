@@ -255,61 +255,72 @@ export function PageDots({
   active,
   labels,
   onGo,
+  navOpen,
 }: {
   total: number;
   active: number;
   labels: string[];
   onGo: (index: number) => void;
+  navOpen: boolean;
 }) {
   const { t } = useLang();
   const { openNav } = useNav();
   const prefersReduced = useReducedMotion();
   const dots = Array.from({ length: total }, (_, i) => i);
-  /* Page position lives on the HUD's own border: a hairline track
-     around the housing, with a green arc tracing the pages completed.
-     This replaces the old top-of-page progress bar — same information,
-     physically part of the instrument. The page number itself is not
-     repeated here; every page carries its own numeral. */
-  const progress = (active + 1) / total;
-  const hudTrack = (
-    <svg className="pager-hud-track" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true">
-      <rect
-        x="0.5" y="0.5" width="99" height="33" rx="16.5"
-        fill="none" stroke="rgba(34,197,94,0.14)" strokeWidth="1"
-        vectorEffect="non-scaling-stroke" pathLength={1}
-      />
-      <motion.rect
-        x="0.5" y="0.5" width="99" height="33" rx="16.5"
-        fill="none" stroke="#22c55e" strokeWidth="1.25"
-        vectorEffect="non-scaling-stroke" pathLength={1}
-        style={{ strokeDasharray: 1, filter: 'drop-shadow(0 0 3px rgba(34,197,94,0.45))' }}
+  /* Page position is one instrument, not two: a fixed-width track
+     inside the bar. The START anchor never moves — page 1 sits at 0%
+     and page 9 completes the cycle at 100%:
+
+         progress = active / (total - 1)
+
+     Dots live at fixed proportional positions on the track; the
+     active page is colour + glow only (no width change), so nothing
+     re-centres and neither end of the component ever shifts. The
+     fill is transform-only (scaleX from a left origin). The page
+     number itself is not repeated here; every page carries its own
+     numeral. */
+  const progress = total > 1 ? active / (total - 1) : 0;
+  const track = (
+    <span className="hud-track">
+      <span className="hud-rail" aria-hidden />
+      <motion.span
+        className="hud-fill"
+        aria-hidden
         initial={false}
-        animate={{ strokeDashoffset: 1 - progress }}
-        transition={prefersReduced ? { duration: 0 } : { type: 'spring', stiffness: 120, damping: 24 }}
+        animate={{ scaleX: progress }}
+        transition={prefersReduced ? { duration: 0 } : { type: 'spring', stiffness: 170, damping: 26 }}
       />
-    </svg>
+      {dots.map((i) => (
+        <button
+          key={i}
+          type="button"
+          onClick={() => onGo(i)}
+          aria-label={labels[i] ?? String(i + 1)}
+          aria-current={i === active ? 'true' : undefined}
+          data-magnetic
+          className={`hud-dot${i === active ? ' hud-dot-active' : ''}`}
+          style={{ left: `${total > 1 ? (i / (total - 1)) * 100 : 0}%` }}
+        />
+      ))}
+    </span>
   );
   return (
     <>
-      {/* desktop rail — the pager control, plus the index trigger */}
-      <nav aria-label={t.ui.navTitle} className="pager-dots-rail pager-hud">
-        {hudTrack}
-        {dots.map((i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => onGo(i)}
-            aria-label={labels[i] ?? String(i + 1)}
-            aria-current={i === active ? 'true' : undefined}
-            data-magnetic
-            className={`pager-dot${i === active ? ' pager-dot-active' : ''}`}
-          />
-        ))}
+      {/* desktop rail — the pager control, plus the index trigger.
+          data-nav-open couples the bar to the HUD that emerges from
+          it: while the index is open, the bar carries the glow. */}
+      <nav
+        aria-label={t.ui.navTitle}
+        className="pager-dots-rail pager-hud"
+        data-nav-open={navOpen ? 'true' : 'false'}
+      >
+        {track}
+        <span className="hud-divider" aria-hidden />
         <button
           type="button"
           onClick={openNav}
           aria-label={t.ui.navOpen}
-          aria-expanded={false}
+          aria-expanded={navOpen}
           data-magnetic
           className="pager-index-trigger"
         >
@@ -317,23 +328,18 @@ export function PageDots({
         </button>
       </nav>
       {/* phone row */}
-      <nav aria-label={t.ui.navTitle} className="pager-dots-row pager-hud">
-        {hudTrack}
-        {dots.map((i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => onGo(i)}
-            aria-label={labels[i] ?? String(i + 1)}
-            aria-current={i === active ? 'true' : undefined}
-            className={`pager-dot-sm${i === active ? ' pager-dot-sm-active' : ''}`}
-          />
-        ))}
+      <nav
+        aria-label={t.ui.navTitle}
+        className="pager-dots-row pager-hud"
+        data-nav-open={navOpen ? 'true' : 'false'}
+      >
+        {track}
+        <span className="hud-divider" aria-hidden />
         <button
           type="button"
           onClick={openNav}
           aria-label={t.ui.navOpen}
-          aria-expanded={false}
+          aria-expanded={navOpen}
           className="pager-index-trigger pager-index-trigger-sm"
         >
           <IndexGlyph />
@@ -621,11 +627,14 @@ export function Header() {
             <BrandIcon id="portfolio" size={12} />
             {langGlyph}
           </button>
+          {/* GitHub — same green outline family as CV/Services/language:
+              identical border weight, corner geometry and colour, so
+              the four controls read as one system. Icon-only by design. */}
           <Magnetic
             href="https://github.com/soobujmiah"
             ariaLabel={t.header.githubAria}
             className="inline-flex items-center rounded-full px-2.5 sm:px-3 py-1.5 transition-colors duration-300"
-            style={{ border: '1px solid rgba(228,226,223,0.12)', color: '#e4e2df' }}
+            style={{ border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80' }}
             strength={0.2}
           >
             <BrandIcon id="github" size={14} />

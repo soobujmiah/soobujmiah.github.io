@@ -89,7 +89,8 @@ fabricate); the UI maps it to `Explore`, repos to Source/Code links.
   Open Source (curated subset + GitHub route, never a directory),
   Experience accordion below `md` / timeline above.
 - `components/ui.tsx` — cursor, magnetic links, reveals, preloader, header
-  (with EN/BN toggle), footer, page progress, page dots, snap carousel.
+  (with EN/BN toggle), footer, the bottom HUD bar (fixed-start progress
+  track, page dots, index trigger), snap carousel.
 
 Visual language is specified in `DESIGN_SYSTEM.md` — the shared DNA for this
 portfolio and future repository websites (same brand, different context).

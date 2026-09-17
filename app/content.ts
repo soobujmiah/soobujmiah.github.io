@@ -242,6 +242,10 @@ export interface Content {
     navClose: string;
     navHint: string;
     current: string;
+    /* Localized meridiem for the identity clock — Bengali must never
+       render a Latin "AM/PM" (content-gate purity applies). */
+    meridiemAm: string;
+    meridiemPm: string;
     pull: string;
     release: string;
     refreshing: string;
@@ -653,6 +657,8 @@ const en: Content = {
     navClose: 'Close index',
     navHint: 'Arrow keys move · Enter opens · Esc closes',
     current: 'You are here',
+    meridiemAm: 'AM',
+    meridiemPm: 'PM',
     pull: 'Pull to refresh',
     release: 'Release to refresh',
     refreshing: 'Refreshing',
@@ -1127,6 +1133,8 @@ const bn: Content = {
     navClose: 'সূচি বন্ধ করুন',
     navHint: 'অ্যারো কী দিয়ে চলুন · এন্টার দিয়ে খুলুন · এসকেপে বন্ধ করুন',
     current: 'এখানে আছেন',
+    meridiemAm: 'এএম',
+    meridiemPm: 'পিএম',
     pull: 'রিফ্রেশ করতে টানুন',
     release: 'রিফ্রেশে ছেড়ে দিন',
     refreshing: 'রিফ্রেশ হচ্ছে',
