@@ -55,6 +55,8 @@ const IDENTIFIER_PATHS = new Set([
   'profile.linkedin',
   'contact.email.value',
   'contact.email.href',
+  'contact.telegram.value',
+  'contact.telegram.href',
   /* the social ecosystem: handles and URLs are verbatim data in both
      languages, while every group label and platform name stays prose
      and therefore stays under the purity rule (গিটহাব, not GitHub) */
@@ -324,15 +326,19 @@ try {
   }
 
   /* 4b ── the canonical social ecosystem ──
-     Seventeen links, supplied by the owner and format-validated, exact
+     Eighteen links, supplied by the owner and format-validated, exact
      and complete. This is the audit the brief asks for, made repeatable:
      a link can never go missing, duplicated, re-pointed at a different
      handle, or diverge between the two language trees without failing
-     the build. WhatsApp is deliberately absent: wa.me/<username> is not a
+     the build. Email joined the group when the owner's final polish
+     spec promoted Telegram to the prominent contact card and moved
+     email into the compact buttons (one mailto: entry, allowed).
+     WhatsApp is deliberately absent: wa.me/<username> is not a
      valid WhatsApp URL scheme (wa.me requires an international phone
      number), and no replacement was invented — the validation rule of
      the brief wins over the wish-list. */
   const CANONICAL_SOCIAL = [
+    'mailto:soobujmiah@gmail.com',
     'https://github.com/soobujmiah',
     'https://soobujmiah.github.io',
     'https://linkedin.com/in/soobujmiah',
@@ -368,7 +374,7 @@ try {
       if (!CANONICAL_SOCIAL.includes(got)) fail(`${lang}.contact.groups has a non-canonical link ${got}`);
     }
     for (const l of links) {
-      if (!/^https:\/\//.test(l.href)) fail(`${lang}.contact.groups link must be https: ${l.href}`);
+      if (!/^(https:\/\/|mailto:)/.test(l.href)) fail(`${lang}.contact.groups link must be https: or mailto: ${l.href}`);
       if (!l.handle || !l.label) fail(`${lang}.contact.groups link missing handle/label: ${l.href}`);
     }
     if (!content[lang].contact.email.href.startsWith('mailto:')) {

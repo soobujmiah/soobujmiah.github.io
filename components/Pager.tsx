@@ -24,7 +24,7 @@ import {
   Preloader,
   Header,
   Footer,
-  PageDots,
+  HudControl,
 } from '@/components/ui';
 import { NavOverlay } from '@/components/NavOverlay';
 import { PullToRefresh } from '@/components/PullToRefresh';
@@ -381,7 +381,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
           </motion.div>
         </AnimatePresence>
 
-        <PageDots total={PAGE_COUNT} active={index} labels={t.ui.pageLabels} navOpen={navOpen} />
+        <HudControl total={PAGE_COUNT} active={index} labels={t.ui.pageLabels} navOpen={navOpen} />
         <PullToRefresh enabled={index === 0} scrollerRef={activeScroller} onRefresh={onRefresh} />
       </div>
 

@@ -233,7 +233,7 @@ export function Reveal({
    ═══════════════════════════════════════════════════════════════ */
 
 /* The old top-of-page progress bar is gone: page position now travels
-   around the bottom HUD's border (see PageDots), so the progress read
+   around the bottom HUD control's border (see HudControl), so the progress read
    and the navigation it describes are one instrument. */
 
 /** Three stacked rails — reads as "index", not "hamburger". */
@@ -246,16 +246,18 @@ function IndexGlyph() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PERIMETER TRACE — progress as a border trace, never a dot row.
+   HUD CONTROL — ONE bottom control: the progress bar IS the button.
 
-   The bar is a fixed-size pill, so its border path is known exactly:
-   a green trace travels the perimeter clockwise from a fixed origin
-   at bottom-centre — bottom edge → right cap → top edge → left cap —
-   with pathLength normalised to 1 and strokeDashoffset = 1 − progress.
-   Page 1 = 0%, page 9 = 100% (12.5% steps). Only the trace endpoint
-   moves: the origin never re-centres, the bar never resizes or shifts.
-   The NN/09 readout names the position; the ●●● dot row is retired —
-   the trace is the primary progress read.
+   The bar is a fixed-size pill in the header pills' geometry family;
+   its border is the progress instrument (PerimeterTrace): a green
+   trace travels clockwise from a fixed origin at bottom-centre —
+   bottom edge → right cap → top edge → left cap — pathLength = 1,
+   strokeDashoffset = 1 − progress, page 1 = 0% … page 9 = 100%.
+   Only the trace endpoint moves: the origin never re-centres, the
+   control never resizes or shifts. Pressing anywhere on it opens the
+   index HUD; the index glyph is part of the same button, never a
+   second control. No numbering inside — every page carries its own
+   numeral, and the HUD lists the pages.
    ═══════════════════════════════════════════════════════════════ */
 
 function PerimeterTrace({ w, h, progress, reduced }: { w: number; h: number; progress: number; reduced: boolean }) {
@@ -283,7 +285,7 @@ function PerimeterTrace({ w, h, progress, reduced }: { w: number; h: number; pro
   );
 }
 
-export function PageDots({
+export function HudControl({
   total,
   active,
   labels,
@@ -294,55 +296,33 @@ export function PageDots({
   labels: string[];
   navOpen: boolean;
 }) {
-  const { t, lang } = useLang();
+  const { t } = useLang();
   const { openNav } = useNav();
   const prefersReduced = useReducedMotion();
   /* Same instrument as the open panel's bottom-edge trace:
      progress = active / (total − 1), fixed origin, monotonic. */
   const progress = total > 1 ? active / (total - 1) : 0;
-  const pad2 = (n: number) => localizeDigits(String(n).padStart(2, '0'), lang);
-  const readout = `${pad2(active + 1)}/${pad2(total)}`;
-  const bar = (w: number, h: number, sm: boolean) => (
-    <>
+  const bar = (w: number, h: number, cls: string, magnetic: boolean) => (
+    <button
+      type="button"
+      onClick={openNav}
+      aria-label={t.ui.navOpen}
+      aria-expanded={navOpen}
+      data-magnetic={magnetic || undefined}
+      data-nav-open={navOpen ? 'true' : 'false'}
+      className={`pager-hud ${cls}`}
+    >
       <PerimeterTrace w={w} h={h} progress={progress} reduced={!!prefersReduced} />
-      <span className="hud-readout font-mono" aria-hidden>
-        {readout}
-      </span>
+      <IndexGlyph />
       <span className="sr-only">{labels[active] ?? ''}</span>
-      <span className="hud-divider" aria-hidden />
-      <button
-        type="button"
-        onClick={openNav}
-        aria-label={t.ui.navOpen}
-        aria-expanded={navOpen}
-        data-magnetic={!sm}
-        className={sm ? 'pager-index-trigger pager-index-trigger-sm' : 'pager-index-trigger'}
-      >
-        <IndexGlyph />
-      </button>
-    </>
+    </button>
   );
   return (
     <>
-      {/* desktop bar — the index trigger wrapped in its progress
-          trace. data-nav-open couples the bar to the HUD that
-          emerges from it: while the index is open, the bar carries
-          the glow and the trigger sparks. */}
-      <nav
-        aria-label={t.ui.navTitle}
-        className="pager-dots-rail pager-hud"
-        data-nav-open={navOpen ? 'true' : 'false'}
-      >
-        {bar(124, 38, false)}
-      </nav>
-      {/* phone bar */}
-      <nav
-        aria-label={t.ui.navTitle}
-        className="pager-dots-row pager-hud"
-        data-nav-open={navOpen ? 'true' : 'false'}
-      >
-        {bar(112, 36, true)}
-      </nav>
+      {/* one control per breakpoint (rail on desktop, row on phones) —
+          never both visible, never a second trigger inside */}
+      {bar(72, 38, 'pager-dots-rail', true)}
+      {bar(64, 36, 'pager-dots-row', false)}
     </>
   );
 }

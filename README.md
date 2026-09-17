@@ -89,9 +89,9 @@ fabricate); the UI maps it to `Explore`, repos to Source/Code links.
   Open Source (curated subset + GitHub route, never a directory),
   Experience accordion below `md` / timeline above.
 - `components/ui.tsx` — cursor, magnetic links, reveals, preloader, header
-  (with EN/BN toggle), footer, the bottom HUD bar (perimeter progress trace
-  with fixed bottom-centre origin, NN/09 readout, index trigger), snap
-  carousel.
+  (with EN/BN toggle), footer, the bottom HUD control (ONE button: its
+  border is the perimeter progress trace, fixed bottom-centre origin;
+  pressing it opens the index HUD), snap carousel.
 
 Visual language is specified in `DESIGN_SYSTEM.md` — the shared DNA for this
 portfolio and future repository websites (same brand, different context).
@@ -160,7 +160,7 @@ out first, then builds the new one — the two scripts never overlap.
 
 ## Social ecosystem
 
-`content.ts` → `contact.groups` holds all 17 canonical links in six groups
+`content.ts` → `contact.groups` holds all 18 canonical links in six groups
 (Core · Professional · AI / Developer · Social · Direct · Personal), rendered
 once on `/contact/` as a typographic definition list — never a wall of
 platform icons, and no platform brand colours. Group labels and platform

@@ -68,6 +68,7 @@ const SOCIAL_ICON_HOSTS: Record<string, BrandIconId> = {
 };
 
 function iconFor(href: string): 'portfolio' | BrandIconId {
+  if (href.startsWith('mailto:')) return 'mail';
   try {
     const host = new URL(href).hostname.replace(/^www\./, '');
     return SOCIAL_ICON_HOSTS[host] ?? 'portfolio';
@@ -89,13 +90,13 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
       <div className="page-content flex flex-col items-center text-center">
         {/* 0 · live local time — the identity system's smaller sibling.
             It leads the page directly under the header: clock first,
+            its date/timezone metadata directly beneath (one block),
             then the identity mark. Rendered in the name's own dotted
             typographic language (components/IdentityClock.tsx); the
-            entrance is pure CSS, disabled under reduced motion. The
-            date/time metadata line closes the hero instead — the
-            clock owns the top, the name stays the dominant mark. */}
+            entrance is pure CSS, disabled under reduced motion. */}
         <div className="hero-clock-wrap">
           <IdentityClock part="time" />
+          <IdentityClock part="date" />
         </div>
 
         {/* 1 · who I am — the identity mark leads the content; only the
@@ -173,35 +174,7 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
             {t.hero.ctaGithub}
           </Magnetic>
         </motion.div>
-
-        {/* 5 · date/time metadata — the hero's closing instrument line:
-            day, date and timezone under the CTAs, mirroring the clock
-            above the name without competing with it */}
-        <div className="hero-date-wrap">
-          <IdentityClock part="date" />
-        </div>
       </div>
-
-      {/* Scroll hint — decoration, not a control. The bottom bar is the
-          sole origin/control for opening the index HUD. */}
-      <motion.div
-        className="hero-hint absolute bottom-24 left-1/2 -translate-x-1/2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2.5, duration: 1 }}
-        aria-hidden
-      >
-        <motion.span
-          className="flex flex-col items-center gap-2"
-          animate={reducedMotion ? {} : { y: [0, 6, 0] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <span className="font-mono text-[9px] uppercase tracking-[0.2em]" style={{ color: 'rgba(228,226,223,0.4)' }}>
-            {t.hero.scrollHint}
-          </span>
-          <span className="w-px h-6" style={{ background: 'linear-gradient(to bottom, #22c55e, transparent)' }} />
-        </motion.span>
-      </motion.div>
     </div>
   );
 }
@@ -1012,7 +985,11 @@ export function ContactScene() {
     <div className="page-fill">
       <PageNumeral index={8} />
       <div className="page-content page-content-wide">
-        <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-start">
+        {/* pb keeps the content mass clear of the map's arrival label —
+            the camera centres the focus country (Singapore here) in the
+            viewport, so the contact block deliberately leaves that band
+            open; lg:gap-20 widens the desktop channel the label sits in */}
+        <div className="grid gap-8 pb-14 lg:grid-cols-2 lg:gap-20 lg:pb-8 items-start">
           <div className="text-center lg:text-left">
             <Reveal>
               <p className="ph-e font-mono text-[10px] uppercase tracking-[0.3em] mb-3" style={{ color: '#22c55e' }}>
@@ -1041,26 +1018,27 @@ export function ContactScene() {
             </Reveal>
 
             {/* The one primary channel, visually first and on its own —
-                it is a way to reach a person, not a platform profile. */}
+                Telegram is the way to reach the person directly; email
+                joins the compact contact buttons below. */}
             <Reveal delay={0.18}>
               <Magnetic
-                href={t.contact.email.href}
-                ariaLabel={`${t.contact.email.label}: ${t.contact.email.value}`}
+                href={t.contact.telegram.href}
+                ariaLabel={`${t.contact.telegram.label}: ${t.contact.telegram.value}`}
                 className="group mx-auto mt-6 flex flex-col gap-1 rounded-xl p-4 backdrop-blur-md transition-all duration-500 sm:max-w-sm lg:mt-8"
                 style={{ border: '1px solid rgba(34,197,94,0.22)', background: 'rgba(8,14,10,0.6)' }}
                 strength={0.12}
               >
                 <span className="text-sm font-semibold transition-colors duration-300" style={{ color: '#e4e2df' }}>
-                  {t.contact.email.label}
+                  {t.contact.telegram.label}
                 </span>
                 <span className="font-mono text-[11px] truncate" style={{ color: 'rgba(228,226,223,0.5)' }}>
-                  {t.contact.email.value}
+                  {t.contact.telegram.value}
                 </span>
               </Magnetic>
             </Reveal>
           </div>
 
-          {/* The complete ecosystem: 17 canonical links, grouped, one
+          {/* The complete ecosystem: 18 canonical links, grouped, one
               line each. Deliberately typographic rather than a wall of
               platform icons — these are navigation, not content, and
               they stay inside the green-on-black system. The handle is

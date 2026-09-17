@@ -14,12 +14,16 @@
 
        forming → NAME (hold 2.6–3.8s)
                → detach + wide radial SPREAD (bounded field)
-               → converge into a TECHNICAL FORM (hold 1.6–2.3s)
-               → spread again → NAME → hold → next form → …
+               → converge into a TECHNICAL FORM A (hold 1.6–2.3s)
+               → reorganise in place into FORM B (hold)
+               → spread again → NAME → hold → next chain → …
 
    Every morph is two curved legs through a seeded scatter field, so
    material visibly leaves the name, occupies a larger controlled
    region, then reorganises — emergence rather than interpolation.
+   Form→form morphs arc tighter and pair particles by angle around
+   the field centre, so the SAME field is seen becoming the next
+   silhouette — never a cut between unrelated scenes.
    The scatter centre and radii derive from the *layer* box (the
    stable positioned page container), never from the text, so the
    identity container cannot jump or shift between languages or
@@ -745,8 +749,12 @@ export function SignatureName({
        forming  : the existing construction — dispersed field seats into
                   the wordmark, unchanged.
        nameHold : the completed name, readable, breathing gently.
-       toForm   : detach → wide bounded spread → converge into a form.
-       formHold : the form, held with depth shimmer + parallax.
+       toForm   : detach → bounded spread → converge into a form; the
+                  same phase also carries form→form chains (tighter
+                  arc, angle-sorted particle correspondence).
+       formHold : the form, held with depth shimmer + parallax; when a
+                  chained form remains, the field morphs straight into
+                  it instead of returning to the name first.
        toName   : spread again → flow back into the name (this language).
        dissolve : a language retarget — old glyphs loosen and fade, then
                   the new field is sampled and forms.                    */
@@ -758,6 +766,11 @@ export function SignatureName({
     let dissolveT0 = 0;
     let hiddenAt = 0;
     let cycle = 0;
+    /* how many more forms this excursion chains before returning to
+       the name, and a cursor through the seeded form bag so a chain
+       never repeats a form back-to-back */
+    let formsLeft = 0;
+    let formCursor = 0;
     let currentForm: FormId = 'code';
     let currentStyle: StyleId = 'radial';
     let lastStyle: StyleId = 'flow';
@@ -945,7 +958,7 @@ export function SignatureName({
       const sctx = sample.getContext('2d', { alpha: true, willReadFrequently: true });
       if (!sctx) return [];
       sctx.scale(dpr, dpr);
-      drawForm(sctx, form, W, H, fieldSeed + cycle * 0x9e3779b9);
+      drawForm(sctx, form, W, H, fieldSeed + formCursor * 0x9e3779b9);
       const img = sctx.getImageData(0, 0, cw, chh).data;
       const baseStep = Math.max(1, Math.round(2 * dpr));
       const countAt = (step: number) => {
@@ -968,11 +981,17 @@ export function SignatureName({
     };
 
     /* ── aim the whole field: origin → scatter → destination ──────── */
-    const aimField = (toForm: boolean, now: number) => {
+    /* mode 0 = name → form, 1 = form → name, 2 = form → form (the
+       same particles reorganise directly into the next silhouette) */
+    const aimField = (mode: 0 | 1 | 2, now: number) => {
+      const toForm = mode !== 1;
       const seed = (fieldSeed ^ Math.imul(cycle + 1, 0x85ebca6b)) >>> 0;
       const rnd = mulberry32(seed);
       /* per-cycle variety, bounded: spread, timing, turbulence */
       spreadScale = 0.8 + rnd() * 0.4;
+      /* a form→form morph arcs tighter: the field reorganises in
+         place instead of scattering across the whole stage */
+      if (mode === 2) spreadScale *= 0.5;
       holdNameMs = (NAME_HOLD_S + (rnd() - 0.5) * 1.2) * 1000;
       holdFormMs = (FORM_HOLD_S + (rnd() - 0.5) * 0.7) * 1000;
       morphMs = (MORPH_S + (rnd() - 0.5) * 0.6) * 1000;
@@ -999,7 +1018,11 @@ export function SignatureName({
           const j = Math.floor(bagRnd() * (i + 1));
           [bag[i], bag[j]] = [bag[j], bag[i]];
         }
-        currentForm = bag[cycle % bag.length];
+        currentForm = bag[formCursor % bag.length];
+        formCursor += 1;
+        /* every excursion chains two forms: NAME → A → B → NAME, so
+           the field is seen reorganising shape-to-shape, not cut */
+        if (mode === 0) formsLeft = 1;
       }
       const pts = toForm ? formTargets(currentForm) : [];
       const n = particles.length;
@@ -1014,11 +1037,26 @@ export function SignatureName({
         const j = Math.floor(rnd() * (i + 1));
         [order[i], order[j]] = [order[j], order[i]];
       }
+      if (mode === 2 && pts.length > 0) {
+        /* monotonic correspondence: sort both clouds by angle around
+           the field centre and pair them in order, so every particle
+           flies to its angular neighbour in the next silhouette — the
+           two forms are visibly the same field reorganising, never a
+           cut between unrelated scenes */
+        const ang = (x: number, y: number) => Math.atan2(y - scy, x - scx);
+        pts.sort((a, b) => ang(a.x, a.y) - ang(b.x, b.y));
+        order.sort(
+          (a, b) => ang(particles[a].m1x, particles[a].m1y) - ang(particles[b].m1x, particles[b].m1y)
+        );
+        const map = new Array<number>(n);
+        for (let k = 0; k < n; k += 1) map[order[k]] = Math.floor((k * pts.length) / n);
+        for (let i = 0; i < n; i += 1) order[i] = map[i];
+      }
       let stgMaxNow = 0;
       for (let i = 0; i < n; i += 1) {
         const p = particles[i];
-        const fromX = toForm ? p.tx : p.m1x;
-        const fromY = toForm ? p.ty : p.m1y;
+        const fromX = mode === 0 ? p.tx : p.m1x;
+        const fromY = mode === 0 ? p.ty : p.m1y;
         let toX: number;
         let toY: number;
         if (toForm) {
@@ -1230,12 +1268,18 @@ export function SignatureName({
         phase = 'nameHold';
         phaseT0 = now;
       } else if (phase === 'nameHold' && now - phaseT0 > holdNameMs) {
-        aimField(true, now);
+        aimField(0, now);
       } else if (phase === 'toForm' && now - phaseT0 > morphSpan) {
         phase = 'formHold';
         phaseT0 = now;
       } else if (phase === 'formHold' && now - phaseT0 > holdFormMs) {
-        aimField(false, now);
+        if (formsLeft > 0) {
+          /* chain the next silhouette: the same field morphs across */
+          formsLeft -= 1;
+          aimField(2, now);
+        } else {
+          aimField(1, now);
+        }
       } else if (phase === 'toName' && now - phaseT0 > morphSpan) {
         phase = 'nameHold';
         phaseT0 = now;

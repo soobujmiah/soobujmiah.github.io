@@ -501,8 +501,7 @@ body.lang-bn .worldmap-pin {
   .page-fill {
     padding: 70px 0 96px;
   }
-  .page-numeral,
-  .hero-hint {
+  .page-numeral {
     display: none;
   }
   .page-content .ph-h {
@@ -539,8 +538,7 @@ body.lang-bn .worldmap-pin {
   .page-fill {
     padding: 64px 0 48px;
   }
-  .page-numeral,
-  .hero-hint {
+  .page-numeral {
     display: none;
   }
   .page-content .ph-h {
@@ -597,19 +595,17 @@ body.lang-bn .worldmap-pin {
 /* Desktop rail lives in the dedicated lower navigation strip — the
    same safe zone as the phone row — so it never sits over content,
    imagery or controls. Horizontal, centred, above the footer. */
-/* ── bottom HUD bar — same button family as the header pills ────────
-   One compact control: the index trigger wrapped in its own progress
-   trace. The bar is a fixed-size pill whose BORDER is the instrument
-   (PerimeterTrace in ui.tsx): a green trace travels the perimeter
-   clockwise from a fixed origin at bottom-centre, page 1 = 0% to
-   page 9 = 100%, beside a small NN/09 readout. The housing borrows
-   the geometry language of the CV/Services/language pills — a 1px
-   green hairline over a restrained blurred fill — so the bar reads as
-   a futuristic sibling of the header controls, not an unrelated
-   capsule. While the index HUD is open the bar carries the glow and
-   the trigger sparks (data-nav-open): origin and panel stay visually
-   coupled. Motion is limited to the trace endpoint, disabled under
-   reduced motion. */
+/* ── bottom HUD control — ONE control: the progress bar IS the button ──
+   A single fixed-size pill in the header pills' geometry family (1px
+   green hairline, restrained blurred fill). Its border is the progress
+   instrument (PerimeterTrace in ui.tsx): a green trace travels the
+   perimeter clockwise from a fixed origin at bottom-centre, page 1 =
+   0% to page 9 = 100%. Pressing anywhere on it opens the index HUD;
+   the index glyph is part of the same button — there is no second
+   trigger, no readout, no numbering inside. While the HUD is open the
+   control carries the glow and sparks once (data-nav-open): origin and
+   panel stay visually coupled. Motion is limited to the trace endpoint
+   and the spark, disabled under reduced motion. */
 .pager-hud {
   position: absolute;
   z-index: 30;
@@ -618,14 +614,20 @@ body.lang-bn .worldmap-pin {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 0 12px;
+  padding: 0;
   border-radius: 999px;
   border: 1px solid rgba(34, 197, 94, 0.35);
   background: rgba(8, 10, 8, 0.55);
+  color: #4ade80;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.pager-hud:hover {
+  border-color: rgba(74, 222, 128, 0.6);
+  background: rgba(34, 197, 94, 0.1);
 }
 
 .pager-hud[data-nav-open='true'] {
@@ -633,16 +635,19 @@ body.lang-bn .worldmap-pin {
   box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
 }
 
-/* Perimeter trace — the bar's border carries the progress read. The
-   SVG maps 1:1 onto the fixed pill box (viewBox = CSS size), the
+/* Perimeter trace — the control's border carries the progress read.
+   The SVG maps 1:1 onto the fixed pill box (viewBox = CSS size), the
    origin sits at bottom-centre and never moves; only the trace
    endpoint travels (stroke-dashoffset = 1 − progress, pathLength 1),
    so nothing re-centres, resizes or shifts. */
 .hud-perim {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  /* span the border box, not the padding box, so the 1:1 viewBox
+     mapping puts the trace exactly on the pill's border */
+  left: -1px;
+  top: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
   pointer-events: none;
   overflow: visible;
 }
@@ -661,26 +666,9 @@ body.lang-bn .worldmap-pin {
   filter: drop-shadow(0 0 3px rgba(34, 197, 94, 0.6));
 }
 
-/* position readout — telemetry text, not a second page number */
-.hud-readout {
-  flex: 0 0 auto;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  color: rgba(74, 222, 128, 0.85);
-  white-space: nowrap;
-}
-
-/* hairline divider between the telemetry track and the expand control */
-.hud-divider {
-  flex: 0 0 auto;
-  width: 1px;
-  height: 14px;
-  background: linear-gradient(180deg, transparent, rgba(34, 197, 94, 0.35), transparent);
-}
-
 .pager-dots-rail {
   bottom: calc(64px + env(safe-area-inset-bottom));
-  width: 124px;
+  width: 72px;
   height: 38px;
   display: none;
 }
@@ -693,10 +681,8 @@ body.lang-bn .worldmap-pin {
 
 .pager-dots-row {
   bottom: calc(66px + env(safe-area-inset-bottom));
-  width: 112px;
+  width: 64px;
   height: 36px;
-  gap: 8px;
-  padding: 0 10px;
 }
 
 @media (min-width: 768px) {
@@ -950,35 +936,6 @@ body.lang-bn span {
   letter-spacing: -0.01em;
 }
 
-/* ── pager index trigger — the pager's own navigation control ── */
-/* the index trigger — the same pill geometry as the header controls:
-   green hairline, transparent fill, compact circle */
-.pager-index-trigger {
-  position: relative;
-  flex: 0 0 auto;
-  width: 26px;
-  height: 26px;
-  border-radius: 9999px;
-  border: 1px solid rgba(34, 197, 94, 0.35);
-  background: transparent;
-  color: #4ade80;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease, transform 0.3s ease;
-}
-
-.pager-index-trigger:hover {
-  border-color: rgba(74, 222, 128, 0.6);
-  background: rgba(34, 197, 94, 0.08);
-  transform: scale(1.06);
-}
-
-.pager-index-trigger-sm {
-  width: 24px;
-  height: 24px;
-}
-
 /* ── navigation overlay ──
    The pager's index as a dialog. Real anchors to real routes. */
 .nav-overlay-root {
@@ -1026,9 +983,13 @@ body.lang-bn span {
   border: 1px solid rgba(34, 197, 94, 0.16);
   border-radius: 16px;
   background: rgba(8, 9, 8, 0.94);
+  /* layered depth: a faint green wash from the top edge and an inner
+     hairline ring, so the surface reads as an instrument layer */
+  background-image: linear-gradient(180deg, rgba(34, 197, 94, 0.05), rgba(34, 197, 94, 0) 24%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 26px rgba(34, 197, 94, 0.1);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 26px rgba(34, 197, 94, 0.1),
+    inset 0 0 0 1px rgba(34, 197, 94, 0.05);
 }
 
 /* the seam: a short light trace from the panel's bottom edge toward
@@ -1057,8 +1018,9 @@ body.lang-bn span {
 }
 
 /* technical framing — segmented corner brackets over the panel's
-   hairline border, plus one asymmetric edge tick: HUD geometry that
-   keeps the surface from reading as a conventional dialog box */
+   hairline border, one asymmetric edge tick, a short top-edge segment
+   and a one-shot scan sweep: HUD geometry that keeps the surface from
+   reading as a conventional dialog box */
 .nav-overlay-frame {
   position: absolute;
   inset: 5px;
@@ -1074,17 +1036,24 @@ body.lang-bn span {
     linear-gradient(#4ade80, #4ade80),
     linear-gradient(#4ade80, #4ade80),
     linear-gradient(#4ade80, #4ade80),
-    linear-gradient(#4ade80, #4ade80);
+    linear-gradient(#4ade80, #4ade80),
+    linear-gradient(90deg, transparent, rgba(74, 222, 128, 0.7), transparent),
+    linear-gradient(rgba(74, 222, 128, 0.4), rgba(74, 222, 128, 0.4));
   background-size:
     22px 1px, 1px 22px,
     22px 1px, 1px 22px,
     22px 1px, 1px 22px,
-    22px 1px, 1px 22px;
+    22px 1px, 1px 22px,
+    54px 1px,
+    1px 8%;
   background-position:
     left top, left top,
     right top, right top,
     left bottom, left bottom,
-    right bottom, right bottom;
+    right bottom, right bottom,
+    34% top,
+    right 62%;
+  overflow: hidden;
 }
 
 .nav-overlay-frame::before {
@@ -1095,6 +1064,33 @@ body.lang-bn span {
   width: 1px;
   height: 13%;
   background: rgba(74, 222, 128, 0.55);
+}
+
+/* one-shot scan sweep along the frame's top edge as the HUD expands —
+   clipped to the frame, transform-only */
+.nav-overlay-root[data-open='true'] .nav-overlay-frame::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 46px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #4ade80, transparent);
+  animation: hud-scan 1.1s cubic-bezier(0.4, 0, 0.2, 1) 0.12s both;
+}
+
+@keyframes hud-scan {
+  from {
+    transform: translateX(-46px);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  to {
+    transform: translateX(430px);
+    opacity: 0;
+  }
 }
 
 /* content resolves after the frame expands upward — rows stagger in */
@@ -1118,8 +1114,8 @@ body.lang-bn span {
   to { opacity: 1; transform: none; }
 }
 
-/* the trigger sparks once when the HUD it generates opens */
-.pager-hud[data-nav-open='true'] .pager-index-trigger {
+/* the control sparks once when the HUD it generates opens */
+.pager-hud[data-nav-open='true'] {
   animation: hud-spark 0.5s ease-out;
 }
 
@@ -1131,7 +1127,8 @@ body.lang-bn span {
 @media (prefers-reduced-motion: reduce) {
   .nav-overlay-root[data-open='true'] .nav-overlay-list li,
   .nav-overlay-root[data-open='true'] .nav-overlay-panel::after,
-  .pager-hud[data-nav-open='true'] .pager-index-trigger {
+  .nav-overlay-root[data-open='true'] .nav-overlay-frame::after,
+  .pager-hud[data-nav-open='true'] {
     animation: none;
   }
 }
@@ -1395,22 +1392,19 @@ body.lang-bn span {
   }
   .worldmap-origin-halo { opacity: 0.3; }
 
-  /* the hero metadata line resolves immediately — its entrance delay
-     must not hold the date line invisible */
-  .hero-date-wrap {
-    animation-delay: 0s !important;
-  }
-
   /* the clock is readable first, decorative second: no colon pulse,
-     no dot stagger — lit dots simply are */
+     no digit roll — lit dots simply are */
   .idc-colon i {
     animation: none !important;
     opacity: 1 !important;
   }
-  .idc-dot[data-on='true'] {
+  .idc-live {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+  .idc-ghost {
+    display: none !important;
   }
   .idc-ampm {
     animation: none !important;
@@ -1471,12 +1465,12 @@ body:has(> .services-doc) button {
    the block never shifts; only changed digits replay the short dot
    settle. */
 .hero-clock-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   margin-bottom: clamp(14px, 3.2dvh, 30px);
   animation: hero-clock-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
-}
-.hero-date-wrap {
-  margin-top: clamp(16px, 3.4dvh, 30px);
-  animation: hero-clock-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 2.05s both;
 }
 @keyframes hero-clock-in {
   from {
@@ -1531,6 +1525,9 @@ body:has(> .services-doc) button {
   justify-content: center;
   width: 0.66em;
   height: 1.02em;
+  /* the slot is a fixed viewport: the roll happens inside it and can
+     never escape into the neighbouring digit or below the clock */
+  overflow: hidden;
 }
 .idc-grid {
   display: grid;
@@ -1548,16 +1545,42 @@ body:has(> .services-doc) button {
 .idc-dot[data-on='true'] {
   background: #4ade80;
   box-shadow: 0 0 0.045em rgba(34, 197, 94, 0.55);
-  animation: idc-dot-in 0.28s ease-out both;
 }
-@keyframes idc-dot-in {
+/* digit change = a vertical roll: the outgoing digit exits upward
+   while the incoming one enters from below, both clipped to the
+   slot. Only the changed digit remounts, so unchanged digits never
+   move and the clock block never shifts. */
+.idc-live {
+  display: inline-flex;
+  animation: idc-roll-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.idc-ghost {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: idc-roll-out 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+  pointer-events: none;
+}
+@keyframes idc-roll-in {
   from {
-    opacity: 0;
-    transform: scale(0.3);
+    transform: translateY(105%);
+    opacity: 0.15;
   }
   to {
+    transform: none;
     opacity: 1;
-    transform: scale(1);
+  }
+}
+@keyframes idc-roll-out {
+  from {
+    transform: none;
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-105%);
+    opacity: 0.1;
   }
 }
 .idc-colon {
@@ -1605,7 +1628,7 @@ body:has(> .services-doc) button {
   font-family: var(--font-wordmark), var(--font-mono), monospace;
   font-weight: 700;
   font-size: 0.8em;
-  line-height: 1.28em;
+  line-height: 1.25;
   color: #4ade80;
 }
 .idc-bn .idc-fallback {

@@ -321,20 +321,24 @@ compress a hair instead of ever touching their neighbours. It is never a
 generic system monospace; if sampling is unavailable it falls back to the
 same wordmark face as plain text.
 
-- **Order:** header → breathing space → clock → name/identity → role →
-  status → tagline → description → CTAs → date/time metadata. The clock
-  leads the home page content directly below the header (`part="time"`);
-  the bilingual date · timezone line (`part="date"`) closes the hero under
-  the CTAs — the clock owns the top, the name stays the dominant mark.
+- **Order:** header → breathing space → clock → date/time metadata →
+  name/identity → role → status → tagline → description → CTAs. The clock
+  leads the home page content directly below the header (`part="time"`)
+  with the bilingual date · timezone line (`part="date"`) attached
+  directly beneath it as one block — the date is clock metadata, never a
+  separate hero beat — and the name stays the dominant mark below.
 - **Format:** `HH:MM:SS` 12-hour with a localized meridiem from the content
   tree (`AM`/`PM`, `এএম`/`পিএম`) and `localizeDigits` Bengali numerals — the
   Bengali clock contains no Latin characters. Timezone is `Asia/Dhaka`
   regardless of the visitor's clock.
-- **Stability:** fixed-width digit slots; only changed digits remount and
-  replay the short dot settle; unchanged digits keep their DOM. One timer,
-  cleaned up on unmount/language change. Client-only first paint, so SSR
-  output is unchanged.
-- **Reduced motion:** no colon pulse, no dot stagger — lit dots simply are.
+- **Stability:** each digit slot is a fixed viewport (`overflow: hidden`,
+  fixed width/height/baseline); a changed digit rolls vertically — the old
+  face exits upward while the new one enters from below, clipped to the
+  slot — and unchanged digits keep their DOM and never animate. The clock
+  block itself cannot shift or drift. One timer per part, cleaned up on
+  unmount/language change. Client-only first paint, so SSR output is
+  unchanged.
+- **Reduced motion:** no colon pulse, no digit roll — lit dots simply are.
 
 ## 6. Interaction states
 
@@ -384,12 +388,14 @@ no model change needed.
   framing, never a conventional dialog box. Rows stagger in after the frame
   expands. It carries no large page number — the page itself already does.
 - **Progress is one instrument with a fixed origin — a border trace, never a
-  dot row.** The bar is a fixed-size pill whose perimeter carries the trace:
-  it travels clockwise from a fixed origin at bottom-centre (bottom edge →
-  right cap → top edge → left cap), normalised with `pathLength=1` and
-  animated by `stroke-dashoffset = 1 − progress`; an `NN/09` readout beside
-  the trigger names the position. On the open HUD, the same progress travels
-  along the panel's bottom edge. The formula is deterministic —
+  dot row.** The bottom control is ONE fixed-size pill button whose perimeter
+  carries the trace: it travels clockwise from a fixed origin at
+  bottom-centre (bottom edge → right cap → top edge → left cap), normalised
+  with `pathLength=1` and animated by `stroke-dashoffset = 1 − progress`.
+  Pressing anywhere on it opens the index HUD; the index glyph is part of
+  the same button — there is no second trigger, no readout and no numbering
+  inside the control. On the open HUD, the same progress travels along the
+  panel's bottom edge. The formula is deterministic —
   `progress = activeIndex / (totalPages − 1)` — so page 1 = 0% and page 9 =
   100%. Only the trace's end point moves; the origin never re-centres and no
   element resizes or shifts.
