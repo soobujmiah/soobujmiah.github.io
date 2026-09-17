@@ -1,7 +1,7 @@
 'use client';
 
 import { Children, createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { motion, useInView, useMotionValue, useSpring, useVelocity, useTransform } from 'framer-motion';
+import { motion, useInView, useMotionValue, useReducedMotion, useSpring, useVelocity, useTransform } from 'framer-motion';
 import { useLang, localizeDigits } from '@/app/language';
 import { sectionHref } from '@/app/sections';
 import { serviceHref } from '@/app/services';
@@ -232,17 +232,9 @@ export function Reveal({
    PAGE PROGRESS BAR — driven by pager fraction, not scroll.
    ═══════════════════════════════════════════════════════════════ */
 
-export function ScrollProgress({ value }: { value: number }) {
-  return (
-    <motion.div
-      className="fixed top-0 left-0 right-0 h-[2px] z-[99999] origin-left"
-      style={{ background: 'linear-gradient(90deg, #22c55e, #4ade80)' }}
-      initial={false}
-      animate={{ scaleX: Math.min(Math.max(value, 0), 1) }}
-      transition={{ type: 'spring', stiffness: 120, damping: 24 }}
-    />
-  );
-}
+/* The old top-of-page progress bar is gone: page position now travels
+   around the bottom HUD's border (see PageDots), so the progress read
+   and the navigation it describes are one instrument. */
 
 /** Three stacked rails — reads as "index", not "hamburger". */
 function IndexGlyph() {
@@ -269,23 +261,39 @@ export function PageDots({
   labels: string[];
   onGo: (index: number) => void;
 }) {
-  const { t, lang } = useLang();
+  const { t } = useLang();
   const { openNav } = useNav();
+  const prefersReduced = useReducedMotion();
   const dots = Array.from({ length: total }, (_, i) => i);
-  /* telemetry-style page state: NN·NN, localized digits, decorative —
-     the buttons below carry the real accessible information */
-  const hudCount = (
-    <span className="pager-hud-count" aria-hidden="true">
-      {localizeDigits(String(active + 1).padStart(2, '0'), lang)}
-      <span className="pager-hud-sep">·</span>
-      {localizeDigits(String(total).padStart(2, '0'), lang)}
-    </span>
+  /* Page position lives on the HUD's own border: a hairline track
+     around the housing, with a green arc tracing the pages completed.
+     This replaces the old top-of-page progress bar — same information,
+     physically part of the instrument. The page number itself is not
+     repeated here; every page carries its own numeral. */
+  const progress = (active + 1) / total;
+  const hudTrack = (
+    <svg className="pager-hud-track" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true">
+      <rect
+        x="0.5" y="0.5" width="99" height="33" rx="16.5"
+        fill="none" stroke="rgba(34,197,94,0.14)" strokeWidth="1"
+        vectorEffect="non-scaling-stroke" pathLength={1}
+      />
+      <motion.rect
+        x="0.5" y="0.5" width="99" height="33" rx="16.5"
+        fill="none" stroke="#22c55e" strokeWidth="1.25"
+        vectorEffect="non-scaling-stroke" pathLength={1}
+        style={{ strokeDasharray: 1, filter: 'drop-shadow(0 0 3px rgba(34,197,94,0.45))' }}
+        initial={false}
+        animate={{ strokeDashoffset: 1 - progress }}
+        transition={prefersReduced ? { duration: 0 } : { type: 'spring', stiffness: 120, damping: 24 }}
+      />
+    </svg>
   );
   return (
     <>
       {/* desktop rail — the pager control, plus the index trigger */}
       <nav aria-label={t.ui.navTitle} className="pager-dots-rail pager-hud">
-        {hudCount}
+        {hudTrack}
         {dots.map((i) => (
           <button
             key={i}
@@ -310,7 +318,7 @@ export function PageDots({
       </nav>
       {/* phone row */}
       <nav aria-label={t.ui.navTitle} className="pager-dots-row pager-hud">
-        {hudCount}
+        {hudTrack}
         {dots.map((i) => (
           <button
             key={i}
@@ -511,8 +519,13 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
    ═══════════════════════════════════════════════════════════════ */
 
 export function Header() {
-  const { t, toggleLang } = useLang();
+  const { t, lang, toggleLang } = useLang();
   const { goToScene } = useNav();
+  /* compact language glyph showing the *active* language: Latin "EN" or
+     Bangla "বাং". The default (English) render therefore ships "EN" and
+     stays pure-English for SSR; the Bangla glyph only appears after a
+     client-side switch. Full action name stays in the aria-label. */
+  const langGlyph = lang === 'en' ? 'EN' : 'বাং';
 
   return (
     <motion.header
@@ -606,7 +619,7 @@ export function Header() {
             style={{ border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80' }}
           >
             <BrandIcon id="portfolio" size={12} />
-            {t.header.langLabel}
+            {langGlyph}
           </button>
           <Magnetic
             href="https://github.com/soobujmiah"

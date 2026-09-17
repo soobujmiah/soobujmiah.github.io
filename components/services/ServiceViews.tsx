@@ -50,7 +50,7 @@ function ContactCard() {
           the same lane (green outline); email stays available but reads
           neutral; the contact page is the full directory. 2×2 on
           phones, one row once there is width. */}
-      <div className="mt-5 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:items-center">
+      <div className="mt-5 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:items-center sm:justify-center">
         <a
           href="https://wa.me/soobujmiah"
           target="_blank"
@@ -231,11 +231,11 @@ export function ServiceDetail({ slug }: { slug: ServiceSlug }) {
 
       <ContactCard />
 
-      <section className="mt-12">
+      <section className="mt-12 text-center">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider" style={faint}>
           {s.labels.related}
         </h2>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2">
           {related.map((r) => (
             <Link key={r.slug} href={serviceHref(r.slug as ServiceSlug)} className="rounded-full px-4 py-1.5 text-[13px] transition-colors hover:text-[#4ade80]" style={card}>
               {r.title}

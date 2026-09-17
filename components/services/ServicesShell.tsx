@@ -45,15 +45,18 @@ function Chrome({ children, slug }: { children: React.ReactNode; slug?: string }
     <>
       <header className="sticky top-0 z-40 border-b py-3 backdrop-blur-xl" style={{ background: 'rgba(6,6,8,0.7)', borderColor: 'rgba(228,226,223,0.06)' }}>
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 font-mono text-[11px]" style={{ color: 'rgba(228,226,223,0.45)' }}>
-            <Link href={sectionHref(0)} className="transition-opacity hover:opacity-100" style={{ color: '#e4e2df' }}>
-              soobujmiah
-            </Link>
-            <span aria-hidden>/</span>
-            <Link href={serviceHref()} className="transition-opacity hover:opacity-100">
-              {s.labels.hub}
-            </Link>
-          </nav>
+          {/* The portfolio's own identity mark, exactly as the main
+              header presents it — Services is part of this website, so
+              it gets the same brand anchor home, not a breadcrumb
+              announcing where you already are. */}
+          <a
+            href={sectionHref(0)}
+            aria-label={t.header.homeLabel}
+            className="font-mono text-sm font-medium tracking-tight transition-opacity hover:opacity-100"
+            style={{ color: '#e4e2df' }}
+          >
+            soobujmiah
+          </a>
           <div className="flex items-center gap-1 sm:gap-2">
             {/* CV stays reachable inside Services — same pill as the
                 portfolio header, same destination */}
@@ -79,7 +82,7 @@ function Chrome({ children, slug }: { children: React.ReactNode; slug?: string }
               style={{ border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80' }}
             >
               <BrandIcon id="portfolio" size={12} />
-              {t.header.langLabel}
+              {lang === 'en' ? 'EN' : 'বাং'}
             </button>
             <a
               href="https://github.com/soobujmiah"

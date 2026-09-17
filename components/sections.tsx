@@ -188,23 +188,12 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
       <PageNumeral index={0} />
 
       <div className="page-content flex flex-col items-center text-center">
-        {/* 1 · where the work happens — a status line, not a second job title */}
-        <motion.p
-          className="hero-status font-mono text-[10px] uppercase tracking-[0.4em] mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.7 }}
-        >
-          <span className="hero-status-dot" aria-hidden />
-          {t.profile.location} · {t.hero.availability}
-        </motion.p>
-
-        {/* 2 · who I am — the identity mark dominates */}
+        {/* 1 · who I am — the identity mark leads; nothing sits above it */}
         <h1 className="hero-name text-[clamp(3.05rem,10vw,7.4rem)] font-semibold leading-[1.06] tracking-tight">
           <SignatureName text={t.profile.nameFull} reducedMotion={reducedMotion} armed={armed} />
         </h1>
 
-        {/* 3 · what I am — exactly one professional identity treatment */}
+        {/* 2 · what I am — the professional identity, directly under the name */}
         <motion.p
           className="hero-role mt-5 text-[13px] font-medium sm:text-sm"
           initial={{ opacity: 0, y: 14 }}
@@ -214,7 +203,19 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
           {t.profile.title}
         </motion.p>
 
-        {/* 3b · the specialization line — the identity's second half */}
+        {/* 2b · where the work happens — a status line, not a second job
+            title; it supports the identity from below, never above */}
+        <motion.p
+          className="hero-status mt-3 font-mono text-[10px] uppercase tracking-[0.4em]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.7 }}
+        >
+          <span className="hero-status-dot" aria-hidden />
+          {t.profile.location} · {t.hero.availability}
+        </motion.p>
+
+        {/* 3 · the specialization line — the identity's second half */}
         <motion.p
           className="hero-tagline mt-2.5 font-mono text-[10px] leading-relaxed tracking-[0.18em] sm:text-[11px]"
           style={{ color: '#4ade80' }}
@@ -1138,7 +1139,7 @@ export function ContactScene() {
               <Magnetic
                 href={t.contact.email.href}
                 ariaLabel={`${t.contact.email.label}: ${t.contact.email.value}`}
-                className="group mt-6 flex flex-col gap-1 rounded-xl p-4 backdrop-blur-md transition-all duration-500 sm:max-w-sm lg:mt-8"
+                className="group mx-auto mt-6 flex flex-col gap-1 rounded-xl p-4 backdrop-blur-md transition-all duration-500 sm:max-w-sm lg:mt-8"
                 style={{ border: '1px solid rgba(34,197,94,0.22)', background: 'rgba(8,14,10,0.6)' }}
                 strength={0.12}
               >

@@ -24,7 +24,6 @@ import {
   Preloader,
   Header,
   Footer,
-  ScrollProgress,
   PageDots,
 } from '@/components/ui';
 import { NavOverlay } from '@/components/NavOverlay';
@@ -335,7 +334,6 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
         )}
       </AnimatePresence>
 
-      <ScrollProgress value={(index + 1) / PAGE_COUNT} />
       <Header />
 
       <div
