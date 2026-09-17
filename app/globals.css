@@ -457,12 +457,14 @@ body.lang-bn .worldmap-pin {
   padding: 0 1.5rem;
 }
 
-/* Home only: a tighter, top-down rhythm — header → breathing space →
-   clock → identity. The hero content starts just below the header
-   instead of floating centred with a large void above it; leftover
-   height collects at the bottom. */
+/* Home only: the hero is one balanced composition — clock, name,
+   identity lines, CTAs. Leftover viewport height splits above and
+   below it, so the block reads intentionally centred on desktop
+   (the taller top padding and the bottom nav already bias it
+   optically); when content overflows, the page grows and scrolls
+   from the top instead. */
 .page-fill--hero .page-content {
-  margin: clamp(6px, 2.4dvh, 26px) auto auto;
+  margin: auto;
 }
 
 /* dense pages breathe wider on desktop */
