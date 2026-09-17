@@ -315,12 +315,17 @@ on a panel, and no `filter` is stacked on it.
 The homepage clock is the name's smaller sibling, in the same typographic
 language: each digit's ink is sampled from the wordmark face (Chakra Petch;
 Anek Bangla for Bengali digits) into an 11-row dot matrix — the resolved
-particle state — and rendered as lit green dots. It is never a generic
-system monospace; if sampling is unavailable it falls back to the same
-wordmark face as plain text.
+particle state — and rendered as lit green dots. Sampling is capped at
+7 columns so a matrix can never be wider than its fixed slot: digits
+compress a hair instead of ever touching their neighbours. It is never a
+generic system monospace; if sampling is unavailable it falls back to the
+same wordmark face as plain text.
 
-- **Order:** header → breathing space → clock → identity/hero content. The
-  clock leads the home page content, directly below the header.
+- **Order:** header → breathing space → clock → name/identity → role →
+  status → tagline → description → CTAs → date/time metadata. The clock
+  leads the home page content directly below the header (`part="time"`);
+  the bilingual date · timezone line (`part="date"`) closes the hero under
+  the CTAs — the clock owns the top, the name stays the dominant mark.
 - **Format:** `HH:MM:SS` 12-hour with a localized meridiem from the content
   tree (`AM`/`PM`, `এএম`/`পিএম`) and `localizeDigits` Bengali numerals — the
   Bengali clock contains no Latin characters. Timezone is `Asia/Dhaka`
@@ -372,15 +377,22 @@ no model change needed.
 - The overlay is a **HUD that emerges from the bottom bar** — the bar is its
   physical origin and sole control. The panel is anchored above the bar,
   grows upward out of it (transform-origin at its bottom edge) and contracts
-  back into it on close; a seam connector and the bar's `data-nav-open` glow
-  keep the relationship visible. It carries no large page number — the page
-  itself already does.
-- **Progress is one instrument with a fixed start anchor.** In the bar, a
-  fixed-width track holds the nine dots at proportional positions and a
-  left-anchored fill; on the open HUD, the same fill travels along the
-  panel's bottom edge. The formula is deterministic —
+  back into it on close; a seam connector scales in from the bar end, the
+  trigger sparks once on open, and the bar's `data-nav-open` glow keeps the
+  relationship visible. The panel's hairline border is overlaid with
+  segmented corner brackets and one asymmetric edge tick — instrument
+  framing, never a conventional dialog box. Rows stagger in after the frame
+  expands. It carries no large page number — the page itself already does.
+- **Progress is one instrument with a fixed origin — a border trace, never a
+  dot row.** The bar is a fixed-size pill whose perimeter carries the trace:
+  it travels clockwise from a fixed origin at bottom-centre (bottom edge →
+  right cap → top edge → left cap), normalised with `pathLength=1` and
+  animated by `stroke-dashoffset = 1 − progress`; an `NN/09` readout beside
+  the trigger names the position. On the open HUD, the same progress travels
+  along the panel's bottom edge. The formula is deterministic —
   `progress = activeIndex / (totalPages − 1)` — so page 1 = 0% and page 9 =
-  100%. Only the fill's end point moves; no element resizes or re-centres.
+  100%. Only the trace's end point moves; the origin never re-centres and no
+  element resizes or shifts.
 - Pages center when they fit and **scroll internally** when they don't.
   Gestures yield to the inner scroller until its edges, then turn the page.
   Never clip, truncate, or shrink content to preserve composition.

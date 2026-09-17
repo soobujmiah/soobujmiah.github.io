@@ -159,6 +159,11 @@ export function NavOverlay({
         style={{ pointerEvents: open ? 'auto' : 'none', transformOrigin: '50% 100%' }}
         onKeyDown={onKeyDown}
       >
+        {/* technical framing — segmented corner brackets and edge
+            ticks drawn over the panel: HUD geometry, not box UI. The
+            panel's own border stays a faint hairline so the frame
+            reads as an instrument layer, not a dialog outline. */}
+        <span className="nav-overlay-frame" aria-hidden />
         <div className="nav-overlay-head">
           {/* Compact head: the index eyebrow IS the title, with the
               current page named beside it in the same quiet mono.

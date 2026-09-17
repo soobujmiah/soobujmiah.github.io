@@ -229,7 +229,7 @@ export function Reveal({
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PAGE PROGRESS BAR — driven by pager fraction, not scroll.
+   PAGE PROGRESS — the HUD bar's border is the instrument.
    ═══════════════════════════════════════════════════════════════ */
 
 /* The old top-of-page progress bar is gone: page position now travels
@@ -246,104 +246,102 @@ function IndexGlyph() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PAGE DOTS — vertical rail on desktop, mini row above the footer
-   on phones.
+   PERIMETER TRACE — progress as a border trace, never a dot row.
+
+   The bar is a fixed-size pill, so its border path is known exactly:
+   a green trace travels the perimeter clockwise from a fixed origin
+   at bottom-centre — bottom edge → right cap → top edge → left cap —
+   with pathLength normalised to 1 and strokeDashoffset = 1 − progress.
+   Page 1 = 0%, page 9 = 100% (12.5% steps). Only the trace endpoint
+   moves: the origin never re-centres, the bar never resizes or shifts.
+   The NN/09 readout names the position; the ●●● dot row is retired —
+   the trace is the primary progress read.
    ═══════════════════════════════════════════════════════════════ */
+
+function PerimeterTrace({ w, h, progress, reduced }: { w: number; h: number; progress: number; reduced: boolean }) {
+  /* 0.75px inset keeps the 1.5px stroke centred on the pill's border;
+     the caps are true semicircles (r = half the inset height) */
+  const r = (h - 1.5) / 2;
+  const y0 = 0.75;
+  const y1 = h - 0.75;
+  const xL = 0.75 + r;
+  const xR = w - 0.75 - r;
+  const d = `M${w / 2} ${y1}H${xR}A${r} ${r} 0 0 1 ${xR} ${y0}H${xL}A${r} ${r} 0 0 1 ${xL} ${y1}H${w / 2}`;
+  return (
+    <svg className="hud-perim" viewBox={`0 0 ${w} ${h}`} aria-hidden focusable="false">
+      <path className="hud-perim-base" d={d} pathLength={1} />
+      <motion.path
+        className="hud-perim-fill"
+        d={d}
+        pathLength={1}
+        strokeDasharray="1 1"
+        initial={false}
+        animate={{ strokeDashoffset: 1 - progress }}
+        transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 170, damping: 26 }}
+      />
+    </svg>
+  );
+}
 
 export function PageDots({
   total,
   active,
   labels,
-  onGo,
   navOpen,
 }: {
   total: number;
   active: number;
   labels: string[];
-  onGo: (index: number) => void;
   navOpen: boolean;
 }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const { openNav } = useNav();
   const prefersReduced = useReducedMotion();
-  const dots = Array.from({ length: total }, (_, i) => i);
-  /* Page position is one instrument, not two: a fixed-width track
-     inside the bar. The START anchor never moves — page 1 sits at 0%
-     and page 9 completes the cycle at 100%:
-
-         progress = active / (total - 1)
-
-     Dots live at fixed proportional positions on the track; the
-     active page is colour + glow only (no width change), so nothing
-     re-centres and neither end of the component ever shifts. The
-     fill is transform-only (scaleX from a left origin). The page
-     number itself is not repeated here; every page carries its own
-     numeral. */
+  /* Same instrument as the open panel's bottom-edge trace:
+     progress = active / (total − 1), fixed origin, monotonic. */
   const progress = total > 1 ? active / (total - 1) : 0;
-  const track = (
-    <span className="hud-track">
-      <span className="hud-rail" aria-hidden />
-      <motion.span
-        className="hud-fill"
-        aria-hidden
-        initial={false}
-        animate={{ scaleX: progress }}
-        transition={prefersReduced ? { duration: 0 } : { type: 'spring', stiffness: 170, damping: 26 }}
-      />
-      {dots.map((i) => (
-        <button
-          key={i}
-          type="button"
-          onClick={() => onGo(i)}
-          aria-label={labels[i] ?? String(i + 1)}
-          aria-current={i === active ? 'true' : undefined}
-          data-magnetic
-          className={`hud-dot${i === active ? ' hud-dot-active' : ''}`}
-          style={{ left: `${total > 1 ? (i / (total - 1)) * 100 : 0}%` }}
-        />
-      ))}
-    </span>
+  const pad2 = (n: number) => localizeDigits(String(n).padStart(2, '0'), lang);
+  const readout = `${pad2(active + 1)}/${pad2(total)}`;
+  const bar = (w: number, h: number, sm: boolean) => (
+    <>
+      <PerimeterTrace w={w} h={h} progress={progress} reduced={!!prefersReduced} />
+      <span className="hud-readout font-mono" aria-hidden>
+        {readout}
+      </span>
+      <span className="sr-only">{labels[active] ?? ''}</span>
+      <span className="hud-divider" aria-hidden />
+      <button
+        type="button"
+        onClick={openNav}
+        aria-label={t.ui.navOpen}
+        aria-expanded={navOpen}
+        data-magnetic={!sm}
+        className={sm ? 'pager-index-trigger pager-index-trigger-sm' : 'pager-index-trigger'}
+      >
+        <IndexGlyph />
+      </button>
+    </>
   );
   return (
     <>
-      {/* desktop rail — the pager control, plus the index trigger.
-          data-nav-open couples the bar to the HUD that emerges from
-          it: while the index is open, the bar carries the glow. */}
+      {/* desktop bar — the index trigger wrapped in its progress
+          trace. data-nav-open couples the bar to the HUD that
+          emerges from it: while the index is open, the bar carries
+          the glow and the trigger sparks. */}
       <nav
         aria-label={t.ui.navTitle}
         className="pager-dots-rail pager-hud"
         data-nav-open={navOpen ? 'true' : 'false'}
       >
-        {track}
-        <span className="hud-divider" aria-hidden />
-        <button
-          type="button"
-          onClick={openNav}
-          aria-label={t.ui.navOpen}
-          aria-expanded={navOpen}
-          data-magnetic
-          className="pager-index-trigger"
-        >
-          <IndexGlyph />
-        </button>
+        {bar(124, 38, false)}
       </nav>
-      {/* phone row */}
+      {/* phone bar */}
       <nav
         aria-label={t.ui.navTitle}
         className="pager-dots-row pager-hud"
         data-nav-open={navOpen ? 'true' : 'false'}
       >
-        {track}
-        <span className="hud-divider" aria-hidden />
-        <button
-          type="button"
-          onClick={openNav}
-          aria-label={t.ui.navOpen}
-          aria-expanded={navOpen}
-          className="pager-index-trigger pager-index-trigger-sm"
-        >
-          <IndexGlyph />
-        </button>
+        {bar(112, 36, true)}
       </nav>
     </>
   );

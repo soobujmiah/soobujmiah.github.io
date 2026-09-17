@@ -25,7 +25,7 @@
    identity container cannot jump or shift between languages or
    cycles; only pixels inside the canvas move.
 
-   The form library is a curated collection of 35 technical motifs
+   The form library is a curated collection of 42 technical motifs
    (programming, systems, Android, ecosystem, AI, geometric/3D and
    device metaphors). Forms are drawn into an offscreen canvas and
    sampled exactly like the name's ink — one code path decides where
@@ -84,22 +84,31 @@ const MORPH_S = 2.2; // one spread+converge leg-pair (±0.3)
 /** Where the scatter waypoint sits along a morph, 0..1. */
 const SPREAD_AT = 0.42;
 
-/** The curated form library — cycled by a seeded bag, never all at once. */
+/** The curated form library — cycled by a seeded bag, never all at once.
+    Every entry is a recognizable semantic silhouette (software,
+    computing, AI, systems, Android, science/space) — no abstract
+    filler: the generic geometry that said nothing (arch, pyramid,
+    hex, sphere, robot, bolt, layers) was retired in favour of the
+    science/space and accelerator vocabulary. */
 const FORMS = [
   // programming
   'code', 'braces', 'brackets', 'terminal', 'cursor',
-  // systems / engineering
-  'chip', 'circuit', 'server', 'database', 'network', 'wave', 'arch',
+  // systems / computing
+  'chip', 'gpu', 'npu', 'circuit', 'memory', 'server', 'database',
+  'network', 'wave', 'monitor', 'binary',
   // android / mobile
-  'android', 'phone', 'appgrid', 'robot',
+  'android', 'phone', 'appgrid',
   // developer ecosystem
   'git', 'tree', 'package',
   // ai / data
   'neural', 'matrix', 'flow',
-  // geometric / dimensional
-  'cube', 'sphere', 'orbit', 'hex', 'pyramid', 'layers',
+  // geometric / orbital
+  'cube', 'orbit', 'globe',
+  // science / space
+  'galaxy', 'starfield', 'constellation', 'planet', 'starsystem',
+  'satellite', 'spaceship', 'rocket', 'comet',
   // technical motifs
-  'gear', 'lock', 'cloud', 'globe', 'bolt', 'antenna', 'keyboard',
+  'gear', 'lock', 'cloud', 'antenna', 'keyboard',
 ] as const;
 type FormId = (typeof FORMS)[number];
 
@@ -227,7 +236,7 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       ctx.fillRect(cx + H * 0.16, cy - H * 0.34, lw * 1.6, H * 0.68);
       break;
 
-    /* ── systems / engineering ── */
+    /* ── systems / computing ── */
     case 'chip': {
       const s = H * 0.56;
       ctx.strokeRect(cx - s / 2, cy - s / 2, s, s);
@@ -239,6 +248,56 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
         line(ctx, cx - s / 2, cy + o, cx - s / 2 - H * 0.12, cy + o);
         line(ctx, cx + s / 2, cy + o, cx + s / 2 + H * 0.12, cy + o);
       }
+      break;
+    }
+    case 'gpu':
+    case 'npu': {
+      /* the two accelerators share the die-with-pins body; the label
+         keeps them apart as semantic identities */
+      const s = H * 0.5;
+      const pin = H * 0.12;
+      ctx.strokeRect(cx - s / 2, cy - s / 2, s, s);
+      for (let i = 0; i < 3; i += 1) {
+        const o = (i - 1) * s * 0.34;
+        line(ctx, cx + o, cy - s / 2, cx + o, cy - s / 2 - pin);
+        line(ctx, cx + o, cy + s / 2, cx + o, cy + s / 2 + pin);
+      }
+      txt(ctx, form === 'gpu' ? 'GPU' : 'NPU', cx, cy + s * 0.2, s * 0.46);
+      break;
+    }
+    case 'memory': {
+      /* DIMM module: body, die squares, contact fingers with notch */
+      const w = W * 0.72;
+      const h = H * 0.38;
+      ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
+      for (let i = 0; i < 4; i += 1) {
+        const s = h * 0.44;
+        ctx.strokeRect(cx - w * 0.34 + i * w * 0.23, cy - s / 2, s, s);
+      }
+      for (let i = 0; i < 9; i += 1) {
+        const x = cx - w / 2 + w * 0.07 + i * (w * 0.86) / 8;
+        line(ctx, x, cy + h / 2, x, cy + h / 2 + H * 0.09);
+      }
+      line(ctx, cx - w * 0.02, cy + h / 2 + H * 0.09, cx + w * 0.02, cy + h / 2 + H * 0.09);
+      break;
+    }
+    case 'monitor': {
+      /* terminal on a stand with a prompt line inside */
+      const w = W * 0.7;
+      const h = H * 0.48;
+      ctx.strokeRect(cx - w / 2, cy - h / 2 - H * 0.06, w, h);
+      txt(ctx, '>_', cx - w * 0.24, cy - H * 0.02, h * 0.4);
+      line(ctx, cx, cy + h / 2 - H * 0.06, cx, cy + h / 2 + H * 0.05);
+      line(ctx, cx - w * 0.16, cy + h / 2 + H * 0.07, cx + w * 0.16, cy + h / 2 + H * 0.07);
+      break;
+    }
+    case 'binary': {
+      /* data pattern: columns of 0s and 1s, seeded but glyph-real */
+      const rnd = mulberry32(seed);
+      const s = H * 0.2;
+      for (let c = 0; c < 4; c += 1)
+        for (let r = 0; r < 3; r += 1)
+          txt(ctx, rnd() < 0.5 ? '0' : '1', W * (0.16 + c * 0.23), H * (0.2 + r * 0.3), s);
       break;
     }
     case 'circuit': {
@@ -317,17 +376,6 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       circle(ctx, cx + W * 0.106, cy + H * 0.26, lw);
       break;
     }
-    case 'arch': {
-      const w = H * 0.3;
-      ctx.strokeRect(cx - w / 2, cy - H * 0.4, w, H * 0.22);
-      ctx.strokeRect(cx - W * 0.24 - w / 2, cy + H * 0.16, w, H * 0.22);
-      ctx.strokeRect(cx + W * 0.24 - w / 2, cy + H * 0.16, w, H * 0.22);
-      line(ctx, cx, cy - H * 0.18, cx, cy);
-      line(ctx, cx - W * 0.24, cy, cx + W * 0.24, cy);
-      line(ctx, cx - W * 0.24, cy, cx - W * 0.24, cy + H * 0.16);
-      line(ctx, cx + W * 0.24, cy, cx + W * 0.24, cy + H * 0.16);
-      break;
-    }
 
     /* ── android / mobile ── */
     case 'android': {
@@ -356,17 +404,6 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
         ctx.strokeRect(cx + (dx * (s + g)) / 2 - s / 2, cy + (dy * (s + g)) / 2 - s / 2, s, s);
       }
-      break;
-    }
-    case 'robot': {
-      const w = H * 0.52;
-      const h = H * 0.42;
-      ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
-      circle(ctx, cx - w * 0.22, cy - h * 0.08, lw);
-      circle(ctx, cx + w * 0.22, cy - h * 0.08, lw);
-      line(ctx, cx - w * 0.18, cy + h * 0.2, cx + w * 0.18, cy + h * 0.2);
-      line(ctx, cx, cy - h / 2, cx, cy - h / 2 - H * 0.14);
-      circle(ctx, cx, cy - h / 2 - H * 0.17, lw * 0.9);
       break;
     }
 
@@ -454,16 +491,6 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       line(ctx, cx + s / 2, cy + s / 2 + o / 2, cx + s / 2 + o, cy + s / 2 - o / 2);
       break;
     }
-    case 'sphere': {
-      circle(ctx, cx, cy, H * 0.36, false);
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, H * 0.36, H * 0.13, 0, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, H * 0.13, H * 0.36, 0, 0, Math.PI * 2);
-      ctx.stroke();
-      break;
-    }
     case 'orbit': {
       circle(ctx, cx, cy, H * 0.2, false);
       ctx.beginPath();
@@ -472,31 +499,126 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       circle(ctx, cx + H * 0.34, cy - H * 0.2, lw * 1.2);
       break;
     }
-    case 'hex': {
-      const rr2 = H * 0.4;
-      const pts: number[][] = [];
-      for (let i = 0; i < 6; i += 1) {
-        const a = (i / 6) * Math.PI * 2 - Math.PI / 6;
-        pts.push([cx + Math.cos(a) * rr2, cy + Math.sin(a) * rr2]);
+    /* ── science / space — real silhouettes, seeded, never blobs ── */
+    case 'galaxy': {
+      /* two logarithmic spiral arms around a lit core, vertically
+         inclined like a tilted disc, plus a sparse seeded star halo */
+      ctx.beginPath();
+      for (let arm = 0; arm < 2; arm += 1)
+        for (let i = 0; i <= 26; i += 1) {
+          const th = (i / 26) * Math.PI * 2.2;
+          const r = H * 0.055 * Math.exp(0.3 * th);
+          const x = cx + Math.cos(th + arm * Math.PI) * r;
+          const y = cy + Math.sin(th + arm * Math.PI) * r * 0.68;
+          if (i) ctx.lineTo(x, y);
+          else ctx.moveTo(x, y);
+        }
+      ctx.stroke();
+      circle(ctx, cx, cy, H * 0.075);
+      const rnd = mulberry32(seed);
+      for (let i = 0; i < 10; i += 1) {
+        const a = rnd() * Math.PI * 2;
+        const r = H * (0.14 + rnd() * 0.3);
+        circle(ctx, cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.68, lw * (0.4 + rnd() * 0.5));
       }
-      poly(ctx, pts, true);
+      break;
+    }
+    case 'starfield': {
+      const rnd = mulberry32(seed);
+      for (let i = 0; i < 26; i += 1) {
+        const x = W * (0.06 + rnd() * 0.88);
+        const y = H * (0.08 + rnd() * 0.84);
+        const r = lw * (0.4 + rnd() * 0.9);
+        circle(ctx, x, y, r);
+        /* every fourth star gets diffraction spikes: the field reads
+           as depth, not as uniform noise */
+        if (i % 4) continue;
+        line(ctx, x - r * 2.6, y, x + r * 2.6, y);
+        line(ctx, x, y - r * 2.6, x, y + r * 2.6);
+      }
+      break;
+    }
+    case 'constellation': {
+      const rnd = mulberry32(seed);
+      const pts: number[][] = [];
+      for (let i = 0; i < 7; i += 1) pts.push([W * (0.12 + rnd() * 0.76), H * (0.14 + rnd() * 0.72)]);
+      poly(ctx, pts);
       ctx.stroke();
-      poly(ctx, pts.map(([x, y]) => [cx + (x - cx) * 0.5, cy + (y - cy) * 0.5]), true);
+      for (const [x, y] of pts) circle(ctx, x, y, lw * (0.8 + rnd() * 0.6));
+      break;
+    }
+    case 'planet': {
+      circle(ctx, cx, cy, H * 0.26, false);
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, H * 0.46, H * 0.14, -0.4, 0, Math.PI * 2);
       ctx.stroke();
       break;
     }
-    case 'pyramid': {
-      poly(ctx, [[cx, cy - H * 0.38], [cx - W * 0.26, cy + H * 0.26], [cx + W * 0.26, cy + H * 0.26]], true);
+    case 'starsystem': {
+      circle(ctx, cx, cy, H * 0.1);
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, H * 0.26, H * 0.1, -0.3, 0, Math.PI * 2);
       ctx.stroke();
-      line(ctx, cx, cy - H * 0.38, cx + W * 0.06, cy + H * 0.26);
-      line(ctx, cx - W * 0.26, cy + H * 0.26, cx + W * 0.06, cy + H * 0.26);
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, H * 0.44, H * 0.17, -0.3, 0, Math.PI * 2);
+      ctx.stroke();
+      circle(ctx, cx + H * 0.23, cy - H * 0.12, lw * 1.1);
+      circle(ctx, cx - H * 0.4, cy + H * 0.15, lw * 1.3);
       break;
     }
-    case 'layers': {
-      for (let i = -1; i <= 1; i += 1) {
-        const y = cy + i * H * 0.22;
-        poly(ctx, [[cx, y - H * 0.11], [cx + W * 0.26, y], [cx, y + H * 0.11], [cx - W * 0.26, y]], true);
-        ctx.stroke();
+    case 'satellite': {
+      const b = H * 0.26;
+      ctx.strokeRect(cx - b / 2, cy - b / 2, b, b);
+      ctx.strokeRect(cx - b * 2, cy - b * 0.36, b * 1.15, b * 0.72);
+      ctx.strokeRect(cx + b * 0.85, cy - b * 0.36, b * 1.15, b * 0.72);
+      line(ctx, cx - b * 0.85, cy, cx - b / 2, cy);
+      line(ctx, cx + b / 2, cy, cx + b * 0.85, cy);
+      line(ctx, cx, cy - b / 2, cx, cy - b * 1.15);
+      break;
+    }
+    case 'spaceship': {
+      /* saucer + dome + running lights + tractor beam — an
+         unmistakable spacecraft silhouette */
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + H * 0.04, W * 0.34, H * 0.13, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx, cy - H * 0.03, H * 0.17, Math.PI, 0);
+      ctx.stroke();
+      circle(ctx, cx - W * 0.16, cy + H * 0.06, lw * 0.7);
+      circle(ctx, cx + W * 0.16, cy + H * 0.06, lw * 0.7);
+      line(ctx, cx - W * 0.1, cy + H * 0.17, cx - W * 0.17, cy + H * 0.34);
+      line(ctx, cx, cy + H * 0.18, cx, cy + H * 0.36);
+      line(ctx, cx + W * 0.1, cy + H * 0.17, cx + W * 0.17, cy + H * 0.34);
+      break;
+    }
+    case 'rocket': {
+      const h = H * 0.66;
+      const w = H * 0.24;
+      poly(
+        ctx,
+        [
+          [cx, cy - h / 2],
+          [cx + w / 2, cy - h * 0.08],
+          [cx + w / 2, cy + h * 0.3],
+          [cx - w / 2, cy + h * 0.3],
+          [cx - w / 2, cy - h * 0.08],
+        ],
+        true
+      );
+      ctx.stroke();
+      line(ctx, cx - w / 2, cy + h * 0.12, cx - w * 0.95, cy + h * 0.42);
+      line(ctx, cx + w / 2, cy + h * 0.12, cx + w * 0.95, cy + h * 0.42);
+      circle(ctx, cx, cy - h * 0.12, lw);
+      line(ctx, cx, cy + h * 0.38, cx, cy + h * 0.56);
+      break;
+    }
+    case 'comet': {
+      circle(ctx, cx + W * 0.18, cy + H * 0.14, H * 0.085);
+      const rnd = mulberry32(seed);
+      for (let i = 0; i < 4; i += 1) {
+        const dy = (i - 1.5) * H * 0.1;
+        line(ctx, cx + W * 0.1, cy + H * 0.1 + dy * 0.35, cx - W * (0.22 + rnd() * 0.12), cy + H * 0.02 + dy);
       }
       break;
     }
@@ -544,21 +666,6 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       ctx.stroke();
       break;
     }
-    case 'bolt':
-      poly(
-        ctx,
-        [
-          [cx + H * 0.06, cy - H * 0.4],
-          [cx - H * 0.22, cy + H * 0.06],
-          [cx - H * 0.02, cy + H * 0.06],
-          [cx - H * 0.06, cy + H * 0.4],
-          [cx + H * 0.22, cy - H * 0.06],
-          [cx + H * 0.02, cy - H * 0.06],
-        ],
-        true
-      );
-      ctx.fill();
-      break;
     case 'antenna': {
       line(ctx, cx, cy + H * 0.38, cx, cy - H * 0.1);
       circle(ctx, cx, cy - H * 0.14, lw);

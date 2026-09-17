@@ -91,9 +91,11 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
             It leads the page directly under the header: clock first,
             then the identity mark. Rendered in the name's own dotted
             typographic language (components/IdentityClock.tsx); the
-            entrance is pure CSS, disabled under reduced motion. */}
+            entrance is pure CSS, disabled under reduced motion. The
+            date/time metadata line closes the hero instead — the
+            clock owns the top, the name stays the dominant mark. */}
         <div className="hero-clock-wrap">
-          <IdentityClock />
+          <IdentityClock part="time" />
         </div>
 
         {/* 1 · who I am — the identity mark leads the content; only the
@@ -171,6 +173,13 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
             {t.hero.ctaGithub}
           </Magnetic>
         </motion.div>
+
+        {/* 5 · date/time metadata — the hero's closing instrument line:
+            day, date and timezone under the CTAs, mirroring the clock
+            above the name without competing with it */}
+        <div className="hero-date-wrap">
+          <IdentityClock part="date" />
+        </div>
       </div>
 
       {/* Scroll hint — decoration, not a control. The bottom bar is the
