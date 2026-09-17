@@ -660,6 +660,10 @@ export function SignatureName({
     let holdNameMs = NAME_HOLD_S * 1000;
     let holdFormMs = FORM_HOLD_S * 1000;
     let morphMs = MORPH_S * 1000;
+    /* the morph phase runs until the LAST staggered particle has
+       actually landed (morphMs is one particle's flight; staggered
+       particles start later), so no cycle is ever cut mid-flight */
+    let morphSpan = MORPH_S * 1000;
     let spreadScale = 1;
     /* geometry of the current field, in wordmark space */
     let W = 0;
@@ -903,6 +907,7 @@ export function SignatureName({
         const j = Math.floor(rnd() * (i + 1));
         [order[i], order[j]] = [order[j], order[i]];
       }
+      let stgMaxNow = 0;
       for (let i = 0; i < n; i += 1) {
         const p = particles[i];
         const fromX = toForm ? p.tx : p.m1x;
@@ -1013,9 +1018,12 @@ export function SignatureName({
           : currentStyle === 'fragment' ? (i % 4) * 0.05
           : currentStyle === 'layered' ? (i % 3) * 0.09
           : rnd() * 0.12;
+        if (p.stg > stgMaxNow) stgMaxNow = p.stg;
         p.turb = (rnd() - 0.5) * (currentStyle === 'depth' ? 16 : currentStyle === 'fragment' ? 14 : 10);
         p.z = zc >= 0 ? zc : rnd();
       }
+      /* run the phase until the last staggered particle lands */
+      morphSpan = morphMs * (1 + stgMaxNow);
       phase = toForm ? 'toForm' : 'toName';
       phaseT0 = now;
     };
@@ -1116,12 +1124,12 @@ export function SignatureName({
         phaseT0 = now;
       } else if (phase === 'nameHold' && now - phaseT0 > holdNameMs) {
         aimField(true, now);
-      } else if (phase === 'toForm' && now - phaseT0 > morphMs) {
+      } else if (phase === 'toForm' && now - phaseT0 > morphSpan) {
         phase = 'formHold';
         phaseT0 = now;
       } else if (phase === 'formHold' && now - phaseT0 > holdFormMs) {
         aimField(false, now);
-      } else if (phase === 'toName' && now - phaseT0 > morphMs) {
+      } else if (phase === 'toName' && now - phaseT0 > morphSpan) {
         phase = 'nameHold';
         phaseT0 = now;
         cycle += 1;
@@ -1214,9 +1222,22 @@ export function SignatureName({
           const flight = Math.sin(Math.PI * clamp01(mU));
           x += Math.sin(ts * 2.1 + p.ph1) * p.turb * flight * 0.4;
           y += Math.cos(ts * 1.7 + p.ph2) * p.turb * flight * 0.4;
-          /* depth cue: nearer particles larger mid-flight */
-          s = dot * (1.0 + 0.5 * p.z) * (1 + 0.3 * flight);
-          lc = phase === 'toForm' ? 1 - 0.75 * clamp01(mU) : 0.25 + 0.75 * clamp01(mU);
+          /* per-particle arrival: size and ink ease into the values the
+             next hold phase uses, so the phase switch is seamless —
+             no size pop, no brightness pop, no cut-off look */
+          const ue = clamp01(mU - p.stg);
+          const pf = Math.sin(Math.PI * ue);
+          const arrive = ue <= SPREAD_AT ? 0 : easeInOut((ue - SPREAD_AT) / (1 - SPREAD_AT));
+          const flyS = dot * (1.0 + 0.5 * p.z) * (1 + 0.3 * pf);
+          if (phase === 'toForm') {
+            const holdS = dot * (0.85 + 0.6 * p.z);
+            s = flyS + (holdS - flyS) * arrive;
+            const holdLc = 0.55 + 0.45 * p.z;
+            lc = (1 - 0.75 * clamp01(mU)) * (1 - arrive) + holdLc * arrive;
+          } else {
+            s = flyS + (dot - flyS) * arrive;
+            lc = 0.25 + 0.75 * clamp01(mU);
+          }
         } else {
           /* formHold: seated on the form with dimensional shimmer */
           x = p.m1x + T.microPx * 0.8 * Math.sin(ts * 1.4 + p.ph1) + (p.z - 0.5) * 3.2 * Math.sin(ts * 0.5);

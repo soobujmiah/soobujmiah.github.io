@@ -589,16 +589,72 @@ body.lang-bn .worldmap-pin {
 /* Desktop rail lives in the dedicated lower navigation strip — the
    same safe zone as the phone row — so it never sits over content,
    imagery or controls. Horizontal, centred, above the footer. */
-.pager-dots-rail {
+/* ── HUD pager — a restrained instrument, not a menu ───────────────
+   A thin framed telemetry strip: page-state readout, tick markers,
+   the active page as a lit capsule, and the index trigger as the
+   "expand" control. Framing is hairline + faint accent; the only glow
+   is the active capsule's. Motion is limited to the pulse/scan, both
+   disabled under reduced motion. */
+.pager-hud {
   position: absolute;
   z-index: 30;
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 12px;
+  border: 1px solid rgba(34, 197, 94, 0.14);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(10, 12, 11, 0.72), rgba(6, 7, 8, 0.66));
+  backdrop-filter: blur(10px);
+  box-shadow:
+    0 0 0 1px rgba(6, 6, 8, 0.5),
+    0 8px 26px rgba(0, 0, 0, 0.35);
+}
+
+/* hairline corner ticks — the instrument framing, pure decoration */
+.pager-hud::before,
+.pager-hud::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.pager-hud::before {
+  left: 4px;
+  border-right: 0;
+  border-top: 0;
+  border-bottom-left-radius: 3px;
+}
+.pager-hud::after {
+  right: 4px;
+  border-left: 0;
+  border-top: 0;
+  border-bottom-right-radius: 3px;
+}
+
+/* the page-state readout: 03·09 */
+.pager-hud-count {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: rgba(34, 197, 94, 0.7);
+  padding-right: 3px;
+  white-space: nowrap;
+}
+.pager-hud-sep {
+  color: rgba(228, 226, 223, 0.28);
+  margin: 0 1px;
+}
+
+.pager-dots-rail {
   bottom: calc(64px + env(safe-area-inset-bottom));
   display: none;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
 }
 
 @media (min-width: 768px) {
@@ -608,35 +664,36 @@ body.lang-bn .worldmap-pin {
 }
 
 .pager-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 9999px;
   border: none;
   padding: 0;
-  background: rgba(228, 226, 223, 0.18);
+  background: rgba(228, 226, 223, 0.2);
   transition: all 0.35s ease;
 }
 
 .pager-dot:hover {
-  background: rgba(228, 226, 223, 0.4);
-  transform: scale(1.3);
+  background: rgba(228, 226, 223, 0.42);
+  transform: scale(1.28);
 }
 
 .pager-dot-active {
   background: #22c55e;
-  width: 26px;
-  box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
+  width: 24px;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.55);
+  animation: hud-pulse 3.4s ease-in-out infinite;
+}
+
+@keyframes hud-pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(34, 197, 94, 0.4); }
+  50% { box-shadow: 0 0 16px rgba(34, 197, 94, 0.62); }
 }
 
 .pager-dots-row {
-  position: absolute;
-  z-index: 30;
-  left: 50%;
-  transform: translateX(-50%);
   bottom: calc(66px + env(safe-area-inset-bottom));
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  gap: 7px;
+  padding: 5px 10px;
 }
 
 @media (min-width: 768px) {
@@ -651,14 +708,22 @@ body.lang-bn .worldmap-pin {
   border-radius: 9999px;
   border: none;
   padding: 0;
-  background: rgba(228, 226, 223, 0.2);
+  background: rgba(228, 226, 223, 0.22);
   transition: all 0.35s ease;
 }
 
 .pager-dot-sm-active {
-  width: 22px;
+  width: 20px;
   background: #22c55e;
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.55);
+  animation: hud-pulse 3.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pager-dot-active,
+  .pager-dot-sm-active {
+    animation: none;
+  }
 }
 
 /* ── snap carousels (dense pages on phones) ── */
@@ -908,9 +973,10 @@ body.lang-bn span {
 
 /* ── pager index trigger — the pager's own navigation control ── */
 .pager-index-trigger {
-  width: 30px;
-  height: 30px;
-  margin-top: 8px;
+  position: relative;
+  width: 28px;
+  height: 28px;
+  margin-left: 4px;
   border-radius: 9999px;
   border: 1px solid rgba(228, 226, 223, 0.12);
   background: rgba(6, 6, 8, 0.6);
@@ -919,6 +985,19 @@ body.lang-bn span {
   align-items: center;
   justify-content: center;
   transition: border-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+
+/* telemetry divider between the readout/dots and the expand control */
+.pager-index-trigger::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 14px;
+  background: linear-gradient(180deg, transparent, rgba(34, 197, 94, 0.35), transparent);
+  pointer-events: none;
 }
 
 .pager-index-trigger:hover {
@@ -930,8 +1009,7 @@ body.lang-bn span {
 .pager-index-trigger-sm {
   width: 26px;
   height: 26px;
-  margin-top: 0;
-  margin-left: 4px;
+  margin-left: 3px;
 }
 
 /* ── navigation overlay ──

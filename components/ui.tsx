@@ -5,6 +5,7 @@ import { motion, useInView, useMotionValue, useSpring, useVelocity, useTransform
 import { useLang, localizeDigits } from '@/app/language';
 import { sectionHref } from '@/app/sections';
 import { serviceHref } from '@/app/services';
+import { BrandIcon } from './social-icons';
 
 /* ═══════════════════════════════════════════════════════════════
    PAGE NAVIGATION — discrete pager: goToScene jumps to a page.
@@ -268,13 +269,23 @@ export function PageDots({
   labels: string[];
   onGo: (index: number) => void;
 }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const { openNav } = useNav();
   const dots = Array.from({ length: total }, (_, i) => i);
+  /* telemetry-style page state: NN·NN, localized digits, decorative —
+     the buttons below carry the real accessible information */
+  const hudCount = (
+    <span className="pager-hud-count" aria-hidden="true">
+      {localizeDigits(String(active + 1).padStart(2, '0'), lang)}
+      <span className="pager-hud-sep">·</span>
+      {localizeDigits(String(total).padStart(2, '0'), lang)}
+    </span>
+  );
   return (
     <>
       {/* desktop rail — the pager control, plus the index trigger */}
-      <nav aria-label={t.ui.navTitle} className="pager-dots-rail">
+      <nav aria-label={t.ui.navTitle} className="pager-dots-rail pager-hud">
+        {hudCount}
         {dots.map((i) => (
           <button
             key={i}
@@ -298,7 +309,8 @@ export function PageDots({
         </button>
       </nav>
       {/* phone row */}
-      <nav aria-label={t.ui.navTitle} className="pager-dots-row">
+      <nav aria-label={t.ui.navTitle} className="pager-dots-row pager-hud">
+        {hudCount}
         {dots.map((i) => (
           <button
             key={i}
@@ -590,19 +602,20 @@ export function Header() {
             onClick={toggleLang}
             aria-label={t.header.langAria}
             data-magnetic
-            className="rounded-full px-2.5 sm:px-4 py-1.5 font-mono text-[11px] font-medium transition-colors duration-300"
+            className="inline-flex items-center gap-1.5 rounded-full px-2.5 sm:px-4 py-1.5 font-mono text-[11px] font-medium transition-colors duration-300"
             style={{ border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80' }}
           >
+            <BrandIcon id="portfolio" size={12} />
             {t.header.langLabel}
           </button>
           <Magnetic
             href="https://github.com/soobujmiah"
             ariaLabel={t.header.githubAria}
-            className="rounded-full px-2.5 sm:px-4 py-1.5 text-[11px] font-medium transition-colors duration-300"
+            className="inline-flex items-center rounded-full px-2.5 sm:px-3 py-1.5 transition-colors duration-300"
             style={{ border: '1px solid rgba(228,226,223,0.12)', color: '#e4e2df' }}
             strength={0.2}
           >
-            {t.header.githubLabel}
+            <BrandIcon id="github" size={14} />
           </Magnetic>
         </div>
       </div>
