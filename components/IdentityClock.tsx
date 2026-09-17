@@ -196,11 +196,18 @@ export function IdentityClock({ part = 'time' }: { part?: 'time' | 'date' }) {
         date: date.format(d),
       });
     };
-    tick();
-    /* the time face needs second resolution; the date line changes at
-       most once a day, so it polls lazily */
-    const id = setInterval(tick, isDate ? 30_000 : 1000);
-    return () => clearInterval(id);
+    /* Numeric determinism: a naive 1 s interval drifts across second
+       boundaries — a displayed second could repeat or be skipped.
+       Each tick re-aims at the next real boundary instead: the time
+       face lands ~25 ms after a whole second, every time. The date
+       line changes at most once a day, so it polls lazily. */
+    let id = 0;
+    const loop = () => {
+      tick();
+      id = window.setTimeout(loop, isDate ? 30_000 : 1025 - (Date.now() % 1000));
+    };
+    loop();
+    return () => window.clearTimeout(id);
   }, [lang, t, isDate]);
 
   /* Resolve the identity's display faces from the probe element's

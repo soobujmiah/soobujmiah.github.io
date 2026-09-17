@@ -94,26 +94,33 @@ const SPREAD_AT = 0.42;
     filler: the generic geometry that said nothing (arch, pyramid,
     hex, sphere, robot, bolt, layers) was retired in favour of the
     science/space and accelerator vocabulary. */
-const FORMS = [
+/* The canonical vocabulary: exactly these 25 fixed shapes are the
+   identity's primary forms. They are never removed, never replaced by
+   abstractions, and never redefined per cycle — every excursion draws
+   from this list unless a supporting form is due (below). */
+const CANON_FORMS = [
   // programming
-  'code', 'braces', 'brackets', 'terminal', 'cursor',
+  'code', 'braces', 'terminal', 'git', 'database',
   // systems / computing
-  'chip', 'gpu', 'npu', 'circuit', 'memory', 'server', 'database',
-  'network', 'wave', 'monitor', 'binary',
-  // android / mobile
-  'android', 'phone', 'appgrid',
-  // developer ecosystem
-  'git', 'tree', 'package',
-  // ai / data
-  'neural', 'matrix', 'flow',
-  // geometric / orbital
-  'cube', 'orbit', 'globe',
+  'chip', 'gpu', 'npu', 'circuit', 'server',
+  // platforms
+  'linux', 'android', 'phone', 'monitor', 'network',
+  // documents & records
+  'doc', 'folder', 'sheet', 'printer', 'check',
+  // ai / intelligence
+  'neural', 'aigraph', 'gear',
   // science / space
-  'galaxy', 'starfield', 'constellation', 'planet', 'starsystem',
-  'satellite', 'spaceship', 'rocket', 'comet',
-  // technical motifs
-  'gear', 'lock', 'cloud', 'antenna', 'keyboard',
+  'galaxy', 'starsystem',
 ] as const;
+/* Supporting forms: occasional guests (~1 excursion in 6) sharing the
+   same particle language — they enrich the cycle without ever
+   displacing the canonical 25. */
+const SUPPORT_FORMS = [
+  'binary', 'package', 'matrix', 'flow', 'orbit', 'globe',
+  'starfield', 'constellation', 'planet', 'satellite', 'spaceship',
+  'rocket', 'comet',
+] as const;
+const FORMS = [...CANON_FORMS, ...SUPPORT_FORMS] as const;
 type FormId = (typeof FORMS)[number];
 
 /** Transition choreographies — the spread itself must vary cycle to
@@ -184,6 +191,11 @@ const circle = (ctx: Ctx, x: number, y: number, r: number, fill = true) => {
   if (fill) ctx.fill();
   else ctx.stroke();
 };
+const ell = (ctx: Ctx, x: number, y: number, rx: number, ry: number) => {
+  ctx.beginPath();
+  ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+  ctx.stroke();
+};
 const line = (ctx: Ctx, a: number, b: number, c: number, d: number) => {
   ctx.beginPath();
   ctx.moveTo(a, b);
@@ -220,9 +232,6 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
     case 'braces':
       txt(ctx, '{ }', cx, cy, H * 0.86);
       break;
-    case 'brackets':
-      txt(ctx, '[ ]', cx, cy, H * 0.86);
-      break;
     case 'terminal': {
       const w = W * 0.62;
       const h = H * 0.74;
@@ -235,10 +244,6 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       ctx.fillRect(cx - w * 0.08, cy + h * 0.02, w * 0.22, lw * 1.4);
       break;
     }
-    case 'cursor':
-      line(ctx, cx - H * 0.42, cy, cx + H * 0.08, cy);
-      ctx.fillRect(cx + H * 0.16, cy - H * 0.34, lw * 1.6, H * 0.68);
-      break;
 
     /* ── systems / computing ── */
     case 'chip': {
@@ -267,22 +272,6 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
         line(ctx, cx + o, cy + s / 2, cx + o, cy + s / 2 + pin);
       }
       txt(ctx, form === 'gpu' ? 'GPU' : 'NPU', cx, cy + s * 0.2, s * 0.46);
-      break;
-    }
-    case 'memory': {
-      /* DIMM module: body, die squares, contact fingers with notch */
-      const w = W * 0.72;
-      const h = H * 0.38;
-      ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
-      for (let i = 0; i < 4; i += 1) {
-        const s = h * 0.44;
-        ctx.strokeRect(cx - w * 0.34 + i * w * 0.23, cy - s / 2, s, s);
-      }
-      for (let i = 0; i < 9; i += 1) {
-        const x = cx - w / 2 + w * 0.07 + i * (w * 0.86) / 8;
-        line(ctx, x, cy + h / 2, x, cy + h / 2 + H * 0.09);
-      }
-      line(ctx, cx - w * 0.02, cy + h / 2 + H * 0.09, cx + w * 0.02, cy + h / 2 + H * 0.09);
       break;
     }
     case 'monitor': {
@@ -368,16 +357,21 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       for (let i = 1; i < nodes.length; i += 1) circle(ctx, nodes[i][0], nodes[i][1], lw);
       break;
     }
-    case 'wave': {
-      ctx.beginPath();
-      for (let x = -W * 0.32; x <= W * 0.32; x += 2) {
-        const y = cy + Math.sin((x / (W * 0.64)) * Math.PI * 3) * H * 0.26;
-        if (x === -W * 0.32) ctx.moveTo(cx + x, y);
-        else ctx.lineTo(cx + x, y);
-      }
+    case 'linux': {
+      /* Tux: body, belly, head, beak, feet — the Linux mark */
+      const bw = W * 0.22;
+      const bh = H * 0.34;
+      ell(ctx, cx, cy + H * 0.08, bw, bh);
+      ell(ctx, cx, cy + H * 0.14, bw * 0.52, bh * 0.56);
+      circle(ctx, cx, cy - H * 0.3, H * 0.15, false);
+      poly(ctx, [
+        [cx - H * 0.04, cy - H * 0.28],
+        [cx + H * 0.1, cy - H * 0.255],
+        [cx - H * 0.04, cy - H * 0.23],
+      ]);
       ctx.stroke();
-      circle(ctx, cx - W * 0.106, cy - H * 0.26, lw);
-      circle(ctx, cx + W * 0.106, cy + H * 0.26, lw);
+      line(ctx, cx - bw * 0.7, cy + H * 0.44, cx - bw * 0.1, cy + H * 0.44);
+      line(ctx, cx + bw * 0.1, cy + H * 0.44, cx + bw * 0.7, cy + H * 0.44);
       break;
     }
 
@@ -402,15 +396,6 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       circle(ctx, cx, cy + h / 2 - H * 0.09, lw * 0.9);
       break;
     }
-    case 'appgrid': {
-      const s = H * 0.26;
-      const g = H * 0.12;
-      for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-        ctx.strokeRect(cx + (dx * (s + g)) / 2 - s / 2, cy + (dy * (s + g)) / 2 - s / 2, s, s);
-      }
-      break;
-    }
-
     /* ── developer ecosystem ── */
     case 'git': {
       line(ctx, cx - W * 0.14, cy - H * 0.36, cx - W * 0.14, cy + H * 0.36);
@@ -424,17 +409,6 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       circle(ctx, cx + W * 0.16, cy + H * 0.2, lw * 1.2);
       break;
     }
-    case 'tree': {
-      const x0 = cx - W * 0.22;
-      line(ctx, x0, cy - H * 0.34, x0, cy + H * 0.3);
-      for (let i = 0; i < 4; i += 1) {
-        const y = cy - H * 0.2 + i * H * 0.17;
-        line(ctx, x0, y, x0 + W * 0.14, y);
-        line(ctx, x0 + W * 0.14, y, x0 + W * 0.3, y);
-      }
-      circle(ctx, x0, cy - H * 0.34, lw);
-      break;
-    }
     case 'package': {
       const s = H * 0.56;
       poly(ctx, [[cx - s / 2, cy - s * 0.32], [cx, cy - s / 2], [cx + s / 2, cy - s * 0.32], [cx + s / 2, cy + s * 0.32], [cx, cy + s / 2], [cx - s / 2, cy + s * 0.32]], true);
@@ -442,6 +416,77 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       line(ctx, cx - s / 2, cy - s * 0.32, cx, cy - s * 0.14);
       line(ctx, cx + s / 2, cy - s * 0.32, cx, cy - s * 0.14);
       line(ctx, cx, cy - s * 0.14, cx, cy + s / 2);
+      break;
+    }
+
+    /* ── documents & records ── */
+    case 'doc': {
+      /* file: sheet with a folded corner and text rules */
+      const w = W * 0.4;
+      const h = H * 0.6;
+      const f = w * 0.26;
+      poly(ctx, [
+        [cx - w / 2, cy - h / 2], [cx + w / 2 - f, cy - h / 2],
+        [cx + w / 2, cy - h / 2 + f], [cx + w / 2, cy + h / 2],
+        [cx - w / 2, cy + h / 2],
+      ], true);
+      ctx.stroke();
+      line(ctx, cx + w / 2 - f, cy - h / 2, cx + w / 2, cy - h / 2 + f);
+      for (let i = 0; i < 2; i += 1)
+        line(ctx, cx - w * 0.3, cy + i * h * 0.17, cx + w * 0.3, cy + i * h * 0.17);
+      break;
+    }
+    case 'folder': {
+      /* records folder: tabbed sleeve */
+      const w = W * 0.56;
+      const h = H * 0.42;
+      const t = cy - h / 2;
+      poly(ctx, [
+        [cx - w / 2, t], [cx - w * 0.1, t],
+        [cx + w * 0.02, t + h * 0.2], [cx - w / 2, t + h * 0.2],
+      ], true);
+      ctx.stroke();
+      ctx.strokeRect(cx - w / 2, t + h * 0.2, w, h * 0.8);
+      break;
+    }
+    case 'sheet': {
+      /* spreadsheet: header row, column rules, data grid */
+      const w = W * 0.56;
+      const h = H * 0.5;
+      const x = cx - w / 2;
+      const y = cy - h / 2;
+      ctx.strokeRect(x, y, w, h);
+      line(ctx, x, y + h * 0.26, x + w, y + h * 0.26);
+      line(ctx, x + w / 2, y, x + w / 2, y + h);
+      line(ctx, x, y + h * 0.63, x + w, y + h * 0.63);
+      break;
+    }
+    case 'printer': {
+      /* printer: paper in, body, sheet out */
+      const w = W * 0.58;
+      const h = H * 0.26;
+      ctx.strokeRect(cx - w * 0.28, cy - h / 2 - H * 0.16, w * 0.56, H * 0.16);
+      ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
+      ctx.strokeRect(cx - w * 0.24, cy + h / 2, w * 0.48, H * 0.18);
+      line(ctx, cx - w * 0.12, cy + h / 2 + H * 0.09, cx + w * 0.12, cy + h / 2 + H * 0.09);
+      break;
+    }
+    case 'check': {
+      /* clipboard checklist: board, clip, ticked rows */
+      const w = W * 0.42;
+      const h = H * 0.58;
+      ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
+      ctx.strokeRect(cx - w * 0.15, cy - h / 2 - H * 0.045, w * 0.3, H * 0.07);
+      for (let i = 0; i < 3; i += 1) {
+        const y = cy - h * 0.18 + i * h * 0.28;
+        poly(ctx, [
+          [cx - w * 0.3, y],
+          [cx - w * 0.2, y + H * 0.045],
+          [cx - w * 0.08, y - H * 0.045],
+        ]);
+        ctx.stroke();
+        line(ctx, cx + w * 0.04, y, cx + w * 0.3, y);
+      }
       break;
     }
 
@@ -460,6 +505,23 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       for (let c = 0; c < 2; c += 1)
         for (const a of pts[c]) for (const b of pts[c + 1]) line(ctx, a[0], a[1], b[0], b[1]);
       for (const col of pts) for (const [x, y] of col) circle(ctx, x, y, lw * 1.1);
+      break;
+    }
+    case 'aigraph': {
+      /* intelligence graph: core hub, six ring nodes, chord links —
+         distinct from the layered 'neural' net and the mesh 'network' */
+      const ring: number[][] = [];
+      for (let i = 0; i < 6; i += 1) {
+        const a = ((i + 0.5) / 6) * Math.PI * 2;
+        ring.push([cx + Math.cos(a) * W * 0.26, cy + Math.sin(a) * H * 0.34]);
+      }
+      for (let i = 0; i < 6; i += 1) {
+        line(ctx, cx, cy, ring[i][0], ring[i][1]);
+        const j = (i + 2) % 6;
+        line(ctx, ring[i][0], ring[i][1], ring[j][0], ring[j][1]);
+      }
+      circle(ctx, cx, cy, H * 0.09);
+      for (const [x, y] of ring) circle(ctx, x, y, lw * 1.15);
       break;
     }
     case 'matrix': {
@@ -483,18 +545,7 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       break;
     }
 
-    /* ── geometric / dimensional ── */
-    case 'cube': {
-      const s = H * 0.42;
-      const o = H * 0.16;
-      ctx.strokeRect(cx - s / 2, cy - s / 2 + o / 2, s, s);
-      ctx.strokeRect(cx - s / 2 + o, cy - s / 2 - o / 2, s, s);
-      line(ctx, cx - s / 2, cy - s / 2 + o / 2, cx - s / 2 + o, cy - s / 2 - o / 2);
-      line(ctx, cx + s / 2, cy - s / 2 + o / 2, cx + s / 2 + o, cy - s / 2 - o / 2);
-      line(ctx, cx - s / 2, cy + s / 2 + o / 2, cx - s / 2 + o, cy + s / 2 - o / 2);
-      line(ctx, cx + s / 2, cy + s / 2 + o / 2, cx + s / 2 + o, cy + s / 2 - o / 2);
-      break;
-    }
+    /* ── geometric / orbital ── */
     case 'orbit': {
       circle(ctx, cx, cy, H * 0.2, false);
       ctx.beginPath();
@@ -643,53 +694,12 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       }
       break;
     }
-    case 'lock': {
-      const w = H * 0.5;
-      const h = H * 0.4;
-      ctx.strokeRect(cx - w / 2, cy - h * 0.1, w, h);
-      ctx.beginPath();
-      ctx.arc(cx, cy - h * 0.1, w * 0.32, Math.PI, 0);
-      ctx.stroke();
-      circle(ctx, cx, cy + h * 0.32, lw * 1.1);
-      break;
-    }
-    case 'cloud': {
-      ctx.beginPath();
-      ctx.arc(cx - H * 0.2, cy + H * 0.08, H * 0.16, Math.PI * 0.4, Math.PI * 1.5);
-      ctx.arc(cx - H * 0.02, cy - H * 0.12, H * 0.2, Math.PI * 0.9, Math.PI * 1.95);
-      ctx.arc(cx + H * 0.2, cy + H * 0.06, H * 0.15, Math.PI * 1.4, Math.PI * 0.6);
-      ctx.closePath();
-      ctx.stroke();
-      break;
-    }
     case 'globe': {
       circle(ctx, cx, cy, H * 0.36, false);
       line(ctx, cx - H * 0.36, cy, cx + H * 0.36, cy);
       ctx.beginPath();
       ctx.ellipse(cx, cy, H * 0.16, H * 0.36, 0, 0, Math.PI * 2);
       ctx.stroke();
-      break;
-    }
-    case 'antenna': {
-      line(ctx, cx, cy + H * 0.38, cx, cy - H * 0.1);
-      circle(ctx, cx, cy - H * 0.14, lw);
-      ctx.beginPath();
-      ctx.arc(cx, cy - H * 0.14, H * 0.16, Math.PI * 1.15, Math.PI * 1.85);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(cx, cy - H * 0.14, H * 0.28, Math.PI * 1.2, Math.PI * 1.8);
-      ctx.stroke();
-      line(ctx, cx - H * 0.16, cy + H * 0.38, cx + H * 0.16, cy + H * 0.38);
-      break;
-    }
-    case 'keyboard': {
-      const w = W * 0.62;
-      const h = H * 0.4;
-      ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
-      for (let i = 0; i < 8; i += 1)
-        for (let j = 0; j < 2; j += 1)
-          circle(ctx, cx - w * 0.4 + i * (w * 0.8 / 7), cy - h * 0.2 + j * h * 0.26, lw * 0.6);
-      line(ctx, cx - w * 0.24, cy + h * 0.28, cx + w * 0.24, cy + h * 0.28);
       break;
     }
   }
@@ -732,6 +742,10 @@ export function SignatureName({
     stage.style.setProperty('--sig-resolve', `${T.resolveSeconds}s`);
     let cancelled = false;
     let raf = 0;
+    /* transform-unrest guard: deferred re-measure while the page turn
+       animates (see build) */
+    let calmRaf = 0;
+    let calmTries = 0;
     const timers: number[] = [];
     const later = (fn: () => void, ms: number) => {
       timers.push(
@@ -812,17 +826,46 @@ export function SignatureName({
     let ramp: string[] = [];
 
     /* ── sample the rendered wordmark into a particle field ───────── */
-    const build = (textNow: string, clustersIn: string[]) => {
-      if (cancelled) return;
+    const build = (textNow: string, clustersIn: string[]): boolean => {
+      if (cancelled) return true;
       const ctx = canvas.getContext('2d', { alpha: true });
-      if (!ctx) return giveUpToText();
+      if (!ctx) {
+        giveUpToText();
+        return true;
+      }
 
       const stageBox = stage.getBoundingClientRect();
       W = stageBox.width;
       H = stageBox.height;
-      if (!(W > 4) || !(H > 4)) return giveUpToText();
+      if (!(W > 4) || !(H > 4)) {
+        giveUpToText();
+        return true;
+      }
 
       const layerBox = canvas.getBoundingClientRect();
+      /* determinism guard: while the pager's page turn is animating,
+         its y/rotateX/scale transforms distort every rect — sampling
+         mid-turn bakes the animation offset into the field geometry
+         and the name lands displaced until a refresh (returning to
+         the homepage must give the same geometry as reloading it).
+         Translation cannot fool the check: it shifts stage and layer
+         rects alike, while scale/rotateX make rect ≠ layout offset.
+         Wait for calm, then measure; after ~2 s of unrest, sample
+         anyway rather than never. */
+      const unset = (r: DOMRect, el: HTMLElement) =>
+        Math.abs(r.width - el.offsetWidth) < 0.75 &&
+        Math.abs(r.height - el.offsetHeight) < 0.75;
+      const calm = unset(stageBox, stage) && unset(layerBox, canvas);
+      if (!calm && calmTries < 120) {
+        calmTries += 1;
+        if (!calmRaf)
+          calmRaf = requestAnimationFrame(() => {
+            calmRaf = 0;
+            if (build(textNow, clustersIn)) startLoop();
+          });
+        return false;
+      }
+      calmTries = 0;
       dpr = Math.min(window.devicePixelRatio || 1, T.maxDpr);
       const maxArea = 4.0e6;
       const areaAt = (d: number) => layerBox.width * d * (layerBox.height * d);
@@ -838,7 +881,10 @@ export function SignatureName({
       sample.width = cw;
       sample.height = chh;
       const sctx = sample.getContext('2d', { alpha: true, willReadFrequently: true });
-      if (!sctx) return giveUpToText();
+      if (!sctx) {
+        giveUpToText();
+        return true;
+      }
       sctx.scale(dpr, dpr);
       sctx.font = fontStr;
       sctx.textBaseline = 'alphabetic';
@@ -924,7 +970,10 @@ export function SignatureName({
         }
       }
 
-      if (next.length === 0) return giveUpToText();
+      if (next.length === 0) {
+        giveUpToText();
+        return true;
+      }
 
       particles = next;
       clustersNow = clustersIn;
@@ -953,6 +1002,7 @@ export function SignatureName({
       builtText = textNow;
       cycle = 0;
       phase = 'forming';
+      return true;
     };
 
     /* ── sample a technical form into targets for the same field ──── */
@@ -1028,10 +1078,12 @@ export function SignatureName({
       swirlDir = rnd() < 0.5 ? -1 : 1;
       wavePh = rnd() * Math.PI * 2;
       if (toForm) {
-        /* seeded shuffled bag over the whole library: no immediate
-           repeat and no visible tiny loop */
+        /* the canonical 25 are the primary vocabulary; a supporting
+           form is due about one excursion in six, so the identity
+           stays light. Seeded shuffled bag per pool: no immediate
+           repeat and no visible tiny loop. */
         const bagRnd = mulberry32((fieldSeed ^ 0x2c1b3c6d) >>> 0);
-        const bag = [...FORMS];
+        const bag = [...(bagRnd() < 0.16 ? SUPPORT_FORMS : CANON_FORMS)];
         for (let i = bag.length - 1; i > 0; i -= 1) {
           const j = Math.floor(bagRnd() * (i + 1));
           [bag[i], bag[j]] = [bag[j], bag[i]];
@@ -1433,17 +1485,21 @@ export function SignatureName({
       if (!raf) raf = requestAnimationFrame(frame);
     };
 
+    const startLoop = () => {
+      if (cancelled || raf) return;
+      raf = requestAnimationFrame((now) => {
+        t0 = now;
+        phaseT0 = now;
+        dissolveT0 = now;
+        frame(now);
+      });
+    };
+
     const start = () => {
       if (cancelled) return;
-      build(textRef.current, clustersRef.current);
-      if (!raf) {
-        raf = requestAnimationFrame((now) => {
-          t0 = now;
-          phaseT0 = now;
-          dissolveT0 = now;
-          frame(now);
-        });
-      }
+      /* a build deferred by transform unrest starts the loop itself
+         once the geometry it sampled is deterministic */
+      if (build(textRef.current, clustersRef.current)) startLoop();
     };
 
     const withFonts = () => {
@@ -1481,6 +1537,10 @@ export function SignatureName({
       if (raf) {
         cancelAnimationFrame(raf);
         raf = 0;
+      }
+      if (calmRaf) {
+        cancelAnimationFrame(calmRaf);
+        calmRaf = 0;
       }
       timers.forEach((id) => window.clearTimeout(id));
       document.removeEventListener('visibilitychange', onVisibility);
