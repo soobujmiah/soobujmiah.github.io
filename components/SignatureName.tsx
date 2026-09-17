@@ -935,12 +935,17 @@ export function SignatureName({
       oy = stageBox.top - layerBox.top;
       cssW = layerBox.width;
       cssH = layerBox.height;
-      /* the controlled scatter field: centred on the stable layer box,
-         bounded to stay inside it whatever the cycle variety says */
+      /* the controlled scatter field: centred horizontally on the
+         stable layer box, but vertically owned by the wordmark stage —
+         the field spreads inside a band around the name, never down
+         across the hero copy below it. The radii are clamped so the
+         widest cycle spread (plus curve bend and turbulence) cannot
+         reach the canvas edge: a transition can never be clipped by
+         an invisible wall mid-flight. */
       scx = cssW / 2 - ox;
-      scy = cssH / 2 - oy;
-      srx = Math.max(60, cssW * 0.42);
-      sry = Math.max(40, cssH * 0.4);
+      scy = H * 0.5;
+      srx = Math.max(60, Math.min(cssW * 0.42, cssW / 2 - 52));
+      sry = Math.max(36, H * 0.65);
       canvas.width = Math.max(1, Math.round(cssW * dpr));
       canvas.height = Math.max(1, Math.round(cssH * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, ox * dpr, oy * dpr);
@@ -952,29 +957,40 @@ export function SignatureName({
 
     /* ── sample a technical form into targets for the same field ──── */
     const formTargets = (form: FormId): Array<{ x: number; y: number }> => {
+      /* silhouettes are sampled at 1.12× the wordmark box, centred on
+         it — the forms read larger and clearer without growing the
+         canvas; a margined sample canvas keeps the overhang ink, which
+         is mapped back into stage coordinates */
+      const k = 1.12;
+      const mw = Math.ceil(((W * (k - 1)) / 2) * dpr) + 2;
+      const mh = Math.ceil(((H * (k - 1)) / 2) * dpr) + 2;
+      const fw = cw + mw * 2;
+      const fh = chh + mh * 2;
       const sample = document.createElement('canvas');
-      sample.width = cw;
-      sample.height = chh;
+      sample.width = fw;
+      sample.height = fh;
       const sctx = sample.getContext('2d', { alpha: true, willReadFrequently: true });
       if (!sctx) return [];
       sctx.scale(dpr, dpr);
-      drawForm(sctx, form, W, H, fieldSeed + formCursor * 0x9e3779b9);
-      const img = sctx.getImageData(0, 0, cw, chh).data;
+      sctx.translate(mw / dpr - (W * (k - 1)) / 2, mh / dpr - (H * (k - 1)) / 2);
+      drawForm(sctx, form, W * k, H * k, fieldSeed + formCursor * 0x9e3779b9);
+      const img = sctx.getImageData(0, 0, fw, fh).data;
       const baseStep = Math.max(1, Math.round(2 * dpr));
       const countAt = (step: number) => {
         let n = 0;
-        for (let y = 0; y < chh; y += step) {
-          for (let x = 0; x < cw; x += step) {
-            if (img[(y * cw + x) * 4 + 3] > 110) n += 1;
+        for (let y = 0; y < fh; y += step) {
+          for (let x = 0; x < fw; x += step) {
+            if (img[(y * fw + x) * 4 + 3] > 110) n += 1;
           }
         }
         return n;
       };
       const step = sampleStepFor(countAt(baseStep), baseStep, Math.max(240, particles.length));
       const pts: Array<{ x: number; y: number }> = [];
-      for (let y = 0; y < chh; y += step) {
-        for (let x = 0; x < cw; x += step) {
-          if (img[(y * cw + x) * 4 + 3] > 110) pts.push({ x: (x + step / 2) / dpr, y: (y + step / 2) / dpr });
+      for (let y = 0; y < fh; y += step) {
+        for (let x = 0; x < fw; x += step) {
+          if (img[(y * fw + x) * 4 + 3] > 110)
+            pts.push({ x: (x + step / 2 - mw) / dpr, y: (y + step / 2 - mh) / dpr });
         }
       }
       return pts;
@@ -987,8 +1003,10 @@ export function SignatureName({
       const toForm = mode !== 1;
       const seed = (fieldSeed ^ Math.imul(cycle + 1, 0x85ebca6b)) >>> 0;
       const rnd = mulberry32(seed);
-      /* per-cycle variety, bounded: spread, timing, turbulence */
-      spreadScale = 0.8 + rnd() * 0.4;
+      /* per-cycle variety, bounded: spread, timing, turbulence. The
+         spread tops out at 1.0 so the waypoint families — whose radii
+         are fractions of the safe ellipse — can never exceed it. */
+      spreadScale = 0.75 + rnd() * 0.25;
       /* a form→form morph arcs tighter: the field reorganises in
          place instead of scattering across the whole stage */
       if (mode === 2) spreadScale *= 0.5;

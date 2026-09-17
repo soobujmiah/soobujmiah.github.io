@@ -101,13 +101,13 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
 
         {/* 1 · who I am — the identity mark leads the content; only the
             clock, its sibling instrument, sits above it */}
-        <h1 className="hero-name text-[clamp(3.05rem,10vw,7.4rem)] font-semibold leading-[1.06] tracking-tight">
+        <h1 className="hero-name text-[clamp(3.2rem,10.5vw,7.8rem)] font-semibold leading-[1.06] tracking-tight">
           <SignatureName text={t.profile.nameFull} reducedMotion={reducedMotion} armed={armed} />
         </h1>
 
         {/* 2 · what I am — the professional identity, directly under the name */}
         <motion.p
-          className="hero-role mt-5 text-[13px] font-medium sm:text-sm"
+          className="hero-role mt-8 text-[13px] font-medium sm:text-sm"
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.6, duration: 0.7 }}
