@@ -101,7 +101,7 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
 
         {/* 1 · who I am — the identity mark leads the content; only the
             clock, its sibling instrument, sits above it */}
-        <h1 className="hero-name text-[clamp(min(3.5rem,15.6vw),10.5vw,7.8rem)] font-semibold leading-[1.06] tracking-tight">
+        <h1 className="hero-name text-[clamp(min(3.85rem,16.6vw),10.5vw,7.8rem)] font-semibold leading-[1.06] tracking-tight">
           <SignatureName text={t.profile.nameFull} reducedMotion={reducedMotion} armed={armed} />
         </h1>
 

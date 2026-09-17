@@ -909,6 +909,15 @@ body.lang-bn span {
   font-feature-settings: 'ss01' 1;
 }
 
+/* phones: the identity mark borrows 8px of the page gutter per side
+   (viewport margins stay 16px), so the larger mobile name never wraps
+   or touches the screen edge */
+@media (max-width: 479px) {
+  .hero-name {
+    margin-inline: -0.5rem;
+  }
+}
+
 /* ── hero hierarchy ──
    One identity: status line → name → single professional descriptor
    → what/why → where to explore. Nothing repeats. */
@@ -1533,12 +1542,14 @@ body:has(> .services-doc) button {
 }
 .idc-grid {
   display: grid;
-  grid-template-columns: repeat(var(--cols, 7), 0.0909em);
-  grid-template-rows: repeat(var(--rows, 11), 0.0909em);
+  /* cells derive from the row count, so the denser 15-row matrix
+     still fills exactly the slot height and can never spill */
+  grid-template-columns: repeat(var(--cols, 7), calc(1.02em / var(--rows, 15)));
+  grid-template-rows: repeat(var(--rows, 15), calc(1.02em / var(--rows, 15)));
 }
 .idc-dot {
-  width: 0.062em;
-  height: 0.062em;
+  width: 0.05em;
+  height: 0.05em;
   border-radius: 50%;
   justify-self: center;
   align-self: center;

@@ -25,10 +25,11 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useLang, localizeDigits } from '@/app/language';
+import { hour12, twoDigit } from '@/app/clock';
 
 type DotGrid = { cols: number; rows: number; cells: boolean[] };
 
-const ROWS = 11; // sample density reads as the name's particle grid
+const ROWS = 15; // 11 rows aliased Chakra Petch 6/9 into 8 — see the threshold note
 const SIZE = 88; // canvas glyph size, px
 
 /* Deterministic and cached: ten digits per language, sampled once. */
@@ -88,10 +89,15 @@ function sampleGlyph(ch: string, faces: string): DotGrid | null {
           const r = Math.min(ROWS - 1, (((pts[i + 1] - by0) * ROWS) / h) | 0);
           n[r * cols + c] += 1;
         }
-        /* a cell lights when real ink fills it — ≥3 ink pixels, so
-           stray anti-aliasing cannot fake a dot */
+        /* A cell lights when real ink fills it, and the threshold
+           scales with the cell area. The old fixed ≥3px floor let
+           anti-aliasing fringes close the counters of 6 and 9, so
+           both displayed as 8 — the clock "showed" numbers it never
+           held (55→58→57→58→58→00). 32% keeps bowls open, stems
+           solid, and every digit 0-9 visually distinct. */
+        const thr = Math.max(2, (w / cols) * (h / ROWS) * 0.32);
         const cells: boolean[] = [];
-        for (let i = 0; i < ROWS * cols; i += 1) cells.push(n[i] >= 3);
+        for (let i = 0; i < ROWS * cols; i += 1) cells.push(n[i] >= thr);
         grid = { cols, rows: ROWS, cells };
       }
     }
@@ -186,12 +192,14 @@ export function IdentityClock({ part = 'time' }: { part?: 'time' | 'date' }) {
       const d = new Date();
       const p: Record<string, string> = {};
       for (const part of time.formatToParts(d)) p[part.type] = part.value;
-      let h24 = Number(p.hour ?? '0');
-      if (!(h24 >= 0) || h24 >= 24) h24 = 0;
+      /* one authoritative reading per tick: every displayed part —
+         dial hour, meridiem, minute, second — derives from this same
+         real-time value, never from animation state */
+      const h24 = Math.min(23, Math.max(0, Number(p.hour ?? 0) || 0));
       setState({
-        h: localizeDigits(String(((h24 + 11) % 12) + 1).padStart(2, '0'), lang),
-        m: localizeDigits(p.minute ?? '00', lang),
-        s: localizeDigits(p.second ?? '00', lang),
+        h: localizeDigits(String(hour12(h24)).padStart(2, '0'), lang),
+        m: localizeDigits(twoDigit(Number(p.minute ?? 0)), lang),
+        s: localizeDigits(twoDigit(Number(p.second ?? 0)), lang),
         ap: h24 < 12 ? t.ui.meridiemAm : t.ui.meridiemPm,
         date: date.format(d),
       });
