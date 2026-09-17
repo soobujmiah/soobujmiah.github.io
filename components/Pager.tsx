@@ -381,7 +381,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
           </motion.div>
         </AnimatePresence>
 
-        <PageDots total={PAGE_COUNT} active={index} labels={t.ui.pageLabels} onGo={goToScene} />
+        <PageDots total={PAGE_COUNT} active={index} labels={t.ui.pageLabels} onGo={goToScene} navOpen={navOpen} />
         <PullToRefresh enabled={index === 0} scrollerRef={activeScroller} onRefresh={onRefresh} />
       </div>
 

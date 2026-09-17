@@ -457,6 +457,14 @@ body.lang-bn .worldmap-pin {
   padding: 0 1.5rem;
 }
 
+/* Home only: a tighter, top-down rhythm — header → breathing space →
+   clock → identity. The hero content starts just below the header
+   instead of floating centred with a large void above it; leftover
+   height collects at the bottom. */
+.page-fill--hero .page-content {
+  margin: clamp(6px, 2.4dvh, 26px) auto auto;
+}
+
 /* dense pages breathe wider on desktop */
 .page-content-wide {
   max-width: 72rem;
@@ -589,12 +597,16 @@ body.lang-bn .worldmap-pin {
 /* Desktop rail lives in the dedicated lower navigation strip — the
    same safe zone as the phone row — so it never sits over content,
    imagery or controls. Horizontal, centred, above the footer. */
-/* ── HUD pager — a restrained instrument, not a menu ───────────────
-   A thin framed telemetry strip: page-state readout, tick markers,
-   the active page as a lit capsule, and the index trigger as the
-   "expand" control. Framing is hairline + faint accent; the only glow
-   is the active capsule's. Motion is limited to the pulse/scan, both
-   disabled under reduced motion. */
+/* ── bottom HUD bar — same button family as the header pills ────────
+   One compact control: a fixed-start progress track with the nine
+   page dots, a hairline divider, and the index trigger. The housing
+   borrows the exact geometry language of the CV/Services/language
+   pills — full-round corners, a 1px green hairline, a restrained
+   blurred fill — so the bar reads as a futuristic sibling of the
+   header controls, not an unrelated capsule. While the index HUD is
+   open the bar carries the glow (data-nav-open): origin and popup
+   stay visually coupled. Motion is limited to the active dot's
+   pulse, disabled under reduced motion. */
 .pager-hud {
   position: absolute;
   z-index: 30;
@@ -602,48 +614,99 @@ body.lang-bn .worldmap-pin {
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 6px 12px;
+  gap: 10px;
+  padding: 5px 7px 5px 16px;
   border-radius: 999px;
-  background: linear-gradient(180deg, rgba(10, 12, 11, 0.72), rgba(6, 7, 8, 0.66));
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  background: rgba(8, 10, 8, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* the border IS the progress instrument: a hairline track ring with a
-   lit arc tracing the pages completed, drawn by PageDots */
-.pager-hud-track {
+.pager-hud[data-nav-open='true'] {
+  border-color: rgba(74, 222, 128, 0.65);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+/* Progress track — the only geometry that moves is the fill's end
+   point. The track has a fixed width and the dots sit at fixed
+   proportional positions (i / (total − 1)); the active dot changes
+   colour and glow only, never width, so nothing re-centres and
+   neither end of the component ever shifts. Page 1 = 0%, page 9 =
+   100%, start anchor physically fixed at the left. */
+.hud-track {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  width: 148px;
+  height: 20px;
+}
+
+.hud-rail {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: visible;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  margin-top: -0.5px;
+  background: rgba(34, 197, 94, 0.16);
 }
 
-/* hairline corner ticks — the instrument framing, pure decoration */
-.pager-hud::before,
-.pager-hud::after {
-  content: '';
+.hud-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  margin-top: -0.5px;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.45), #22c55e);
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.45);
+}
+
+.hud-dot {
   position: absolute;
   top: 50%;
-  width: 5px;
-  height: 5px;
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  transform: translateY(-50%);
-  pointer-events: none;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(228, 226, 223, 0.22);
+  transition: background 0.35s ease, box-shadow 0.35s ease;
 }
-.pager-hud::before {
-  left: 4px;
-  border-right: 0;
-  border-top: 0;
-  border-bottom-left-radius: 3px;
+
+/* enlarged hit area — touch comfort without moving any geometry */
+.hud-dot::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
 }
-.pager-hud::after {
-  right: 4px;
-  border-left: 0;
-  border-top: 0;
-  border-bottom-right-radius: 3px;
+
+.hud-dot:hover {
+  background: rgba(228, 226, 223, 0.5);
+}
+
+.hud-dot-active {
+  background: #22c55e;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.55);
+  animation: hud-pulse 3.4s ease-in-out infinite;
+}
+
+@keyframes hud-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); }
+  50% { box-shadow: 0 0 14px rgba(34, 197, 94, 0.62); }
+}
+
+/* hairline divider between the telemetry track and the expand control */
+.hud-divider {
+  flex: 0 0 auto;
+  width: 1px;
+  height: 14px;
+  background: linear-gradient(180deg, transparent, rgba(34, 197, 94, 0.35), transparent);
 }
 
 .pager-dots-rail {
@@ -657,37 +720,14 @@ body.lang-bn .worldmap-pin {
   }
 }
 
-.pager-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 9999px;
-  border: none;
-  padding: 0;
-  background: rgba(228, 226, 223, 0.2);
-  transition: all 0.35s ease;
-}
-
-.pager-dot:hover {
-  background: rgba(228, 226, 223, 0.42);
-  transform: scale(1.28);
-}
-
-.pager-dot-active {
-  background: #22c55e;
-  width: 24px;
-  box-shadow: 0 0 12px rgba(34, 197, 94, 0.55);
-  animation: hud-pulse 3.4s ease-in-out infinite;
-}
-
-@keyframes hud-pulse {
-  0%, 100% { box-shadow: 0 0 10px rgba(34, 197, 94, 0.4); }
-  50% { box-shadow: 0 0 16px rgba(34, 197, 94, 0.62); }
-}
-
 .pager-dots-row {
   bottom: calc(66px + env(safe-area-inset-bottom));
-  gap: 7px;
-  padding: 5px 10px;
+  gap: 8px;
+  padding: 5px 6px 5px 13px;
+}
+
+.pager-dots-row .hud-track {
+  width: 108px;
 }
 
 @media (min-width: 768px) {
@@ -696,26 +736,8 @@ body.lang-bn .worldmap-pin {
   }
 }
 
-.pager-dot-sm {
-  width: 6px;
-  height: 6px;
-  border-radius: 9999px;
-  border: none;
-  padding: 0;
-  background: rgba(228, 226, 223, 0.22);
-  transition: all 0.35s ease;
-}
-
-.pager-dot-sm-active {
-  width: 20px;
-  background: #22c55e;
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.55);
-  animation: hud-pulse 3.4s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .pager-dot-active,
-  .pager-dot-sm-active {
+  .hud-dot-active {
     animation: none;
   }
 }
@@ -966,44 +988,32 @@ body.lang-bn span {
 }
 
 /* ── pager index trigger — the pager's own navigation control ── */
+/* the index trigger — the same pill geometry as the header controls:
+   green hairline, transparent fill, compact circle */
 .pager-index-trigger {
   position: relative;
-  width: 28px;
-  height: 28px;
-  margin-left: 4px;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
   border-radius: 9999px;
-  border: 1px solid rgba(228, 226, 223, 0.12);
-  background: rgba(6, 6, 8, 0.6);
-  color: rgba(228, 226, 223, 0.6);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  background: transparent;
+  color: #4ade80;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
-}
-
-/* telemetry divider between the readout/dots and the expand control */
-.pager-index-trigger::before {
-  content: '';
-  position: absolute;
-  left: -7px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 1px;
-  height: 14px;
-  background: linear-gradient(180deg, transparent, rgba(34, 197, 94, 0.35), transparent);
-  pointer-events: none;
+  transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease, transform 0.3s ease;
 }
 
 .pager-index-trigger:hover {
-  border-color: rgba(34, 197, 94, 0.45);
-  color: var(--accent-bright);
+  border-color: rgba(74, 222, 128, 0.6);
+  background: rgba(34, 197, 94, 0.08);
   transform: scale(1.06);
 }
 
 .pager-index-trigger-sm {
-  width: 26px;
-  height: 26px;
-  margin-left: 3px;
+  width: 24px;
+  height: 24px;
 }
 
 /* ── navigation overlay ──
@@ -1033,81 +1043,131 @@ body.lang-bn span {
   -webkit-backdrop-filter: blur(10px);
 }
 
+/* The panel is physically anchored above the bottom bar — the HUD
+   grows upward out of the bar and contracts back into it (motion in
+   NavOverlay.tsx, transform-origin at the panel's bottom edge). The
+   seam connector below and the bar's own data-nav-open glow keep the
+   origin relationship obvious. Sized to fit inside a phone viewport
+   with room for the bar and footer; the list scrolls internally. */
 .nav-overlay-panel {
   position: absolute;
   left: 0;
   right: 0;
-  top: 0;
+  bottom: calc(106px + env(safe-area-inset-bottom));
   margin: 0 auto;
-  width: min(560px, calc(100% - 1.25rem));
-  max-height: min(80vh, 680px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 1.2rem 1.2rem 1rem;
-  border: 1px solid rgba(228, 226, 223, 0.09);
-  border-top: none;
-  border-radius: 0 0 18px 18px;
+  width: min(430px, calc(100% - 1.5rem));
+  max-height: min(64dvh, 560px);
+  display: flex;
+  flex-direction: column;
+  padding: 0.9rem 1rem 1.15rem;
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  border-radius: 16px;
   background: rgba(8, 9, 8, 0.94);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 26px rgba(34, 197, 94, 0.1);
+}
+
+/* the seam: a short light trace from the panel's bottom edge toward
+   the bar control it emerged from */
+.nav-overlay-panel::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -20px;
+  width: 1px;
+  height: 20px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.55), transparent);
+  pointer-events: none;
 }
 
 .nav-overlay-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.85rem;
+  gap: 0.75rem;
+  margin-bottom: 0.55rem;
+  padding: 0 0.2rem;
+}
+
+.nav-overlay-headtext {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  min-width: 0;
 }
 
 .nav-overlay-eyebrow {
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 9px;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.32em;
   color: var(--accent);
-  margin-bottom: 0.4rem;
+  margin: 0;
 }
 
-.nav-overlay-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--fg);
+/* the current page, named once, quietly — the HUD carries no large
+   page number; the page itself already does */
+.nav-overlay-current {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(228, 226, 223, 0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .nav-overlay-close {
   flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   border-radius: 9999px;
-  border: 1px solid rgba(228, 226, 223, 0.12);
-  color: rgba(228, 226, 223, 0.7);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #4ade80;
   background: transparent;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.25s ease, color 0.25s ease;
+  transition: border-color 0.25s ease, background 0.25s ease;
 }
 
 .nav-overlay-close:hover {
-  border-color: rgba(228, 226, 223, 0.3);
-  color: var(--fg);
+  border-color: rgba(74, 222, 128, 0.6);
+  background: rgba(34, 197, 94, 0.08);
 }
 
-.nav-overlay-rail {
+.nav-overlay-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* bottom-edge progress — the same instrument as the bar's track:
+   fixed start anchor at the left, fill = index / (total − 1), so
+   page 1 = 0% and page 9 completes the cycle on the HUD's border */
+.nav-overlay-progress {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 6px;
   height: 1px;
-  background: rgba(228, 226, 223, 0.08);
+  background: rgba(34, 197, 94, 0.14);
+  border-radius: 1px;
   overflow: hidden;
-  margin-bottom: 0.7rem;
+  pointer-events: none;
 }
 
-.nav-overlay-rail-fill {
+.nav-overlay-progress-fill {
   display: block;
   height: 100%;
-  transform-origin: left;
+  transform-origin: left center;
+  transform: scaleX(0);
   background: linear-gradient(90deg, var(--accent), var(--accent-bright));
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
 }
 
 .nav-overlay-list ol {
@@ -1281,6 +1341,22 @@ body.lang-bn span {
   }
   .worldmap-origin-halo { opacity: 0.3; }
 
+  /* the clock is readable first, decorative second: no colon pulse,
+     no dot stagger — lit dots simply are */
+  .idc-colon i {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  .idc-dot[data-on='true'] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .idc-ampm {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
   /* the map does not travel: no camera flight, no packets */
   .worldmap-packet {
     display: none !important;
@@ -1326,16 +1402,43 @@ body:has(> .services-doc) button {
   margin-top: 0.45rem;
 }
 
-/* ── Live clock — date line + focal 12-hour time ────────────────
+/* ── Identity clock — dotted sibling of the signature name ───────
    One quiet bilingual date/location line; below it the 12-hour clock
-   with seconds as the focal point. Changing characters remount and
-   play a short slot-morph; tabular digits keep widths stable so the
-   block never shifts. */
-.hero-clock-block {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
+   with seconds, drawn as dot matrices sampled from the wordmark face
+   (components/IdentityClock.tsx) — the same visual state the name's
+   particles resolve into. Fixed-width digit slots, so the block
+   never shifts; only changed digits replay the short dot settle. */
+.hero-clock-wrap {
+  margin-bottom: clamp(14px, 3.2dvh, 30px);
+  animation: hero-clock-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
+}
+@keyframes hero-clock-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* the probe: an invisible element whose computed font-family IS the
+   identity face stack for the active language — JS reads it instead
+   of hardcoding next/font's hashed family names (same pattern as
+   SignatureName's stage) */
+.idc-probe {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  font-family: var(--font-wordmark), var(--font-display), monospace;
+  font-weight: 700;
+}
+.idc-bn .idc-probe,
+.idc-probe.idc-bn {
+  font-family: var(--font-wordmark-bn), var(--font-bengali), sans-serif;
 }
 .hero-clock-date {
   font-size: 10px;
@@ -1343,68 +1446,104 @@ body:has(> .services-doc) button {
   text-transform: uppercase;
   color: rgba(228, 226, 223, 0.45);
 }
-.hero-clock-time {
+.idclock {
   display: inline-flex;
-  align-items: baseline;
-  font-size: clamp(1.9rem, 5.8vw, 2.8rem);
-  font-weight: 500;
-  letter-spacing: 0.07em;
-  color: #e4e2df;
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 22px rgba(34, 197, 94, 0.28);
-}
-/* Flip-clock character roll — each changed glyph becomes a masked
-   two-cell drum: the outgoing digit rolls vertically out while the
-   incoming one rolls in, with a faint rotateX facet for depth. Cell
-   height is a constant em, so the line never shifts. */
-.ck-ch {
-  position: relative;
-  display: inline-block;
-  overflow: hidden;
-  height: 1.3em;
-  line-height: 1.3em;
-  margin: -0.06em 0;
-  vertical-align: top;
-  perspective: 5em;
-}
-.ck-reel {
-  display: flex;
   flex-direction: column;
-  transform-origin: 50% 50%;
-  backface-visibility: hidden;
-  /* ease-in-out drum: soft lift, fluid travel, no snap at either end */
-  animation: ck-roll 0.62s cubic-bezier(0.45, 0.05, 0.25, 1) both;
+  align-items: center;
+  gap: 10px;
 }
-.ck-reel > span {
-  display: block;
-  height: 1.3em;
-  line-height: 1.3em;
+.idc-time {
+  display: inline-flex;
+  align-items: center;
+  font-size: clamp(2rem, 8vw, 3.3rem);
+  line-height: 1;
 }
-@keyframes ck-roll {
+.idc-slot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.66em;
+  height: 1.02em;
+}
+.idc-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 7), 0.0909em);
+  grid-template-rows: repeat(var(--rows, 11), 0.0909em);
+}
+.idc-dot {
+  width: 0.062em;
+  height: 0.062em;
+  border-radius: 50%;
+  justify-self: center;
+  align-self: center;
+  background: transparent;
+}
+.idc-dot[data-on='true'] {
+  background: #4ade80;
+  box-shadow: 0 0 0.045em rgba(34, 197, 94, 0.55);
+  animation: idc-dot-in 0.28s ease-out both;
+}
+@keyframes idc-dot-in {
   from {
-    transform: translateY(0) rotateX(6deg);
+    opacity: 0;
+    transform: scale(0.3);
   }
   to {
-    transform: translateY(-1.3em) rotateX(0deg);
+    opacity: 1;
+    transform: scale(1);
   }
 }
-.ck-ampm {
-  display: inline-block;
-  overflow: hidden;
-  height: 1.3em;
-  line-height: 1.3em;
-  margin-left: 0.45em;
-  vertical-align: top;
-  perspective: 5em;
-  font-size: 0.4em;
-  letter-spacing: 0.2em;
+.idc-colon {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.24em;
+  width: 0.2em;
+  height: 1.02em;
+}
+.idc-colon i {
+  width: 0.062em;
+  height: 0.062em;
+  border-radius: 50%;
+  background: #4ade80;
+  animation: idc-blink 2s ease-in-out infinite;
+}
+@keyframes idc-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+.idc-ampm {
+  margin-left: 0.42em;
+  margin-bottom: 0.18em;
+  align-self: flex-end;
+  font-family: var(--font-wordmark), var(--font-mono), monospace;
+  font-weight: 700;
+  font-size: 0.3em;
+  letter-spacing: 0.18em;
+  color: #4ade80;
+  animation: idc-fade 0.3s ease-out both;
+}
+.idc-bn .idc-ampm {
+  font-family: var(--font-wordmark-bn), var(--font-bengali), sans-serif;
+  letter-spacing: 0.06em;
+}
+@keyframes idc-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* pre-sampling fallback: the identity face as plain text — never a
+   generic system monospace */
+.idc-fallback {
+  font-family: var(--font-wordmark), var(--font-mono), monospace;
+  font-weight: 700;
+  font-size: 0.8em;
+  line-height: 1.28em;
   color: #4ade80;
 }
-@media (prefers-reduced-motion: reduce) {
-  .ck-reel {
-    animation: none;
-    transform: translateY(-1.3em);
-  }
+.idc-bn .idc-fallback {
+  font-family: var(--font-wordmark-bn), var(--font-bengali), sans-serif;
 }
 
 /* ── Contact: compact icon row ─────────────────────────────────

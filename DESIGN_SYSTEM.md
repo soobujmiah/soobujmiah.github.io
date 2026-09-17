@@ -310,6 +310,27 @@ these bands. The construction canvas is `pointer-events: none` and paints no
 surface of its own — the identity sits on the world-map environment, never
 on a panel, and no `filter` is stacked on it.
 
+## 5c. Identity clock (`components/IdentityClock.tsx`)
+
+The homepage clock is the name's smaller sibling, in the same typographic
+language: each digit's ink is sampled from the wordmark face (Chakra Petch;
+Anek Bangla for Bengali digits) into an 11-row dot matrix — the resolved
+particle state — and rendered as lit green dots. It is never a generic
+system monospace; if sampling is unavailable it falls back to the same
+wordmark face as plain text.
+
+- **Order:** header → breathing space → clock → identity/hero content. The
+  clock leads the home page content, directly below the header.
+- **Format:** `HH:MM:SS` 12-hour with a localized meridiem from the content
+  tree (`AM`/`PM`, `এএম`/`পিএম`) and `localizeDigits` Bengali numerals — the
+  Bengali clock contains no Latin characters. Timezone is `Asia/Dhaka`
+  regardless of the visitor's clock.
+- **Stability:** fixed-width digit slots; only changed digits remount and
+  replay the short dot settle; unchanged digits keep their DOM. One timer,
+  cleaned up on unmount/language change. Client-only first paint, so SSR
+  output is unchanged.
+- **Reduced motion:** no colon pulse, no dot stagger — lit dots simply are.
+
 ## 6. Interaction states
 
 | State | Treatment |
@@ -317,7 +338,7 @@ on a panel, and no `filter` is stacked on it.
 | Hover | subtle lift (`translateY(-2..-4px)`), border brightening, glow |
 | Press | compression (`scale(0.95–0.96)`) on buttons and magnetic links |
 | Focus | visible green outline (`:focus-visible`, 2px + 3px offset) |
-| Active nav | accent dot stretches + glows; tabs get accent border + wash |
+| Active nav | accent dot glows (colour only — dot geometry never changes, so the track never re-centres); tabs get accent border + wash |
 | Disabled | `opacity-25`, no pointer events |
 
 ## 7. Link language (shared across the ecosystem)
@@ -348,6 +369,18 @@ no model change needed.
   returned to the trigger on close, Escape/backdrop close, arrow/Home/End
   movement, and a Tab trap. Rows are real anchors, so middle-click and crawlers
   work even though a normal click drives the pager.
+- The overlay is a **HUD that emerges from the bottom bar** — the bar is its
+  physical origin and sole control. The panel is anchored above the bar,
+  grows upward out of it (transform-origin at its bottom edge) and contracts
+  back into it on close; a seam connector and the bar's `data-nav-open` glow
+  keep the relationship visible. It carries no large page number — the page
+  itself already does.
+- **Progress is one instrument with a fixed start anchor.** In the bar, a
+  fixed-width track holds the nine dots at proportional positions and a
+  left-anchored fill; on the open HUD, the same fill travels along the
+  panel's bottom edge. The formula is deterministic —
+  `progress = activeIndex / (totalPages − 1)` — so page 1 = 0% and page 9 =
+  100%. Only the fill's end point moves; no element resizes or re-centres.
 - Pages center when they fit and **scroll internally** when they don't.
   Gestures yield to the inner scroller until its edges, then turn the page.
   Never clip, truncate, or shrink content to preserve composition.
@@ -486,9 +519,10 @@ app/robots.ts            robots.txt
 app/sitemap.ts           sitemap.xml, one line per section
 app/globals.css          tokens (§1), pager, overlay, name, carousels, a11y
 components/Pager.tsx     discrete pager, gestures, paper-turn, route sync
-components/NavOverlay.tsx  the section index dialog
+components/NavOverlay.tsx  the section index HUD, emerging from the bottom bar
 components/PullToRefresh.tsx  real mobile pull-to-refresh gesture
 components/SignatureName.tsx  the signature identity mark (§5b)
+components/IdentityClock.tsx  the dot-matrix identity clock (§5c)
 components/WorldMap.tsx   dark-green page-aware map environment (§9)
 components/world-map-path.ts  generated land contours (do not edit)
 components/world-map-countries.ts  generated per-country shapes (do not edit)

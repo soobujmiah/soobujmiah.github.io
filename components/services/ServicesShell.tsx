@@ -84,11 +84,13 @@ function Chrome({ children, slug }: { children: React.ReactNode; slug?: string }
               <BrandIcon id="portfolio" size={12} />
               {lang === 'en' ? 'EN' : 'বাং'}
             </button>
+            {/* GitHub — same green outline family as CV/language, exactly
+                as in the portfolio header: one system across the site. */}
             <a
               href="https://github.com/soobujmiah"
               aria-label={t.header.githubAria}
               className="inline-flex items-center rounded-full px-2.5 sm:px-3 py-1.5 transition-colors duration-300"
-              style={{ border: '1px solid rgba(228,226,223,0.12)', color: '#e4e2df' }}
+              style={{ border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80' }}
             >
               <BrandIcon id="github" size={14} />
             </a>
