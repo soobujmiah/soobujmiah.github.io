@@ -344,7 +344,10 @@ if (!nameComp) {
   if (!/particleBudget\(/.test(nameComp)) {
     fail(`${NAME_COMPONENT} must derive the field size from the device (viewport + cores), not hard-code it`);
   }
-  if (!/sampleStepFor\(/.test(nameComp)) {
+  /* denseStepFor is the density-aware evolution of sampleStepFor: it
+     delegates to it when a field is over budget and tightens the step
+     when far under, so either call site satisfies the contract */
+  if (!/(sampleStepFor|denseStepFor)\(/.test(nameComp)) {
     fail(`${NAME_COMPONENT} must adapt its sampling step to the budget`);
   }
   if (/setInterval\(/.test(nameCode)) {
