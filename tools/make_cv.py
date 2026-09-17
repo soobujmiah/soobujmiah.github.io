@@ -26,7 +26,7 @@ _rl_config.invariant = 1  # byte-deterministic PDF output (fixed timestamps/IDs)
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.colors import HexColor
+from reportlab.lib.colors import HexColor, Color
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -35,15 +35,28 @@ OUT = os.path.join(ROOT, "public", "cv", "Sobuj_Miah_CV.pdf")
 
 W, H = A4  # 595.28 x 841.89
 
-# Palette — one brand accent on near-black, white type.
-BG = HexColor("#0a0e0c")
-PANEL = HexColor("#101613")
-LINE = HexColor("#233029")
-ACCENT = HexColor("#22c55e")
-ACCENT_B = HexColor("#4ade80")
-TEXT = HexColor("#e9e7e4")
-MUTED = HexColor("#9fb0a6")
-DIM = HexColor("#c9d2cc")
+# ── Colour system — sourced from the portfolio design tokens ───
+# Single source of truth: app/design-tokens.ts (BRAND), mirrored in
+# app/globals.css :root and DESIGN_SYSTEM.md (check-design enforces
+# the three-way equality). The CV must read as the same design
+# system in print:
+#   --bg #050507            · --fg #e4e2df
+#   --accent #22c55e        · --accent-bright #4ade80
+#   --card rgba(6,7,6,.66)  · --green-soft rgba(34,197,94,.08)
+#   --muted rgba(228,226,223,.45)
+#   control border rgba(228,226,223,.15) (hero buttons, cv-link)
+#   primary-card border rgba(34,197,94,.22) (contact email card)
+# PANEL is the exact opaque composite of --card then --green-soft
+# layered over --bg, so print and screen surfaces match.
+BG = HexColor("#050507")                                    # --bg
+PANEL = HexColor("#08160d")                                 # --card+--green-soft over --bg
+PANEL_BORDER = Color(34 / 255, 197 / 255, 94 / 255, 0.22)   # primary-card border
+LINE = Color(228 / 255, 226 / 255, 223 / 255, 0.15)         # control border ink
+ACCENT = HexColor("#22c55e")                                # --accent
+ACCENT_B = HexColor("#4ade80")                              # --accent-bright
+TEXT = HexColor("#e4e2df")                                  # --fg
+MUTED = Color(228 / 255, 226 / 255, 223 / 255, 0.60)        # secondary ink (site .6)
+DIM = Color(228 / 255, 226 / 255, 223 / 255, 0.62)          # paragraph ink (site .62)
 
 F_BODY = "Helvetica"
 F_BOLD = "Helvetica-Bold"
@@ -124,6 +137,9 @@ def main():
     c.rect(0, 0, W, H, fill=1, stroke=0)
     c.setFillColor(PANEL)
     c.rect(0, 0, M + LEFT_W + GUT * 0.5, H, fill=1, stroke=0)
+    c.setStrokeColor(PANEL_BORDER)
+    c.setLineWidth(0.8)
+    c.line(M + LEFT_W + GUT * 0.5, 0, M + LEFT_W + GUT * 0.5, H)
 
     # ── Header ────────────────────────────────────────────────
     hy = H - 52
