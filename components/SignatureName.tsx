@@ -105,7 +105,10 @@ type FormId = (typeof FORMS)[number];
 
 /** Transition choreographies — the spread itself must vary cycle to
     cycle; radial is one member, never the universal behaviour. */
-const STYLES = ['radial', 'spiral', 'orbital', 'wave', 'sweep', 'clusters', 'depth', 'flow'] as const;
+const STYLES = [
+  'radial', 'spiral', 'vortex', 'orbital', 'wave', 'ripple', 'sweep',
+  'clusters', 'fragment', 'depth', 'perspective', 'layered', 'flow',
+] as const;
 type StyleId = (typeof STYLES)[number];
 
 type Particle = {
@@ -920,6 +923,9 @@ export function SignatureName({
         const tn = i / n;
         let sx = scx;
         let sy = scy;
+        /* perspective keeps its own depth channel so waypoint radius
+           and in-flight push share one z per particle */
+        let zc = -1;
         if (currentStyle === 'radial') {
           const a = rnd() * Math.PI * 2;
           const rf = (0.55 + 0.45 * rnd()) * spreadScale;
@@ -951,6 +957,39 @@ export function SignatureName({
           const rf = (0.15 + 0.35 * rnd()) * spreadScale;
           sx = scx + Math.cos(a) * srx * rf;
           sy = scy + Math.sin(a) * sry * rf;
+        } else if (currentStyle === 'vortex') {
+          /* double spiral — two interlocked arms, opposite phase */
+          const arm = i % 2;
+          const a = swirlDir * (tn * Math.PI * 2 * 2.4) + arm * Math.PI + 1.1;
+          const rf = (0.32 + 0.66 * tn) * spreadScale;
+          sx = scx + Math.cos(a) * srx * rf * 0.92;
+          sy = scy + Math.sin(a) * sry * rf * 0.92;
+        } else if (currentStyle === 'ripple') {
+          /* shockwave: four concentric rings outward from the core */
+          const k = i % 4;
+          const a = tn * Math.PI * 8 + k * 0.9 + wavePh;
+          const rf = (0.28 + 0.22 * k) * spreadScale;
+          sx = scx + Math.cos(a) * srx * rf;
+          sy = scy + Math.sin(a) * sry * rf;
+        } else if (currentStyle === 'fragment') {
+          /* shatter: the field breaks into tight shards, then recombines */
+          const k = i % 4;
+          const fa = 0.55 + k * 1.57 + wavePh * 0.3;
+          const fr = (0.5 + 0.06 * k) * spreadScale;
+          sx = scx + Math.cos(fa) * srx * fr + (rnd() - 0.5) * srx * 0.16;
+          sy = scy + Math.sin(fa) * sry * fr + (rnd() - 0.5) * sry * 0.16;
+        } else if (currentStyle === 'perspective') {
+          /* depth push: near particles hold inward, far ones flung out */
+          zc = rnd();
+          const a = rnd() * Math.PI * 2;
+          const rf = (0.18 + 0.82 * zc) * spreadScale;
+          sx = scx + Math.cos(a) * srx * rf;
+          sy = scy + Math.sin(a) * sry * rf;
+        } else if (currentStyle === 'layered') {
+          /* three horizontal bands emerge, top to bottom */
+          const band = i % 3;
+          sx = scx + (rnd() * 2 - 1) * srx * 0.88 * spreadScale;
+          sy = scy + (band - 1) * sry * 0.5 * spreadScale + (rnd() - 0.5) * sry * 0.12;
         } else {
           /* flow: a smooth horizontal field with a sine current */
           const x = (rnd() * 2 - 1) * srx * 0.9 * spreadScale;
@@ -967,9 +1006,15 @@ export function SignatureName({
         p.c0y = (fromY + sy) / 2 + ((sx - fromX) / (Math.hypot(sx - fromX, sy - fromY) || 1)) * bend0;
         p.c1x = (sx + toX) / 2 + (-(toY - sy) / (Math.hypot(toX - sx, toY - sy) || 1)) * bend1;
         p.c1y = (sy + toY) / 2 + ((toX - sx) / (Math.hypot(toX - sx, toY - sy) || 1)) * bend1;
-        p.stg = currentStyle === 'sweep' ? tn * 0.22 : currentStyle === 'orbital' ? tn * 0.15 : rnd() * 0.12;
-        p.turb = (rnd() - 0.5) * (currentStyle === 'depth' ? 16 : 10);
-        p.z = rnd();
+        p.stg = currentStyle === 'sweep' ? tn * 0.22
+          : currentStyle === 'orbital' ? tn * 0.15
+          : currentStyle === 'vortex' ? tn * 0.18
+          : currentStyle === 'ripple' ? (i % 4) * 0.06
+          : currentStyle === 'fragment' ? (i % 4) * 0.05
+          : currentStyle === 'layered' ? (i % 3) * 0.09
+          : rnd() * 0.12;
+        p.turb = (rnd() - 0.5) * (currentStyle === 'depth' ? 16 : currentStyle === 'fragment' ? 14 : 10);
+        p.z = zc >= 0 ? zc : rnd();
       }
       phase = toForm ? 'toForm' : 'toName';
       phaseT0 = now;
@@ -987,18 +1032,26 @@ export function SignatureName({
       let y = quad(p.sy, p.c1y, p.m1y, e);
       /* family-specific flight character on top of the two legs */
       const flight = Math.sin(Math.PI * u);
-      if (currentStyle === 'spiral' || currentStyle === 'orbital') {
+      if (currentStyle === 'spiral' || currentStyle === 'orbital' || currentStyle === 'vortex') {
         const dx = x - scx;
         const dy = y - scy;
-        const ang = swirlDir * 0.35 * flight;
+        /* vortex co-rotates harder than the single-arm families */
+        const ang = swirlDir * (currentStyle === 'vortex' ? 0.55 : 0.35) * flight;
         const cos = Math.cos(ang);
         const sin = Math.sin(ang);
         x = scx + dx * cos - dy * sin;
         y = scy + dx * sin + dy * cos;
       } else if (currentStyle === 'wave') {
         y += Math.sin(u * Math.PI * 2 + p.ph1) * 6 * flight;
+      } else if (currentStyle === 'ripple') {
+        y += Math.cos(u * Math.PI * 3 + p.ph1) * 5 * flight;
       } else if (currentStyle === 'depth') {
         const k = 1 + 0.3 * flight * p.z;
+        x = scx + (x - scx) * k;
+        y = scy + (y - scy) * k;
+      } else if (currentStyle === 'perspective') {
+        /* strong z-burst: far particles rush past the frame plane */
+        const k = 1 + 0.5 * flight * p.z;
         x = scx + (x - scx) * k;
         y = scy + (y - scy) * k;
       }

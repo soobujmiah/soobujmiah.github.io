@@ -42,7 +42,13 @@ function PageNumeral({ index }: { index: number }) {
 
 function DhakaClock() {
   const { lang } = useLang();
-  const [now, setNow] = useState<{ body: string; ampm: string; date: string } | null>(null);
+  const [now, setNow] = useState<{
+    body: string;
+    ampm: string;
+    date: string;
+    prevBody: string;
+    prevAmpm: string;
+  } | null>(null);
   useEffect(() => {
     const locale = lang === 'bn' ? 'bn' : 'en-GB';
     /* 12-hour wall clock with visible seconds; the meridiem is split off
@@ -62,7 +68,16 @@ function DhakaClock() {
       const parts = time.format(d).split(' ');
       const ampm = parts.length > 1 ? parts[parts.length - 1] : '';
       const body = parts.length > 1 ? parts.slice(0, -1).join(' ') : time.format(d);
-      setNow({ body, ampm, date: `${wd.format(d)} · ${dmy.format(d)}` });
+      const date = `${wd.format(d)} · ${dmy.format(d)}`;
+      /* previous frame rides along so render can diff character by
+         character and roll only the glyphs that actually changed */
+      setNow((old) => ({
+        body,
+        ampm,
+        date,
+        prevBody: old ? old.body : body,
+        prevAmpm: old ? old.ampm : ampm,
+      }));
     };
     tick();
     /* one timer, cleaned up on unmount / language change */
@@ -71,22 +86,52 @@ function DhakaClock() {
   }, [lang]);
   if (!now) return null;
   /* Date/location on one quiet line; the 12-hour clock below it is the
-     focal point. Changing characters remount (keyed by position+glyph)
-     and play a short slot-morph — no whole-clock flash, no layout shift
-     (tabular digits keep every frame the same width). */
+     focal point. Only changed glyphs animate: a changed character
+     remounts as a two-cell vertical reel that rolls old→new behind a
+     mask (flip-clock character), while stable characters keep their
+     DOM node and stay perfectly still. Tabular digits + fixed cell
+     height ⇒ no layout shift; one timer, cleaned on unmount. */
+  const cells = now.body.split('').map((ch, i) => {
+    const prev = now.prevBody[i];
+    if (prev !== undefined && prev !== ch) {
+      return (
+        <span key={`${i}-${ch}`} className="ck-ch" aria-hidden="true">
+          <span className="ck-reel">
+            <span>{prev}</span>
+            <span>{ch}</span>
+          </span>
+        </span>
+      );
+    }
+    return (
+      <span key={i} className="ck-ch" aria-hidden="true">
+        {ch}
+      </span>
+    );
+  });
+  const ampmRolled = now.prevAmpm !== '' && now.prevAmpm !== now.ampm;
   return (
     <span className="hero-clock-block">
       <span className="hero-clock-date font-mono">
         {now.date} · {lang === 'bn' ? 'জিএমটি+৬ · ঢাকা' : 'GMT+6 · Dhaka'}
       </span>
       <span className="hero-clock-time font-mono">
-        {now.body.split('').map((ch, i) => (
-          <span key={`${i}-${ch}`} className="ck-ch" aria-hidden="true">
-            {ch}
-          </span>
-        ))}
-        {now.ampm ? <span className="ck-ampm">{now.ampm}</span> : null}
-        <span className="sr-only">{now.body} {now.ampm}</span>
+        {cells}
+        {now.ampm ? (
+          ampmRolled ? (
+            <span key={`ap-${now.ampm}`} className="ck-ampm">
+              <span className="ck-reel">
+                <span>{now.prevAmpm}</span>
+                <span>{now.ampm}</span>
+              </span>
+            </span>
+          ) : (
+            <span className="ck-ampm">{now.ampm}</span>
+          )
+        ) : null}
+        <span className="sr-only">
+          {now.body} {now.ampm}
+        </span>
       </span>
     </span>
   );
@@ -1116,7 +1161,7 @@ export function ContactScene() {
           <Reveal delay={0.22}>
             {/* One balanced grid: official marks in currentColor, equal
                 cards, handle carried quietly — navigation, not noise. */}
-            <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: 'rgba(228,226,223,0.4)' }}>
+            <p className="mb-4 text-center font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: 'rgba(228,226,223,0.4)' }}>
               {t.contact.groupsHeading}
             </p>
             <div className="social-icons">
@@ -1135,7 +1180,7 @@ export function ContactScene() {
                 </a>
               ))}
             </div>
-            <p className="mt-4 font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>
+            <p className="mt-4 text-center font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>
               {t.contact.groupsNote} <span style={{ color: '#4ade80' }}>@soobujmiah</span>
             </p>
           </Reveal>

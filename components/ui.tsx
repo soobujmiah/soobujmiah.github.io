@@ -510,7 +510,7 @@ export function Header() {
       animate={{ y: 0 }}
       transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-3 sm:px-6">
         {/* Brand mark returns to the site root — the portfolio is the
             brand root of the ecosystem, so its own mark must lead home. */}
         <a
@@ -548,7 +548,7 @@ export function Header() {
             {t.header.servicesLabel}
           </a>
         </nav>
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {/* CV — quiet but always present, desktop and mobile */}
           <a
             href="/cv/Sobuj_Miah_CV.pdf"
@@ -564,6 +564,26 @@ export function Header() {
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
             {t.header.cvLabel}
+          </a>
+          {/* Services — the nav row is desktop-only, so phones get the
+              service intent as its own quiet pill: icon always, label
+              once there is room for it. Same green outline language as
+              the CV pill, so the cluster reads as one system. */}
+          <a
+            href={serviceHref()}
+            aria-label={t.header.servicesLabel}
+            title={t.header.servicesLabel}
+            data-magnetic
+            className="md:hidden inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 font-mono text-[11px] font-medium transition-colors duration-300"
+            style={{ border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80' }}
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="7.5" height="7.5" rx="1.5" />
+              <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5" />
+              <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5" />
+              <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" />
+            </svg>
+            <span className="max-[399px]:hidden">{t.header.servicesLabel}</span>
           </a>
           <button
             type="button"

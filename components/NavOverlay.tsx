@@ -24,6 +24,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useLang, localizeDigits } from '@/app/language';
 import { SECTION_IDS, sectionHref } from '@/app/sections';
+import { serviceHref } from '@/app/services';
 
 const FOCUSABLE = 'a[href], button:not([disabled])';
 
@@ -193,6 +194,26 @@ export function NavOverlay({
                 </li>
               );
             })}
+            {/* Services — the intent layer sits outside the scene
+                sequence, but joins the same row system (and the
+                arrow-key cycle) so it is never a dead end. A real
+                route change, so no pager interception. */}
+            <li>
+              <a
+                ref={(el) => {
+                  rowRefs.current[total] = el;
+                }}
+                href={serviceHref()}
+                className="nav-row"
+                tabIndex={open ? 0 : -1}
+              >
+                <span className="nav-row-num" aria-hidden>
+                  —
+                </span>
+                <span className="nav-row-label">{t.header.servicesLabel}</span>
+                <span className="nav-row-mark" aria-hidden />
+              </a>
+            </li>
           </ol>
         </nav>
 
