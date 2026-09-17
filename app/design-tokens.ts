@@ -82,7 +82,7 @@ export const MOTION = {
     /** Dispersal radius, as a multiple of the wordmark box height. */
     disperseRadius: 1.35,
     /** Hard ceiling on live particles — a budget, not a target. */
-    maxParticles: 1700,
+    maxParticles: 2000,
     /** Sampling grid step in CSS px before the budget adapts it. */
     sampleStepPx: 2.6,
     /** Device-pixel-ratio cap for the construction canvas. */
