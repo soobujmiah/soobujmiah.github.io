@@ -34,6 +34,30 @@ function PageNumeral({ index }: { index: number }) {
   );
 }
 
+/* ── 00 · LIVE LOCAL CLOCK ─────────────────────────────────────
+   Client-only (rendered after mount, so SSR output is unchanged and
+   the no-JS baseline is untouched). Shows Dhaka local time+date in
+   the active language; Intl renders Bengali digits/months in bn. */
+
+function DhakaClock() {
+  const { lang } = useLang();
+  const [now, setNow] = useState('');
+  useEffect(() => {
+    const locale = lang === 'bn' ? 'bn' : 'en-GB';
+    const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Dhaka' });
+    const date = new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Dhaka' });
+    const tick = () => {
+      const d = new Date();
+      setNow(`${date.format(d)} · ${time.format(d)} · ${lang === 'bn' ? 'জিএমটি+৬' : 'GMT+6'}`);
+    };
+    tick();
+    const id = setInterval(tick, 30_000);
+    return () => clearInterval(id);
+  }, [lang]);
+  if (!now) return null;
+  return <span>{now}</span>;
+}
+
 /* ── 01 · HERO ───────────────────────────────────────────────── */
 
 export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: boolean; armed?: boolean }) {
@@ -125,7 +149,30 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
             {t.hero.ctaServices}
           </Magnetic>
         </motion.div>
+
+        {/* 5 · live local time — quiet mono line, client-only */}
+        <motion.p
+          className="mt-5 font-mono text-[10px] uppercase tracking-[0.3em]"
+          style={{ color: 'rgba(228,226,223,0.45)' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2.3, duration: 0.8 }}
+        >
+          <DhakaClock />
+        </motion.p>
       </div>
+
+      {/* Composed landscape band — decorative derivative of the session
+          photo; full-width, height-controlled, never a full-screen hero. */}
+      <figure className="home-band" aria-hidden="true">
+        <img
+          src="/images/home-landscape.jpg"
+          srcSet="/images/home-landscape-sm.jpg 1000w, /images/home-landscape.jpg 1672w"
+          sizes="100vw"
+          alt=""
+          decoding="async"
+        />
+      </figure>
 
       <motion.div
         className="hero-hint absolute bottom-24 left-1/2 -translate-x-1/2"
@@ -1003,6 +1050,33 @@ export function ContactScene() {
                   {t.contact.email.value}
                 </span>
               </Magnetic>
+            </Reveal>
+
+            {/* Understated professional CV link — same quiet visual
+                language as the channel cards, never its own section. */}
+            <Reveal delay={0.24}>
+              <a
+                href="/cv/Sobuj_Miah_CV.pdf"
+                download="Sobuj_Miah_CV.pdf"
+                className="cv-link mt-3 inline-flex items-center gap-2"
+              >
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                {t.ui.downloadCv}
+              </a>
             </Reveal>
           </div>
 

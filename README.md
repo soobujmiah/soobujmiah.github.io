@@ -236,6 +236,25 @@ python3 tools/make-og.py   # needs Pillow + numpy and two font files
 real 1200×630 PNG — social platforms reject SVG, so the format is checked, not
 assumed.
 
+## CV system
+
+A one-page professional CV ships as a static asset at `/cv/Sobuj_Miah_CV.pdf`
+and is linked from the Contact page as an understated `Download CV` action
+(EN) / `সিভি ডাউনলোড করুন` (BN).
+
+- Reproducible: `python3 tools/make_cv.py` rebuilds the PDF from this
+  repository (single A4 page, two-column, dark + one restrained accent).
+  Build-time-only dependency: `reportlab`. The cropped portrait lives at
+  `tools/cv/portrait.jpg` in-repo; nothing CV-related is fetched at runtime.
+- Content rules: every claim maps to repository evidence (portfolio copy, the
+  ADT/TERNUX/LAI/GGEN/Songjog repos, GitHub Actions history). Nothing is
+  invented — no fabricated companies, dates, degrees or awards. An older
+  reference CV is a secondary source only and never overrides repository
+  evidence. Private details (phone number, street address) are omitted.
+- Photo roles are strict: `tools/cv/portrait.jpg` → CV PDF only;
+  `public/images/home-landscape*.jpg` → home page band only. Source originals
+  are never shipped, and each derivative appears in exactly one surface.
+
 ## Owner context
 
 This repository is operated under Sobuj's SKB project-bootstrap standard —

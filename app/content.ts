@@ -247,6 +247,7 @@ export interface Content {
     release: string;
     refreshing: string;
     mapFocus: string;
+    downloadCv: string;
   };
   preloader: { status: string };
   /* Per-route search metadata, aligned with SECTION_IDS in
@@ -658,6 +659,7 @@ const en: Content = {
     release: 'Release to refresh',
     refreshing: 'Refreshing',
     mapFocus: 'Background map focus',
+    downloadCv: 'Download CV',
   },
   footer: {
     built: 'Built from a phone.',
@@ -1129,6 +1131,7 @@ const bn: Content = {
     release: 'রিফ্রেশে ছেড়ে দিন',
     refreshing: 'রিফ্রেশ হচ্ছে',
     mapFocus: 'পটভূমি মানচিত্রের কেন্দ্র',
+    downloadCv: 'সিভি ডাউনলোড করুন',
   },
   footer: {
     built: 'ফোন থেকে তৈরি।',
