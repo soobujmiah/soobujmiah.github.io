@@ -83,7 +83,7 @@ function Chrome({ children, slug }: { children: React.ReactNode; slug?: string }
           <span className="flex flex-wrap gap-4">
             <Link href={sectionHref(0)} className="hover:text-[#4ade80]">{s.labels.backHome}</Link>
             <Link href={serviceHref()} className="hover:text-[#4ade80]">{s.labels.allServices}</Link>
-            <Link href={sectionHref(8)} className="hover:text-[#4ade80]">{t.contact.email.label}</Link>
+            <Link href={sectionHref(8)} className="hover:text-[#4ade80]">{s.labels.contactPage}</Link>
           </span>
         </div>
       </footer>

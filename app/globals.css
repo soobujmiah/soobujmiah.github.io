@@ -1263,7 +1263,7 @@ body:has(> .services-doc) button {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
 }
 .hero-clock-date {
   font-size: 10px;
@@ -1274,12 +1274,12 @@ body:has(> .services-doc) button {
 .hero-clock-time {
   display: inline-flex;
   align-items: baseline;
-  font-size: clamp(1.5rem, 4.5vw, 2.2rem);
+  font-size: clamp(1.9rem, 5.8vw, 2.8rem);
   font-weight: 500;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   color: #e4e2df;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 18px rgba(34, 197, 94, 0.25);
+  text-shadow: 0 0 22px rgba(34, 197, 94, 0.28);
 }
 /* Flip-clock character roll — each changed glyph becomes a masked
    two-cell drum: the outgoing digit rolls vertically out while the
@@ -1300,7 +1300,8 @@ body:has(> .services-doc) button {
   flex-direction: column;
   transform-origin: 50% 50%;
   backface-visibility: hidden;
-  animation: ck-roll 0.5s cubic-bezier(0.32, 0.72, 0.18, 1) both;
+  /* ease-in-out drum: soft lift, fluid travel, no snap at either end */
+  animation: ck-roll 0.62s cubic-bezier(0.45, 0.05, 0.25, 1) both;
 }
 .ck-reel > span {
   display: block;
@@ -1309,7 +1310,7 @@ body:has(> .services-doc) button {
 }
 @keyframes ck-roll {
   from {
-    transform: translateY(0) rotateX(9deg);
+    transform: translateY(0) rotateX(6deg);
   }
   to {
     transform: translateY(-1.3em) rotateX(0deg);
@@ -1320,11 +1321,11 @@ body:has(> .services-doc) button {
   overflow: hidden;
   height: 1.3em;
   line-height: 1.3em;
-  margin-left: 0.5em;
+  margin-left: 0.45em;
   vertical-align: top;
   perspective: 5em;
-  font-size: 0.42em;
-  letter-spacing: 0.22em;
+  font-size: 0.4em;
+  letter-spacing: 0.2em;
   color: #4ade80;
 }
 @media (prefers-reduced-motion: reduce) {

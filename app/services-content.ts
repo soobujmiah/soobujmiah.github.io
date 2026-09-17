@@ -59,6 +59,9 @@ export interface ServicesContent {
     allServices: string;
     viewSource: string;
     breadcrumbHome: string;
+    whatsapp: string;
+    telegram: string;
+    contactPage: string;
   };
   availability: string;
   contactCta: string;
@@ -95,9 +98,12 @@ const en: ServicesContent = {
     allServices: 'Browse all services',
     viewSource: 'View on GitHub',
     breadcrumbHome: 'Sobuj Miah',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    contactPage: 'Contact page',
   },
   availability: 'Based in Dhaka, Bangladesh · remote worldwide. Work is delivered remotely; on-site visits are not offered as a standard service.',
-  contactCta: 'Email is the primary channel. Describe the problem, the desired outcome and the timeline if there is one; I will respond with the relevant questions and a practical next step.',
+  contactCta: 'Direct contact is available on WhatsApp and Telegram; email also works, and the contact page lists every channel. Describe the problem, the desired outcome and the timeline if there is one; I will respond with the relevant questions and a practical next step.',
   pages: [
     {
       slug: 'web-development',
@@ -441,9 +447,12 @@ const bn: ServicesContent = {
     allServices: 'সব সেবা দেখুন',
     viewSource: 'গিটহাবে দেখুন',
     breadcrumbHome: 'সবুজ মিয়া',
+    whatsapp: 'হোয়াটসঅ্যাপ',
+    telegram: 'টেলিগ্রাম',
+    contactPage: 'যোগাযোগ পাতা',
   },
   availability: 'ঢাকা, বাংলাদেশে অবস্থিত · বিশ্বব্যাপী রিমোট। কাজ রিমোটে সম্পন্ন হয়; সরেজমিন পরিদর্শন নিয়মিত সেবা হিসেবে দেওয়া হয় না।',
-  contactCta: 'ইমেইলই প্রধান মাধ্যম। সমস্যাটি, কাঙ্ক্ষিত ফলাফল এবং সময়সীমা থাকলে সেটি লিখে পাঠান; আমি প্রাসঙ্গিক প্রশ্ন ও একটি বাস্তব পরবর্তী ধাপ নিয়ে উত্তর দেব।',
+  contactCta: 'সরাসরি যোগাযোগের জন্য হোয়াটসঅ্যাপ ও টেলিগ্রাম রয়েছে; ইমেইলও কাজ করে, আর যোগাযোগ পাতায় সব মাধ্যমের তালিকা আছে। সমস্যাটি, কাঙ্ক্ষিত ফলাফল এবং সময়সীমা থাকলে সেটি লিখে পাঠান; আমি প্রাসঙ্গিক প্রশ্ন ও একটি বাস্তব পরবর্তী ধাপ নিয়ে উত্তর দেব।',
   pages: [
     {
       slug: 'web-development',

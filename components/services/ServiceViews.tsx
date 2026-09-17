@@ -5,6 +5,7 @@ import { useLang } from '@/app/language';
 import { servicesContent } from '@/app/services-content';
 import { SERVICE_SLUGS, serviceHref, type ServiceSlug } from '@/app/services';
 import { sectionHref } from '@/app/sections';
+import { BrandIcon } from '@/components/social-icons';
 
 const card = { border: '1px solid rgba(228,226,223,0.08)', background: 'rgba(8,10,8,0.55)' } as const;
 const muted = { color: 'rgba(228,226,223,0.6)' } as const;
@@ -45,16 +46,48 @@ function ContactCard() {
       <p className="text-[15px] leading-relaxed" style={muted}>
         {s.contactCta}
       </p>
-      <div className="mt-4 flex flex-wrap items-center gap-3">
+      {/* Direct-contact hierarchy: WhatsApp leads (solid), Telegram is
+          the same lane (green outline); email stays available but reads
+          neutral; the contact page is the full directory. 2×2 on
+          phones, one row once there is width. */}
+      <div className="mt-5 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:items-center">
         <a
-          href={t.contact.email.href}
-          className="rounded-full px-5 py-2 text-sm font-medium transition-opacity hover:opacity-80"
+          href="https://wa.me/soobujmiah"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-85"
           style={{ background: 'var(--accent)', color: '#04140a' }}
         >
-          {t.contact.email.label}: {t.contact.email.value}
+          <BrandIcon id="whatsapp" size={15} />
+          {s.labels.whatsapp}
         </a>
-        <Link href={sectionHref(8)} className="font-mono text-[12px] hover:text-[#4ade80]" style={faint}>
-          {t.contact.groupsHeading} →
+        <a
+          href="https://t.me/soobujmiah"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-colors duration-300"
+          style={{ border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80' }}
+        >
+          <BrandIcon id="telegram" size={15} />
+          {s.labels.telegram}
+        </a>
+        <a
+          href={t.contact.email.href}
+          className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm transition-colors duration-300"
+          style={{ border: '1px solid rgba(228,226,223,0.14)', color: '#e4e2df' }}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="m22 7-10 6L2 7" />
+          </svg>
+          {t.contact.email.label}
+        </a>
+        <Link
+          href={sectionHref(8)}
+          className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm transition-colors duration-300 hover:text-[#4ade80]"
+          style={{ border: '1px solid rgba(228,226,223,0.14)', color: 'rgba(228,226,223,0.75)' }}
+        >
+          {s.labels.contactPage} →
         </Link>
       </div>
       <p className="mt-4 font-mono text-[11px]" style={faint}>

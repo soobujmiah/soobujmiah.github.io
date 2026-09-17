@@ -1180,9 +1180,25 @@ export function ContactScene() {
                 </a>
               ))}
             </div>
-            <p className="mt-4 text-center font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>
-              {t.contact.groupsNote} <span style={{ color: '#4ade80' }}>@soobujmiah</span>
+            {/* Closing beat: the supporting line stays quiet, the
+                handle becomes the focal point — its own line, larger,
+                accent green with the clock's glow language, centred in
+                both languages. Links to the canonical origin of the
+                handle; the hover is the site's standard color shift. */}
+            <p className="mt-7 text-center font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: 'rgba(228,226,223,0.4)' }}>
+              {t.contact.groupsNote}
             </p>
+            <a
+              href="https://github.com/soobujmiah"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="soobujmiah on GitHub"
+              data-magnetic
+              className="mt-3 block text-center font-mono text-[clamp(1.3rem,4.2vw,1.75rem)] font-medium tracking-tight transition-opacity duration-300 hover:opacity-80"
+              style={{ color: '#4ade80', textShadow: '0 0 26px rgba(34,197,94,0.32)' }}
+            >
+              @soobujmiah
+            </a>
           </Reveal>
         </div>
       </div>
