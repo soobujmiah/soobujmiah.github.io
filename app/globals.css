@@ -598,15 +598,18 @@ body.lang-bn .worldmap-pin {
    same safe zone as the phone row — so it never sits over content,
    imagery or controls. Horizontal, centred, above the footer. */
 /* ── bottom HUD bar — same button family as the header pills ────────
-   One compact control: a fixed-start progress track with the nine
-   page dots, a hairline divider, and the index trigger. The housing
-   borrows the exact geometry language of the CV/Services/language
-   pills — full-round corners, a 1px green hairline, a restrained
-   blurred fill — so the bar reads as a futuristic sibling of the
-   header controls, not an unrelated capsule. While the index HUD is
-   open the bar carries the glow (data-nav-open): origin and popup
-   stay visually coupled. Motion is limited to the active dot's
-   pulse, disabled under reduced motion. */
+   One compact control: the index trigger wrapped in its own progress
+   trace. The bar is a fixed-size pill whose BORDER is the instrument
+   (PerimeterTrace in ui.tsx): a green trace travels the perimeter
+   clockwise from a fixed origin at bottom-centre, page 1 = 0% to
+   page 9 = 100%, beside a small NN/09 readout. The housing borrows
+   the geometry language of the CV/Services/language pills — a 1px
+   green hairline over a restrained blurred fill — so the bar reads as
+   a futuristic sibling of the header controls, not an unrelated
+   capsule. While the index HUD is open the bar carries the glow and
+   the trigger sparks (data-nav-open): origin and panel stay visually
+   coupled. Motion is limited to the trace endpoint, disabled under
+   reduced motion. */
 .pager-hud {
   position: absolute;
   z-index: 30;
@@ -614,8 +617,9 @@ body.lang-bn .worldmap-pin {
   transform: translateX(-50%);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  padding: 5px 7px 5px 16px;
+  padding: 0 12px;
   border-radius: 999px;
   border: 1px solid rgba(34, 197, 94, 0.35);
   background: rgba(8, 10, 8, 0.55);
@@ -629,76 +633,41 @@ body.lang-bn .worldmap-pin {
   box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
 }
 
-/* Progress track — the only geometry that moves is the fill's end
-   point. The track has a fixed width and the dots sit at fixed
-   proportional positions (i / (total − 1)); the active dot changes
-   colour and glow only, never width, so nothing re-centres and
-   neither end of the component ever shifts. Page 1 = 0%, page 9 =
-   100%, start anchor physically fixed at the left. */
-.hud-track {
-  position: relative;
-  display: block;
+/* Perimeter trace — the bar's border carries the progress read. The
+   SVG maps 1:1 onto the fixed pill box (viewBox = CSS size), the
+   origin sits at bottom-centre and never moves; only the trace
+   endpoint travels (stroke-dashoffset = 1 − progress, pathLength 1),
+   so nothing re-centres, resizes or shifts. */
+.hud-perim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.hud-perim-base {
+  fill: none;
+  stroke: rgba(34, 197, 94, 0.14);
+  stroke-width: 1.5;
+}
+
+.hud-perim-fill {
+  fill: none;
+  stroke: #22c55e;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 3px rgba(34, 197, 94, 0.6));
+}
+
+/* position readout — telemetry text, not a second page number */
+.hud-readout {
   flex: 0 0 auto;
-  width: 148px;
-  height: 20px;
-}
-
-.hud-rail {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 1px;
-  margin-top: -0.5px;
-  background: rgba(34, 197, 94, 0.16);
-}
-
-.hud-fill {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 1px;
-  margin-top: -0.5px;
-  transform-origin: left center;
-  transform: scaleX(0);
-  background: linear-gradient(90deg, rgba(34, 197, 94, 0.45), #22c55e);
-  box-shadow: 0 0 6px rgba(34, 197, 94, 0.45);
-}
-
-.hud-dot {
-  position: absolute;
-  top: 50%;
-  width: 6px;
-  height: 6px;
-  margin: -3px 0 0 -3px;
-  padding: 0;
-  border: none;
-  border-radius: 9999px;
-  background: rgba(228, 226, 223, 0.22);
-  transition: background 0.35s ease, box-shadow 0.35s ease;
-}
-
-/* enlarged hit area — touch comfort without moving any geometry */
-.hud-dot::before {
-  content: '';
-  position: absolute;
-  inset: -10px;
-}
-
-.hud-dot:hover {
-  background: rgba(228, 226, 223, 0.5);
-}
-
-.hud-dot-active {
-  background: #22c55e;
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.55);
-  animation: hud-pulse 3.4s ease-in-out infinite;
-}
-
-@keyframes hud-pulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); }
-  50% { box-shadow: 0 0 14px rgba(34, 197, 94, 0.62); }
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: rgba(74, 222, 128, 0.85);
+  white-space: nowrap;
 }
 
 /* hairline divider between the telemetry track and the expand control */
@@ -711,6 +680,8 @@ body.lang-bn .worldmap-pin {
 
 .pager-dots-rail {
   bottom: calc(64px + env(safe-area-inset-bottom));
+  width: 124px;
+  height: 38px;
   display: none;
 }
 
@@ -722,23 +693,15 @@ body.lang-bn .worldmap-pin {
 
 .pager-dots-row {
   bottom: calc(66px + env(safe-area-inset-bottom));
+  width: 112px;
+  height: 36px;
   gap: 8px;
-  padding: 5px 6px 5px 13px;
-}
-
-.pager-dots-row .hud-track {
-  width: 108px;
+  padding: 0 10px;
 }
 
 @media (min-width: 768px) {
   .pager-dots-row {
     display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hud-dot-active {
-    animation: none;
   }
 }
 
@@ -1060,7 +1023,7 @@ body.lang-bn span {
   display: flex;
   flex-direction: column;
   padding: 0.9rem 1rem 1.15rem;
-  border: 1px solid rgba(34, 197, 94, 0.28);
+  border: 1px solid rgba(34, 197, 94, 0.16);
   border-radius: 16px;
   background: rgba(8, 9, 8, 0.94);
   backdrop-filter: blur(20px);
@@ -1069,7 +1032,8 @@ body.lang-bn span {
 }
 
 /* the seam: a short light trace from the panel's bottom edge toward
-   the bar control it emerged from */
+   the bar control it emerged from — it scales in from the bar end as
+   the panel grows, so the emergence stays physically connected */
 .nav-overlay-panel::after {
   content: '';
   position: absolute;
@@ -1078,8 +1042,98 @@ body.lang-bn span {
   width: 1px;
   height: 20px;
   transform: translateX(-50%);
+  transform-origin: 50% 100%;
   background: linear-gradient(180deg, rgba(34, 197, 94, 0.55), transparent);
   pointer-events: none;
+}
+
+.nav-overlay-root[data-open='true'] .nav-overlay-panel::after {
+  animation: hud-seam-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes hud-seam-in {
+  from { transform: translateX(-50%) scaleY(0); }
+  to { transform: translateX(-50%) scaleY(1); }
+}
+
+/* technical framing — segmented corner brackets over the panel's
+   hairline border, plus one asymmetric edge tick: HUD geometry that
+   keeps the surface from reading as a conventional dialog box */
+.nav-overlay-frame {
+  position: absolute;
+  inset: 5px;
+  border-radius: 11px;
+  pointer-events: none;
+  opacity: 0.75;
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(#4ade80, #4ade80),
+    linear-gradient(#4ade80, #4ade80),
+    linear-gradient(#4ade80, #4ade80),
+    linear-gradient(#4ade80, #4ade80),
+    linear-gradient(#4ade80, #4ade80),
+    linear-gradient(#4ade80, #4ade80),
+    linear-gradient(#4ade80, #4ade80),
+    linear-gradient(#4ade80, #4ade80);
+  background-size:
+    22px 1px, 1px 22px,
+    22px 1px, 1px 22px,
+    22px 1px, 1px 22px,
+    22px 1px, 1px 22px;
+  background-position:
+    left top, left top,
+    right top, right top,
+    left bottom, left bottom,
+    right bottom, right bottom;
+}
+
+.nav-overlay-frame::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 34%;
+  width: 1px;
+  height: 13%;
+  background: rgba(74, 222, 128, 0.55);
+}
+
+/* content resolves after the frame expands upward — rows stagger in */
+.nav-overlay-root[data-open='true'] .nav-overlay-list li {
+  animation: hud-row-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.nav-overlay-list li:nth-child(1) { animation-delay: 0.1s; }
+.nav-overlay-list li:nth-child(2) { animation-delay: 0.12s; }
+.nav-overlay-list li:nth-child(3) { animation-delay: 0.14s; }
+.nav-overlay-list li:nth-child(4) { animation-delay: 0.16s; }
+.nav-overlay-list li:nth-child(5) { animation-delay: 0.18s; }
+.nav-overlay-list li:nth-child(6) { animation-delay: 0.2s; }
+.nav-overlay-list li:nth-child(7) { animation-delay: 0.22s; }
+.nav-overlay-list li:nth-child(8) { animation-delay: 0.24s; }
+.nav-overlay-list li:nth-child(9) { animation-delay: 0.26s; }
+.nav-overlay-list li:nth-child(10) { animation-delay: 0.28s; }
+
+@keyframes hud-row-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* the trigger sparks once when the HUD it generates opens */
+.pager-hud[data-nav-open='true'] .pager-index-trigger {
+  animation: hud-spark 0.5s ease-out;
+}
+
+@keyframes hud-spark {
+  from { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+  to { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-overlay-root[data-open='true'] .nav-overlay-list li,
+  .nav-overlay-root[data-open='true'] .nav-overlay-panel::after,
+  .pager-hud[data-nav-open='true'] .pager-index-trigger {
+    animation: none;
+  }
 }
 
 .nav-overlay-head {
@@ -1341,6 +1395,12 @@ body.lang-bn span {
   }
   .worldmap-origin-halo { opacity: 0.3; }
 
+  /* the hero metadata line resolves immediately — its entrance delay
+     must not hold the date line invisible */
+  .hero-date-wrap {
+    animation-delay: 0s !important;
+  }
+
   /* the clock is readable first, decorative second: no colon pulse,
      no dot stagger — lit dots simply are */
   .idc-colon i {
@@ -1403,14 +1463,20 @@ body:has(> .services-doc) button {
 }
 
 /* ── Identity clock — dotted sibling of the signature name ───────
-   One quiet bilingual date/location line; below it the 12-hour clock
-   with seconds, drawn as dot matrices sampled from the wordmark face
-   (components/IdentityClock.tsx) — the same visual state the name's
-   particles resolve into. Fixed-width digit slots, so the block
-   never shifts; only changed digits replay the short dot settle. */
+   The 12-hour clock with seconds, drawn as dot matrices sampled from
+   the wordmark face (components/IdentityClock.tsx) — the same visual
+   state the name's particles resolve into. It leads the hero under
+   the header; the bilingual date/location metadata line (its 'date'
+   part) closes the hero under the CTAs. Fixed-width digit slots, so
+   the block never shifts; only changed digits replay the short dot
+   settle. */
 .hero-clock-wrap {
   margin-bottom: clamp(14px, 3.2dvh, 30px);
   animation: hero-clock-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
+}
+.hero-date-wrap {
+  margin-top: clamp(16px, 3.4dvh, 30px);
+  animation: hero-clock-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 2.05s both;
 }
 @keyframes hero-clock-in {
   from {

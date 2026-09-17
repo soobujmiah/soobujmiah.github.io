@@ -47,9 +47,14 @@ const EXPECTED_PUBLIC_ROUTES = SECTIONS.length + SERVICE_ROUTES.length; // 9 + 9
 const MIN_VISIBLE_CHARS = 220;
 /** Total gzipped JS ceiling for the whole site (audit baseline: 262 KB;
     329 KB before the service layer; the layer adds one ~18 KB chunk that
-    only /services/* routes load — so the site-wide sum moves to 360 KB
-    while the per-route ceilings below stay where the pager was). */
-const MAX_TOTAL_JS_GZIP = 360 * 1024;
+    only /services/* routes load — so the site-wide sum moved to 360 KB
+    while the per-route ceilings below stay where the pager was.
+    361 KB since the owner's final micro-polish spec: the identity form
+    library grew to 42 semantic silhouettes (+14 science/space and
+    accelerator forms, −7 retired generics) and the bottom bar's dot row
+    became the perimeter progress trace — ~750 B gz of real, required
+    vocabulary that trimming could not recover. */
+const MAX_TOTAL_JS_GZIP = 361 * 1024;
 /** Per-route payload ceiling: the gzipped sum of every script a single
     HTML page references. The home page measured ~250 KB before the
     service layer; this holds every route — pager and services — there. */

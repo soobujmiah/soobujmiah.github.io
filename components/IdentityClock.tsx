@@ -16,6 +16,11 @@
    client-only first paint (SSR/no-JS baseline untouched), and
    reduced motion neutralised in CSS. Bengali gets Bengali digits
    (localizeDigits) and the Bengali meridiem from the content tree.
+
+   Rendered in two parts: `part="time"` (the dot-matrix clock) leads
+   the hero under the header; `part="date"` (the bilingual date ·
+   timezone metadata line) closes the hero under the CTAs — the
+   clock frames the identity without crowding the name.
    ═══════════════════════════════════════════════════════════════ */
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
@@ -72,7 +77,11 @@ function sampleGlyph(ch: string, faces: string): DotGrid | null {
       const h = by1 - by0 + 1;
       const cov = pts.length && w > 0 && h > 0 ? pts.length / 2 / (w * h) : 0;
       if (cov >= 0.05 && cov <= 0.72) {
-        const cols = Math.max(3, Math.min(9, Math.round(w / (h / ROWS))));
+        /* 7-column cap: cells are fixed at 1/11 em and slots at
+           0.66 em, so 7 columns (0.636 em) is the widest grid that
+           cannot spill into the neighbouring slot — wide glyphs
+           sample slightly compressed instead of ever overlapping */
+        const cols = Math.max(3, Math.min(7, Math.round(w / (h / ROWS))));
         const n = new Uint16Array(ROWS * cols);
         for (let i = 0; i < pts.length; i += 2) {
           const c = Math.min(cols - 1, (((pts[i] - bx0) * cols) / w) | 0);
@@ -122,11 +131,12 @@ function DigitSlot({ ch, faces }: { ch: string; faces: string | null }) {
 
 type ClockState = { h: string; m: string; s: string; ap: string; date: string };
 
-export function IdentityClock() {
+export function IdentityClock({ part = 'time' }: { part?: 'time' | 'date' }) {
   const { lang, t } = useLang();
   const [state, setState] = useState<ClockState | null>(null);
   const [faces, setFaces] = useState<string | null>(null);
   const probeRef = useRef<HTMLSpanElement>(null);
+  const isDate = part === 'date';
 
   /* One timer; Asia/Dhaka regardless of the visitor's timezone. Parts
      are read as Latin digits and localized by hand so the meridiem
@@ -162,9 +172,11 @@ export function IdentityClock() {
       });
     };
     tick();
-    const id = setInterval(tick, 1000);
+    /* the time face needs second resolution; the date line changes at
+       most once a day, so it polls lazily */
+    const id = setInterval(tick, isDate ? 30_000 : 1000);
     return () => clearInterval(id);
-  }, [lang, t]);
+  }, [lang, t, isDate]);
 
   /* Resolve the identity's display faces from the probe element's
      computed style — the same pattern SignatureName uses: the CSS
@@ -172,6 +184,7 @@ export function IdentityClock() {
      reads what actually applies. load() then guarantees the woff2 is
      in memory before the first sample. */
   useEffect(() => {
+    if (isDate) return; // only digit matrices sample the wordmark faces
     let dead = false;
     const list = probeRef.current ? getComputedStyle(probeRef.current).fontFamily : '';
     const face = list.split(',')[0]?.trim() ?? '';
@@ -188,26 +201,36 @@ export function IdentityClock() {
     return () => {
       dead = true;
     };
-  }, [lang]);
+  }, [lang, isDate]);
 
   /* Client-only first paint, identical to the clock this replaces.
      The probe renders from the very first mount so the face
      resolution above always finds it. The language class is applied
      locally (not read from body.lang-bn) so the probe's computed
      font stack is already correct when this component's effect runs —
-     child effects fire before the parent provider's body class swap. */
+     child effects fire before the parent provider's body class swap.
+     The date face keeps an empty line box on first paint so the
+     metadata row never shifts in. */
   if (!state)
-    return (
+    return isDate ? (
+      <span className="hero-clock-date font-mono" aria-hidden="true">
+        &nbsp;
+      </span>
+    ) : (
       <span ref={probeRef} className={lang === 'bn' ? 'idc-probe idc-bn' : 'idc-probe'} aria-hidden="true" />
+    );
+
+  if (isDate)
+    return (
+      <span className="hero-clock-date font-mono">
+        {state.date} · {lang === 'bn' ? 'জিএমটি+৬ · ঢাকা' : 'GMT+6 · Dhaka'}
+      </span>
     );
 
   const digits = [state.h[0], state.h[1], ':', state.m[0], state.m[1], ':', state.s[0], state.s[1]];
   return (
     <span className={lang === 'bn' ? 'idclock idc-bn' : 'idclock'}>
       <span ref={probeRef} className="idc-probe" aria-hidden="true" />
-      <span className="hero-clock-date font-mono">
-        {state.date} · {lang === 'bn' ? 'জিএমটি+৬ · ঢাকা' : 'GMT+6 · Dhaka'}
-      </span>
       <span className="idc-time">
         {digits.map((ch, i) =>
           ch === ':' ? (
