@@ -62,6 +62,7 @@ import {
   particleBudget,
   rampPalette,
   sampleStepFor,
+  denseStepFor,
   startOffset,
 } from '@/app/name-motion';
 
@@ -116,7 +117,7 @@ const CANON_FORMS = [
    same particle language — they enrich the cycle without ever
    displacing the canonical 25. */
 const SUPPORT_FORMS = [
-  'binary', 'package', 'matrix', 'flow', 'orbit', 'globe',
+  'binary', 'matrix', 'flow', 'orbit', 'globe',
   'starfield', 'constellation', 'planet', 'satellite', 'spaceship',
   'rocket', 'comet',
 ] as const;
@@ -407,15 +408,6 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       circle(ctx, cx - W * 0.14, cy - H * 0.1, lw * 1.2);
       circle(ctx, cx - W * 0.14, cy + H * 0.3, lw * 1.2);
       circle(ctx, cx + W * 0.16, cy + H * 0.2, lw * 1.2);
-      break;
-    }
-    case 'package': {
-      const s = H * 0.56;
-      poly(ctx, [[cx - s / 2, cy - s * 0.32], [cx, cy - s / 2], [cx + s / 2, cy - s * 0.32], [cx + s / 2, cy + s * 0.32], [cx, cy + s / 2], [cx - s / 2, cy + s * 0.32]], true);
-      ctx.stroke();
-      line(ctx, cx - s / 2, cy - s * 0.32, cx, cy - s * 0.14);
-      line(ctx, cx + s / 2, cy - s * 0.32, cx, cy - s * 0.14);
-      line(ctx, cx, cy - s * 0.14, cx, cy + s / 2);
       break;
     }
 
@@ -931,7 +923,7 @@ export function SignatureName({
         }
         return n;
       };
-      const step = sampleStepFor(countAt(baseStep), baseStep, budget);
+      const step = denseStepFor(countAt(baseStep), baseStep, budget);
 
       const clusterOf = (xCss: number) => {
         let idx = 0;
@@ -1035,7 +1027,7 @@ export function SignatureName({
         }
         return n;
       };
-      const step = sampleStepFor(countAt(baseStep), baseStep, Math.max(240, particles.length));
+      const step = denseStepFor(countAt(baseStep), baseStep, Math.max(240, particles.length));
       const pts: Array<{ x: number; y: number }> = [];
       for (let y = 0; y < fh; y += step) {
         for (let x = 0; x < fw; x += step) {
@@ -1131,8 +1123,12 @@ export function SignatureName({
         let toY: number;
         if (toForm) {
           const pt = pts[order[i] % pts.length];
-          toX = pt.x;
-          toY = pt.y;
+          /* when the population outnumbers the samples, duplicates
+             converge with a deterministic sub-cell jitter (from their
+             own phases — no allocation, no respawn) instead of
+             stacking into one glowing point */
+          toX = pt.x + ((p.ph1 * 0.3183) % 1 - 0.5) * 2.4;
+          toY = pt.y + ((p.ph2 * 0.3183) % 1 - 0.5) * 2.4;
         } else {
           toX = p.tx;
           toY = p.ty;
@@ -1449,15 +1445,23 @@ export function SignatureName({
           const ue = clamp01(mU - p.stg);
           const pf = Math.sin(Math.PI * ue);
           const arrive = ue <= SPREAD_AT ? 0 : easeInOut((ue - SPREAD_AT) / (1 - SPREAD_AT));
-          const flyS = dot * (1.0 + 0.5 * p.z) * (1 + 0.3 * pf);
+          /* particle identity at the phase seam: size and ink start at
+             EXACTLY the values the departing hold was using, and the
+             flight size ramps in with the spread leg — nothing pops
+             when a morph begins or ends, so the same particles are
+             visibly the same particles throughout. The flight ink dip
+             stays inside the identity-green top of the ramp. */
+          const depart = easeOut(clamp01(ue / SPREAD_AT));
+          const holdS = dot * (0.85 + 0.6 * p.z);
+          const holdLc = 0.55 + 0.45 * p.z;
+          const restS = phase === 'toForm' ? dot : holdS;
+          const flyS = (restS + (dot * (1.0 + 0.5 * p.z) - restS) * depart) * (1 + 0.3 * pf);
           if (phase === 'toForm') {
-            const holdS = dot * (0.85 + 0.6 * p.z);
             s = flyS + (holdS - flyS) * arrive;
-            const holdLc = 0.55 + 0.45 * p.z;
-            lc = (1 - 0.75 * clamp01(mU)) * (1 - arrive) + holdLc * arrive;
+            lc = (1 - 0.3 * clamp01(mU)) * (1 - arrive) + holdLc * arrive;
           } else {
             s = flyS + (dot - flyS) * arrive;
-            lc = 0.25 + 0.75 * clamp01(mU);
+            lc = holdLc + (1 - holdLc) * clamp01(mU);
           }
         } else {
           /* formHold: seated on the form with dimensional shimmer */

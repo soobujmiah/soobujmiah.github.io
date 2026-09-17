@@ -105,6 +105,7 @@ const {
   easeOutSettle,
   baselineWithinBox,
   sampleStepFor,
+  denseStepFor,
   startOffset,
   disperseOrigin,
   rampPalette,
@@ -236,6 +237,12 @@ eq('the fallback sits inside the box', baselineWithinBox(0, 0, 0, 0), 0);
 
 console.log('\nSignature name — the particle budget is a ceiling');
 eq('under budget keeps the crisp base step', sampleStepFor(400, 3, 1700), 3);
+eq('sparse fields densify below the base step', denseStepFor(400, 8, 1600) < 8, true);
+eq('densified count never exceeds the budget', 400 * (8 / denseStepFor(400, 8, 1600)) ** 2 <= 1600, true);
+eq('near-target fields keep the base step', denseStepFor(1500, 3, 1700), 3);
+eq('over target matches sampleStepFor', denseStepFor(6800, 2, 1700), sampleStepFor(6800, 2, 1700));
+eq('dense degenerate input returns the base step', denseStepFor(0, 3, 1700), 3);
+eq('the dense step never collapses below one pixel', denseStepFor(1, 8, 4000) >= 1, true);
 eq('over budget widens the step', sampleStepFor(6800, 2, 1700), 4);
 eq('the widened step actually brings the count under the ceiling', (() => {
   const step = sampleStepFor(6800, 2, 1700);

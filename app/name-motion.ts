@@ -112,6 +112,24 @@ export function sampleStepFor(inkPixels: number, baseStep: number, maxParticles:
 }
 
 /**
+ * Responsive-density sampling step.
+ *
+ * sampleStepFor only ever widens the step when a field exceeds the
+ * budget; small fields — a phone wordmark is a fraction of the
+ * desktop's ink — stay at the base step and sample sparse, so the
+ * mobile name reads thin. denseStepFor tightens the step toward the
+ * same budget when ink falls well under it, giving every viewport
+ * comparable particle typography. The ceil guarantees the predicted
+ * count never exceeds the budget; within 85% of it the base step is
+ * kept, so desktop sampling is unchanged.
+ */
+export function denseStepFor(inkPixels: number, baseStep: number, target: number): number {
+  if (!(inkPixels > 0) || !(target > 0)) return baseStep;
+  if (inkPixels >= target * 0.85) return sampleStepFor(inkPixels, baseStep, target);
+  return Math.max(1, Math.ceil(baseStep * Math.sqrt(inkPixels / target)));
+}
+
+/**
  * Where a particle starts.
  *
  * The field reads as a wordmark that has just been taken apart rather
