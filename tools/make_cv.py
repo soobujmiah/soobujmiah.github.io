@@ -20,6 +20,10 @@ Run:      python3 tools/make_cv.py
 """
 import os
 
+import reportlab.rl_config as _rl_config
+
+_rl_config.invariant = 1  # byte-deterministic PDF output (fixed timestamps/IDs)
+
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.colors import HexColor
