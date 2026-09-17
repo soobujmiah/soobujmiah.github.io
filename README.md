@@ -12,7 +12,7 @@ particle field that travels home and resolves into real typography.
 
 ## Stack
 
-- Next.js 14 (static export), React 18, TypeScript, Tailwind CSS
+- Next.js 15.5.24 (static export), React 18, TypeScript, Tailwind CSS
 - framer-motion for spring paper-turn page transitions + inner page scroll
 - GitHub Pages deploy via `.github/workflows/deploy.yml` (lint → build → upload `./out`)
 
@@ -33,6 +33,15 @@ stops the build before anything is emitted. The deploy workflow runs the same
 sequence on Node 22 with `npm ci`, and finishes by validating the exported
 artifact.
 
+### Dependency note
+
+`eslint-config-next` is intentionally pinned at `14.2.35` while `next` is `15.5.24`.
+That is not an oversight and not a conflict: `eslint-config-next@14.2.35` declares
+peer dependencies on `eslint` (`^7.23.0 || ^8.0.0`) and `typescript` (`>=3.3.1`)
+only — it has no `next` peer — so the pairing cannot produce a peer-range error,
+and `next lint` runs green as part of every build. Bumping it is a separate,
+deliberate change, not cleanup.
+
 ### Gates
 
 | Script | Proves |
@@ -41,7 +50,7 @@ artifact.
 | `check:purity` | Adversarial suite — injects `"এটি AI Work Section GitHub"` and `"This is বাংলা বিভাগ"` into copies of the real content and asserts the gate rejects each, with an unmodified control that must pass. |
 | `check:design` | `app/design-tokens.ts` = `DESIGN_SYSTEM.md` = `globals.css :root` = browser `themeColor`. Documentation drift fails the build. Also asserts the identity mark's engineering contract (§6) and palette family (§7), and guards retired hero motifs — including the character-substitution wordmark — against returning. |
 | `check:units` | Bengali grapheme segmentation (both the `Intl.Segmenter` path and the fallback), section routing, digit localisation, and the signature-name motion logic: determinism, exact landing, baseline derivation, particle budget, cluster ordering, colour ramp, and the motion-token budget adding up to 1. |
-| `check:build` | From the built `out/`: 9 real routes with server-rendered text, per-route title/canonical/social card, `robots.txt`/`sitemap.xml`/`og.png`, and the JavaScript budget. |
+| `check:build` | From the built `out/`: 18 real routes (9 pager sections + 9 service pages) with server-rendered text, per-route title/canonical/social card, `robots.txt`/`sitemap.xml`/`og.png`, and the JavaScript budget. |
 
 ## Content model
 
