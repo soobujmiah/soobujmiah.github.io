@@ -174,7 +174,10 @@ def main():
     c.clipPath(p, stroke=0)
     c.drawImage(PORTRAIT, px, py, width=pw, height=ph, preserveAspectRatio=True, anchor="c")
     c.restoreState()
-    c.setStrokeColor(ACCENT)
+    # Neutral hairline frame — the photograph itself stays visually
+    # neutral (no site tint on the person); the surrounding CV carries
+    # the portfolio identity instead.
+    c.setStrokeColor(Color(228 / 255, 226 / 255, 223 / 255, 0.28))
     c.setLineWidth(1.0)
     c.roundRect(px, py, pw, ph, 8, fill=0, stroke=1)
     cur.y = py - 18
@@ -243,7 +246,7 @@ def main():
          "Bangladesh and Saudi Arabia.",
          rx, rw, size=8.7, color=DIM, leading=11.6)
 
-    section(c, rcur, "Selected Engineering Work", rx, rw)
+    section(c, rcur, "Engineering Experience — Selected Work", rx, rw)
     bullet(c, rcur, "LAI — on-device AI runtime",
            "Bangla-first local LLM inference and consent-driven Android automation. arm64 llama.cpp CPU inference "
            "device-validated at 12–20 tok/s; Adreno Vulkan crash root-caused into a fail-closed CPU-default design.")
@@ -262,10 +265,22 @@ def main():
            "On-device AI, ARM64 Android tooling and Linux systems, delivered independently.")
     bullet(c, rcur, "Office Administrator — Rabeya Education Family, Savar, Dhaka (2025–present)",
            "Daily operations, social media and SEO, student registration, records and promotional media.")
-    body(c, rcur,
-         "Earlier: eight years across office administration, digital operations and industrial-site roles "
-         "(progress reporting, fire safety, electrical, coordination) in Bangladesh and Saudi Arabia.",
-         rx, rw, size=8.3, color=MUTED, leading=10.8)
+    # Compact 2015–23 timeline (reference CV as secondary evidence):
+    # the full body of work, one line per role, after the current roles.
+    section(c, rcur, "Earlier Experience (2015–23)", rx, rw)
+    for years, role in [
+        ("2015–17", "Email marketing — freelance, online"),
+        ("2017–18", "Fire watcher — Aramco site (Fadhli), Saudi Arabia"),
+        ("2018–20", "Progress reporter — PCMC, Saudi Arabia"),
+        ("2020–21", "Electrician — SEC (Khaled Juffali), Jeddah"),
+        ("2021–22", "Coordinator — Abdullah Trading, Jubail"),
+        ("2022–23", "Computer operator — Savar, Bangladesh"),
+    ]:
+        c.setFont(F_BOLD, 7.8)
+        c.setFillColor(ACCENT_B)
+        c.drawString(rx, rcur.y, years)
+        body(c, rcur, role, rx + 50, rw - 50, size=7.9, color=MUTED, leading=9.8)
+        rcur.y -= 2.5
 
     section(c, rcur, "Technical Skills", rx, rw)
     for head, tail in [

@@ -252,8 +252,10 @@ and is linked from the Contact page as an understated `Download CV` action
   reference CV is a secondary source only and never overrides repository
   evidence. Private details (phone number, street address) are omitted.
 - Photo roles are strict: `tools/cv/portrait.jpg` → CV PDF only;
-  `public/images/home-landscape*.jpg` → home page band only. Source originals
-  are never shipped, and each derivative appears in exactly one surface.
+  `public/images/home-figure.jpg` (person crop derived from the edited
+  landscape source, blended + edge-masked into the page background) → the
+  home page visual layer only. Source originals are never shipped, and
+  each derivative appears in exactly one surface.
 
 ## Owner context
 

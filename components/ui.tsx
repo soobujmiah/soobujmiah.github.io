@@ -4,6 +4,7 @@ import { Children, createContext, useCallback, useContext, useEffect, useRef, us
 import { motion, useInView, useMotionValue, useSpring, useVelocity, useTransform } from 'framer-motion';
 import { useLang, localizeDigits } from '@/app/language';
 import { sectionHref } from '@/app/sections';
+import { serviceHref } from '@/app/services';
 
 /* ═══════════════════════════════════════════════════════════════
    PAGE NAVIGATION — discrete pager: goToScene jumps to a page.
@@ -509,7 +510,7 @@ export function Header() {
       animate={{ y: 0 }}
       transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* Brand mark returns to the site root — the portfolio is the
             brand root of the ecosystem, so its own mark must lead home. */}
         <a
@@ -537,14 +538,39 @@ export function Header() {
               {l.label}
             </a>
           ))}
+          {/* the service-intent layer, reachable from every page */}
+          <a
+            href={serviceHref()}
+            className="text-xs uppercase tracking-[0.1em] transition-colors duration-300 hover:opacity-100"
+            style={{ color: 'rgba(228,226,223,0.4)' }}
+            data-magnetic
+          >
+            {t.header.servicesLabel}
+          </a>
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* CV — quiet but always present, desktop and mobile */}
+          <a
+            href="/cv/Sobuj_Miah_CV.pdf"
+            download="Sobuj_Miah_CV.pdf"
+            aria-label={t.header.cvAria}
+            data-magnetic
+            className="inline-flex items-center gap-1.5 rounded-full px-2.5 sm:px-3.5 py-1.5 font-mono text-[11px] font-medium transition-colors duration-300"
+            style={{ border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80' }}
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            {t.header.cvLabel}
+          </a>
           <button
             type="button"
             onClick={toggleLang}
             aria-label={t.header.langAria}
             data-magnetic
-            className="rounded-full px-4 py-1.5 font-mono text-[11px] font-medium transition-colors duration-300"
+            className="rounded-full px-2.5 sm:px-4 py-1.5 font-mono text-[11px] font-medium transition-colors duration-300"
             style={{ border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80' }}
           >
             {t.header.langLabel}
@@ -552,7 +578,7 @@ export function Header() {
           <Magnetic
             href="https://github.com/soobujmiah"
             ariaLabel={t.header.githubAria}
-            className="rounded-full px-4 py-1.5 text-[11px] font-medium transition-colors duration-300"
+            className="rounded-full px-2.5 sm:px-4 py-1.5 text-[11px] font-medium transition-colors duration-300"
             style={{ border: '1px solid rgba(228,226,223,0.12)', color: '#e4e2df' }}
             strength={0.2}
           >

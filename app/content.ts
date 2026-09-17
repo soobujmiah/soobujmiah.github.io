@@ -230,7 +230,11 @@ export interface Content {
     servicesLink: string;
   };
   nav: { scene: number; label: string }[];
-  header: { homeLabel: string; githubLabel: string; langLabel: string; langAria: string; githubAria: string };
+  header: { homeLabel: string; githubLabel: string; langLabel: string; langAria: string; githubAria: string; cvLabel: string; cvAria: string; servicesLabel: string };
+  homeVisual: {
+    stats: { value: string; label: string; sub: string }[];
+    quote: string;
+  };
   footer: { built: string; claims: string };
   ui: {
     carouselPrev: string;
@@ -626,16 +630,25 @@ const en: Content = {
         label: 'Direct',
         links: [
           { label: 'Telegram', handle: '@soobujmiah', href: 'https://t.me/soobujmiah' },
-          { label: 'WhatsApp', handle: 'soobujmiah', href: 'https://wa.me/soobujmiah' },
         ],
       },
       {
         label: 'Personal',
         links: [
           { label: 'About.me', handle: 'soobujmiah', href: 'https://about.me/soobujmiah' },
+          { label: 'Buy Me a Coffee', handle: 'soobujmiah', href: 'https://buymeacoffee.com/soobujmiah' },
         ],
       },
     ],
+  },
+  homeVisual: {
+    stats: [
+      { value: '8+', label: 'Years', sub: 'Diverse professional experience' },
+      { value: 'Self-taught', label: 'Continuous learner', sub: 'Independent research, applied' },
+      { value: 'Open source', label: 'Real devices', sub: 'Real results' },
+      { value: 'Community', label: 'Stronger together', sub: 'Through technology' },
+    ],
+    quote: 'Technology should be useful, accessible, and truly serve people.',
   },
   nav: [
     { scene: 3, label: 'Work' },
@@ -643,7 +656,7 @@ const en: Content = {
     { scene: 5, label: 'Stack' },
     { scene: 8, label: 'Contact' },
   ],
-  header: { homeLabel: 'Back to home', githubLabel: 'GitHub', langLabel: 'Bangla', langAria: 'Switch to Bangla', githubAria: 'GitHub profile' },
+  header: { homeLabel: 'Back to home', githubLabel: 'GitHub', langLabel: 'Bangla', langAria: 'Switch to Bangla', githubAria: 'GitHub profile', cvLabel: 'CV', cvAria: 'Download CV (PDF)', servicesLabel: 'Services' },
   ui: {
     carouselPrev: 'Previous',
     carouselNext: 'Next',
@@ -1092,16 +1105,25 @@ const bn: Content = {
         label: 'সরাসরি',
         links: [
           { label: 'টেলিগ্রাম', handle: '@soobujmiah', href: 'https://t.me/soobujmiah' },
-          { label: 'হোয়াটসঅ্যাপ', handle: 'soobujmiah', href: 'https://wa.me/soobujmiah' },
         ],
       },
       {
         label: 'ব্যক্তিগত',
         links: [
           { label: 'অ্যাবাউট.মি', handle: 'soobujmiah', href: 'https://about.me/soobujmiah' },
+          { label: 'বাই মি আ কফি', handle: 'soobujmiah', href: 'https://buymeacoffee.com/soobujmiah' },
         ],
       },
     ],
+  },
+  homeVisual: {
+    stats: [
+      { value: '৮+', label: 'বছর', sub: 'বৈচিত্র্যময় পেশাগত অভিজ্ঞতা' },
+      { value: 'স্বশিক্ষিত', label: 'নিরন্তর শিক্ষার্থী', sub: 'স্বাধীন গবেষণা, বাস্তব প্রয়োগ' },
+      { value: 'ওপেন সোর্স', label: 'প্রকৃত ডিভাইস', sub: 'প্রকৃত ফলাফল' },
+      { value: 'কমিউনিটি', label: 'একসাথে শক্তিশালী', sub: 'প্রযুক্তির মাধ্যমে' },
+    ],
+    quote: 'প্রযুক্তি হওয়া উচিত উপযোগী, সহজলভ্য, এবং সত্যিই মানুষের কাজে আসা।',
   },
   nav: [
     { scene: 3, label: 'কাজ' },
@@ -1115,6 +1137,9 @@ const bn: Content = {
     langLabel: 'ইংরেজি',
     langAria: 'ইংরেজিতে বদলান',
     githubAria: 'গিটহাব প্রোফাইল',
+    cvLabel: 'সিভি',
+    cvAria: 'সিভি ডাউনলোড করুন',
+    servicesLabel: 'সার্ভিস',
   },
   ui: {
     carouselPrev: 'আগের',

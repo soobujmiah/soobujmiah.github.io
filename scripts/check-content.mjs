@@ -324,10 +324,14 @@ try {
   }
 
   /* 4b ── the canonical social ecosystem ──
-     Seventeen links, supplied by the owner, exact and complete. This is
-     the audit the brief asks for, made repeatable: a link can never go
-     missing, duplicated, re-pointed at a different handle, or diverge
-     between the two language trees without failing the build. */
+     Seventeen links, supplied by the owner and format-validated, exact
+     and complete. This is the audit the brief asks for, made repeatable:
+     a link can never go missing, duplicated, re-pointed at a different
+     handle, or diverge between the two language trees without failing
+     the build. WhatsApp is deliberately absent: wa.me/<username> is not a
+     valid WhatsApp URL scheme (wa.me requires an international phone
+     number), and no replacement was invented — the validation rule of
+     the brief wins over the wish-list. */
   const CANONICAL_SOCIAL = [
     'https://github.com/soobujmiah',
     'https://soobujmiah.github.io',
@@ -344,8 +348,8 @@ try {
     'https://facebook.com/soobujmiah',
     'https://youtube.com/@soobujmiah',
     'https://t.me/soobujmiah',
-    'https://wa.me/soobujmiah',
     'https://about.me/soobujmiah',
+    'https://buymeacoffee.com/soobujmiah',
   ];
   const flat = (lang) => content[lang].contact.groups.flatMap((g) => g.links);
   const shapes = {};

@@ -3,6 +3,7 @@
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { Magnetic, Reveal, SnapCarousel, useNav } from './ui';
+import { BrandIcon, type BrandIconId } from './social-icons';
 import { SignatureName } from './SignatureName';
 import { sectionHref } from '@/app/sections';
 import { serviceHref } from '@/app/services';
@@ -41,21 +42,122 @@ function PageNumeral({ index }: { index: number }) {
 
 function DhakaClock() {
   const { lang } = useLang();
-  const [now, setNow] = useState('');
+  const [now, setNow] = useState<{ time: string; date: string } | null>(null);
   useEffect(() => {
     const locale = lang === 'bn' ? 'bn' : 'en-GB';
     const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Dhaka' });
-    const date = new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Dhaka' });
+    const date = new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Dhaka' });
     const tick = () => {
       const d = new Date();
-      setNow(`${date.format(d)} · ${time.format(d)} · ${lang === 'bn' ? 'জিএমটি+৬' : 'GMT+6'}`);
+      setNow({ time: time.format(d), date: date.format(d) });
     };
     tick();
     const id = setInterval(tick, 30_000);
     return () => clearInterval(id);
   }, [lang]);
   if (!now) return null;
-  return <span>{now}</span>;
+  /* The clock is the identity system's smaller sibling: a readable
+     time in the site's mono face, the particle/dot language borrowed
+     as three calm pulsing dots, and the full date + zone beside it. */
+  return (
+    <span className="hero-clock">
+      <span className="hero-clock-time font-mono">{now.time}</span>
+      <span className="clock-dots" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </span>
+      <span className="hero-clock-date font-mono">
+        {now.date} · {lang === 'bn' ? 'জিএমটি+৬ · ঢাকা' : 'GMT+6 · Dhaka'}
+      </span>
+    </span>
+  );
+}
+
+/* ── 00b · HOME VISUAL — the designed information panel ──────────
+   Replaces the old opaque landscape band. The person artwork is a
+   blended, edge-masked layer that dissolves into the page background
+   (no rectangle, no card); the informational structure from the
+   supplied composition — stat rail, project chips, motto quote — is
+   rebuilt as real bilingual DOM floating over the existing hero
+   environment. A transparent PNG dropped at /images/home-figure.png
+   is the artwork layer; the blend simply respects its alpha.        */
+
+const HV_ICONS = [
+  /* bolt */
+  <path key="b" d="M13 2 4.5 13.5H11L9.8 22 18.5 10.5H12L13 2Z" />,
+  /* cap */
+  <path key="c" d="M12 3 1.5 8.5 12 14l9-4.7V16h2V8.5L12 3Zm-7 9.6V17c0 1.9 3.1 3.5 7 3.5s7-1.6 7-3.5v-4.4l-7 3.7-7-3.8Z" />,
+  /* code */
+  <path key="d" d="m8.4 6.2-5.9 5.8 5.9 5.8 1.7-1.7-4.2-4.1 4.2-4.1-1.7-1.7Zm7.2 0-1.7 1.7 4.2 4.1-4.2 4.1 1.7 1.7 5.9-5.8-5.9-5.8Z" />,
+  /* people */
+  <path key="p" d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 0a3 3 0 1 0-2-5.2 5 5 0 0 1 0 4.4c.6.5 1.3.8 2 .8Zm-8 2c-3 0-7 1.5-7 4.5V19h14v-1.5c0-3-4-4.5-7-4.5Zm8 0c-.5 0-1 .05-1.6.14 1.6 1.1 2.6 2.6 2.6 4.36V19h6v-1.5c0-3-4-4.5-7-4.5Z" />,
+];
+
+function HomeVisual() {
+  const { t, lang } = useLang();
+  const chips = t.work.projects.slice(0, 4);
+  return (
+    <div className="home-visual">
+      <img className="home-figure" src="/images/home-figure.jpg" alt="" decoding="async" />
+      <p className="hv-quote">
+        “{t.homeVisual.quote}” <span>— {t.profile.nameFull}</span>
+      </p>
+      <div className="hv-stats">
+        {t.homeVisual.stats.map((s, i) => (
+          <div key={s.label} className="hv-stat">
+            <svg className="hv-stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              {HV_ICONS[i % HV_ICONS.length]}
+            </svg>
+            <div>
+              <p className="hv-v">{localizeDigits(s.value, lang)}</p>
+              <p className="hv-l">{s.label}</p>
+              <p className="hv-s">{s.sub}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="hv-chips">
+        {chips.map((p) => (
+          <a key={p.name} className="hv-chip" href={p.repo} target="_blank" rel="noreferrer" data-magnetic>
+            <span className="hv-chip-name">{p.name}</span>
+            <span className="hv-chip-tag">{p.tagline}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── 00c · SOCIAL ICON RESOLUTION ────────────────────────────────
+   Icons resolve from the link target, so both language trees share
+   one mapping without duplicating identifiers in content.          */
+const SOCIAL_ICON_HOSTS: Record<string, BrandIconId> = {
+  'github.com': 'github',
+  'linkedin.com': 'linkedin',
+  'peerlist.io': 'peerlist',
+  'producthunt.com': 'producthunt',
+  'huggingface.co': 'huggingface',
+  'dev.to': 'devdotto',
+  'hashnode.com': 'hashnode',
+  'medium.com': 'medium',
+  'x.com': 'x',
+  'instagram.com': 'instagram',
+  'threads.net': 'threads',
+  'facebook.com': 'facebook',
+  'youtube.com': 'youtube',
+  't.me': 'telegram',
+  'about.me': 'aboutdotme',
+  'buymeacoffee.com': 'buymeacoffee',
+};
+
+function iconFor(href: string): 'portfolio' | BrandIconId {
+  try {
+    const host = new URL(href).hostname.replace(/^www\./, '');
+    return SOCIAL_ICON_HOSTS[host] ?? 'portfolio';
+  } catch {
+    return 'portfolio';
+  }
 }
 
 /* ── 01 · HERO ───────────────────────────────────────────────── */
@@ -150,10 +252,9 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
           </Magnetic>
         </motion.div>
 
-        {/* 5 · live local time — quiet mono line, client-only */}
+        {/* 5 · live local time — the identity system's smaller sibling */}
         <motion.p
-          className="mt-5 font-mono text-[10px] uppercase tracking-[0.3em]"
-          style={{ color: 'rgba(228,226,223,0.45)' }}
+          className="mt-5"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2.3, duration: 0.8 }}
@@ -162,17 +263,9 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
         </motion.p>
       </div>
 
-      {/* Composed landscape band — decorative derivative of the session
-          photo; full-width, height-controlled, never a full-screen hero. */}
-      <figure className="home-band" aria-hidden="true">
-        <img
-          src="/images/home-landscape.jpg"
-          srcSet="/images/home-landscape-sm.jpg 1000w, /images/home-landscape.jpg 1672w"
-          sizes="100vw"
-          alt=""
-          decoding="async"
-        />
-      </figure>
+      {/* Designed information panel — artwork blended into the page
+          background, informational structure as real bilingual DOM. */}
+      <HomeVisual />
 
       <motion.div
         className="hero-hint absolute bottom-24 left-1/2 -translate-x-1/2"
@@ -1087,33 +1180,38 @@ export function ContactScene() {
               carried in the accessible name and on hover, so the row
               stays quiet without hiding anything. */}
           <Reveal delay={0.22}>
-            <dl className="social-grid">
-              {t.contact.groups.map((g) => (
-                <div key={g.label} className="social-row">
-                  <dt className="social-group">{g.label}</dt>
-                  <dd className="social-links">
-                    {g.links.map((l, i) => (
-                      <span key={l.href} className="social-item">
-                        {i > 0 && <span className="social-sep" aria-hidden="true">·</span>}
-                        <a
-                          href={l.href}
-                          target="_blank"
-                          rel="noreferrer"
-                          data-magnetic
-                          title={`${l.label} — ${l.handle}`}
-                          aria-label={`${l.label}: ${l.handle}`}
-                        >
-                          {l.label}
-                        </a>
-                      </span>
-                    ))}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-            <p className="mt-5 font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.3)' }}>
-              {t.contact.groupsNote}
+            {/* One balanced grid: official marks in currentColor, equal
+                cards, handle carried quietly — navigation, not noise. */}
+            <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: 'rgba(228,226,223,0.4)' }}>
+              {t.contact.groupsHeading}
             </p>
+            <div className="social-icon-grid">
+              {t.contact.groups.flatMap((g) => g.links).map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  data-magnetic
+                  className="soc-card"
+                  title={`${l.label} — ${l.handle}`}
+                  aria-label={`${l.label}: ${l.handle}`}
+                >
+                  <span className="soc-icon">
+                    <BrandIcon id={iconFor(l.href)} size={15} />
+                  </span>
+                  <span className="soc-label">{l.label}</span>
+                  <span className="soc-handle">{l.handle}</span>
+                </a>
+              ))}
+              <div className="soc-card soc-note">
+                <span className="soc-icon soc-at" aria-hidden="true">
+                  @
+                </span>
+                <span className="soc-label">{t.contact.groupsNote}</span>
+                <span className="soc-handle">@soobujmiah</span>
+              </div>
+            </div>
           </Reveal>
         </div>
       </div>
