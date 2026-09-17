@@ -83,52 +83,6 @@ function DhakaClock() {
    environment. A transparent PNG dropped at /images/home-figure.png
    is the artwork layer; the blend simply respects its alpha.        */
 
-const HV_ICONS = [
-  /* bolt */
-  <path key="b" d="M13 2 4.5 13.5H11L9.8 22 18.5 10.5H12L13 2Z" />,
-  /* cap */
-  <path key="c" d="M12 3 1.5 8.5 12 14l9-4.7V16h2V8.5L12 3Zm-7 9.6V17c0 1.9 3.1 3.5 7 3.5s7-1.6 7-3.5v-4.4l-7 3.7-7-3.8Z" />,
-  /* code */
-  <path key="d" d="m8.4 6.2-5.9 5.8 5.9 5.8 1.7-1.7-4.2-4.1 4.2-4.1-1.7-1.7Zm7.2 0-1.7 1.7 4.2 4.1-4.2 4.1 1.7 1.7 5.9-5.8-5.9-5.8Z" />,
-  /* people */
-  <path key="p" d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 0a3 3 0 1 0-2-5.2 5 5 0 0 1 0 4.4c.6.5 1.3.8 2 .8Zm-8 2c-3 0-7 1.5-7 4.5V19h14v-1.5c0-3-4-4.5-7-4.5Zm8 0c-.5 0-1 .05-1.6.14 1.6 1.1 2.6 2.6 2.6 4.36V19h6v-1.5c0-3-4-4.5-7-4.5Z" />,
-];
-
-function HomeVisual() {
-  const { t, lang } = useLang();
-  const chips = t.work.projects.slice(0, 4);
-  return (
-    <div className="home-visual">
-      <img className="home-figure" src="/images/home-figure.jpg" alt="" decoding="async" />
-      <p className="hv-quote">
-        “{t.homeVisual.quote}” <span>— {t.profile.nameFull}</span>
-      </p>
-      <div className="hv-stats">
-        {t.homeVisual.stats.map((s, i) => (
-          <div key={s.label} className="hv-stat">
-            <svg className="hv-stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              {HV_ICONS[i % HV_ICONS.length]}
-            </svg>
-            <div>
-              <p className="hv-v">{localizeDigits(s.value, lang)}</p>
-              <p className="hv-l">{s.label}</p>
-              <p className="hv-s">{s.sub}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="hv-chips">
-        {chips.map((p) => (
-          <a key={p.name} className="hv-chip" href={p.repo} target="_blank" rel="noreferrer" data-magnetic>
-            <span className="hv-chip-name">{p.name}</span>
-            <span className="hv-chip-tag">{p.tagline}</span>
-          </a>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /* ── 00c · SOCIAL ICON RESOLUTION ────────────────────────────────
    Icons resolve from the link target, so both language trees share
    one mapping without duplicating identifiers in content.          */
@@ -243,13 +197,6 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
           >
             {t.hero.ctaGithub}
           </Magnetic>
-          <Magnetic
-            href={serviceHref()}
-            className="rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300 backdrop-blur-md"
-            style={{ border: '1px solid rgba(228,226,223,0.15)', color: '#e4e2df', background: 'rgba(8,10,8,0.5)' }}
-          >
-            {t.hero.ctaServices}
-          </Magnetic>
         </motion.div>
 
         {/* 5 · live local time — the identity system's smaller sibling */}
@@ -262,10 +209,6 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
           <DhakaClock />
         </motion.p>
       </div>
-
-      {/* Designed information panel — artwork blended into the page
-          background, informational structure as real bilingual DOM. */}
-      <HomeVisual />
 
       <motion.div
         className="hero-hint absolute bottom-24 left-1/2 -translate-x-1/2"
@@ -1144,33 +1087,6 @@ export function ContactScene() {
                 </span>
               </Magnetic>
             </Reveal>
-
-            {/* Understated professional CV link — same quiet visual
-                language as the channel cards, never its own section. */}
-            <Reveal delay={0.24}>
-              <a
-                href="/cv/Sobuj_Miah_CV.pdf"
-                download="Sobuj_Miah_CV.pdf"
-                className="cv-link mt-3 inline-flex items-center gap-2"
-              >
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                {t.ui.downloadCv}
-              </a>
-            </Reveal>
           </div>
 
           {/* The complete ecosystem: 17 canonical links, grouped, one
@@ -1185,7 +1101,7 @@ export function ContactScene() {
             <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: 'rgba(228,226,223,0.4)' }}>
               {t.contact.groupsHeading}
             </p>
-            <div className="social-icon-grid">
+            <div className="social-icons">
               {t.contact.groups.flatMap((g) => g.links).map((l) => (
                 <a
                   key={l.href}
@@ -1193,25 +1109,17 @@ export function ContactScene() {
                   target="_blank"
                   rel="noreferrer"
                   data-magnetic
-                  className="soc-card"
+                  className="soc-btn"
                   title={`${l.label} — ${l.handle}`}
                   aria-label={`${l.label}: ${l.handle}`}
                 >
-                  <span className="soc-icon">
-                    <BrandIcon id={iconFor(l.href)} size={15} />
-                  </span>
-                  <span className="soc-label">{l.label}</span>
-                  <span className="soc-handle">{l.handle}</span>
+                  <BrandIcon id={iconFor(l.href)} size={16} />
                 </a>
               ))}
-              <div className="soc-card soc-note">
-                <span className="soc-icon soc-at" aria-hidden="true">
-                  @
-                </span>
-                <span className="soc-label">{t.contact.groupsNote}</span>
-                <span className="soc-handle">@soobujmiah</span>
-              </div>
             </div>
+            <p className="mt-4 font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>
+              {t.contact.groupsNote} <span style={{ color: '#4ade80' }}>@soobujmiah</span>
+            </p>
           </Reveal>
         </div>
       </div>

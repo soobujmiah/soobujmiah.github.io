@@ -134,7 +134,6 @@ export interface Content {
     availability: string;
     ctaWork: string;
     ctaGithub: string;
-    ctaServices: string;
     scrollHint: string;
   };
   presence: {
@@ -231,10 +230,6 @@ export interface Content {
   };
   nav: { scene: number; label: string }[];
   header: { homeLabel: string; githubLabel: string; langLabel: string; langAria: string; githubAria: string; cvLabel: string; cvAria: string; servicesLabel: string };
-  homeVisual: {
-    stats: { value: string; label: string; sub: string }[];
-    quote: string;
-  };
   footer: { built: string; claims: string };
   ui: {
     carouselPrev: string;
@@ -287,7 +282,6 @@ const en: Content = {
     availability: 'Open to remote',
     ctaWork: 'Explore my work',
     ctaGithub: 'View GitHub ↗',
-    ctaServices: 'View All Services',
     scrollHint: 'Open index',
   },
   presence: {
@@ -641,15 +635,6 @@ const en: Content = {
       },
     ],
   },
-  homeVisual: {
-    stats: [
-      { value: '8+', label: 'Years', sub: 'Diverse professional experience' },
-      { value: 'Self-taught', label: 'Continuous learner', sub: 'Independent research, applied' },
-      { value: 'Open source', label: 'Real devices', sub: 'Real results' },
-      { value: 'Community', label: 'Stronger together', sub: 'Through technology' },
-    ],
-    quote: 'Technology should be useful, accessible, and truly serve people.',
-  },
   nav: [
     { scene: 3, label: 'Work' },
     { scene: 4, label: 'Research' },
@@ -762,7 +747,6 @@ const bn: Content = {
     availability: 'রিমোটে উন্মুক্ত',
     ctaWork: 'আমার কাজ দেখুন',
     ctaGithub: 'গিটহাব দেখুন ↗',
-    ctaServices: 'সব সেবা দেখুন',
     scrollHint: 'সূচি দেখুন',
   },
   presence: {
@@ -1115,15 +1099,6 @@ const bn: Content = {
         ],
       },
     ],
-  },
-  homeVisual: {
-    stats: [
-      { value: '৮+', label: 'বছর', sub: 'বৈচিত্র্যময় পেশাগত অভিজ্ঞতা' },
-      { value: 'স্বশিক্ষিত', label: 'নিরন্তর শিক্ষার্থী', sub: 'স্বাধীন গবেষণা, বাস্তব প্রয়োগ' },
-      { value: 'ওপেন সোর্স', label: 'প্রকৃত ডিভাইস', sub: 'প্রকৃত ফলাফল' },
-      { value: 'কমিউনিটি', label: 'একসাথে শক্তিশালী', sub: 'প্রযুক্তির মাধ্যমে' },
-    ],
-    quote: 'প্রযুক্তি হওয়া উচিত উপযোগী, সহজলভ্য, এবং সত্যিই মানুষের কাজে আসা।',
   },
   nav: [
     { scene: 3, label: 'কাজ' },

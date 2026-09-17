@@ -251,11 +251,10 @@ and is linked from the Contact page as an understated `Download CV` action
   invented — no fabricated companies, dates, degrees or awards. An older
   reference CV is a secondary source only and never overrides repository
   evidence. Private details (phone number, street address) are omitted.
-- Photo roles are strict: `tools/cv/portrait.jpg` → CV PDF only;
-  `public/images/home-figure.jpg` (person crop derived from the edited
-  landscape source, blended + edge-masked into the page background) → the
-  home page visual layer only. Source originals are never shipped, and
-  each derivative appears in exactly one surface.
+- Photo roles are strict: `tools/cv/portrait.jpg` → CV PDF only. The home
+  page ships no personal photograph (the earlier photo composition was
+  removed as duplicated profile content); source originals are never
+  shipped.
 
 ## Owner context
 

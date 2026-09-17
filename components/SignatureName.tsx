@@ -3,54 +3,45 @@
 /* ═══════════════════════════════════════════════════════════════
    SIGNATURE NAME — a constructed, living identity.
 
-   The wordmark is not revealed, it is *built*. The rendered ink of
+   The wordmark is not revealed, it is *built*: the rendered ink of
    the name is sampled into a particle field, the field is dispersed,
    and every particle travels home to the exact pixel it was sampled
-   from. The word assembles grapheme cluster by grapheme cluster,
-   left to right, each particle seating with one warm highlight.
+   from, grapheme cluster by grapheme cluster. That construction —
+   and the Bengali shaping guarantees that come with it — is
+   protected existing behaviour and is unchanged.
 
    Once built, the identity lives in a controlled loop:
 
-       forming → NAME (hold 3s) → morph → TECHNICAL FORM (hold ~2s)
-               → morph → NAME (hold 3s) → morph → next form → …
+       forming → NAME (hold 2.6–3.8s)
+               → detach + wide radial SPREAD (bounded field)
+               → converge into a TECHNICAL FORM (hold 1.6–2.3s)
+               → spread again → NAME → hold → next form → …
 
-   The forms come from a fixed, designed collection (code brackets,
-   a terminal, the Android head, a chip, a small robot, a circuit) —
-   never unconstrained noise. Each morph re-aims the *same* particle
-   field at pixels sampled from the drawn form, along seeded curved
-   (quadratic Bézier) paths with per-particle depth, so the field
-   reads as one coordinated mass with weight and dimension rather
-   than teleporting dots.
+   Every morph is two curved legs through a seeded scatter field, so
+   material visibly leaves the name, occupies a larger controlled
+   region, then reorganises — emergence rather than interpolation.
+   The scatter centre and radii derive from the *layer* box (the
+   stable positioned page container), never from the text, so the
+   identity container cannot jump or shift between languages or
+   cycles; only pixels inside the canvas move.
 
-   Why the resting state is DOM text and not canvas
-   ------------------------------------------------
-   The no-JS / reduced-motion answer is real, selectable, crawlable
-   text rendered by the browser's own text engine. With motion on,
-   the particle letterform is the living state and the DOM cells stay
-   hidden behind it; the accessible name is always the sr-only copy.
+   The form library is a curated collection of 35 technical motifs
+   (programming, systems, Android, ecosystem, AI, geometric/3D and
+   device metaphors). Forms are drawn into an offscreen canvas and
+   sampled exactly like the name's ink — one code path decides where
+   material goes. A seeded shuffled bag schedules them: no immediate
+   repeat, no visible tiny loop, fully reproducible per cycle.
 
-   Why Bengali shaping cannot break
-   --------------------------------
-   Nothing here addresses a character. The renderer draws whole
-   grapheme clusters (`app/graphemes.ts` → `Intl.Segmenter`, with a
-   combining-mark-aware fallback) and samples the pixels the browser
-   produced, so কার, মাত্রা, হসন্ত and যুক্তাক্ষর are correct by
-   construction. The technical forms are language-neutral glyphs, so
-   both languages share them while the name targets stay per-language.
+   Depth without a 3D engine: each particle carries a seeded z used
+   for size, ramp position and a slow parallax sway while a form is
+   held; curved Bézier legs + per-particle stagger + a bounded
+   turbulence term give the transitions their organic, nonlinear
+   character. All maths is deterministic (FNV-1a + mulberry32); no
+   Math.random, no per-frame allocation beyond the batched paths.
 
-   Signal discipline
-   -----------------
-   - Deterministic: every seed derives from the name (FNV-1a) plus
-     the cycle index. No Math.random — the same name produces the
-     same field, the same form order and the same frame at the same
-     timestamp.
-   - Budgeted: the particle count derives from viewport width and
-     core count under a hard cap; form targets are sampled once per
-     morph (never per frame); frames batch into an eight-step ramp.
-   - Paused while the tab is hidden (the clock stops with it), fully
-     torn down on unmount.
-   - Reduced motion: no canvas, no timer, no loop — the wordmark is
-     simply present, stable and readable.
+   Reduced motion: no canvas, no timer, no loop — the wordmark is
+   simply present, stable and readable. The accessible name is the
+   sr-only copy at every moment, in the current language.
    ═══════════════════════════════════════════════════════════════ */
 
 import { useEffect, useMemo, useRef } from 'react';
@@ -86,15 +77,30 @@ const RESOLVED_INK = '#4ade80';
 /** Ink + alpha for material that has not started travelling yet. */
 const WAITING_INK = 'rgba(147,197,253,0.20)';
 
-/* ── the living loop, seconds ─────────────────────────────────────
-   Deliberately local constants (not brand tokens): they tune one
-   component's choreography rather than the shared design system. */
-const NAME_HOLD_S = 3.0; // the name, clearly readable, before any transform
-const FORM_HOLD_S = 1.9; // a technical form, held
-const MORPH_S = 1.5; // one reorganisation, either direction
+/* ── the living loop, seconds (varied per cycle by a seeded factor) ── */
+const NAME_HOLD_S = 3.0; // readable name before any transform (±0.6)
+const FORM_HOLD_S = 1.9; // a technical form, held (±0.35)
+const MORPH_S = 2.2; // one spread+converge leg-pair (±0.3)
+/** Where the scatter waypoint sits along a morph, 0..1. */
+const SPREAD_AT = 0.42;
 
-/** The designed form collection — cycled, never all at once. */
-const FORMS = ['code', 'terminal', 'android', 'chip', 'robot', 'circuit'] as const;
+/** The curated form library — cycled by a seeded bag, never all at once. */
+const FORMS = [
+  // programming
+  'code', 'braces', 'brackets', 'terminal', 'cursor',
+  // systems / engineering
+  'chip', 'circuit', 'server', 'database', 'network', 'wave', 'arch',
+  // android / mobile
+  'android', 'phone', 'appgrid', 'robot',
+  // developer ecosystem
+  'git', 'tree', 'package',
+  // ai / data
+  'neural', 'matrix', 'flow',
+  // geometric / dimensional
+  'cube', 'sphere', 'orbit', 'hex', 'pyramid', 'layers',
+  // technical motifs
+  'gear', 'lock', 'cloud', 'globe', 'bolt', 'antenna', 'keyboard',
+] as const;
 type FormId = (typeof FORMS)[number];
 
 type Particle = {
@@ -117,54 +123,90 @@ type Particle = {
   /** unit-ish direction the breath wave carries this particle */
   bx: number;
   by: number;
-  /** morph state: current leg anchors + Bézier control + depth 0..1 */
-  m0x: number;
-  m0y: number;
-  m1x: number;
-  m1y: number;
-  cpx: number;
-  cpy: number;
+  /** morph legs: origin → scatter → destination, curved controls */
+  m0x: number; m0y: number;
+  sx: number; sy: number;
+  m1x: number; m1y: number;
+  c0x: number; c0y: number;
+  c1x: number; c1y: number;
+  /** per-particle morph stagger + bounded turbulence amplitude */
+  stg: number;
+  turb: number;
+  /** depth 0..1 */
   z: number;
 };
 
+const clamp01 = (t: number): number => (t < 0 ? 0 : t > 1 ? 1 : t);
 const easeInOut = (t: number): number => {
-  const x = t < 0 ? 0 : t > 1 ? 1 : t;
+  const x = clamp01(t);
   return x * x * (3 - 2 * x);
+};
+const easeOut = (t: number): number => {
+  const x = clamp01(t);
+  return 1 - (1 - x) * (1 - x);
 };
 const quad = (a: number, c: number, b: number, t: number): number => {
   const u = 1 - t;
   return u * u * a + 2 * u * t * c + t * t * b;
 };
 
+/* ── canvas drawing helpers for the form library ───────────────── */
+type Ctx = CanvasRenderingContext2D;
+const poly = (ctx: Ctx, pts: number[][], close = false) => {
+  ctx.beginPath();
+  pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+  if (close) ctx.closePath();
+};
+const circle = (ctx: Ctx, x: number, y: number, r: number, fill = true) => {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  if (fill) ctx.fill();
+  else ctx.stroke();
+};
+const line = (ctx: Ctx, a: number, b: number, c: number, d: number) => {
+  ctx.beginPath();
+  ctx.moveTo(a, b);
+  ctx.lineTo(c, d);
+  ctx.stroke();
+};
+const txt = (ctx: Ctx, s: string, x: number, y: number, px: number) => {
+  ctx.font = `700 ${Math.round(px)}px ui-monospace, monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(s, x, y);
+};
+
 /* ── drawing the technical forms ──────────────────────────────────
    Each form is drawn into the same wordmark box the name occupies;
    the lit pixels are then sampled into particle targets exactly like
-   the name's ink — one code path for "where does material go". */
-function drawForm(ctx: CanvasRenderingContext2D, form: FormId, W: number, H: number, seed: number): void {
+   the name's ink. Strokes are sized off H so every form reads at the
+   identity's scale. */
+function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): void {
   const cx = W / 2;
   const cy = H / 2;
-  const lw = Math.max(2, H * 0.055);
+  const lw = Math.max(2, H * 0.05);
   ctx.strokeStyle = '#ffffff';
   ctx.fillStyle = '#ffffff';
   ctx.lineWidth = lw;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
+
   switch (form) {
-    case 'code': {
-      ctx.font = `700 ${Math.round(H * 0.82)}px ui-monospace, monospace`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('</>', cx, cy);
+    /* ── programming ── */
+    case 'code':
+      txt(ctx, '</>', cx, cy, H * 0.82);
       break;
-    }
+    case 'braces':
+      txt(ctx, '{ }', cx, cy, H * 0.86);
+      break;
+    case 'brackets':
+      txt(ctx, '[ ]', cx, cy, H * 0.86);
+      break;
     case 'terminal': {
       const w = W * 0.62;
       const h = H * 0.74;
       ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
-      ctx.beginPath();
-      ctx.moveTo(cx - w / 2, cy - h / 2 + h * 0.22);
-      ctx.lineTo(cx + w / 2, cy - h / 2 + h * 0.22);
-      ctx.stroke();
+      line(ctx, cx - w / 2, cy - h / 2 + h * 0.22, cx + w / 2, cy - h / 2 + h * 0.22);
       ctx.font = `700 ${Math.round(H * 0.34)}px ui-monospace, monospace`;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
@@ -172,62 +214,23 @@ function drawForm(ctx: CanvasRenderingContext2D, form: FormId, W: number, H: num
       ctx.fillRect(cx - w * 0.08, cy + h * 0.02, w * 0.22, lw * 1.4);
       break;
     }
-    case 'android': {
-      const r = H * 0.3;
-      ctx.beginPath();
-      ctx.arc(cx, cy + r * 0.55, r, Math.PI, 0);
-      ctx.closePath();
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(cx - r * 0.45, cy + 0.05 * H, lw * 0.9, 0, Math.PI * 2);
-      ctx.arc(cx + r * 0.45, cy + 0.05 * H, lw * 0.9, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(cx - r * 0.55, cy - r * 0.75);
-      ctx.lineTo(cx - r * 0.85, cy - r * 1.25);
-      ctx.moveTo(cx + r * 0.55, cy - r * 0.75);
-      ctx.lineTo(cx + r * 0.85, cy - r * 1.25);
-      ctx.stroke();
+    case 'cursor':
+      line(ctx, cx - H * 0.42, cy, cx + H * 0.08, cy);
+      ctx.fillRect(cx + H * 0.16, cy - H * 0.34, lw * 1.6, H * 0.68);
       break;
-    }
+
+    /* ── systems / engineering ── */
     case 'chip': {
       const s = H * 0.56;
       ctx.strokeRect(cx - s / 2, cy - s / 2, s, s);
       ctx.fillRect(cx - s * 0.18, cy - s * 0.18, s * 0.36, s * 0.36);
       for (let i = -1; i <= 1; i += 1) {
         const o = (i * s) / 3;
-        ctx.beginPath();
-        ctx.moveTo(cx + o, cy - s / 2);
-        ctx.lineTo(cx + o, cy - s / 2 - H * 0.12);
-        ctx.moveTo(cx + o, cy + s / 2);
-        ctx.lineTo(cx + o, cy + s / 2 + H * 0.12);
-        ctx.moveTo(cx - s / 2, cy + o);
-        ctx.lineTo(cx - s / 2 - H * 0.12, cy + o);
-        ctx.moveTo(cx + s / 2, cy + o);
-        ctx.lineTo(cx + s / 2 + H * 0.12, cy + o);
-        ctx.stroke();
+        line(ctx, cx + o, cy - s / 2, cx + o, cy - s / 2 - H * 0.12);
+        line(ctx, cx + o, cy + s / 2, cx + o, cy + s / 2 + H * 0.12);
+        line(ctx, cx - s / 2, cy + o, cx - s / 2 - H * 0.12, cy + o);
+        line(ctx, cx + s / 2, cy + o, cx + s / 2 + H * 0.12, cy + o);
       }
-      break;
-    }
-    case 'robot': {
-      const w = H * 0.52;
-      const h = H * 0.42;
-      ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
-      ctx.beginPath();
-      ctx.arc(cx - w * 0.22, cy - h * 0.08, lw, 0, Math.PI * 2);
-      ctx.arc(cx + w * 0.22, cy - h * 0.08, lw, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(cx - w * 0.18, cy + h * 0.2);
-      ctx.lineTo(cx + w * 0.18, cy + h * 0.2);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(cx, cy - h / 2);
-      ctx.lineTo(cx, cy - h / 2 - H * 0.14);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(cx, cy - h / 2 - H * 0.17, lw * 0.9, 0, Math.PI * 2);
-      ctx.fill();
       break;
     }
     case 'circuit': {
@@ -239,18 +242,335 @@ function drawForm(ctx: CanvasRenderingContext2D, form: FormId, W: number, H: num
         ctx.moveTo(x, y);
         ctx.arc(x, y, lw * 0.8, 0, Math.PI * 2);
         const segs = 3 + Math.floor(rnd() * 2);
-        for (let sIdx = 0; sIdx < segs; sIdx += 1) {
-          const dx = W * (0.14 + rnd() * 0.14);
-          const dy = rnd() < 0.45 ? 0 : (rnd() - 0.5) * H * 0.34;
-          x += dx;
-          y += dy;
+        for (let s = 0; s < segs; s += 1) {
+          x += W * (0.14 + rnd() * 0.14);
+          y += rnd() < 0.45 ? 0 : (rnd() - 0.5) * H * 0.34;
           ctx.lineTo(x, y);
         }
         ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(x, y, lw * 1.1, 0, Math.PI * 2);
-        ctx.fill();
+        circle(ctx, x, y, lw * 1.1);
       }
+      break;
+    }
+    case 'server': {
+      const w = H * 0.72;
+      const h = H * 0.2;
+      for (let i = -1; i <= 1; i += 1) {
+        const y = cy + i * (h + H * 0.06) - h / 2;
+        ctx.strokeRect(cx - w / 2, y, w, h);
+        circle(ctx, cx - w / 2 + H * 0.07, y + h / 2, lw * 0.8);
+        line(ctx, cx + w * 0.08, y + h / 2, cx + w / 2 - H * 0.06, y + h / 2);
+      }
+      break;
+    }
+    case 'database': {
+      const w = H * 0.6;
+      const h = H * 0.66;
+      const ry = H * 0.1;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy - h / 2, w / 2, ry, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      line(ctx, cx - w / 2, cy - h / 2, cx - w / 2, cy + h / 2);
+      line(ctx, cx + w / 2, cy - h / 2, cx + w / 2, cy + h / 2);
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + h / 2, w / 2, ry, 0, 0, Math.PI);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(cx, cy - h / 6, w / 2, ry, 0, 0, Math.PI);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + h / 6, w / 2, ry, 0, 0, Math.PI);
+      ctx.stroke();
+      break;
+    }
+    case 'network': {
+      const rnd = mulberry32(seed);
+      const nodes: number[][] = [[cx, cy]];
+      for (let i = 0; i < 6; i += 1) {
+        const a = (i / 6) * Math.PI * 2 + rnd() * 0.5;
+        nodes.push([cx + Math.cos(a) * W * 0.3, cy + Math.sin(a) * H * 0.34]);
+      }
+      for (let i = 1; i < nodes.length; i += 1) line(ctx, cx, cy, nodes[i][0], nodes[i][1]);
+      line(ctx, nodes[1][0], nodes[1][1], nodes[2][0], nodes[2][1]);
+      line(ctx, nodes[4][0], nodes[4][1], nodes[5][0], nodes[5][1]);
+      circle(ctx, cx, cy, lw * 1.4);
+      for (let i = 1; i < nodes.length; i += 1) circle(ctx, nodes[i][0], nodes[i][1], lw);
+      break;
+    }
+    case 'wave': {
+      ctx.beginPath();
+      for (let x = -W * 0.32; x <= W * 0.32; x += 2) {
+        const y = cy + Math.sin((x / (W * 0.64)) * Math.PI * 3) * H * 0.26;
+        if (x === -W * 0.32) ctx.moveTo(cx + x, y);
+        else ctx.lineTo(cx + x, y);
+      }
+      ctx.stroke();
+      circle(ctx, cx - W * 0.106, cy - H * 0.26, lw);
+      circle(ctx, cx + W * 0.106, cy + H * 0.26, lw);
+      break;
+    }
+    case 'arch': {
+      const w = H * 0.3;
+      ctx.strokeRect(cx - w / 2, cy - H * 0.4, w, H * 0.22);
+      ctx.strokeRect(cx - W * 0.24 - w / 2, cy + H * 0.16, w, H * 0.22);
+      ctx.strokeRect(cx + W * 0.24 - w / 2, cy + H * 0.16, w, H * 0.22);
+      line(ctx, cx, cy - H * 0.18, cx, cy);
+      line(ctx, cx - W * 0.24, cy, cx + W * 0.24, cy);
+      line(ctx, cx - W * 0.24, cy, cx - W * 0.24, cy + H * 0.16);
+      line(ctx, cx + W * 0.24, cy, cx + W * 0.24, cy + H * 0.16);
+      break;
+    }
+
+    /* ── android / mobile ── */
+    case 'android': {
+      const rr = H * 0.3;
+      ctx.beginPath();
+      ctx.arc(cx, cy + rr * 0.55, rr, Math.PI, 0);
+      ctx.closePath();
+      ctx.stroke();
+      circle(ctx, cx - rr * 0.45, cy + 0.05 * H, lw * 0.9);
+      circle(ctx, cx + rr * 0.45, cy + 0.05 * H, lw * 0.9);
+      line(ctx, cx - rr * 0.55, cy - rr * 0.75, cx - rr * 0.85, cy - rr * 1.25);
+      line(ctx, cx + rr * 0.55, cy - rr * 0.75, cx + rr * 0.85, cy - rr * 1.25);
+      break;
+    }
+    case 'phone': {
+      const w = H * 0.42;
+      const h = H * 0.78;
+      ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
+      line(ctx, cx - w * 0.16, cy - h / 2 + H * 0.08, cx + w * 0.16, cy - h / 2 + H * 0.08);
+      circle(ctx, cx, cy + h / 2 - H * 0.09, lw * 0.9);
+      break;
+    }
+    case 'appgrid': {
+      const s = H * 0.26;
+      const g = H * 0.12;
+      for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+        ctx.strokeRect(cx + (dx * (s + g)) / 2 - s / 2, cy + (dy * (s + g)) / 2 - s / 2, s, s);
+      }
+      break;
+    }
+    case 'robot': {
+      const w = H * 0.52;
+      const h = H * 0.42;
+      ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
+      circle(ctx, cx - w * 0.22, cy - h * 0.08, lw);
+      circle(ctx, cx + w * 0.22, cy - h * 0.08, lw);
+      line(ctx, cx - w * 0.18, cy + h * 0.2, cx + w * 0.18, cy + h * 0.2);
+      line(ctx, cx, cy - h / 2, cx, cy - h / 2 - H * 0.14);
+      circle(ctx, cx, cy - h / 2 - H * 0.17, lw * 0.9);
+      break;
+    }
+
+    /* ── developer ecosystem ── */
+    case 'git': {
+      line(ctx, cx - W * 0.14, cy - H * 0.36, cx - W * 0.14, cy + H * 0.36);
+      ctx.beginPath();
+      ctx.moveTo(cx - W * 0.14, cy - H * 0.1);
+      ctx.quadraticCurveTo(cx + W * 0.16, cy - H * 0.06, cx + W * 0.16, cy + H * 0.16);
+      ctx.stroke();
+      circle(ctx, cx - W * 0.14, cy - H * 0.3, lw * 1.2);
+      circle(ctx, cx - W * 0.14, cy - H * 0.1, lw * 1.2);
+      circle(ctx, cx - W * 0.14, cy + H * 0.3, lw * 1.2);
+      circle(ctx, cx + W * 0.16, cy + H * 0.2, lw * 1.2);
+      break;
+    }
+    case 'tree': {
+      const x0 = cx - W * 0.22;
+      line(ctx, x0, cy - H * 0.34, x0, cy + H * 0.3);
+      for (let i = 0; i < 4; i += 1) {
+        const y = cy - H * 0.2 + i * H * 0.17;
+        line(ctx, x0, y, x0 + W * 0.14, y);
+        line(ctx, x0 + W * 0.14, y, x0 + W * 0.3, y);
+      }
+      circle(ctx, x0, cy - H * 0.34, lw);
+      break;
+    }
+    case 'package': {
+      const s = H * 0.56;
+      poly(ctx, [[cx - s / 2, cy - s * 0.32], [cx, cy - s / 2], [cx + s / 2, cy - s * 0.32], [cx + s / 2, cy + s * 0.32], [cx, cy + s / 2], [cx - s / 2, cy + s * 0.32]], true);
+      ctx.stroke();
+      line(ctx, cx - s / 2, cy - s * 0.32, cx, cy - s * 0.14);
+      line(ctx, cx + s / 2, cy - s * 0.32, cx, cy - s * 0.14);
+      line(ctx, cx, cy - s * 0.14, cx, cy + s / 2);
+      break;
+    }
+
+    /* ── ai / data ── */
+    case 'neural': {
+      const cols = [-W * 0.26, 0, W * 0.26];
+      const rows = [2, 3, 2];
+      const pts: number[][][] = [];
+      for (let c = 0; c < 3; c += 1) {
+        pts[c] = [];
+        for (let i = 0; i < rows[c]; i += 1) {
+          const y = cy + (i - (rows[c] - 1) / 2) * H * 0.3;
+          pts[c].push([cx + cols[c], y]);
+        }
+      }
+      for (let c = 0; c < 2; c += 1)
+        for (const a of pts[c]) for (const b of pts[c + 1]) line(ctx, a[0], a[1], b[0], b[1]);
+      for (const col of pts) for (const [x, y] of col) circle(ctx, x, y, lw * 1.1);
+      break;
+    }
+    case 'matrix': {
+      const rnd = mulberry32(seed);
+      for (let i = 0; i < 6; i += 1)
+        for (let j = 0; j < 3; j += 1) {
+          const x = cx + (i - 2.5) * W * 0.11;
+          const y = cy + (j - 1) * H * 0.3;
+          circle(ctx, x, y, rnd() < 0.3 ? lw * 1.3 : lw * 0.7);
+        }
+      break;
+    }
+    case 'flow': {
+      for (let i = -1; i <= 1; i += 1) {
+        const y = cy + i * H * 0.28;
+        const x1 = cx + W * 0.26;
+        line(ctx, cx - W * 0.28, y, x1, y);
+        line(ctx, x1 - H * 0.1, y - H * 0.08, x1, y);
+        line(ctx, x1 - H * 0.1, y + H * 0.08, x1, y);
+      }
+      break;
+    }
+
+    /* ── geometric / dimensional ── */
+    case 'cube': {
+      const s = H * 0.42;
+      const o = H * 0.16;
+      ctx.strokeRect(cx - s / 2, cy - s / 2 + o / 2, s, s);
+      ctx.strokeRect(cx - s / 2 + o, cy - s / 2 - o / 2, s, s);
+      line(ctx, cx - s / 2, cy - s / 2 + o / 2, cx - s / 2 + o, cy - s / 2 - o / 2);
+      line(ctx, cx + s / 2, cy - s / 2 + o / 2, cx + s / 2 + o, cy - s / 2 - o / 2);
+      line(ctx, cx - s / 2, cy + s / 2 + o / 2, cx - s / 2 + o, cy + s / 2 - o / 2);
+      line(ctx, cx + s / 2, cy + s / 2 + o / 2, cx + s / 2 + o, cy + s / 2 - o / 2);
+      break;
+    }
+    case 'sphere': {
+      circle(ctx, cx, cy, H * 0.36, false);
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, H * 0.36, H * 0.13, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, H * 0.13, H * 0.36, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      break;
+    }
+    case 'orbit': {
+      circle(ctx, cx, cy, H * 0.2, false);
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, H * 0.42, H * 0.15, -0.5, 0, Math.PI * 2);
+      ctx.stroke();
+      circle(ctx, cx + H * 0.34, cy - H * 0.2, lw * 1.2);
+      break;
+    }
+    case 'hex': {
+      const rr2 = H * 0.4;
+      const pts: number[][] = [];
+      for (let i = 0; i < 6; i += 1) {
+        const a = (i / 6) * Math.PI * 2 - Math.PI / 6;
+        pts.push([cx + Math.cos(a) * rr2, cy + Math.sin(a) * rr2]);
+      }
+      poly(ctx, pts, true);
+      ctx.stroke();
+      poly(ctx, pts.map(([x, y]) => [cx + (x - cx) * 0.5, cy + (y - cy) * 0.5]), true);
+      ctx.stroke();
+      break;
+    }
+    case 'pyramid': {
+      poly(ctx, [[cx, cy - H * 0.38], [cx - W * 0.26, cy + H * 0.26], [cx + W * 0.26, cy + H * 0.26]], true);
+      ctx.stroke();
+      line(ctx, cx, cy - H * 0.38, cx + W * 0.06, cy + H * 0.26);
+      line(ctx, cx - W * 0.26, cy + H * 0.26, cx + W * 0.06, cy + H * 0.26);
+      break;
+    }
+    case 'layers': {
+      for (let i = -1; i <= 1; i += 1) {
+        const y = cy + i * H * 0.22;
+        poly(ctx, [[cx, y - H * 0.11], [cx + W * 0.26, y], [cx, y + H * 0.11], [cx - W * 0.26, y]], true);
+        ctx.stroke();
+      }
+      break;
+    }
+
+    /* ── technical motifs ── */
+    case 'gear': {
+      circle(ctx, cx, cy, H * 0.24, false);
+      circle(ctx, cx, cy, H * 0.09, false);
+      for (let i = 0; i < 8; i += 1) {
+        const a = (i / 8) * Math.PI * 2;
+        line(
+          ctx,
+          cx + Math.cos(a) * H * 0.24,
+          cy + Math.sin(a) * H * 0.24,
+          cx + Math.cos(a) * H * 0.38,
+          cy + Math.sin(a) * H * 0.38
+        );
+      }
+      break;
+    }
+    case 'lock': {
+      const w = H * 0.5;
+      const h = H * 0.4;
+      ctx.strokeRect(cx - w / 2, cy - h * 0.1, w, h);
+      ctx.beginPath();
+      ctx.arc(cx, cy - h * 0.1, w * 0.32, Math.PI, 0);
+      ctx.stroke();
+      circle(ctx, cx, cy + h * 0.32, lw * 1.1);
+      break;
+    }
+    case 'cloud': {
+      ctx.beginPath();
+      ctx.arc(cx - H * 0.2, cy + H * 0.08, H * 0.16, Math.PI * 0.4, Math.PI * 1.5);
+      ctx.arc(cx - H * 0.02, cy - H * 0.12, H * 0.2, Math.PI * 0.9, Math.PI * 1.95);
+      ctx.arc(cx + H * 0.2, cy + H * 0.06, H * 0.15, Math.PI * 1.4, Math.PI * 0.6);
+      ctx.closePath();
+      ctx.stroke();
+      break;
+    }
+    case 'globe': {
+      circle(ctx, cx, cy, H * 0.36, false);
+      line(ctx, cx - H * 0.36, cy, cx + H * 0.36, cy);
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, H * 0.16, H * 0.36, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      break;
+    }
+    case 'bolt':
+      poly(
+        ctx,
+        [
+          [cx + H * 0.06, cy - H * 0.4],
+          [cx - H * 0.22, cy + H * 0.06],
+          [cx - H * 0.02, cy + H * 0.06],
+          [cx - H * 0.06, cy + H * 0.4],
+          [cx + H * 0.22, cy - H * 0.06],
+          [cx + H * 0.02, cy - H * 0.06],
+        ],
+        true
+      );
+      ctx.fill();
+      break;
+    case 'antenna': {
+      line(ctx, cx, cy + H * 0.38, cx, cy - H * 0.1);
+      circle(ctx, cx, cy - H * 0.14, lw);
+      ctx.beginPath();
+      ctx.arc(cx, cy - H * 0.14, H * 0.16, Math.PI * 1.15, Math.PI * 1.85);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx, cy - H * 0.14, H * 0.28, Math.PI * 1.2, Math.PI * 1.8);
+      ctx.stroke();
+      line(ctx, cx - H * 0.16, cy + H * 0.38, cx + H * 0.16, cy + H * 0.38);
+      break;
+    }
+    case 'keyboard': {
+      const w = W * 0.62;
+      const h = H * 0.4;
+      ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
+      for (let i = 0; i < 8; i += 1)
+        for (let j = 0; j < 2; j += 1)
+          circle(ctx, cx - w * 0.4 + i * (w * 0.8 / 7), cy - h * 0.2 + j * h * 0.26, lw * 0.6);
+      line(ctx, cx - w * 0.24, cy + h * 0.28, cx + w * 0.24, cy + h * 0.28);
       break;
     }
   }
@@ -264,7 +584,7 @@ export function SignatureName({
   text: string;
   reducedMotion?: boolean;
   /** False while the boot splash still covers the page, so the
-      construction is not spent where nobody can see it. */
+     construction is not spent where nobody can see it. */
   armed?: boolean;
 }) {
   const clusters = useMemo(() => segmentGraphemes(text), [text]);
@@ -290,16 +610,10 @@ export function SignatureName({
     if (!stage || !canvas) return;
 
     const T = MOTION.nameAssemble;
-    /* The handover duration is read from the token here rather than
-       hard-coded in the stylesheet, so the two cannot drift. It now only
-       serves the no-JS/failure fallback cross-fade. */
     stage.style.setProperty('--sig-resolve', `${T.resolveSeconds}s`);
     let cancelled = false;
     let raf = 0;
     const timers: number[] = [];
-    /* assigned by build(); lets the visibility handler resume the clock */
-    let resume: (() => void) | null = null;
-
     const later = (fn: () => void, ms: number) => {
       timers.push(
         window.setTimeout(() => {
@@ -308,9 +622,6 @@ export function SignatureName({
       );
     };
 
-    /* Failure fallback only: if the field can never be sampled, the real
-       text is the accessible, legible answer. Normal motion never takes
-       this path — the particle letterform IS the resting state. */
     const giveUpToText = () => {
       stage.dataset.asm = 'done';
     };
@@ -318,14 +629,12 @@ export function SignatureName({
     /* ── the living state machine ───────────────────────────────────
        forming  : the existing construction — dispersed field seats into
                   the wordmark, unchanged.
-       nameHold : the completed name, readable, breathing gently, for
-                  NAME_HOLD_S. The strongest identity moment.
-       toForm   : the field reorganises along seeded curved paths into a
-                  technical form (one morph, coordinated mass).
+       nameHold : the completed name, readable, breathing gently.
+       toForm   : detach → wide bounded spread → converge into a form.
        formHold : the form, held with depth shimmer + parallax.
-       toName   : the field flows back into the name (this language).
-       dissolve : a language retarget — the old particle glyphs loosen and
-                  fade, then the new field is sampled and forms.        */
+       toName   : spread again → flow back into the name (this language).
+       dissolve : a language retarget — old glyphs loosen and fade, then
+                  the new field is sampled and forms.                    */
     let phase: 'forming' | 'nameHold' | 'toForm' | 'formHold' | 'toName' | 'dissolve' = 'forming';
     let particles: Particle[] = [];
     let builtText: string | null = null;
@@ -335,12 +644,24 @@ export function SignatureName({
     let hiddenAt = 0;
     let cycle = 0;
     let currentForm: FormId = 'code';
+    /* per-cycle choreography variety, seeded */
+    let holdNameMs = NAME_HOLD_S * 1000;
+    let holdFormMs = FORM_HOLD_S * 1000;
+    let morphMs = MORPH_S * 1000;
+    let spreadScale = 1;
     /* geometry of the current field, in wordmark space */
     let W = 0;
     let H = 0;
     let ruleY = 0;
     let dot = 2;
     let fieldSeed = 1;
+    /* stable anchor: the layer (positioned page container) box. The
+       scatter field is centred on this and never on the text, so the
+       composition cannot drift sideways between cycles or languages. */
+    let scx = 0;
+    let scy = 0;
+    let srx = 0;
+    let sry = 0;
     /* sampling geometry shared by name and form sampling */
     let dpr = 1;
     let cw = 1;
@@ -365,15 +686,8 @@ export function SignatureName({
       H = stageBox.height;
       if (!(W > 4) || !(H > 4)) return giveUpToText();
 
-      /* The display layer covers the stable hero-name box; the sample
-         canvas covers only the wordmark box (that is where the ink is),
-         keeping getImageData small. */
       const layerBox = canvas.getBoundingClientRect();
       dpr = Math.min(window.devicePixelRatio || 1, T.maxDpr);
-      /* Fill-rate guard: the layer covers the whole page box, so cap its
-         total device pixels and trade resolution for area rather than
-         letting a phone allocate an outsized backing store. 4 Mpx is the
-         budget of an ordinary full-screen dpr-3 phone canvas. */
       const maxArea = 4.0e6;
       const areaAt = (d: number) => layerBox.width * d * (layerBox.height * d);
       while (dpr > 1 && areaAt(dpr) > maxArea) dpr -= 0.25;
@@ -384,10 +698,6 @@ export function SignatureName({
       const fontStr = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
       const fontSize = parseFloat(cs.fontSize) || 64;
 
-      /* Render the clusters exactly where the DOM puts them; the lit
-         pixels become the particle targets. Shaping is the browser's:
-         clusters are drawn as whole grapheme clusters, never code points,
-         so কার/মাত্রা/যুক্তাক্ষর arrive here already correct. */
       const sample = document.createElement('canvas');
       sample.width = cw;
       sample.height = chh;
@@ -399,8 +709,6 @@ export function SignatureName({
       sctx.textAlign = 'left';
       sctx.fillStyle = '#ffffff';
 
-      /* Left edge of every cluster, and the baseline the rule sits on.
-         Both come from the same metrics the browser used. */
       edges = [];
       ruleY = 0;
       clustersIn.forEach((cluster, i) => {
@@ -443,7 +751,6 @@ export function SignatureName({
       };
       const step = sampleStepFor(countAt(baseStep), baseStep, budget);
 
-      /* Which cluster a sample belongs to, from the measured edges. */
       const clusterOf = (xCss: number) => {
         let idx = 0;
         for (let i = 0; i < edges.length; i += 1) {
@@ -463,14 +770,9 @@ export function SignatureName({
           const tx = (x + step / 2) / dpr;
           const ty = (y + step / 2) / dpr;
           const o = disperseOrigin(tx, ty, W, H, rnd, T.disperseRadius);
-          /* breath direction: biased outward from the word's centre, so a
-             loosening glyph exhales rather than sliding sideways */
           const ang = Math.atan2(ty - H / 2, tx - W / 2) + (rnd() - 0.5) * 1.6;
           next.push({
-            tx,
-            ty,
-            ox: o.x,
-            oy: o.y,
+            tx, ty, ox: o.x, oy: o.y,
             at: startOffset(clusterOf(tx), clusterCount, rnd, T.clusterShare, T.jitterShare),
             dur: T.travelShare,
             ph1: rnd() * Math.PI * 2,
@@ -479,19 +781,13 @@ export function SignatureName({
             wph: rnd(),
             bx: Math.cos(ang),
             by: Math.sin(ang),
-            m0x: tx,
-            m0y: ty,
-            m1x: tx,
-            m1y: ty,
-            cpx: tx,
-            cpy: ty,
-            z: rnd(),
+            m0x: tx, m0y: ty, sx: tx, sy: ty, m1x: tx, m1y: ty,
+            c0x: tx, c0y: ty, c1x: tx, c1y: ty,
+            stg: 0, turb: 0, z: rnd(),
           });
         }
       }
 
-      /* Nothing lit (font not ready, or a zero-width box): do not leave
-         the hero empty — hand straight over to the real text. */
       if (next.length === 0) return giveUpToText();
 
       particles = next;
@@ -499,17 +795,19 @@ export function SignatureName({
       ramp = rampPalette(ASSEMBLE_INKS[0], LOCK_INK, RESOLVED_INK, RAMP_BUCKETS, WARM_AT);
       dot = Math.max(1.1, Math.min(2.3, W / 250));
 
-      /* wordmark space: the layer's origin sits one stage-offset away, so
-         every coordinate below stays relative to the rendered letters */
       ox = stageBox.left - layerBox.left;
       oy = stageBox.top - layerBox.top;
       cssW = layerBox.width;
       cssH = layerBox.height;
+      /* the controlled scatter field: centred on the stable layer box,
+         bounded to stay inside it whatever the cycle variety says */
+      scx = cssW / 2 - ox;
+      scy = cssH / 2 - oy;
+      srx = Math.max(60, cssW * 0.42);
+      sry = Math.max(40, cssH * 0.4);
       canvas.width = Math.max(1, Math.round(cssW * dpr));
       canvas.height = Math.max(1, Math.round(cssH * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, ox * dpr, oy * dpr);
-      /* the particle letterform is the only visual from here on: the DOM
-         cells stay hidden for the whole life of the animation */
       stage.dataset.asm = 'run';
       builtText = textNow;
       cycle = 0;
@@ -546,13 +844,18 @@ export function SignatureName({
       return pts;
     };
 
-    /* ── aim the whole field at a destination set, curved paths ───── */
+    /* ── aim the whole field: origin → scatter → destination ──────── */
     const aimField = (toForm: boolean, now: number) => {
       const seed = (fieldSeed ^ Math.imul(cycle + 1, 0x85ebca6b)) >>> 0;
       const rnd = mulberry32(seed);
+      /* per-cycle variety, bounded: spread, timing, turbulence */
+      spreadScale = 0.8 + rnd() * 0.4;
+      holdNameMs = (NAME_HOLD_S + (rnd() - 0.5) * 1.2) * 1000;
+      holdFormMs = (FORM_HOLD_S + (rnd() - 0.5) * 0.7) * 1000;
+      morphMs = (MORPH_S + (rnd() - 0.5) * 0.6) * 1000;
       if (toForm) {
-        /* deterministic form order: shuffled bag per epoch, no immediate
-           repeat across the bag boundary */
+        /* seeded shuffled bag over the whole library: no immediate
+           repeat and no visible tiny loop */
         const bagRnd = mulberry32((fieldSeed ^ 0x2c1b3c6d) >>> 0);
         const bag = [...FORMS];
         for (let i = bag.length - 1; i > 0; i -= 1) {
@@ -560,20 +863,14 @@ export function SignatureName({
           [bag[i], bag[j]] = [bag[j], bag[i]];
         }
         currentForm = bag[cycle % bag.length];
-        if (cycle > 0 && currentForm === FORMS[(cycle - 1) % FORMS.length]) {
-          currentForm = bag[(cycle + 1) % bag.length];
-        }
       }
       const pts = toForm ? formTargets(currentForm) : [];
       const n = particles.length;
       if (toForm && pts.length === 0) {
-        /* sampling failed: skip this form, hold the name instead */
         phase = 'nameHold';
         phaseT0 = now;
         return;
       }
-      /* deterministic assignment: a seeded permutation pairs particles
-         with targets so paths cross fluidly instead of sliding in lockstep */
       const order = new Array<number>(n);
       for (let i = 0; i < n; i += 1) order[i] = i;
       for (let i = n - 1; i > 0; i -= 1) {
@@ -594,32 +891,44 @@ export function SignatureName({
           toX = p.tx;
           toY = p.ty;
         }
-        /* control point: midpoint pushed perpendicular, seeded — the
-           curve gives the morph its organic, non-mechanical sweep */
-        const mx = (fromX + toX) / 2;
-        const my = (fromY + toY) / 2;
-        const dx = toX - fromX;
-        const dy = toY - fromY;
-        const len = Math.sqrt(dx * dx + dy * dy) || 1;
-        const bend = (rnd() - 0.5) * 0.9 * Math.min(90, len * 0.5);
-        p.m0x = fromX;
-        p.m0y = fromY;
-        p.m1x = toX;
-        p.m1y = toY;
-        p.cpx = mx + (-dy / len) * bend;
-        p.cpy = my + (dx / len) * bend;
+        /* scatter waypoint on the bounded elliptical field, seeded */
+        const a = rnd() * Math.PI * 2;
+        const rf = (0.55 + 0.45 * rnd()) * spreadScale;
+        const sx = scx + Math.cos(a) * srx * rf;
+        const sy = scy + Math.sin(a) * sry * rf;
+        /* curved controls per leg: midpoint + perpendicular bend */
+        const bend0 = (rnd() - 0.5) * 0.7 * Math.min(120, Math.hypot(sx - fromX, sy - fromY) * 0.5);
+        const bend1 = (rnd() - 0.5) * 0.7 * Math.min(120, Math.hypot(toX - sx, toY - sy) * 0.5);
+        p.m0x = fromX; p.m0y = fromY;
+        p.sx = sx; p.sy = sy;
+        p.m1x = toX; p.m1y = toY;
+        p.c0x = (fromX + sx) / 2 + (-(sy - fromY) / (Math.hypot(sx - fromX, sy - fromY) || 1)) * bend0;
+        p.c0y = (fromY + sy) / 2 + ((sx - fromX) / (Math.hypot(sx - fromX, sy - fromY) || 1)) * bend0;
+        p.c1x = (sx + toX) / 2 + (-(toY - sy) / (Math.hypot(toX - sx, toY - sy) || 1)) * bend1;
+        p.c1y = (sy + toY) / 2 + ((toX - sx) / (Math.hypot(toX - sx, toY - sy) || 1)) * bend1;
+        p.stg = rnd() * 0.12;
+        p.turb = (rnd() - 0.5) * 10;
         p.z = rnd();
       }
       phase = toForm ? 'toForm' : 'toName';
       phaseT0 = now;
     };
 
+    /* position along the two-leg morph for one particle */
+    const morphPos = (p: Particle, u0: number): { x: number; y: number } => {
+      const u = clamp01(u0 - p.stg);
+      if (u <= SPREAD_AT) {
+        const e = easeOut(u / SPREAD_AT);
+        return { x: quad(p.m0x, p.c0x, p.sx, e), y: quad(p.m0y, p.c0y, p.sy, e) };
+      }
+      const e = easeInOut((u - SPREAD_AT) / (1 - SPREAD_AT));
+      return { x: quad(p.sx, p.c1x, p.m1x, e), y: quad(p.sy, p.c1y, p.m1y, e) };
+    };
+
     const frame = (now: number) => {
       raf = 0;
       if (cancelled) return;
       if (document.hidden) {
-        /* stop the clock as well as the loop, so returning to the tab
-           resumes the motion instead of skipping ahead in it */
         if (!hiddenAt) hiddenAt = now;
         return;
       }
@@ -641,8 +950,6 @@ export function SignatureName({
       ctx.clearRect(-ox - 4, -oy - 4, cssW + 8, cssH + 8);
 
       if (phase === 'dissolve') {
-        /* the old glyphs loosen outward and fade — particles leaving, not
-           a cut. When they are gone the new field is sampled and forms. */
         const prog = Math.min(1, (now - dissolveT0) / (T.dissolveSeconds * 1000));
         const ease = prog * prog * (3 - 2 * prog);
         const buckets: Path2D[] = [];
@@ -674,21 +981,19 @@ export function SignatureName({
       if (phase === 'forming' && t >= 1) {
         phase = 'nameHold';
         phaseT0 = now;
-      } else if (phase === 'nameHold' && now - phaseT0 > NAME_HOLD_S * 1000) {
+      } else if (phase === 'nameHold' && now - phaseT0 > holdNameMs) {
         aimField(true, now);
-      } else if (phase === 'toForm' && now - phaseT0 > MORPH_S * 1000) {
+      } else if (phase === 'toForm' && now - phaseT0 > morphMs) {
         phase = 'formHold';
         phaseT0 = now;
-      } else if (phase === 'formHold' && now - phaseT0 > FORM_HOLD_S * 1000) {
+      } else if (phase === 'formHold' && now - phaseT0 > holdFormMs) {
         aimField(false, now);
-      } else if (phase === 'toName' && now - phaseT0 > MORPH_S * 1000) {
+      } else if (phase === 'toName' && now - phaseT0 > morphMs) {
         phase = 'nameHold';
         phaseT0 = now;
         cycle += 1;
       }
 
-      /* construction guides: one baseline rule, one tick per cluster.
-         They exist while the word is being built and leave with it. */
       const guideFade = phase === 'forming' ? Math.max(0, 1 - t / T.guideShare) : 0;
       if (guideFade > 0.01) {
         ctx.globalCompositeOperation = 'source-over';
@@ -710,15 +1015,13 @@ export function SignatureName({
         ctx.stroke();
       }
 
-      /* particles: one path for material still waiting, then one per
-         ramp bucket — at most RAMP_BUCKETS + 1 fills a frame */
       ctx.globalCompositeOperation = 'lighter';
       const waiting = new Path2D();
       const buckets: Path2D[] = [];
       for (let b = 0; b < RAMP_BUCKETS; b += 1) buckets.push(new Path2D());
 
       const morphing = phase === 'toForm' || phase === 'toName';
-      const mProg = morphing ? easeInOut(Math.min(1, (now - phaseT0) / (MORPH_S * 1000))) : 0;
+      const mU = morphing ? (now - phaseT0) / morphMs : 0;
 
       for (let i = 0; i < particles.length; i += 1) {
         const p = particles[i];
@@ -739,7 +1042,6 @@ export function SignatureName({
           x = p.ox + (p.tx - p.ox) * e;
           y = p.oy + (p.ty - p.oy) * e;
           if (local >= 1) {
-            /* seated while the name holds: micro-drift + breath wave */
             const q = Math.min(1, (local - 1) / 0.25);
             x += T.microPx * q * Math.sin(ts * 1.7 + p.ph1);
             y += T.microPx * q * Math.cos(ts * 1.3 + p.ph2);
@@ -760,7 +1062,6 @@ export function SignatureName({
             buckets[bucketFor(lc, RAMP_BUCKETS)].rect(bx2 - s * 0.3, by2 - s * 0.3, s * 0.6, s * 0.6);
           }
         } else if (phase === 'nameHold') {
-          /* the readable name: micro-drift + the staggered breath wave */
           x = p.tx + T.microPx * Math.sin(ts * 1.7 + p.ph1);
           y = p.ty + T.microPx * Math.cos(ts * 1.3 + p.ph2);
           const c = (ts / T.breathSeconds + p.wph) % 1;
@@ -773,14 +1074,18 @@ export function SignatureName({
           lc = 1;
           s = dot;
         } else if (morphing) {
-          x = quad(p.m0x, p.cpx, p.m1x, mProg);
-          y = quad(p.m0y, p.cpy, p.m1y, mProg);
-          /* depth cue in flight: nearer particles slightly larger */
-          s = dot * (1.05 + 0.45 * p.z) * (1 + 0.25 * Math.sin(Math.PI * mProg));
-          lc = phase === 'toForm' ? 1 - 0.75 * mProg : 0.25 + 0.75 * mProg;
+          const pos = morphPos(p, mU);
+          x = pos.x;
+          y = pos.y;
+          /* bounded turbulence while genuinely in flight */
+          const flight = Math.sin(Math.PI * clamp01(mU));
+          x += Math.sin(ts * 2.1 + p.ph1) * p.turb * flight * 0.4;
+          y += Math.cos(ts * 1.7 + p.ph2) * p.turb * flight * 0.4;
+          /* depth cue: nearer particles larger mid-flight */
+          s = dot * (1.0 + 0.5 * p.z) * (1 + 0.3 * flight);
+          lc = phase === 'toForm' ? 1 - 0.75 * clamp01(mU) : 0.25 + 0.75 * clamp01(mU);
         } else {
-          /* formHold: seated on the form, with dimensional shimmer —
-             depth-scaled size, intensity by z, and a slow parallax sway */
+          /* formHold: seated on the form with dimensional shimmer */
           x = p.m1x + T.microPx * 0.8 * Math.sin(ts * 1.4 + p.ph1) + (p.z - 0.5) * 3.2 * Math.sin(ts * 0.5);
           y = p.m1y + T.microPx * 0.8 * Math.cos(ts * 1.1 + p.ph2) + (p.z - 0.5) * 2.2 * Math.cos(ts * 0.42);
           s = dot * (0.85 + 0.6 * p.z);
@@ -800,12 +1105,11 @@ export function SignatureName({
       raf = requestAnimationFrame(frame);
     };
 
-    resume = () => {
+    const resume = () => {
       if (cancelled) return;
       if (!raf) raf = requestAnimationFrame(frame);
     };
 
-    /* ── start: fonts first, then one persistent lifecycle ── */
     const start = () => {
       if (cancelled) return;
       build(textRef.current, clustersRef.current);
@@ -837,26 +1141,26 @@ export function SignatureName({
 
     const onVisibility = () => {
       if (cancelled) return;
-      if (document.hidden) return; /* the frame loop parks itself */
-      /* the clock was stopped with the loop; shift the origin by the
-         hidden duration so the motion resumes where it left off */
-      resume?.();
+      if (document.hidden) return;
+      resume();
     };
 
     withFonts();
+    /* watchdog: if the font pipeline never resolves and no field was ever
+       sampled, the real DOM text is the accessible, legible answer */
+    later(() => {
+      if (!builtText) giveUpToText();
+    }, 5000);
     document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
       cancelled = true;
-      resume = null;
       if (raf) {
         cancelAnimationFrame(raf);
         raf = 0;
       }
       timers.forEach((id) => window.clearTimeout(id));
       document.removeEventListener('visibilitychange', onVisibility);
-      /* the nodes captured when the effect ran, not the ref's current
-         value: by teardown the ref may already point somewhere else */
       canvas.width = 0;
       canvas.height = 0;
       delete stage.dataset.asm;
