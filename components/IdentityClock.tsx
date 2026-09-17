@@ -102,29 +102,54 @@ function sampleGlyph(ch: string, faces: string): DotGrid | null {
   return grid;
 }
 
-/** One digit slot: fixed width, dot matrix inside, keyed remount on change. */
-function DigitSlot({ ch, faces }: { ch: string; faces: string | null }) {
+/** One digit's face: its dot matrix, or the wordmark face as text. */
+function DigitFace({ ch, faces }: { ch: string; faces: string | null }) {
   const grid = faces ? sampleGlyph(ch, faces) : null;
+  return grid ? (
+    <span
+      className="idc-grid"
+      aria-hidden="true"
+      style={{ '--cols': grid.cols, '--rows': grid.rows } as CSSProperties}
+    >
+      {grid.cells.map((on, i) =>
+        on ? <span key={i} className="idc-dot" data-on="true" /> : <span key={i} className="idc-dot" />
+      )}
+    </span>
+  ) : (
+    <span className="idc-fallback" aria-hidden="true">
+      {ch}
+    </span>
+  );
+}
+
+/** One digit slot: a fixed viewport. A changed digit rolls — the old
+    face exits upward while the new one enters from below, both clipped
+    inside the slot, so the clock block never moves and nothing can
+    drift into the neighbours or out of the row. Unchanged digits keep
+    their DOM and never animate. */
+function DigitSlot({ ch, faces }: { ch: string; faces: string | null }) {
+  const prevRef = useRef(ch);
+  const [ghost, setGhost] = useState<string | null>(null);
+  useEffect(() => {
+    const prev = prevRef.current;
+    if (prev === ch) return;
+    prevRef.current = ch;
+    setGhost(prev);
+    const id = setTimeout(() => setGhost(null), 380);
+    return () => clearTimeout(id);
+  }, [ch]);
   return (
     <span className="idc-slot">
-      {grid ? (
-        /* key carries the value: a changed digit remounts and replays
-           the short dot settle; an unchanged digit keeps its DOM */
-        <span
-          key={ch}
-          className="idc-grid"
-          aria-hidden="true"
-          style={{ '--cols': grid.cols, '--rows': grid.rows } as CSSProperties}
-        >
-          {grid.cells.map((on, i) =>
-            on ? <span key={i} className="idc-dot" data-on="true" /> : <span key={i} className="idc-dot" />
-          )}
+      {ghost !== null && ghost !== ch ? (
+        <span className="idc-ghost" aria-hidden="true">
+          <DigitFace ch={ghost} faces={faces} />
         </span>
-      ) : (
-        <span className="idc-fallback" aria-hidden="true">
-          {ch}
-        </span>
-      )}
+      ) : null}
+      {/* key carries the value: a changed digit remounts and replays
+          the roll-in; an unchanged digit keeps its DOM */}
+      <span key={ch} className="idc-live">
+        <DigitFace ch={ch} faces={faces} />
+      </span>
     </span>
   );
 }

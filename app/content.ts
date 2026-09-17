@@ -134,7 +134,6 @@ export interface Content {
     availability: string;
     ctaWork: string;
     ctaGithub: string;
-    scrollHint: string;
   };
   presence: {
     eyebrow: string;
@@ -217,12 +216,14 @@ export interface Content {
     headingA: string;
     headingB: string;
     sub: string;
-    /** The one primary channel, kept visually first and separate from
-        the platform ecosystem below it. */
+/** The prominent direct channel, visually first and separate from
+        the platform ecosystem below it — Telegram reaches the person;
+        email joins the compact contact buttons. */
+    telegram: { label: string; value: string; href: string };
     email: { label: string; value: string; href: string };
     groupsHeading: string;
     groupsNote: string;
-    /** The complete ecosystem: 17 canonical links in six groups. One
+    /** The complete ecosystem: 18 canonical links in six groups. One
         system, rendered once — never a second wall of icons elsewhere. */
     groups: SocialGroup[];
     /** Discovery link into the service-intent layer (/services/). */
@@ -286,7 +287,6 @@ const en: Content = {
     availability: 'Open to remote',
     ctaWork: 'Explore my work',
     ctaGithub: 'View GitHub ↗',
-    scrollHint: 'Open index',
   },
   presence: {
     eyebrow: '02 — What I Build',
@@ -585,6 +585,7 @@ const en: Content = {
     headingA: 'Open to freelance,',
     headingB: 'remote, and collaboration.',
     sub: 'Available for on-device AI, Android systems, ARM64 tooling and local-first products, as well as practical technology work: website development, custom software, and computer or Android support. Based in Dhaka, Bangladesh; remote worldwide.',
+    telegram: { label: 'Telegram', value: '@soobujmiah', href: 'https://t.me/soobujmiah' },
     email: { label: 'Email', value: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
     servicesLink: 'View all services →',
     groupsHeading: 'Find me online',
@@ -628,6 +629,7 @@ const en: Content = {
         label: 'Direct',
         links: [
           { label: 'Telegram', handle: '@soobujmiah', href: 'https://t.me/soobujmiah' },
+          { label: 'Email', handle: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
         ],
       },
       {
@@ -753,7 +755,6 @@ const bn: Content = {
     availability: 'রিমোটে উন্মুক্ত',
     ctaWork: 'আমার কাজ দেখুন',
     ctaGithub: 'গিটহাব দেখুন ↗',
-    scrollHint: 'সূচি দেখুন',
   },
   presence: {
     eyebrow: '০২ — আমি যা তৈরি করি',
@@ -1052,6 +1053,7 @@ const bn: Content = {
     headingA: 'ফ্রিল্যান্স,',
     headingB: 'রিমোট ও কোলাবরেশনে উন্মুক্ত।',
     sub: 'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ টুলিং ও লোকাল-ফার্স্ট প্রোডাক্টের পাশাপাশি ব্যবহারিক প্রযুক্তি কাজেও পাওয়া যাবে: ওয়েবসাইট তৈরি, কাস্টম সফটওয়্যার, কম্পিউটার বা অ্যান্ড্রয়েড সহায়তা। ঢাকা, বাংলাদেশে অবস্থিত; বিশ্বব্যাপী রিমোট।',
+    telegram: { label: 'টেলিগ্রাম', value: '@soobujmiah', href: 'https://t.me/soobujmiah' },
     email: { label: 'ইমেইল', value: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
     servicesLink: 'সব সেবার পূর্ণ তালিকা দেখুন →',
     groupsHeading: 'অনলাইনে আমাকে পাবেন',
@@ -1095,6 +1097,7 @@ const bn: Content = {
         label: 'সরাসরি',
         links: [
           { label: 'টেলিগ্রাম', handle: '@soobujmiah', href: 'https://t.me/soobujmiah' },
+          { label: 'ইমেইল', handle: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
         ],
       },
       {
