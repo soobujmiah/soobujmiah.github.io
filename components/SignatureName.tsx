@@ -95,31 +95,34 @@ const SPREAD_AT = 0.42;
     filler: the generic geometry that said nothing (arch, pyramid,
     hex, sphere, robot, bolt, layers) was retired in favour of the
     science/space and accelerator vocabulary. */
-/* The canonical vocabulary: exactly these 25 fixed shapes are the
-   identity's primary forms. They are never removed, never replaced by
-   abstractions, and never redefined per cycle — every excursion draws
-   from this list unless a supporting form is due (below). */
+/* The canonical vocabulary — 25 symbols derived from the actual
+   Services pages (app/services-content.ts is the source of truth),
+   one per real capability:
+   website development → code, git, server, monitor, doc ·
+   custom software → braces, terminal, database, android, chip,
+     circuit, gpu, npu, neural, aigraph, gear (Kotlin/Flutter,
+     Python/Shell CLI, C/C++/JNI on ARM64, SQLite, llama.cpp/GGUF
+     on-device AI, GitHub Actions) ·
+   computer support → linux, network (Windows/Linux, remote sessions) ·
+   android support → phone (ADB, Termux, device tuning) ·
+   small-business technology → sheet, folder (spreadsheet systems,
+     local records) ·
+   office administration → printer, check (operations, reporting) ·
+   graphics design → palette · data entry → keyboard.
+   Never removed, never redefined per cycle. */
 const CANON_FORMS = [
-  // programming
   'code', 'braces', 'terminal', 'git', 'database',
-  // systems / computing
   'chip', 'gpu', 'npu', 'circuit', 'server',
-  // platforms
   'linux', 'android', 'phone', 'monitor', 'network',
-  // documents & records
   'doc', 'folder', 'sheet', 'printer', 'check',
-  // ai / intelligence
-  'neural', 'aigraph', 'gear',
-  // science / space
-  'galaxy', 'starsystem',
+  'neural', 'aigraph', 'gear', 'palette', 'keyboard',
 ] as const;
 /* Supporting forms: occasional guests (~1 excursion in 6) sharing the
-   same particle language — they enrich the cycle without ever
-   displacing the canonical 25. */
+   SAME canonical particle population — ambient technical and orbital
+   motifs between the service symbols, never a second system. */
 const SUPPORT_FORMS = [
-  'binary', 'matrix', 'flow', 'orbit', 'globe',
-  'starfield', 'constellation', 'planet', 'satellite', 'spaceship',
-  'rocket', 'comet',
+  'binary', 'matrix', 'flow', 'orbit', 'globe', 'starfield',
+  'constellation', 'planet', 'satellite', 'galaxy', 'starsystem',
 ] as const;
 const FORMS = [...CANON_FORMS, ...SUPPORT_FORMS] as const;
 type FormId = (typeof FORMS)[number];
@@ -623,50 +626,26 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       line(ctx, cx, cy - b / 2, cx, cy - b * 1.15);
       break;
     }
-    case 'spaceship': {
-      /* saucer + dome + running lights + tractor beam — an
-         unmistakable spacecraft silhouette */
-      ctx.beginPath();
-      ctx.ellipse(cx, cy + H * 0.04, W * 0.34, H * 0.13, 0, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(cx, cy - H * 0.03, H * 0.17, Math.PI, 0);
-      ctx.stroke();
-      circle(ctx, cx - W * 0.16, cy + H * 0.06, lw * 0.7);
-      circle(ctx, cx + W * 0.16, cy + H * 0.06, lw * 0.7);
-      line(ctx, cx - W * 0.1, cy + H * 0.17, cx - W * 0.17, cy + H * 0.34);
-      line(ctx, cx, cy + H * 0.18, cx, cy + H * 0.36);
-      line(ctx, cx + W * 0.1, cy + H * 0.17, cx + W * 0.17, cy + H * 0.34);
-      break;
-    }
-    case 'rocket': {
-      const h = H * 0.66;
-      const w = H * 0.24;
-      poly(
-        ctx,
-        [
-          [cx, cy - h / 2],
-          [cx + w / 2, cy - h * 0.08],
-          [cx + w / 2, cy + h * 0.3],
-          [cx - w / 2, cy + h * 0.3],
-          [cx - w / 2, cy - h * 0.08],
-        ],
-        true
-      );
-      ctx.stroke();
-      line(ctx, cx - w / 2, cy + h * 0.12, cx - w * 0.95, cy + h * 0.42);
-      line(ctx, cx + w / 2, cy + h * 0.12, cx + w * 0.95, cy + h * 0.42);
-      circle(ctx, cx, cy - h * 0.12, lw);
-      line(ctx, cx, cy + h * 0.38, cx, cy + h * 0.56);
-      break;
-    }
-    case 'comet': {
-      circle(ctx, cx + W * 0.18, cy + H * 0.14, H * 0.085);
-      const rnd = mulberry32(seed);
+    /* ── services: design & data work ── */
+    case 'palette': {
+      /* graphics design: painter's palette, paint wells, thumb hole */
+      circle(ctx, cx, cy, H * 0.38, false);
       for (let i = 0; i < 4; i += 1) {
-        const dy = (i - 1.5) * H * 0.1;
-        line(ctx, cx + W * 0.1, cy + H * 0.1 + dy * 0.35, cx - W * (0.22 + rnd() * 0.12), cy + H * 0.02 + dy);
+        const a = -2.4 + i * 0.85;
+        circle(ctx, cx + Math.cos(a) * W * 0.24, cy + Math.sin(a) * H * 0.24, lw * 0.85);
       }
+      circle(ctx, cx - W * 0.16, cy + H * 0.2, H * 0.07, false);
+      break;
+    }
+    case 'keyboard': {
+      /* data entry: key deck with a space bar */
+      const w = W * 0.62;
+      const h = H * 0.4;
+      ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
+      for (let i = 0; i < 8; i += 1)
+        for (let j = 0; j < 2; j += 1)
+          circle(ctx, cx - w * 0.4 + i * ((w * 0.8) / 7), cy - h * 0.2 + j * h * 0.26, lw * 0.6);
+      line(ctx, cx - w * 0.24, cy + h * 0.28, cx + w * 0.24, cy + h * 0.28);
       break;
     }
 

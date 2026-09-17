@@ -62,7 +62,7 @@ writeFileSync(
         strict: false,
         plugins: [],
       },
-      include: ['app/graphemes.ts', 'app/sections.ts', 'app/language.tsx', 'app/geo.ts', 'app/name-motion.ts', 'app/design-tokens.ts'],
+      include: ['app/graphemes.ts', 'app/sections.ts', 'app/language.tsx', 'app/geo.ts', 'app/name-motion.ts', 'app/design-tokens.ts', 'app/clock.ts'],
     },
     null,
     2
@@ -96,6 +96,12 @@ const { SECTION_IDS, sectionHref, indexForSlug, indexFromPathname, sectionUrl, S
   pathToFileURL(sectionsPath).href
 );
 const { localizeDigits } = await import(pathToFileURL(langPath).href);
+const clockPath = pick('app/clock.js', 'clock.js');
+if (!clockPath) {
+  console.error('check-units FAIL: compiled app/clock.ts not found');
+  process.exit(1);
+}
+const { hour12, twoDigit } = await import(pathToFileURL(clockPath).href);
 const { GEO_FOCUS, cameraFor, clampCamera, projectPoint, projectToScreen } = await import(
   pathToFileURL(geoPath).href
 );
@@ -188,6 +194,22 @@ eq(
 console.log('\nBengali digits');
 eq('English digits unchanged', localizeDigits('2026', 'en'), '2026');
 eq('Bengali digits', localizeDigits('2026', 'bn'), '২০২৬');
+
+console.log('\nClock arithmetic — one authoritative value (§13/§15 boundaries)');
+eq('00h reads 12 AM', hour12(0), 12);
+eq('01h reads 1', hour12(1), 1);
+eq('11h reads 11 (11:59 AM edge)', hour12(11), 11);
+eq('12h reads 12 (12:00 PM)', hour12(12), 12);
+eq('13h reads 1 (12:59 PM → 01 PM)', hour12(13), 1);
+eq('23h reads 11 (11:59 PM edge)', hour12(23), 11);
+eq('out-of-range wraps onto the dial', hour12(24), 12);
+eq('garbage hour falls back to 12', hour12(NaN), 12);
+eq('seconds pad below ten', twoDigit(5), '05');
+eq('the 55→56 step', twoDigit(56), '56');
+eq('59 stays 59 before the wrap', twoDigit(59), '59');
+eq('over-range clamps to 59', twoDigit(75), '59');
+eq('garbage part falls back to 00', twoDigit(NaN), '00');
+eq('Bengali seconds render ৫৮ for 58', localizeDigits(twoDigit(58), 'bn'), '৫৮');
 eq('padded counter', localizeDigits('03', 'bn'), '০৩');
 
 console.log('\nSignature name — determinism (the construction must be reproducible)');

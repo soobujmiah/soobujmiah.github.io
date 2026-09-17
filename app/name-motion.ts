@@ -243,7 +243,9 @@ export function particleBudget(viewportWidth: number, cores: number, cap: number
   const small = viewportWidth < 700;
   const weak = cores > 0 && cores <= 4;
   let budget = cap;
-  if (small) budget = Math.round(budget * 0.55);
+  /* phones keep 70% of the cap: enough for a dense, legible wordmark
+     (the name is priority one), still well under desktop load */
+  if (small) budget = Math.round(budget * 0.7);
   if (weak) budget = Math.round(budget * 0.8);
   return Math.max(180, Math.min(cap, budget));
 }
