@@ -132,16 +132,13 @@ def main():
     c.setAuthor("Sobuj Miah")
     c.setSubject("Independent Software & AI Systems Engineer")
 
-    # Surfaces
+    # Surfaces — the page ground first; the two-column panels start
+    # BELOW the dedicated identity band so header text never crosses
+    # a column boundary.
     c.setFillColor(BG)
     c.rect(0, 0, W, H, fill=1, stroke=0)
-    c.setFillColor(PANEL)
-    c.rect(0, 0, M + LEFT_W + GUT * 0.5, H, fill=1, stroke=0)
-    c.setStrokeColor(PANEL_BORDER)
-    c.setLineWidth(0.8)
-    c.line(M + LEFT_W + GUT * 0.5, 0, M + LEFT_W + GUT * 0.5, H)
 
-    # ── Header ────────────────────────────────────────────────
+    # ── Header (dedicated full-width identity band) ───────────
     hy = H - 52
     c.setFillColor(TEXT)
     c.setFont(F_BOLD, 25)
@@ -157,6 +154,14 @@ def main():
     c.line(M, hy - 40, W - M, hy - 40)
 
     top = hy - 40
+
+    # Body panels live under the identity band.
+    panelW = M + LEFT_W + GUT * 0.5
+    c.setFillColor(PANEL)
+    c.rect(0, 0, panelW, top, fill=1, stroke=0)
+    c.setStrokeColor(PANEL_BORDER)
+    c.setLineWidth(0.8)
+    c.line(panelW, 0, panelW, top)
 
     # ── Left column ───────────────────────────────────────────
     lx = M

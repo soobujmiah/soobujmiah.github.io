@@ -103,6 +103,11 @@ const FORMS = [
 ] as const;
 type FormId = (typeof FORMS)[number];
 
+/** Transition choreographies — the spread itself must vary cycle to
+    cycle; radial is one member, never the universal behaviour. */
+const STYLES = ['radial', 'spiral', 'orbital', 'wave', 'sweep', 'clusters', 'depth', 'flow'] as const;
+type StyleId = (typeof STYLES)[number];
+
 type Particle = {
   /** sampled target, CSS px — where this pixel of ink actually is */
   tx: number;
@@ -644,6 +649,10 @@ export function SignatureName({
     let hiddenAt = 0;
     let cycle = 0;
     let currentForm: FormId = 'code';
+    let currentStyle: StyleId = 'radial';
+    let lastStyle: StyleId = 'flow';
+    let swirlDir = 1;
+    let wavePh = 0;
     /* per-cycle choreography variety, seeded */
     let holdNameMs = NAME_HOLD_S * 1000;
     let holdFormMs = FORM_HOLD_S * 1000;
@@ -853,6 +862,20 @@ export function SignatureName({
       holdNameMs = (NAME_HOLD_S + (rnd() - 0.5) * 1.2) * 1000;
       holdFormMs = (FORM_HOLD_S + (rnd() - 0.5) * 0.7) * 1000;
       morphMs = (MORPH_S + (rnd() - 0.5) * 0.6) * 1000;
+      /* transition style: seeded bag over the family, never twice in
+         a row — NAME→spiral→A then NAME→wave→B, etc. */
+      const sBagRnd = mulberry32((fieldSeed ^ 0x51ab3d) >>> 0);
+      const sBag = [...STYLES];
+      for (let i2 = sBag.length - 1; i2 > 0; i2 -= 1) {
+        const j2 = Math.floor(sBagRnd() * (i2 + 1));
+        [sBag[i2], sBag[j2]] = [sBag[j2], sBag[i2]];
+      }
+      let sIdx = (cycle * 2 + (toForm ? 0 : 1)) % sBag.length;
+      if (sBag[sIdx] === lastStyle) sIdx = (sIdx + 1) % sBag.length;
+      currentStyle = sBag[sIdx];
+      lastStyle = currentStyle;
+      swirlDir = rnd() < 0.5 ? -1 : 1;
+      wavePh = rnd() * Math.PI * 2;
       if (toForm) {
         /* seeded shuffled bag over the whole library: no immediate
            repeat and no visible tiny loop */
@@ -891,11 +914,49 @@ export function SignatureName({
           toX = p.tx;
           toY = p.ty;
         }
-        /* scatter waypoint on the bounded elliptical field, seeded */
-        const a = rnd() * Math.PI * 2;
-        const rf = (0.55 + 0.45 * rnd()) * spreadScale;
-        const sx = scx + Math.cos(a) * srx * rf;
-        const sy = scy + Math.sin(a) * sry * rf;
+        /* scatter waypoint on the bounded field — placement follows
+           the cycle's transition family, so no two spreads read the
+           same. All styles stay inside the elliptical boundary. */
+        const tn = i / n;
+        let sx = scx;
+        let sy = scy;
+        if (currentStyle === 'radial') {
+          const a = rnd() * Math.PI * 2;
+          const rf = (0.55 + 0.45 * rnd()) * spreadScale;
+          sx = scx + Math.cos(a) * srx * rf;
+          sy = scy + Math.sin(a) * sry * rf;
+        } else if (currentStyle === 'spiral') {
+          const a = tn * Math.PI * 2 * 2.2 + swirlDir * 1.7;
+          const rf = (0.3 + 0.7 * tn) * spreadScale;
+          sx = scx + Math.cos(a) * srx * rf * 0.9;
+          sy = scy + Math.sin(a) * sry * rf * 0.9;
+        } else if (currentStyle === 'orbital') {
+          const a = tn * Math.PI * 2 + (rnd() - 0.5) * 0.15;
+          const rf = (0.8 + 0.15 * rnd()) * spreadScale;
+          sx = scx + Math.cos(a) * srx * rf;
+          sy = scy + Math.sin(a) * sry * rf;
+        } else if (currentStyle === 'wave') {
+          const x = (tn * 2 - 1) * srx * 0.92 * spreadScale;
+          sx = scx + x;
+          sy = scy + Math.sin(tn * Math.PI * 3 + wavePh) * sry * 0.5 * spreadScale + (rnd() - 0.5) * 8;
+        } else if (currentStyle === 'sweep') {
+          sx = scx + (tn * 2 - 1) * srx * 0.9 * spreadScale;
+          sy = scy + (rnd() - 0.5) * sry * 0.7 * spreadScale;
+        } else if (currentStyle === 'clusters') {
+          const ca = [0.6, 2.7, 4.6][i % 3];
+          sx = scx + Math.cos(ca) * srx * 0.55 * spreadScale + (rnd() - 0.5) * srx * 0.22;
+          sy = scy + Math.sin(ca) * sry * 0.55 * spreadScale + (rnd() - 0.5) * sry * 0.22;
+        } else if (currentStyle === 'depth') {
+          const a = rnd() * Math.PI * 2;
+          const rf = (0.15 + 0.35 * rnd()) * spreadScale;
+          sx = scx + Math.cos(a) * srx * rf;
+          sy = scy + Math.sin(a) * sry * rf;
+        } else {
+          /* flow: a smooth horizontal field with a sine current */
+          const x = (rnd() * 2 - 1) * srx * 0.9 * spreadScale;
+          sx = scx + x;
+          sy = scy + Math.sin(x * 0.018 + wavePh) * sry * 0.38 * spreadScale + (rnd() - 0.5) * sry * 0.2;
+        }
         /* curved controls per leg: midpoint + perpendicular bend */
         const bend0 = (rnd() - 0.5) * 0.7 * Math.min(120, Math.hypot(sx - fromX, sy - fromY) * 0.5);
         const bend1 = (rnd() - 0.5) * 0.7 * Math.min(120, Math.hypot(toX - sx, toY - sy) * 0.5);
@@ -906,8 +967,8 @@ export function SignatureName({
         p.c0y = (fromY + sy) / 2 + ((sx - fromX) / (Math.hypot(sx - fromX, sy - fromY) || 1)) * bend0;
         p.c1x = (sx + toX) / 2 + (-(toY - sy) / (Math.hypot(toX - sx, toY - sy) || 1)) * bend1;
         p.c1y = (sy + toY) / 2 + ((toX - sx) / (Math.hypot(toX - sx, toY - sy) || 1)) * bend1;
-        p.stg = rnd() * 0.12;
-        p.turb = (rnd() - 0.5) * 10;
+        p.stg = currentStyle === 'sweep' ? tn * 0.22 : currentStyle === 'orbital' ? tn * 0.15 : rnd() * 0.12;
+        p.turb = (rnd() - 0.5) * (currentStyle === 'depth' ? 16 : 10);
         p.z = rnd();
       }
       phase = toForm ? 'toForm' : 'toName';
@@ -922,7 +983,26 @@ export function SignatureName({
         return { x: quad(p.m0x, p.c0x, p.sx, e), y: quad(p.m0y, p.c0y, p.sy, e) };
       }
       const e = easeInOut((u - SPREAD_AT) / (1 - SPREAD_AT));
-      return { x: quad(p.sx, p.c1x, p.m1x, e), y: quad(p.sy, p.c1y, p.m1y, e) };
+      let x = quad(p.sx, p.c1x, p.m1x, e);
+      let y = quad(p.sy, p.c1y, p.m1y, e);
+      /* family-specific flight character on top of the two legs */
+      const flight = Math.sin(Math.PI * u);
+      if (currentStyle === 'spiral' || currentStyle === 'orbital') {
+        const dx = x - scx;
+        const dy = y - scy;
+        const ang = swirlDir * 0.35 * flight;
+        const cos = Math.cos(ang);
+        const sin = Math.sin(ang);
+        x = scx + dx * cos - dy * sin;
+        y = scy + dx * sin + dy * cos;
+      } else if (currentStyle === 'wave') {
+        y += Math.sin(u * Math.PI * 2 + p.ph1) * 6 * flight;
+      } else if (currentStyle === 'depth') {
+        const k = 1 + 0.3 * flight * p.z;
+        x = scx + (x - scx) * k;
+        y = scy + (y - scy) * k;
+      }
+      return { x, y };
     };
 
     const frame = (now: number) => {

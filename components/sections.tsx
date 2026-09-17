@@ -42,33 +42,51 @@ function PageNumeral({ index }: { index: number }) {
 
 function DhakaClock() {
   const { lang } = useLang();
-  const [now, setNow] = useState<{ time: string; date: string } | null>(null);
+  const [now, setNow] = useState<{ body: string; ampm: string; date: string } | null>(null);
   useEffect(() => {
     const locale = lang === 'bn' ? 'bn' : 'en-GB';
-    const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Dhaka' });
-    const date = new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Dhaka' });
+    /* 12-hour wall clock with visible seconds; the meridiem is split off
+       so the digits and the AM/PM token can be styled (and morphed)
+       independently. Locale-appropriate digits in both languages. */
+    const time = new Intl.DateTimeFormat(lang === 'bn' ? 'bn' : 'en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+      timeZone: 'Asia/Dhaka',
+    });
+    const wd = new Intl.DateTimeFormat(locale, { weekday: 'long', timeZone: 'Asia/Dhaka' });
+    const dmy = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Dhaka' });
     const tick = () => {
       const d = new Date();
-      setNow({ time: time.format(d), date: date.format(d) });
+      const parts = time.format(d).split(' ');
+      const ampm = parts.length > 1 ? parts[parts.length - 1] : '';
+      const body = parts.length > 1 ? parts.slice(0, -1).join(' ') : time.format(d);
+      setNow({ body, ampm, date: `${wd.format(d)} · ${dmy.format(d)}` });
     };
     tick();
-    const id = setInterval(tick, 30_000);
+    /* one timer, cleaned up on unmount / language change */
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [lang]);
   if (!now) return null;
-  /* The clock is the identity system's smaller sibling: a readable
-     time in the site's mono face, the particle/dot language borrowed
-     as three calm pulsing dots, and the full date + zone beside it. */
+  /* Date/location on one quiet line; the 12-hour clock below it is the
+     focal point. Changing characters remount (keyed by position+glyph)
+     and play a short slot-morph — no whole-clock flash, no layout shift
+     (tabular digits keep every frame the same width). */
   return (
-    <span className="hero-clock">
-      <span className="hero-clock-time font-mono">{now.time}</span>
-      <span className="clock-dots" aria-hidden="true">
-        <i />
-        <i />
-        <i />
-      </span>
+    <span className="hero-clock-block">
       <span className="hero-clock-date font-mono">
         {now.date} · {lang === 'bn' ? 'জিএমটি+৬ · ঢাকা' : 'GMT+6 · Dhaka'}
+      </span>
+      <span className="hero-clock-time font-mono">
+        {now.body.split('').map((ch, i) => (
+          <span key={`${i}-${ch}`} className="ck-ch" aria-hidden="true">
+            {ch}
+          </span>
+        ))}
+        {now.ampm ? <span className="ck-ampm">{now.ampm}</span> : null}
+        <span className="sr-only">{now.body} {now.ampm}</span>
       </span>
     </span>
   );
@@ -318,7 +336,7 @@ export function AboutScene() {
             {/* Engineering method, as working principles — the same
                 discipline the evidence lines on the work page rely on. */}
             <Reveal delay={0.13}>
-              <div className="flex flex-wrap gap-1.5 mb-5">
+              <div className="flex flex-wrap gap-1.5 mb-5 justify-center">
                 {t.about.principles.map((p) => (
                   <span
                     key={p}
@@ -974,11 +992,11 @@ export function ExperienceScene() {
             <PageHeading eyebrow={t.experience.eyebrow} heading={t.experience.heading} />
             {/* Practical professional layer — deliberately separate
                 from the engineering identity on the work pages. */}
-            <Reveal delay={0.1}>
+            <Reveal delay={0.1} className="text-center">
               <p className="font-mono text-[9px] uppercase tracking-wider mb-2" style={{ color: 'rgba(228,226,223,0.4)' }}>
                 {t.experience.services.label}
               </p>
-              <div className="flex flex-wrap gap-1.5 max-w-md">
+              <div className="flex flex-wrap gap-1.5 justify-center">
                 {t.experience.services.items.map((s) => (
                   <span
                     key={s}

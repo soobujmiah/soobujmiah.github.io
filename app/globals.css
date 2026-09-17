@@ -1254,47 +1254,59 @@ body:has(> .services-doc) button {
   margin-top: 0.45rem;
 }
 
-/* ── Live clock — the identity system's smaller sibling ────────
-   Readable time in the site mono face; the particle language is
-   borrowed only as three calm pulsing dots. */
-.hero-clock {
+/* ── Live clock — date line + focal 12-hour time ────────────────
+   One quiet bilingual date/location line; below it the 12-hour clock
+   with seconds as the focal point. Changing characters remount and
+   play a short slot-morph; tabular digits keep widths stable so the
+   block never shifts. */
+.hero-clock-block {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-}
-.hero-clock-time {
-  font-size: 15px;
-  letter-spacing: 0.08em;
-  color: #e4e2df;
-  font-variant-numeric: tabular-nums;
-}
-.clock-dots {
-  display: inline-flex;
-  gap: 4px;
-  align-items: center;
-}
-.clock-dots i {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: #22c55e;
-  opacity: 0.5;
-  animation: clock-pulse 2.4s ease-in-out infinite;
-}
-.clock-dots i:nth-child(2) { animation-delay: 0.4s; }
-.clock-dots i:nth-child(3) { animation-delay: 0.8s; }
-@keyframes clock-pulse {
-  0%, 100% { opacity: 0.25; transform: scale(1); }
-  50% { opacity: 0.9; transform: scale(1.35); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .clock-dots i { animation: none; opacity: 0.5; transform: none; }
+  gap: 6px;
 }
 .hero-clock-date {
   font-size: 10px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(228, 226, 223, 0.45);
+}
+.hero-clock-time {
+  display: inline-flex;
+  align-items: baseline;
+  font-size: clamp(1.5rem, 4.5vw, 2.2rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: #e4e2df;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 18px rgba(34, 197, 94, 0.25);
+}
+.ck-ch {
+  display: inline-block;
+  animation: ck-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes ck-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+.ck-ampm {
+  margin-left: 0.5em;
+  font-size: 0.42em;
+  letter-spacing: 0.22em;
+  color: #4ade80;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ck-ch {
+    animation: none;
+  }
 }
 
 /* ── Contact: compact icon row ─────────────────────────────────
@@ -1304,6 +1316,7 @@ body:has(> .services-doc) button {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  justify-content: center;
 }
 .soc-btn {
   width: 40px;
