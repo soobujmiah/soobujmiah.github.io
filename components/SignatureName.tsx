@@ -122,7 +122,7 @@ const CANON_FORMS = [
    motifs between the service symbols, never a second system. */
 const SUPPORT_FORMS = [
   'binary', 'matrix', 'flow', 'orbit', 'globe', 'starfield',
-  'constellation', 'planet', 'satellite', 'galaxy', 'starsystem',
+  'constellation', 'satellite', 'galaxy', 'starsystem',
 ] as const;
 const FORMS = [...CANON_FORMS, ...SUPPORT_FORMS] as const;
 type FormId = (typeof FORMS)[number];
@@ -595,13 +595,6 @@ function drawForm(ctx: Ctx, form: FormId, W: number, H: number, seed: number): v
       poly(ctx, pts);
       ctx.stroke();
       for (const [x, y] of pts) circle(ctx, x, y, lw * (0.8 + rnd() * 0.6));
-      break;
-    }
-    case 'planet': {
-      circle(ctx, cx, cy, H * 0.26, false);
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, H * 0.46, H * 0.14, -0.4, 0, Math.PI * 2);
-      ctx.stroke();
       break;
     }
     case 'starsystem': {

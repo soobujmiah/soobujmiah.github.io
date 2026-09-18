@@ -1543,8 +1543,10 @@ body:has(> .services-doc) button {
 .idc-grid {
   display: grid;
   /* cells derive from the row count, so the denser 15-row matrix
-     still fills exactly the slot height and can never spill */
-  grid-template-columns: repeat(var(--cols, 7), calc(1.02em / var(--rows, 15)));
+     still fills exactly the slot height and can never spill; a
+     Bengali grid also carries --cw, the aspect-preserving cell width
+     its sampler measured — Latin keeps square cells */
+  grid-template-columns: repeat(var(--cols, 7), var(--cw, calc(1.02em / var(--rows, 15))));
   grid-template-rows: repeat(var(--rows, 15), calc(1.02em / var(--rows, 15)));
 }
 .idc-dot {
@@ -1627,6 +1629,13 @@ body:has(> .services-doc) button {
   color: #4ade80;
   animation: idc-fade 0.3s ease-out both;
 }
+/* Bengali digits are wide glyphs: their slots are wider, so every
+   grid keeps real horizontal breathing room between neighbours while
+   the roll still clips inside a fixed viewport (English untouched) */
+.idc-bn .idc-slot {
+  width: 1.05em;
+}
+
 .idc-bn .idc-ampm {
   font-family: var(--font-wordmark-bn), var(--font-bengali), sans-serif;
   letter-spacing: 0.06em;
