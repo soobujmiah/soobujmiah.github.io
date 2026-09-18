@@ -27,7 +27,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useLang, localizeDigits } from '@/app/language';
 import { hour12, twoDigit } from '@/app/clock';
 
-type DotGrid = { cols: number; rows: number; cells: boolean[] };
+type DotGrid = { cols: number; rows: number; cells: boolean[]; cw: number };
 
 const ROWS = 15; // 11 rows aliased Chakra Petch 6/9 into 8 — see the threshold note
 const SIZE = 88; // canvas glyph size, px
@@ -43,8 +43,8 @@ const gridCache = new Map<string, DotGrid | null>();
  * the next). Implausible coverage (no ink / tofu) → null, and the
  * caller falls back to the wordmark face as plain text.
  */
-function sampleGlyph(ch: string, faces: string): DotGrid | null {
-  const key = `${ch}|${faces}`;
+function sampleGlyph(ch: string, faces: string, bn: boolean): DotGrid | null {
+  const key = `${ch}|${faces}|${bn}`;
   const hit = gridCache.get(key);
   if (hit !== undefined) return hit;
   let grid: DotGrid | null = null;
@@ -78,11 +78,14 @@ function sampleGlyph(ch: string, faces: string): DotGrid | null {
       const h = by1 - by0 + 1;
       const cov = pts.length && w > 0 && h > 0 ? pts.length / 2 / (w * h) : 0;
       if (cov >= 0.05 && cov <= 0.72) {
-        /* 7-column cap: cells are fixed at 1/11 em and slots at
-           0.66 em, so 7 columns (0.636 em) is the widest grid that
-           cannot spill into the neighbouring slot — wide glyphs
-           sample slightly compressed instead of ever overlapping */
-        const cols = Math.max(3, Math.min(7, Math.round(w / (h / ROWS))));
+        /* Column caps follow the script. Latin digits are narrow
+           (w/h ≈ 0.55): 7 square-cell columns fit the 0.66 em slot.
+           Bengali digits are inherently wide (w/h ≈ 0.8–1.1, measured
+           on the shipped face) — 7 square columns squeezed them to
+           ~45% of their proportions, collapsing the loops so ৬ read
+           as ৫. Bengali gets 10 columns plus an aspect-preserving
+           cell width (cw) inside its own wider slot. */
+        const cols = Math.max(3, Math.min(bn ? 10 : 7, Math.round(w / (h / ROWS))));
         const n = new Uint16Array(ROWS * cols);
         for (let i = 0; i < pts.length; i += 2) {
           const c = Math.min(cols - 1, (((pts[i] - bx0) * cols) / w) | 0);
@@ -95,10 +98,20 @@ function sampleGlyph(ch: string, faces: string): DotGrid | null {
            both displayed as 8 — the clock "showed" numbers it never
            held (55→58→57→58→58→00). 32% keeps bowls open, stems
            solid, and every digit 0-9 visually distinct. */
-        const thr = Math.max(2, (w / cols) * (h / ROWS) * 0.32);
+        const thr = Math.max(2, (w / cols) * (h / ROWS) * (bn ? 0.25 : 0.32));
         const cells: boolean[] = [];
         for (let i = 0; i < ROWS * cols; i += 1) cells.push(n[i] >= thr);
-        grid = { cols, rows: ROWS, cells };
+        /* cw: the em cell width that keeps a Bengali grid at its true
+           proportions (the grid is always 1.02 em tall), capped so the
+           widest grid still fits the 1.05 em Bengali slot with real
+           breathing room. Latin keeps square cells (cw 0 → CSS
+           default), so the working English clock is byte-identical. */
+        grid = {
+          cols,
+          rows: ROWS,
+          cells,
+          cw: bn ? +Math.min(0.09, (1.02 * w) / (cols * h)).toFixed(4) : 0,
+        };
       }
     }
   } catch {
@@ -109,13 +122,13 @@ function sampleGlyph(ch: string, faces: string): DotGrid | null {
 }
 
 /** One digit's face: its dot matrix, or the wordmark face as text. */
-function DigitFace({ ch, faces }: { ch: string; faces: string | null }) {
-  const grid = faces ? sampleGlyph(ch, faces) : null;
+function DigitFace({ ch, faces, bn }: { ch: string; faces: string | null; bn: boolean }) {
+  const grid = faces ? sampleGlyph(ch, faces, bn) : null;
   return grid ? (
     <span
       className="idc-grid"
       aria-hidden="true"
-      style={{ '--cols': grid.cols, '--rows': grid.rows } as CSSProperties}
+      style={{ '--cols': grid.cols, '--rows': grid.rows, '--cw': grid.cw ? `${grid.cw}em` : undefined } as CSSProperties}
     >
       {grid.cells.map((on, i) =>
         on ? <span key={i} className="idc-dot" data-on="true" /> : <span key={i} className="idc-dot" />
@@ -133,7 +146,7 @@ function DigitFace({ ch, faces }: { ch: string; faces: string | null }) {
     inside the slot, so the clock block never moves and nothing can
     drift into the neighbours or out of the row. Unchanged digits keep
     their DOM and never animate. */
-function DigitSlot({ ch, faces }: { ch: string; faces: string | null }) {
+function DigitSlot({ ch, faces, bn }: { ch: string; faces: string | null; bn: boolean }) {
   const prevRef = useRef(ch);
   const [ghost, setGhost] = useState<string | null>(null);
   useEffect(() => {
@@ -148,13 +161,13 @@ function DigitSlot({ ch, faces }: { ch: string; faces: string | null }) {
     <span className="idc-slot">
       {ghost !== null && ghost !== ch ? (
         <span className="idc-ghost" aria-hidden="true">
-          <DigitFace ch={ghost} faces={faces} />
+          <DigitFace ch={ghost} faces={faces} bn={bn} />
         </span>
       ) : null}
       {/* key carries the value: a changed digit remounts and replays
           the roll-in; an unchanged digit keeps its DOM */}
       <span key={ch} className="idc-live">
-        <DigitFace ch={ch} faces={faces} />
+        <DigitFace ch={ch} faces={faces} bn={bn} />
       </span>
     </span>
   );
@@ -164,6 +177,7 @@ type ClockState = { h: string; m: string; s: string; ap: string; date: string };
 
 export function IdentityClock({ part = 'time' }: { part?: 'time' | 'date' }) {
   const { lang, t } = useLang();
+  const bn = lang === 'bn';
   const [state, setState] = useState<ClockState | null>(null);
   const [faces, setFaces] = useState<string | null>(null);
   const probeRef = useRef<HTMLSpanElement>(null);
@@ -257,19 +271,19 @@ export function IdentityClock({ part = 'time' }: { part?: 'time' | 'date' }) {
         &nbsp;
       </span>
     ) : (
-      <span ref={probeRef} className={lang === 'bn' ? 'idc-probe idc-bn' : 'idc-probe'} aria-hidden="true" />
+      <span ref={probeRef} className={bn ? 'idc-probe idc-bn' : 'idc-probe'} aria-hidden="true" />
     );
 
   if (isDate)
     return (
       <span className="hero-clock-date font-mono">
-        {state.date} · {lang === 'bn' ? 'জিএমটি+৬ · ঢাকা' : 'GMT+6 · Dhaka'}
+        {state.date} · {bn ? 'জিএমটি+৬ · ঢাকা' : 'GMT+6 · Dhaka'}
       </span>
     );
 
   const digits = [state.h[0], state.h[1], ':', state.m[0], state.m[1], ':', state.s[0], state.s[1]];
   return (
-    <span className={lang === 'bn' ? 'idclock idc-bn' : 'idclock'}>
+    <span className={bn ? 'idclock idc-bn' : 'idclock'}>
       <span ref={probeRef} className="idc-probe" aria-hidden="true" />
       <span className="idc-time">
         {digits.map((ch, i) =>
@@ -279,7 +293,7 @@ export function IdentityClock({ part = 'time' }: { part?: 'time' | 'date' }) {
               <i />
             </span>
           ) : (
-            <DigitSlot key={i} ch={ch ?? '0'} faces={faces} />
+            <DigitSlot key={i} ch={ch ?? '0'} faces={faces} bn={bn} />
           )
         )}
         <span key={state.ap} className="idc-ampm">
