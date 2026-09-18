@@ -1018,9 +1018,11 @@ export function SignatureName({
       const seed = (fieldSeed ^ Math.imul(cycle + 1, 0x85ebca6b)) >>> 0;
       const rnd = mulberry32(seed);
       /* per-cycle variety, bounded: spread, timing, turbulence. The
-         spread tops out at 1.0 so the waypoint families — whose radii
-         are fractions of the safe ellipse — can never exceed it. */
-      spreadScale = 0.75 + rnd() * 0.25;
+         tighter ceiling keeps the field reading as ONE cloud physically
+         reorganising near the stage centre, not as a burst that
+         dissolves the population; families stay inside the safe
+         ellipse with room for bend and turbulence. */
+      spreadScale = 0.6 + rnd() * 0.2;
       /* a form→form morph arcs tighter: the field reorganises in
          place instead of scattering across the whole stage */
       if (mode === 2) spreadScale *= 0.5;
@@ -1425,12 +1427,17 @@ export function SignatureName({
              stays inside the identity-green top of the ramp. */
           const depart = easeOut(clamp01(ue / SPREAD_AT));
           const holdS = dot * (0.85 + 0.6 * p.z);
-          const holdLc = 0.55 + 0.45 * p.z;
+          /* forms settle in the IDENTITY-GREEN top band of the ramp
+             (0.86–1.0) with depth shimmer — never down in the amber
+             assemble zone, so a shape can never read as "a different,
+             differently-coloured population": the same green particles
+             reorganise, subtly deepen, and return */
+          const holdLc = 0.86 + 0.14 * p.z;
           const restS = phase === 'toForm' ? dot : holdS;
-          const flyS = (restS + (dot * (1.0 + 0.5 * p.z) - restS) * depart) * (1 + 0.3 * pf);
+          const flyS = (restS + (dot * (1.0 + 0.3 * p.z) - restS) * depart) * (1 + 0.18 * pf);
           if (phase === 'toForm') {
             s = flyS + (holdS - flyS) * arrive;
-            lc = (1 - 0.3 * clamp01(mU)) * (1 - arrive) + holdLc * arrive;
+            lc = (1 - 0.12 * clamp01(mU)) * (1 - arrive) + holdLc * arrive;
           } else {
             s = flyS + (dot - flyS) * arrive;
             lc = holdLc + (1 - holdLc) * clamp01(mU);
@@ -1440,7 +1447,7 @@ export function SignatureName({
           x = p.m1x + T.microPx * 0.8 * Math.sin(ts * 1.4 + p.ph1) + (p.z - 0.5) * 3.2 * Math.sin(ts * 0.5);
           y = p.m1y + T.microPx * 0.8 * Math.cos(ts * 1.1 + p.ph2) + (p.z - 0.5) * 2.2 * Math.cos(ts * 0.42);
           s = dot * (0.85 + 0.6 * p.z);
-          lc = 0.55 + 0.45 * p.z;
+          lc = 0.86 + 0.14 * p.z;
         }
 
         buckets[bucketFor(lc, RAMP_BUCKETS)].rect(x - s / 2, y - s / 2, s, s);

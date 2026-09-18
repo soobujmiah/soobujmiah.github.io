@@ -78,14 +78,16 @@ function sampleGlyph(ch: string, faces: string, bn: boolean): DotGrid | null {
       const h = by1 - by0 + 1;
       const cov = pts.length && w > 0 && h > 0 ? pts.length / 2 / (w * h) : 0;
       if (cov >= 0.05 && cov <= 0.72) {
-        /* Column caps follow the script. Latin digits are narrow
-           (w/h ≈ 0.55): 7 square-cell columns fit the 0.66 em slot.
-           Bengali digits are inherently wide (w/h ≈ 0.8–1.1, measured
-           on the shipped face) — 7 square columns squeezed them to
-           ~45% of their proportions, collapsing the loops so ৬ read
-           as ৫. Bengali gets 10 columns plus an aspect-preserving
-           cell width (cw) inside its own wider slot. */
-        const cols = Math.max(3, Math.min(bn ? 10 : 7, Math.round(w / (h / ROWS))));
+        /* Column caps and cell widths follow the script, measured on
+           the shipped faces. Square cells inside a fixed column cap
+           squeeze every glyph toward the cap's aspect (7/15 ≈ 0.47):
+           Bengali digits (w/h ≈ 0.8–1.1) collapsed to ~45% of their
+           proportions — ৬ read as ৫ — and Latin digits (w/h ≈
+           0.42–0.79) to ~62%, nearly merging 6 with 8. So each grid
+           now carries --cw, the aspect-preserving cell width from its
+           own bounding box, at a per-script column cap (Latin 8,
+           Bengali 10) inside a slot wide enough to breathe. */
+        const cols = Math.max(3, Math.min(bn ? 10 : 8, Math.round(w / (h / ROWS))));
         const n = new Uint16Array(ROWS * cols);
         for (let i = 0; i < pts.length; i += 2) {
           const c = Math.min(cols - 1, (((pts[i] - bx0) * cols) / w) | 0);
@@ -101,16 +103,15 @@ function sampleGlyph(ch: string, faces: string, bn: boolean): DotGrid | null {
         const thr = Math.max(2, (w / cols) * (h / ROWS) * (bn ? 0.25 : 0.32));
         const cells: boolean[] = [];
         for (let i = 0; i < ROWS * cols; i += 1) cells.push(n[i] >= thr);
-        /* cw: the em cell width that keeps a Bengali grid at its true
-           proportions (the grid is always 1.02 em tall), capped so the
-           widest grid still fits the 1.05 em Bengali slot with real
-           breathing room. Latin keeps square cells (cw 0 → CSS
-           default), so the working English clock is byte-identical. */
+        /* cw: the em cell width that keeps the grid at the glyph's
+           true proportions (a grid is always 1.02 em tall), capped so
+           the widest grid still fits its slot — 0.80 em Latin, 1.05
+           em Bengali — with real breathing room on both sides. */
         grid = {
           cols,
           rows: ROWS,
           cells,
-          cw: bn ? +Math.min(0.09, (1.02 * w) / (cols * h)).toFixed(4) : 0,
+          cw: +Math.min(bn ? 0.09 : 0.085, (1.02 * w) / (cols * h)).toFixed(4),
         };
       }
     }
@@ -128,7 +129,7 @@ function DigitFace({ ch, faces, bn }: { ch: string; faces: string | null; bn: bo
     <span
       className="idc-grid"
       aria-hidden="true"
-      style={{ '--cols': grid.cols, '--rows': grid.rows, '--cw': grid.cw ? `${grid.cw}em` : undefined } as CSSProperties}
+      style={{ '--cols': grid.cols, '--rows': grid.rows, '--cw': `${grid.cw}em` } as CSSProperties}
     >
       {grid.cells.map((on, i) =>
         on ? <span key={i} className="idc-dot" data-on="true" /> : <span key={i} className="idc-dot" />
