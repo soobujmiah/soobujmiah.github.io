@@ -1534,7 +1534,10 @@ body:has(> .services-doc) button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 0.66em;
+  /* wide enough for the aspect-correct Latin grid (≤ 0.68 em) plus
+     breathing room on both sides — the slot stays fixed, so a digit
+     change never moves the clock */
+  width: 0.8em;
   height: 1.02em;
   /* the slot is a fixed viewport: the roll happens inside it and can
      never escape into the neighbouring digit or below the clock */
