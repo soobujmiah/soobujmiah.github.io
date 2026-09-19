@@ -62,7 +62,7 @@ writeFileSync(
         strict: false,
         plugins: [],
       },
-      include: ['app/graphemes.ts', 'app/sections.ts', 'app/language.tsx', 'app/geo.ts', 'app/name-motion.ts', 'app/design-tokens.ts', 'app/clock.ts'],
+      include: ['app/graphemes.ts', 'app/sections.ts', 'app/language.tsx', 'app/geo.ts', 'app/name-motion.ts', 'app/design-tokens.ts', 'app/clock.ts', 'app/story-scenes.ts'],
     },
     null,
     2
@@ -120,7 +120,16 @@ const {
   hexToRgb,
   mixRgb,
   rgbToCss,
+  spatialPairing,
+  flowPoint,
+  easeInOutQuint,
 } = await import(pathToFileURL(motionPath).href);
+const storyPath = pick('app/story-scenes.js', 'story-scenes.js');
+if (!storyPath) {
+  console.error('check-units FAIL: compiled app/story-scenes.ts not found');
+  process.exit(1);
+}
+const { STORY_BEATS } = await import(pathToFileURL(storyPath).href);
 const { MOTION } = await import(pathToFileURL(tokensPath).href);
 
 console.log('\nBengali grapheme segmentation (Intl.Segmenter path)');
@@ -324,6 +333,37 @@ eq('the guides are gone before the name resolves', NA.guideShare > 0 && NA.guide
 eq('the particle ceiling is a real ceiling', NA.maxParticles >= 400 && NA.maxParticles <= 4000, true);
 eq('the device-pixel ratio is capped for mobile fill rate', NA.maxDpr <= 2, true);
 eq('the settle overshoot stays subtle', NA.settleBack > 0 && NA.settleBack <= 1.2, true);
+eq('name-hold micro-drift stays subtle enough to keep the name readable', NA.microPx <= 0.35, true);
+eq('name-hold breath stays minimal', NA.breathPx <= 1.5, true);
+
+console.log('\nStorytelling canvas — spatial pairing + narrative beats');
+eq('easeInOutQuint starts and ends at the endpoints', [easeInOutQuint(0), easeInOutQuint(1)], [0, 1]);
+eq('flowPoint starts at A and ends at B', (() => {
+  const a = flowPoint(0, 0, 10, 0, 0, 4);
+  const b = flowPoint(0, 0, 10, 0, 1, 4);
+  return Math.hypot(a.x, a.y) < 1e-9 && Math.hypot(b.x - 10, b.y) < 1e-9;
+})(), true);
+eq('spatialPairing is structure-preserving (sorted left-to-right)', (() => {
+  const from = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 20, y: 0 }];
+  const to = [{ x: 0, y: 5 }, { x: 10, y: 5 }, { x: 20, y: 5 }];
+  const map = spatialPairing(from, to);
+  return map[0] === 0 && map[1] === 1 && map[2] === 2;
+})(), true);
+eq('spatialPairing handles unequal populations without throwing', (() => {
+  const from = [{ x: 0, y: 0 }, { x: 5, y: 0 }, { x: 10, y: 0 }, { x: 15, y: 0 }];
+  const to = [{ x: 0, y: 1 }, { x: 20, y: 1 }];
+  const map = spatialPairing(from, to);
+  return map.length === 4 && [...map].every((i) => i === 0 || i === 1);
+})(), true);
+eq('the story has a full life-cycle beat list', STORY_BEATS.length >= 12, true);
+eq('the story is deterministic (no random bag of forms)', Array.isArray(STORY_BEATS) && STORY_BEATS.every((b) => b.id && b.holdMs > 0 && b.morphMs > 0), true);
+eq('sleep is the last beat before name return', STORY_BEATS[STORY_BEATS.length - 1].id, 'sleep');
+eq('the first beat is waking', STORY_BEATS[0].id, 'wake_sleep');
+const ids = STORY_BEATS.map((b) => b.id);
+eq('robot→phone arc is present', ids.includes('robot') && ids.includes('robot_phone') && ids.includes('phone'), true);
+eq('work / break / game / read arc is present', ids.includes('work') && ids.includes('break_1') && ids.includes('game') && ids.includes('read'), true);
+eq('build / test / debug / success arc is present', ids.includes('build') && ids.includes('test') && ids.includes('debug') && ids.includes('success'), true);
+eq('retired random form ids are gone from the story', !ids.some((id) => ['code', 'braces', 'git', 'gpu', 'npu', 'galaxy', 'starfield'].includes(id)), true);
 
 rmSync(cfgPath, { force: true });
 rmSync(tmp, { recursive: true, force: true });

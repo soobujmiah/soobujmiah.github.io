@@ -249,3 +249,88 @@ export function particleBudget(viewportWidth: number, cores: number, cap: number
   if (weak) budget = Math.round(budget * 0.8);
   return Math.max(180, Math.min(cap, budget));
 }
+
+/**
+ * Smoothstep / quintic fade — continuous velocity at the endpoints when used
+ * as a morph parameter (no sudden acceleration).
+ */
+export function easeInOutQuint(t: number): number {
+  const x = clamp01(t);
+  return x < 0.5 ? 16 * x * x * x * x * x : 1 - Math.pow(-2 * x + 2, 5) / 2;
+}
+
+export function easeInOutCubic(t: number): number {
+  const x = clamp01(t);
+  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
+
+/**
+ * Spatial particle↔target correspondence.
+ *
+ * Sorts both clouds by a stable spatial key (x then y) and pairs them in
+ * order so neighbouring material stays neighbouring. When the populations
+ * differ, targets are stretched evenly across the particle list — never
+ * randomly shuffled. This is the anti-noise contract for the storytelling
+ * canvas: particles must appear to flow, not teleport.
+ */
+export function spatialPairing(
+  from: Array<{ x: number; y: number }>,
+  to: Array<{ x: number; y: number }>
+): Int32Array {
+  const n = from.length;
+  const m = to.length;
+  const map = new Int32Array(n);
+  if (n === 0 || m === 0) return map;
+
+  const fi = new Array<number>(n);
+  const ti = new Array<number>(m);
+  for (let i = 0; i < n; i += 1) fi[i] = i;
+  for (let i = 0; i < m; i += 1) ti[i] = i;
+
+  const bySpatial = (
+    pts: Array<{ x: number; y: number }>,
+    a: number,
+    b: number
+  ): number => {
+    const dx = pts[a].x - pts[b].x;
+    if (Math.abs(dx) > 0.01) return dx;
+    return pts[a].y - pts[b].y;
+  };
+
+  fi.sort((a, b) => bySpatial(from, a, b));
+  ti.sort((a, b) => bySpatial(to, a, b));
+
+  for (let k = 0; k < n; k += 1) {
+    const dest = m === 1 ? 0 : Math.min(m - 1, Math.floor((k * m) / n));
+    map[fi[k]] = ti[dest];
+  }
+  return map;
+}
+
+/**
+ * Quadratic Bézier through a controlled midpoint. The midpoint is biased
+ * toward the short path so long-distance pairs arc gently instead of
+ * cutting diagonally through the whole field.
+ */
+export function flowPoint(
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+  t: number,
+  bend: number
+): { x: number; y: number } {
+  const e = easeInOutQuint(t);
+  const mx = (ax + bx) * 0.5;
+  const my = (ay + by) * 0.5;
+  const dx = bx - ax;
+  const dy = by - ay;
+  const len = Math.hypot(dx, dy) || 1;
+  const cx = mx + (-dy / len) * bend;
+  const cy = my + (dx / len) * bend;
+  const u = 1 - e;
+  return {
+    x: u * u * ax + 2 * u * e * cx + e * e * bx,
+    y: u * u * ay + 2 * u * e * cy + e * e * by,
+  };
+}
