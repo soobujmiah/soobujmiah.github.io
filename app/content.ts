@@ -134,6 +134,10 @@ export interface Content {
     availability: string;
     ctaWork: string;
     ctaGithub: string;
+    /** Service discovery — the practical-services offer, and the
+        pointer to the canonical Services entry (top navigation). */
+    servicesOffer: string;
+    servicesPoint: string;
   };
   presence: {
     eyebrow: string;
@@ -287,6 +291,9 @@ const en: Content = {
     availability: 'Open to remote',
     ctaWork: 'Explore my work',
     ctaGithub: 'View GitHub ↗',
+    servicesOffer:
+      'Need a website, custom software, Android support, computer help, business technology, design or digital office support?',
+    servicesPoint: 'Explore Services at the top to see available services, scope and how to get started',
   },
   presence: {
     eyebrow: '02 — What I Build',
@@ -755,6 +762,9 @@ const bn: Content = {
     availability: 'রিমোটে উন্মুক্ত',
     ctaWork: 'আমার কাজ দেখুন',
     ctaGithub: 'গিটহাব দেখুন ↗',
+    servicesOffer:
+      'ওয়েবসাইট, কাস্টম সফটওয়্যার, অ্যান্ড্রয়েড ও ফোন সহায়তা, কম্পিউটার সমস্যা সমাধান, ছোট ব্যবসার প্রযুক্তি, গ্রাফিক্স ডিজাইন কিংবা ডিজিটাল অফিস সহায়তা প্রয়োজন?',
+    servicesPoint: 'উপরের ন্যাভিগেশনের সার্ভিস তালিকায় সব সেবা, পরিসর ও শুরু করার নিয়ম দেখে নিন',
   },
   presence: {
     eyebrow: '০২ — আমি যা তৈরি করি',

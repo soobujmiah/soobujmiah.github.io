@@ -138,6 +138,38 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
           {t.profile.tagline}
         </motion.p>
 
+        {/* 3b · service discovery — what the same person also provides.
+            Sits BELOW the identity (clock → name → its particle life →
+            role → status → tagline) and before the engineering story,
+            so the personal/technical identity stays the first
+            impression and the practical offer immediately follows it.
+            The pointer routes to the canonical Services entry — the
+            existing top-navigation Services item (/services/, and its
+            mobile header pill) — it adds no competing navigation and
+            no new pager section: the service layer stays outside the
+            nine-page pager. */}
+        <motion.div
+          className="mt-5 flex flex-col items-center gap-2"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.71, duration: 0.7 }}
+        >
+          <p
+            className="mx-auto max-w-xl px-2 text-[13px] leading-relaxed sm:text-sm"
+            style={{ color: 'rgba(228,226,223,0.72)' }}
+          >
+            {t.hero.servicesOffer}
+          </p>
+          <a
+            href={serviceHref()}
+            className="font-mono text-[10px] tracking-[0.18em] underline decoration-[rgba(74,222,128,0.35)] underline-offset-4 transition-opacity duration-300 hover:opacity-80 sm:text-[11px]"
+            style={{ color: '#4ade80' }}
+          >
+            {t.hero.servicesPoint}
+            <span aria-hidden="true"> →</span>
+          </a>
+        </motion.div>
+
         {/* 4 · what I build, and why it is credible */}
         <motion.p
           className="mx-auto mt-4 max-w-lg text-sm leading-relaxed"
