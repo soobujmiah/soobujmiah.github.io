@@ -181,7 +181,9 @@ const jsonLd = {
           en.profile.github,
           en.profile.linkedin,
           `https://t.me/${en.profile.telegram.replace(/^@/, '')}`,
-          ...en.contact.groups.flatMap((g) => g.links.map((l) => l.href)),
+          ...en.contact.groups
+            .flatMap((g) => g.links.map((l) => l.href))
+            .filter((href) => /^https?:\/\//i.test(href)),
         ])
       ),
       knowsLanguage: ['bn', 'en', 'hi', 'ur', 'ar'],
