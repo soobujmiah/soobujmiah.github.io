@@ -81,7 +81,7 @@ const en: ServicesContent = {
   ],
   hubSeoTitle: 'Services — Web, Software, Computer & Android Support, Design, Admin, Data',
   hubSeoDescription:
-    'Services by Sobuj Miah: website development, custom software, computer and Android support, business technology, graphics design, office administration and data entry. Based in Dhaka, Bangladesh; remote worldwide.',
+    'Services by Sobuj Miah: website development, custom software, computer and Android support, business technology, graphics design, office administration and data entry. Based in Savar, Dhaka, Bangladesh; remote worldwide.',
   labels: {
     hub: 'Services',
     forWho: 'Who it is for',
@@ -102,7 +102,7 @@ const en: ServicesContent = {
     telegram: 'Telegram',
     contactPage: 'Contact page',
   },
-  availability: 'Based in Dhaka, Bangladesh · remote worldwide. Work is delivered remotely; on-site visits are not offered as a standard service.',
+  availability: 'Based in Savar, Dhaka, Bangladesh · remote worldwide. Work is delivered remotely; on-site visits are not offered as a standard service.',
   contactCta: 'Direct contact is available on WhatsApp and Telegram; email also works, and the contact page lists every channel. Describe the problem, the desired outcome and the timeline if there is one; I will respond with the relevant questions and a practical next step.',
   pages: [
     {
@@ -430,7 +430,7 @@ const bn: ServicesContent = {
   ],
   hubSeoTitle: 'সেবাসমূহ — ওয়েব, সফটওয়্যার, কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, ডিজাইন, প্রশাসন, ডেটা',
   hubSeoDescription:
-    'সবুজ মিয়ার সেবাসমূহ: ওয়েবসাইট তৈরি, কাস্টম সফটওয়্যার, কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, ব্যবসার প্রযুক্তি, গ্রাফিক্স ডিজাইন, অফিস অ্যাডমিনিস্ট্রেশন ও ডেটা এন্ট্রি। ঢাকা, বাংলাদেশে অবস্থিত; বিশ্বব্যাপী রিমোট।',
+    'সবুজ মিয়ার সেবাসমূহ: ওয়েবসাইট তৈরি, কাস্টম সফটওয়্যার, কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, ব্যবসার প্রযুক্তি, গ্রাফিক্স ডিজাইন, অফিস অ্যাডমিনিস্ট্রেশন ও ডেটা এন্ট্রি। সাভার, ঢাকা, বাংলাদেশে অবস্থিত; বিশ্বব্যাপী রিমোট।',
   labels: {
     hub: 'সেবাসমূহ',
     forWho: 'কাদের জন্য',
@@ -451,7 +451,7 @@ const bn: ServicesContent = {
     telegram: 'টেলিগ্রাম',
     contactPage: 'যোগাযোগ পাতা',
   },
-  availability: 'ঢাকা, বাংলাদেশে অবস্থিত · বিশ্বব্যাপী রিমোট। কাজ রিমোটে সম্পন্ন হয়; সরেজমিন পরিদর্শন নিয়মিত সেবা হিসেবে দেওয়া হয় না।',
+  availability: 'সাভার, ঢাকা, বাংলাদেশে অবস্থিত · বিশ্বব্যাপী রিমোট। কাজ রিমোটে সম্পন্ন হয়; সরেজমিন পরিদর্শন নিয়মিত সেবা হিসেবে দেওয়া হয় না।',
   contactCta: 'সরাসরি যোগাযোগের জন্য হোয়াটসঅ্যাপ ও টেলিগ্রাম রয়েছে; ইমেইলও কাজ করে, আর যোগাযোগ পাতায় সব মাধ্যমের তালিকা আছে। সমস্যাটি, কাঙ্ক্ষিত ফলাফল এবং সময়সীমা থাকলে সেটি লিখে পাঠান; আমি প্রাসঙ্গিক প্রশ্ন ও একটি বাস্তব পরবর্তী ধাপ নিয়ে উত্তর দেব।',
   pages: [
     {
