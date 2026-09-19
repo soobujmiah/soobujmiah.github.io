@@ -1479,9 +1479,66 @@ body:has(> .services-doc) button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  margin-bottom: clamp(14px, 3.2dvh, 30px);
+  gap: 6px;
+  /* Pull the clock toward the header so the story canvas gets vertical room. */
+  margin-top: clamp(-6px, -0.8dvh, 0px);
+  margin-bottom: clamp(8px, 1.6dvh, 16px);
+  flex-shrink: 0;
   animation: hero-clock-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
+}
+
+/* Reserved band for the particle storytelling world.
+   The canvas is positioned to this box (not the whole page), so bed /
+   person / robot scenes cannot paint over the clock or the role copy. */
+.hero-story-stage {
+  position: relative;
+  width: 100%;
+  max-width: 42rem;
+  /* Enough height for a side-view bedroom on phones; grows on desktop. */
+  height: clamp(200px, 34dvh, 340px);
+  margin: 0 auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Isolate painting; never intercept pointer events meant for CTAs. */
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hero-story-stage .hero-name {
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+  /* Keep the name optically centred in the band without eating scene room. */
+  margin: 0;
+  max-width: 100%;
+}
+
+.hero-story-stage .sig-canvas {
+  /* Canvas fills the story stage (containing block), not the page. */
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+@media (max-height: 700px) {
+  .hero-story-stage {
+    height: clamp(170px, 30dvh, 260px);
+  }
+  .hero-clock-wrap {
+    margin-bottom: 6px;
+    gap: 4px;
+  }
+}
+
+@media (min-width: 768px) {
+  .hero-story-stage {
+    height: clamp(240px, 36dvh, 380px);
+    max-width: 48rem;
+  }
 }
 @keyframes hero-clock-in {
   from {

@@ -62,7 +62,7 @@ writeFileSync(
         strict: false,
         plugins: [],
       },
-      include: ['app/graphemes.ts', 'app/sections.ts', 'app/language.tsx', 'app/geo.ts', 'app/name-motion.ts', 'app/design-tokens.ts', 'app/clock.ts', 'app/story-scenes.ts'],
+      include: ['app/graphemes.ts', 'app/sections.ts', 'app/language.tsx', 'app/geo.ts', 'app/name-motion.ts', 'app/design-tokens.ts', 'app/clock.ts', 'app/story-world.ts'],
     },
     null,
     2
@@ -124,12 +124,12 @@ const {
   flowPoint,
   easeInOutQuint,
 } = await import(pathToFileURL(motionPath).href);
-const storyPath = pick('app/story-scenes.js', 'story-scenes.js');
+const storyPath = pick('app/story-world.js', 'story-world.js');
 if (!storyPath) {
-  console.error('check-units FAIL: compiled app/story-scenes.ts not found');
+  console.error('check-units FAIL: compiled app/story-world.ts not found');
   process.exit(1);
 }
-const { STORY_BEATS } = await import(pathToFileURL(storyPath).href);
+const { STORY_BEATS, physicsLandT } = await import(pathToFileURL(storyPath).href);
 const { MOTION } = await import(pathToFileURL(tokensPath).href);
 
 console.log('\nBengali grapheme segmentation (Intl.Segmenter path)');
@@ -336,7 +336,7 @@ eq('the settle overshoot stays subtle', NA.settleBack > 0 && NA.settleBack <= 1.
 eq('name-hold micro-drift stays subtle enough to keep the name readable', NA.microPx <= 0.35, true);
 eq('name-hold breath stays minimal', NA.breathPx <= 1.5, true);
 
-console.log('\nStorytelling canvas — spatial pairing + narrative beats');
+console.log('\nStory world — spatial pairing + continuous bedroom narrative');
 eq('easeInOutQuint starts and ends at the endpoints', [easeInOutQuint(0), easeInOutQuint(1)], [0, 1]);
 eq('flowPoint starts at A and ends at B', (() => {
   const a = flowPoint(0, 0, 10, 0, 0, 4);
@@ -355,15 +355,20 @@ eq('spatialPairing handles unequal populations without throwing', (() => {
   const map = spatialPairing(from, to);
   return map.length === 4 && [...map].every((i) => i === 0 || i === 1);
 })(), true);
-eq('the story has a full life-cycle beat list', STORY_BEATS.length >= 12, true);
+eq('physics land curve starts at 0 and ends near 1', physicsLandT(0) === 0 && physicsLandT(1) >= 0.99, true);
+eq('physics land curve is finite across the path', [0.1, 0.35, 0.5, 0.7, 0.9].every((t) => Number.isFinite(physicsLandT(t))), true);
+eq('the story has a full continuous-world beat list', STORY_BEATS.length >= 16, true);
 eq('the story is deterministic (no random bag of forms)', Array.isArray(STORY_BEATS) && STORY_BEATS.every((b) => b.id && b.holdMs > 0 && b.morphMs > 0), true);
-eq('sleep is the last beat before name return', STORY_BEATS[STORY_BEATS.length - 1].id, 'sleep');
-eq('the first beat is waking', STORY_BEATS[0].id, 'wake_sleep');
+eq('first beat is a real bedroom sleep scene', STORY_BEATS[0].id, 'bed_sleep');
+eq('last beat returns to sleep before name', STORY_BEATS[STORY_BEATS.length - 1].id, 'sleep');
 const ids = STORY_BEATS.map((b) => b.id);
-eq('robot→phone arc is present', ids.includes('robot') && ids.includes('robot_phone') && ids.includes('phone'), true);
+eq('wake posture chain is present', ids.includes('bed_stir') && ids.includes('bed_sit') && ids.includes('bed_stand'), true);
+eq('robot→phone→land arc is present', ids.includes('robot_active') && ids.includes('robot_compress') && ids.includes('phone_held') && ids.includes('phone_land'), true);
 eq('work / break / game / read arc is present', ids.includes('work') && ids.includes('break_1') && ids.includes('game') && ids.includes('read'), true);
 eq('build / test / debug / success arc is present', ids.includes('build') && ids.includes('test') && ids.includes('debug') && ids.includes('success'), true);
-eq('retired random form ids are gone from the story', !ids.some((id) => ['code', 'braces', 'git', 'gpu', 'npu', 'galaxy', 'starfield'].includes(id)), true);
+eq('retired silhouette icon ids are gone', !ids.some((id) => ['wake_sleep', 'wake_rise', 'code', 'braces', 'git', 'gpu', 'galaxy'].includes(id)), true);
+eq('bedroom hold is long enough to read the scene', STORY_BEATS[0].holdMs >= 2000, true);
+eq('name-hold micro-drift stays subtle enough to keep the name readable', NA.microPx <= 0.35, true);
 
 rmSync(cfgPath, { force: true });
 rmSync(tmp, { recursive: true, force: true });
