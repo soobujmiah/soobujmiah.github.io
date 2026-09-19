@@ -1,20 +1,18 @@
 'use client';
 
 /* ═══════════════════════════════════════════════════════════════
-   SIGNATURE NAME — continuous particle storytelling world.
+   SIGNATURE NAME — service-driven particle storytelling canvas.
 
-   One particle population. One spatial world. One character.
+   One particle population continuously morphs:
 
-       NAME → BEDROOM (bed + pillow + blanket + sleeper + robot)
-            → wake postures → robot activates → robot→phone
-            → phone lands on mattress → work → break → game → read
-            → build → test → debug → break → build → success
-            → return to bed → sleep → NAME → …
+       NAME → website → software → devices → business
+            → graphics → office → data → NAME → …
 
-   Scenes are real compositions (app/story-world.ts), not icon swaps.
-   Correspondence is spatial; morphs use flow curves + light physics.
+   Scene geometry (app/story-world.ts) abstracts the real Services
+   pillars — never invents offerings, never day-in-the-life theatre.
+   Correspondence is spatial; morphs use flow curves.
    The canvas is bound to .hero-story-stage so it never paints over
-   the clock or the hero copy.
+   the clock, role copy, CTAs, or the bottom HUD.
 
    Reduced motion: static multi-tone wordmark, no canvas loop.
    ═══════════════════════════════════════════════════════════════ */
@@ -38,12 +36,7 @@ import {
   spatialPairing,
   startOffset,
 } from '@/app/name-motion';
-import {
-  STORY_BEATS,
-  sampleWorldScene,
-  physicsLandT,
-  type SceneBeat,
-} from '@/app/story-world';
+import { STORY_BEATS, sampleWorldScene, type SceneBeat } from '@/app/story-world';
 
 const INKS = ['#a3e635', '#4ade80', '#22c55e', '#34d399', '#10b981', '#2dd4bf', '#84cc16', '#16a34a'];
 const ASSEMBLE_INKS = ['#7dd3fc', '#a5b4fc', '#93c5fd', '#67e8f9'];
@@ -80,8 +73,6 @@ const clamp01 = (t: number): number => (t < 0 ? 0 : t > 1 ? 1 : t);
 function motionEase(kind: SceneBeat['motion'], t: number): number {
   const x = clamp01(t);
   switch (kind) {
-    case 'physics':
-      return physicsLandT(x);
     case 'organic':
       return easeInOutQuint(x * 0.94 + 0.06 * x * x);
     case 'mechanical': {
@@ -394,14 +385,14 @@ export function SignatureName({
         p.toY = dest.y + jy;
         const dist = Math.hypot(p.toX - p.fromX, p.toY - p.fromY);
         const bendScale =
-          motion === 'physics'
-            ? 0.12
-            : motion === 'mechanical'
-              ? 0.16
-              : motion === 'organic'
-                ? 0.26
-                : motion === 'energetic'
-                  ? 0.3
+          motion === 'mechanical'
+            ? 0.16
+            : motion === 'organic'
+              ? 0.26
+              : motion === 'energetic'
+                ? 0.3
+                : motion === 'precise'
+                  ? 0.14
                   : 0.2;
         p.bend = (rnd() - 0.5) * Math.min(56, dist * bendScale);
         p.stg = (i / Math.max(1, n - 1)) * 0.08 + rnd() * 0.03;
@@ -592,19 +583,12 @@ export function SignatureName({
           // scene hold — soft depth shimmer, restrained breath on sleep
           x = p.toX + T.microPx * 0.85 * Math.sin(ts * 1.05 + p.ph1);
           y = p.toY + T.microPx * 0.85 * Math.cos(ts * 0.9 + p.ph2);
-          const sleepish =
-            currentBeat?.id === 'bed_sleep' ||
-            currentBeat?.id === 'bed_stir' ||
-            currentBeat?.id === 'sleep';
-          if (sleepish) {
-            const breath = 0.5 + 0.5 * Math.sin(ts * 1.4 + p.ph3);
-            y += breath * 0.55 * (p.z - 0.5);
-          }
-          if (currentBeat?.id === 'success') {
-            const pulse = 0.5 + 0.5 * Math.sin(ts * 2.0);
-            s = dot * (0.94 + 0.18 * p.z + 0.05 * pulse);
-          } else if (currentBeat?.id === 'game') {
-            s = dot * (0.9 + 0.2 * p.z + 0.035 * Math.sin(ts * 2.8 + p.ph3));
+          // soft depth shimmer on service holds — denser on data climax
+          if (currentBeat?.id === 'data') {
+            const pulse = 0.5 + 0.5 * Math.sin(ts * 1.6);
+            s = dot * (0.94 + 0.18 * p.z + 0.04 * pulse);
+          } else if (currentBeat?.id === 'devices') {
+            s = dot * (0.9 + 0.2 * p.z + 0.02 * Math.sin(ts * 2.2 + p.ph3));
           } else {
             s = dot * (0.9 + 0.2 * p.z);
           }
