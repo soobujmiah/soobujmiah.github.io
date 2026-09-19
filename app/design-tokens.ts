@@ -42,18 +42,15 @@ export const MOTION = {
   reveal: { seconds: 0.7, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' },
   /** Magnetic link pointer-follow / release. */
   magnetic: { followSeconds: 0.12, releaseSeconds: 0.5, pressSeconds: 0.1 },
-  /** Signature identity — the wordmark is *constructed*, not revealed:
-      its own rendered ink is sampled into a dispersed particle field
-      that travels home and resolves into real typography. One-shot and
-      deterministic (seeded from the name); nothing loops afterwards.
-
-      Shares are fractions of `totalSeconds`, and they are a budget that
-      must sum to 1: the last cluster starts at clusterShare +
-      jitterShare and travels for travelShare, so
-      `clusterShare + jitterShare + travelShare === 1`. */
+  /** Signature identity — the wordmark is *constructed* from its own
+      rendered ink, then becomes a continuous particle storytelling
+      canvas (life/work cycle → back to name). Deterministic and seeded
+      from the name. Shares of `totalSeconds` are a budget that must sum
+      to 1: last cluster starts at clusterShare + jitterShare and travels
+      for travelShare, so `clusterShare + jitterShare + travelShare === 1`. */
   nameAssemble: {
-    /** Whole construction, seconds. */
-    totalSeconds: 1.6,
+    /** Whole name construction, seconds. */
+    totalSeconds: 2.0,
     /** Outgoing wordmark's exit when the language changes, seconds. */
     outgoingSeconds: 0.22,
     /** Cross-fade from particles to the real DOM text, seconds. */
@@ -61,16 +58,17 @@ export const MOTION = {
     /** Language retarget: the old particle glyphs loosen and fade over
         this many seconds while the new field prepares to form. */
     dissolveSeconds: 0.45,
-    /** Alive state: amplitude of the permanent micro-drift, CSS px. */
-    microPx: 0.55,
-    /** Alive state: period of one staggered breath wave, seconds. */
-    breathSeconds: 6.5,
-    /** Alive state: share of the breath period one wave occupies. */
-    breathWindow: 0.42,
-    /** Alive state: peak displacement of a breath wave, CSS px. */
-    breathPx: 4.5,
+    /** Name-hold micro-drift amplitude, CSS px — keep tiny so the name
+        stays clearly readable during the stable identity beat. */
+    microPx: 0.18,
+    /** Reserved breath period (story holds use near-zero breath). */
+    breathSeconds: 8.0,
+    /** Reserved breath window share. */
+    breathWindow: 0.2,
+    /** Name-hold breath peak, CSS px — intentionally minimal. */
+    breathPx: 0.6,
     /** Baseline rule + cluster ticks fade out over this share. */
-    guideShare: 0.62,
+    guideShare: 0.55,
     /** Left-to-right stagger across the grapheme clusters. */
     clusterShare: 0.3,
     /** Deterministic timing spread inside one cluster. */
@@ -78,13 +76,13 @@ export const MOTION = {
     /** Each particle's travel time. */
     travelShare: 0.55,
     /** Ease-out overshoot strength — 0 is plain, 0.7 seats subtly. */
-    settleBack: 0.7,
+    settleBack: 0.55,
     /** Dispersal radius, as a multiple of the wordmark box height. */
-    disperseRadius: 1.35,
-    /** Hard ceiling on live particles — a budget, not a target. */
-    maxParticles: 2000,
+    disperseRadius: 1.15,
+    /** Hard ceiling on the single global particle population. */
+    maxParticles: 2200,
     /** Sampling grid step in CSS px before the budget adapts it. */
-    sampleStepPx: 2.6,
+    sampleStepPx: 2.4,
     /** Device-pixel-ratio cap for the construction canvas. */
     maxDpr: 2,
   },
