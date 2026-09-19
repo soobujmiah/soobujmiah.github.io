@@ -97,8 +97,9 @@ export const metadata: Metadata = {
     'Qualcomm', 'Hexagon', 'QNN', 'Termux', 'PRoot', 'Debian',
     'Flutter', 'Dart', 'Kotlin', 'JNI', 'Android NDK', 'GitHub Actions',
     /* Practical technology services — genuinely offered (see /experience
-       and /contact); Dhaka, Bangladesh base with remote support worldwide. */
+       and /contact); Savar, Dhaka, Bangladesh base with remote support worldwide. */
     'software developer Bangladesh', 'website developer Bangladesh',
+    'Savar', 'Dhaka', 'সাভার',
     'website development', 'website maintenance', 'custom software development',
     'computer troubleshooting', 'computer setup', 'Linux setup', 'Windows troubleshooting',
     'Android troubleshooting', 'Android setup', 'ADB setup', 'phone optimization',

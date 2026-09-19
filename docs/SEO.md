@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | **SEO standard** | [soobujmiah SEO Standard v1](https://github.com/soobujmiah/soobujmiah.github.io/blob/main/docs/SEO_STANDARD.md) |
-| **Last audit** | 2026-09-16 (Phase 2: service-intent layer added) |
+| **Last audit** | 2026-09-19 (Phase 3: Savar/Dhaka geographic refinement — commercial/local SEO preservation pass) |
 | **Site status** | `LIVE_SITE` — https://soobujmiah.github.io/ (GitHub Pages, workflow deploy) |
 | **Role in identity graph** | **Hub.** Every public project links back here; this site links to every public project. |
 | **Search intent** | `Sobuj Miah` / `soobujmiah` identity → engineering positioning + practical technology services |

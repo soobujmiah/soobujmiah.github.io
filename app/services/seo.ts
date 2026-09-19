@@ -88,7 +88,11 @@ export function pageJsonLd(slug: ServiceSlug) {
         url,
         serviceType: page.title,
         provider: { '@id': PERSON_ID },
-        areaServed: [{ '@type': 'Country', name: 'Bangladesh' }, { '@type': 'Place', name: 'Worldwide (remote)' }],
+        /* Service area, not a storefront: Savar/Dhaka is where the work
+           happens (see /experience/ — Savar, Dhaka roles), Bangladesh is
+           the home country, and delivery is remote worldwide. No address,
+           hours, prices or ratings — nothing the page does not say. */
+        areaServed: [{ '@type': 'City', name: 'Savar' }, { '@type': 'City', name: 'Dhaka' }, { '@type': 'Country', name: 'Bangladesh' }, { '@type': 'Place', name: 'Worldwide (remote)' }],
         availableChannel: { '@type': 'ServiceChannel', serviceUrl: url, availableLanguage: ['en', 'bn'] },
         inLanguage: ['en', 'bn'],
       },
