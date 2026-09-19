@@ -79,10 +79,12 @@ export const MOTION = {
     settleBack: 0.55,
     /** Dispersal radius, as a multiple of the wordmark box height. */
     disperseRadius: 1.15,
-    /** Hard ceiling on the single global particle population. */
-    maxParticles: 2200,
+    /** Hard ceiling on the single global particle population.
+        Bedroom multi-object scenes (bed+pillow+blanket+human+robot)
+        need more ink than a wordmark alone; one shared pool still. */
+    maxParticles: 2800,
     /** Sampling grid step in CSS px before the budget adapts it. */
-    sampleStepPx: 2.4,
+    sampleStepPx: 2.2,
     /** Device-pixel-ratio cap for the construction canvas. */
     maxDpr: 2,
   },

@@ -83,8 +83,8 @@ below verbatim. Both stay correct — the gate guarantees it.
       "travelShare": 0.55,
       "settleBack": 0.55,
       "disperseRadius": 1.15,
-      "maxParticles": 2200,
-      "sampleStepPx": 2.4,
+      "maxParticles": 2800,
+      "sampleStepPx": 2.2,
       "maxDpr": 2
     },
     "pullToRefresh": {

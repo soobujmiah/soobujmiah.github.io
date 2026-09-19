@@ -88,26 +88,27 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
       <PageNumeral index={0} />
 
       <div className="page-content flex flex-col items-center text-center">
-        {/* 0 · live local time — the identity system's smaller sibling.
-            It leads the page directly under the header: clock first,
-            its date/timezone metadata directly beneath (one block),
-            then the identity mark. Rendered in the name's own dotted
-            typographic language (components/IdentityClock.tsx); the
-            entrance is pure CSS, disabled under reduced motion. */}
+        {/* 0 · live local time — sits above the storytelling canvas so the
+            clock never overlaps the living particle world. Compact on
+            short viewports; CSS owns the spacing contract. */}
         <div className="hero-clock-wrap">
           <IdentityClock part="time" />
           <IdentityClock part="date" />
         </div>
 
-        {/* 1 · who I am — the identity mark leads the content; only the
-            clock, its sibling instrument, sits above it */}
-        <h1 className="hero-name text-[clamp(min(3.85rem,16.6vw),10.5vw,7.8rem)] font-semibold leading-[1.06] tracking-tight">
-          <SignatureName text={t.profile.nameFull} reducedMotion={reducedMotion} armed={armed} />
-        </h1>
+        {/* 1 · particle storytelling canvas — name + continuous day-cycle
+            world. Owns a reserved vertical band so bed/person/robot
+            scenes never collide with the clock above or the role copy
+            below. */}
+        <div className="hero-story-stage">
+          <h1 className="hero-name text-[clamp(min(2.6rem,11vw),8.5vw,5.6rem)] font-semibold leading-[1.08] tracking-tight">
+            <SignatureName text={t.profile.nameFull} reducedMotion={reducedMotion} armed={armed} />
+          </h1>
+        </div>
 
-        {/* 2 · what I am — the professional identity, directly under the name */}
+        {/* 2 · what I am — the professional identity, below the story band */}
         <motion.p
-          className="hero-role mt-8 text-[13px] font-medium sm:text-sm"
+          className="hero-role mt-5 text-[13px] font-medium sm:text-sm sm:mt-6"
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.6, duration: 0.7 }}
