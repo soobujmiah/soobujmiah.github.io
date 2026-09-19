@@ -1285,7 +1285,12 @@ export function SignatureName({
           const x = p.tx + p.bx * ease * 16;
           const y = p.ty + p.by * ease * 16;
           const s = dot * (1 + 0.35 * ease);
-          buckets[bucketFor(1, RAMP_BUCKETS - (i % 3))].rect(x - s / 2, y - s / 2, s, s);
+          /* the dissolve is the name's own material loosening: the top
+             ramp bucket only — the same green it held in every other
+             phase (a fixed bucket count for every particle; a varied
+             count would push a third of the field into the olive/amber
+             buckets and flash a foreign-coloured population) */
+          buckets[bucketFor(1, RAMP_BUCKETS)].rect(x - s / 2, y - s / 2, s, s);
         }
         ctx.globalCompositeOperation = 'lighter';
         ctx.globalAlpha = 1 - ease;
@@ -1423,31 +1428,34 @@ export function SignatureName({
              EXACTLY the values the departing hold was using, and the
              flight size ramps in with the spread leg — nothing pops
              when a morph begins or ends, so the same particles are
-             visibly the same particles throughout. The flight ink dip
-             stays inside the identity-green top of the ramp. */
+             visibly the same particles throughout. Ink NEVER leaves
+             the top ramp bucket: seated forms and in-flight material
+             quantize to the SAME resolved green the name holds in
+             (bucketFor ≥0.94 → bucket 7 → #4ade80), so the field is
+             one population in one ink — depth is carried by size and
+             position only, never by a second colour. */
           const depart = easeOut(clamp01(ue / SPREAD_AT));
-          const holdS = dot * (0.85 + 0.6 * p.z);
-          /* forms settle in the IDENTITY-GREEN top band of the ramp
-             (0.86–1.0) with depth shimmer — never down in the amber
-             assemble zone, so a shape can never read as "a different,
-             differently-coloured population": the same green particles
-             reorganise, subtly deepen, and return */
-          const holdLc = 0.86 + 0.14 * p.z;
+          const holdS = dot * (0.9 + 0.3 * p.z);
+          /* forms settle in the IDENTITY-GREEN top of the ramp with a
+             size-based depth shimmer — the seated silhouette is the
+             name's own material, dot for dot */
+          const holdLc = 0.94 + 0.06 * p.z;
           const restS = phase === 'toForm' ? dot : holdS;
-          const flyS = (restS + (dot * (1.0 + 0.3 * p.z) - restS) * depart) * (1 + 0.18 * pf);
+          const flyS = (restS + (dot * (1.0 + 0.18 * p.z) - restS) * depart) * (1 + 0.1 * pf);
           if (phase === 'toForm') {
             s = flyS + (holdS - flyS) * arrive;
-            lc = (1 - 0.12 * clamp01(mU)) * (1 - arrive) + holdLc * arrive;
+            lc = (1 - 0.05 * clamp01(mU)) * (1 - arrive) + holdLc * arrive;
           } else {
             s = flyS + (dot - flyS) * arrive;
             lc = holdLc + (1 - holdLc) * clamp01(mU);
           }
         } else {
-          /* formHold: seated on the form with dimensional shimmer */
+          /* formHold: seated on the form with dimensional shimmer —
+             the name's resolved green, at near-name dot size */
           x = p.m1x + T.microPx * 0.8 * Math.sin(ts * 1.4 + p.ph1) + (p.z - 0.5) * 3.2 * Math.sin(ts * 0.5);
           y = p.m1y + T.microPx * 0.8 * Math.cos(ts * 1.1 + p.ph2) + (p.z - 0.5) * 2.2 * Math.cos(ts * 0.42);
-          s = dot * (0.85 + 0.6 * p.z);
-          lc = 0.86 + 0.14 * p.z;
+          s = dot * (0.9 + 0.3 * p.z);
+          lc = 0.94 + 0.06 * p.z;
         }
 
         buckets[bucketFor(lc, RAMP_BUCKETS)].rect(x - s / 2, y - s / 2, s, s);
