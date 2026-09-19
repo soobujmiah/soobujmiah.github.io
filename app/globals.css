@@ -418,8 +418,18 @@ body.lang-bn .worldmap-pin {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 80px 0 108px;
+  /* Bottom padding clears the fixed footer + HUD control on all pages.
+     Hero gets an even larger reserved band via .page-fill--hero. */
+  padding: 80px 0 calc(108px + env(safe-area-inset-bottom, 0px));
   background: transparent;
+}
+
+/* Hero: extra bottom safe zone so the service CTA never sits under the
+   bottom HUD / footer. Values: header clearance top, HUD+footer bottom. */
+.page-fill--hero {
+  padding-top: clamp(72px, 12dvh, 92px);
+  padding-bottom: calc(132px + env(safe-area-inset-bottom, 0px));
+  justify-content: flex-start;
 }
 
 /* Inner page scroll: when a page fits, its content centers; when it
@@ -457,14 +467,18 @@ body.lang-bn .worldmap-pin {
   padding: 0 1.5rem;
 }
 
-/* Home only: the hero is one balanced composition — clock, name,
-   identity lines, CTAs. Leftover viewport height splits above and
-   below it, so the block reads intentionally centred on desktop
-   (the taller top padding and the bottom nav already bias it
-   optically); when content overflows, the page grows and scrolls
-   from the top instead. */
-.page-fill--hero .page-content {
-  margin: auto;
+/* Home only: start from the top with deliberate rhythm — do not
+   vertically centre the whole stack into the HUD. When content is
+   short on tall phones there is breathing room above the safe zone;
+   when it overflows, page-scroll still works from the top. */
+.page-fill--hero .page-content--hero {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 40rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  /* Internal vertical rhythm between hero blocks */
+  gap: 0;
 }
 
 /* dense pages breathe wider on desktop */
@@ -474,10 +488,19 @@ body.lang-bn .worldmap-pin {
 
 @media (min-width: 768px) {
   .page-fill {
-    padding: 92px 0 76px;
+    padding: 92px 0 calc(88px + env(safe-area-inset-bottom, 0px));
+  }
+  .page-fill--hero {
+    padding-top: 92px;
+    padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
   }
   .page-content {
     padding: 0 2rem;
+  }
+  .page-content--hero {
+    max-width: 44rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 }
 
@@ -485,6 +508,11 @@ body.lang-bn .worldmap-pin {
 @media (min-width: 768px) and (max-height: 860px) {
   .page-fill {
     padding: 78px 0 54px;
+  }
+  /* Hero still needs HUD clearance — do not inherit the short 54px bottom. */
+  .page-fill--hero {
+    padding-top: 78px;
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
   }
   .page-content .ph-h {
     font-size: 1.55rem;
@@ -502,6 +530,11 @@ body.lang-bn .worldmap-pin {
 @media (max-width: 767px) and (max-height: 740px) {
   .page-fill {
     padding: 70px 0 96px;
+  }
+  /* Hero bottom must stay above the HUD even when other pages compact. */
+  .page-fill--hero {
+    padding-top: 64px;
+    padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px));
   }
   .page-numeral {
     display: none;
@@ -1480,28 +1513,26 @@ body:has(> .services-doc) button {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  /* Pull the clock toward the header so the story canvas gets vertical room. */
-  margin-top: clamp(-6px, -0.8dvh, 0px);
-  margin-bottom: clamp(8px, 1.6dvh, 16px);
+  margin-top: 0;
+  margin-bottom: clamp(10px, 1.8dvh, 18px);
   flex-shrink: 0;
   animation: hero-clock-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
 }
 
-/* Reserved band for the particle storytelling world.
-   The canvas is positioned to this box (not the whole page), so bed /
-   person / robot scenes cannot paint over the clock or the role copy. */
+/* Reserved band for the service-driven particle story.
+   Canvas is positioned to this box so scenes never paint over the
+   clock above or the identity copy / CTAs below. */
 .hero-story-stage {
   position: relative;
   width: 100%;
-  max-width: 42rem;
-  /* Enough height for a side-view bedroom on phones; grows on desktop. */
-  height: clamp(200px, 34dvh, 340px);
-  margin: 0 auto;
+  max-width: 36rem;
+  /* Meaningful story height without starving the copy stack on phones. */
+  height: clamp(160px, 26dvh, 280px);
+  margin: 0 auto clamp(14px, 2.2dvh, 22px);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Isolate painting; never intercept pointer events meant for CTAs. */
   pointer-events: none;
   z-index: 2;
 }
@@ -1510,13 +1541,11 @@ body:has(> .services-doc) button {
   pointer-events: auto;
   position: relative;
   z-index: 1;
-  /* Keep the name optically centred in the band without eating scene room. */
   margin: 0;
   max-width: 100%;
 }
 
 .hero-story-stage .sig-canvas {
-  /* Canvas fills the story stage (containing block), not the page. */
   position: absolute;
   inset: 0;
   width: 100%;
@@ -1524,20 +1553,83 @@ body:has(> .services-doc) button {
   z-index: 0;
 }
 
+/* Identity copy stack under the story — deliberate gaps, no collision. */
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 0;
+  /* Keep the last services block clear of the HUD safe zone. */
+  padding-bottom: 0.25rem;
+}
+
+.hero-copy .hero-role {
+  margin: 0 0 0.65rem;
+}
+
+.hero-copy .hero-status {
+  margin: 0 0 0.55rem;
+}
+
+.hero-copy .hero-tagline {
+  margin: 0 0 0.85rem;
+}
+
+.hero-copy .hero-intro {
+  margin: 0 0 1.15rem;
+}
+
+.hero-copy .hero-ctas {
+  margin: 0 0 1.25rem;
+}
+
+.hero-copy .hero-services {
+  margin: 0;
+  /* Extra air before the page-fill bottom safe zone / HUD. */
+  padding-bottom: 0.5rem;
+}
+
 @media (max-height: 700px) {
   .hero-story-stage {
-    height: clamp(170px, 30dvh, 260px);
+    height: clamp(140px, 22dvh, 210px);
+    margin-bottom: 10px;
   }
   .hero-clock-wrap {
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     gap: 4px;
+  }
+  .hero-copy .hero-intro {
+    margin-bottom: 0.85rem;
+  }
+  .hero-copy .hero-ctas {
+    margin-bottom: 0.9rem;
+  }
+}
+
+@media (max-height: 640px) {
+  .hero-story-stage {
+    height: clamp(120px, 20dvh, 180px);
+  }
+  .page-fill--hero {
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
   }
 }
 
 @media (min-width: 768px) {
   .hero-story-stage {
-    height: clamp(240px, 36dvh, 380px);
-    max-width: 48rem;
+    height: clamp(200px, 28dvh, 320px);
+    max-width: 42rem;
+    margin-bottom: 1.5rem;
+  }
+  .hero-copy .hero-role {
+    margin-bottom: 0.75rem;
+  }
+  .hero-copy .hero-intro {
+    margin-bottom: 1.35rem;
+  }
+  .hero-copy .hero-ctas {
+    margin-bottom: 1.5rem;
   }
 }
 @keyframes hero-clock-in {

@@ -129,7 +129,7 @@ if (!storyPath) {
   console.error('check-units FAIL: compiled app/story-world.ts not found');
   process.exit(1);
 }
-const { STORY_BEATS, physicsLandT } = await import(pathToFileURL(storyPath).href);
+const { STORY_BEATS } = await import(pathToFileURL(storyPath).href);
 const { MOTION } = await import(pathToFileURL(tokensPath).href);
 
 console.log('\nBengali grapheme segmentation (Intl.Segmenter path)');
@@ -336,7 +336,7 @@ eq('the settle overshoot stays subtle', NA.settleBack > 0 && NA.settleBack <= 1.
 eq('name-hold micro-drift stays subtle enough to keep the name readable', NA.microPx <= 0.35, true);
 eq('name-hold breath stays minimal', NA.breathPx <= 1.5, true);
 
-console.log('\nStory world — spatial pairing + continuous bedroom narrative');
+console.log('\nStory world — service-driven particle narrative');
 eq('easeInOutQuint starts and ends at the endpoints', [easeInOutQuint(0), easeInOutQuint(1)], [0, 1]);
 eq('flowPoint starts at A and ends at B', (() => {
   const a = flowPoint(0, 0, 10, 0, 0, 4);
@@ -355,19 +355,25 @@ eq('spatialPairing handles unequal populations without throwing', (() => {
   const map = spatialPairing(from, to);
   return map.length === 4 && [...map].every((i) => i === 0 || i === 1);
 })(), true);
-eq('physics land curve starts at 0 and ends near 1', physicsLandT(0) === 0 && physicsLandT(1) >= 0.99, true);
-eq('physics land curve is finite across the path', [0.1, 0.35, 0.5, 0.7, 0.9].every((t) => Number.isFinite(physicsLandT(t))), true);
-eq('the story has a full continuous-world beat list', STORY_BEATS.length >= 16, true);
+eq('the story covers the Services pillars', STORY_BEATS.length >= 7, true);
 eq('the story is deterministic (no random bag of forms)', Array.isArray(STORY_BEATS) && STORY_BEATS.every((b) => b.id && b.holdMs > 0 && b.morphMs > 0), true);
-eq('first beat is a real bedroom sleep scene', STORY_BEATS[0].id, 'bed_sleep');
-eq('last beat returns to sleep before name', STORY_BEATS[STORY_BEATS.length - 1].id, 'sleep');
+eq('every beat cites real service slugs', STORY_BEATS.every((b) => Array.isArray(b.services) && b.services.length > 0), true);
+eq('first beat is website development', STORY_BEATS[0].id, 'website');
+eq('last beat is data/admin before name return', STORY_BEATS[STORY_BEATS.length - 1].id, 'data');
 const ids = STORY_BEATS.map((b) => b.id);
-eq('wake posture chain is present', ids.includes('bed_stir') && ids.includes('bed_sit') && ids.includes('bed_stand'), true);
-eq('robot→phone→land arc is present', ids.includes('robot_active') && ids.includes('robot_compress') && ids.includes('phone_held') && ids.includes('phone_land'), true);
-eq('work / break / game / read arc is present', ids.includes('work') && ids.includes('break_1') && ids.includes('game') && ids.includes('read'), true);
-eq('build / test / debug / success arc is present', ids.includes('build') && ids.includes('test') && ids.includes('debug') && ids.includes('success'), true);
-eq('retired silhouette icon ids are gone', !ids.some((id) => ['wake_sleep', 'wake_rise', 'code', 'braces', 'git', 'gpu', 'galaxy'].includes(id)), true);
-eq('bedroom hold is long enough to read the scene', STORY_BEATS[0].holdMs >= 2000, true);
+eq('software-engineering arc is present', ids.includes('website') && ids.includes('software'), true);
+eq('practical-technology arc is present', ids.includes('devices') && ids.includes('business'), true);
+eq('digital-admin arc is present', ids.includes('graphics') && ids.includes('office') && ids.includes('data'), true);
+const allServices = STORY_BEATS.flatMap((b) => b.services);
+eq('web-development is represented', allServices.includes('web-development'), true);
+eq('software-development is represented', allServices.includes('software-development'), true);
+eq('computer + android support are represented', allServices.includes('computer-support') && allServices.includes('android-support'), true);
+eq('business-technology is represented', allServices.includes('business-technology'), true);
+eq('graphics-design is represented', allServices.includes('graphics-design'), true);
+eq('office-administration is represented', allServices.includes('office-administration'), true);
+eq('data-entry is represented', allServices.includes('data-entry'), true);
+eq('retired life-cycle / bedroom ids are gone', !ids.some((id) => ['bed_sleep', 'bed_stir', 'wake_sleep', 'game', 'read', 'sleep', 'phone_land'].includes(id)), true);
+eq('website hold is long enough to read', STORY_BEATS[0].holdMs >= 2000, true);
 eq('name-hold micro-drift stays subtle enough to keep the name readable', NA.microPx <= 0.35, true);
 
 rmSync(cfgPath, { force: true });

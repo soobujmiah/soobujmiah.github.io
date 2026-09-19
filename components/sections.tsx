@@ -87,125 +87,113 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
     <div className="page-fill page-fill--hero">
       <PageNumeral index={0} />
 
-      <div className="page-content flex flex-col items-center text-center">
-        {/* 0 · live local time — sits above the storytelling canvas so the
-            clock never overlaps the living particle world. Compact on
-            short viewports; CSS owns the spacing contract. */}
+      <div className="page-content page-content--hero flex flex-col items-center text-center">
+        {/* Vertical rhythm is owned by .page-content--hero + utility
+            gaps below — deliberate breathing room between clock, story,
+            identity lines, CTAs, services hand-off, and the HUD safe
+            zone (page-fill--hero bottom padding). Never overlap the
+            bottom navigation control. */}
         <div className="hero-clock-wrap">
           <IdentityClock part="time" />
           <IdentityClock part="date" />
         </div>
 
-        {/* 1 · particle storytelling canvas — name + continuous day-cycle
-            world. Owns a reserved vertical band so bed/person/robot
-            scenes never collide with the clock above or the role copy
-            below. */}
+        {/* Particle identity + service story — reserved band. */}
         <div className="hero-story-stage">
-          <h1 className="hero-name text-[clamp(min(2.6rem,11vw),8.5vw,5.6rem)] font-semibold leading-[1.08] tracking-tight">
+          <h1 className="hero-name text-[clamp(min(2.4rem,10.5vw),8vw,5.2rem)] font-semibold leading-[1.08] tracking-tight">
             <SignatureName text={t.profile.nameFull} reducedMotion={reducedMotion} armed={armed} />
           </h1>
         </div>
 
-        {/* 2 · what I am — the professional identity, below the story band */}
-        <motion.p
-          className="hero-role mt-5 text-[13px] font-medium sm:text-sm sm:mt-6"
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.6, duration: 0.7 }}
-        >
-          {t.profile.title}
-        </motion.p>
-
-        {/* 2b · where the work happens — a status line, not a second job
-            title; it supports the identity from below, never above */}
-        <motion.p
-          className="hero-status mt-3 font-mono text-[10px] uppercase tracking-[0.4em]"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.7 }}
-        >
-          <span className="hero-status-dot" aria-hidden />
-          {t.profile.location} · {t.hero.availability}
-        </motion.p>
-
-        {/* 3 · the specialization line — the identity's second half */}
-        <motion.p
-          className="hero-tagline mt-2.5 font-mono text-[10px] leading-relaxed tracking-[0.18em] sm:text-[11px]"
-          style={{ color: '#4ade80' }}
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.68, duration: 0.7 }}
-        >
-          {t.profile.tagline}
-        </motion.p>
-
-        {/* 4 · what I build, and why it is credible */}
-        <motion.p
-          className="mx-auto mt-4 max-w-lg text-sm leading-relaxed"
-          style={{ color: 'rgba(228,226,223,0.62)' }}
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.75, duration: 0.7 }}
-        >
-          {t.hero.intro}
-        </motion.p>
-
-        <motion.div
-          className="mt-6 flex flex-wrap items-center justify-center gap-3"
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2.0, duration: 0.7 }}
-        >
-          <Magnetic
-            href={sectionHref(3)}
-            onClick={(e) => {
-              e.preventDefault();
-              goToScene(3);
-            }}
-            className="rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300"
-            style={{ background: '#22c55e', color: '#060608' }}
+        <div className="hero-copy">
+          <motion.p
+            className="hero-role text-[13px] font-medium sm:text-sm"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.6, duration: 0.7 }}
           >
-            {t.hero.ctaWork}
-          </Magnetic>
-          <Magnetic
-            href="https://github.com/soobujmiah"
-            className="rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300 backdrop-blur-md"
-            style={{ border: '1px solid rgba(228,226,223,0.15)', color: '#e4e2df', background: 'rgba(8,10,8,0.5)' }}
-          >
-            {t.hero.ctaGithub}
-          </Magnetic>
-        </motion.div>
+            {t.profile.title}
+          </motion.p>
 
-        {/* 5 · service discovery — what the same person also provides.
-            Closes the hero AFTER the actions: identity first (clock →
-            name → its particle life → role → status → tagline), then
-            the engineering story and its CTAs, then the practical
-            hand-off. The pointer routes to the canonical Services
-            entry — the existing top-navigation Services item
-            (/services/, and its mobile header pill) — it adds no
-            competing navigation and no new pager section: the service
-            layer stays outside the nine-page pager. */}
-        <motion.div
-          className="mt-6 flex flex-col items-center gap-2"
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2.1, duration: 0.7 }}
-        >
-          <p
-            className="mx-auto max-w-xl px-2 text-[13px] leading-relaxed sm:text-sm"
-            style={{ color: 'rgba(228,226,223,0.72)' }}
+          <motion.p
+            className="hero-status font-mono text-[10px] uppercase tracking-[0.4em]"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.7 }}
           >
-            {t.hero.servicesOffer}
-          </p>
-          <a
-            href={serviceHref()}
-            className="font-mono text-[10px] tracking-[0.18em] underline decoration-[rgba(74,222,128,0.35)] underline-offset-4 transition-opacity duration-300 hover:opacity-80 sm:text-[11px]"
+            <span className="hero-status-dot" aria-hidden />
+            {t.profile.location} · {t.hero.availability}
+          </motion.p>
+
+          <motion.p
+            className="hero-tagline font-mono text-[10px] leading-relaxed tracking-[0.18em] sm:text-[11px]"
             style={{ color: '#4ade80' }}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.68, duration: 0.7 }}
           >
-            {t.hero.servicesPoint}
-            <span aria-hidden="true"> →</span>
-          </a>
-        </motion.div>
+            {t.profile.tagline}
+          </motion.p>
+
+          <motion.p
+            className="hero-intro mx-auto max-w-lg text-sm leading-relaxed"
+            style={{ color: 'rgba(228,226,223,0.62)' }}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.75, duration: 0.7 }}
+          >
+            {t.hero.intro}
+          </motion.p>
+
+          <motion.div
+            className="hero-ctas flex flex-wrap items-center justify-center gap-3"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2.0, duration: 0.7 }}
+          >
+            <Magnetic
+              href={sectionHref(3)}
+              onClick={(e) => {
+                e.preventDefault();
+                goToScene(3);
+              }}
+              className="rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300"
+              style={{ background: '#22c55e', color: '#060608' }}
+            >
+              {t.hero.ctaWork}
+            </Magnetic>
+            <Magnetic
+              href="https://github.com/soobujmiah"
+              className="rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300 backdrop-blur-md"
+              style={{ border: '1px solid rgba(228,226,223,0.15)', color: '#e4e2df', background: 'rgba(8,10,8,0.5)' }}
+            >
+              {t.hero.ctaGithub}
+            </Magnetic>
+          </motion.div>
+
+          {/* Service discovery — last content before the HUD safe zone. */}
+          <motion.div
+            className="hero-services flex flex-col items-center gap-2"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2.1, duration: 0.7 }}
+          >
+            <p
+              className="mx-auto max-w-xl px-2 text-[13px] leading-relaxed sm:text-sm"
+              style={{ color: 'rgba(228,226,223,0.72)' }}
+            >
+              {t.hero.servicesOffer}
+            </p>
+            <a
+              href={serviceHref()}
+              className="font-mono text-[10px] tracking-[0.18em] underline decoration-[rgba(74,222,128,0.35)] underline-offset-4 transition-opacity duration-300 hover:opacity-80 sm:text-[11px]"
+              style={{ color: '#4ade80' }}
+            >
+              {t.hero.servicesPoint}
+              <span aria-hidden="true"> →</span>
+            </a>
+          </motion.div>
+        </div>
       </div>
     </div>
   );
