@@ -1529,24 +1529,26 @@ body:has(> .services-doc) button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   margin-top: 0;
-  margin-bottom: clamp(10px, 1.8dvh, 18px);
+  /* Tight clock → display connection; desktop restores breathing room. */
+  margin-bottom: 0.45rem;
   flex-shrink: 0;
   animation: hero-clock-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
 }
 
 /* Fixed name ⇄ keyword morph slot.
-   Height reserves TWO full display lines at name scale so short/long
-   keywords never shift role / status / CTAs / motto (zero CLS). */
+   Height = two display lines at name scale (+ tiny particle air) — NOT a
+   giant viewport band. Mobile stays compact; desktop keeps the approved
+   cinematic proportions (see min-width: 768px). Zero CLS either way. */
 .hero-story-stage {
   position: relative;
   width: 100%;
-  max-width: 44rem;
-  /* Two lines × large display size — fixed band, no CLS. */
-  height: clamp(168px, 28dvh, 300px);
-  min-height: 168px;
-  margin: 0 auto clamp(12px, 1.8dvh, 18px);
+  max-width: 40rem;
+  /* ~2 × clamp(3.25rem…) line boxes + 8–12px particle air — no empty field. */
+  height: clamp(6.75rem, 2.05em + 2.1rem, 8.75rem);
+  min-height: 6.75rem;
+  margin: 0 auto 0.55rem;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -1554,6 +1556,8 @@ body:has(> .services-doc) button {
   pointer-events: none;
   z-index: 2;
   contain: layout style;
+  /* Inherit display size so em-based height tracks the hero-name clamp. */
+  font-size: clamp(min(3.25rem, 13vw), 11vw, 6.6rem);
 }
 
 .hero-story-stage .hero-name {
@@ -1562,18 +1566,21 @@ body:has(> .services-doc) button {
   z-index: 1;
   margin: 0;
   max-width: 100%;
-  /* Name sits vertically centred in the fixed slot. */
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  /* Tight two-line unit — lines belong together, not stacked with air. */
+  line-height: 1.02;
+  font-size: 1em;
 }
 
 .hero-story-stage .sig-name {
   width: 100%;
   display: flex;
   justify-content: center;
+  line-height: 1.02;
 }
 
 .hero-story-stage .sig-canvas {
@@ -1595,23 +1602,23 @@ body:has(> .services-doc) button {
 }
 
 .hero-copy .hero-role {
-  margin: 0 0 0.45rem;
-}
-
-.hero-copy .hero-status {
   margin: 0 0 0.4rem;
 }
 
+.hero-copy .hero-status {
+  margin: 0 0 0.35rem;
+}
+
 .hero-copy .hero-tagline {
-  margin: 0 0 0.65rem;
+  margin: 0 0 0.55rem;
 }
 
 .hero-copy .hero-intro {
-  margin: 0 0 0.9rem;
+  margin: 0 0 0.8rem;
 }
 
 .hero-copy .hero-ctas {
-  margin: 0 0 0.8rem;
+  margin: 0 0 0.7rem;
 }
 
 .hero-copy .hero-motto {
@@ -1620,43 +1627,52 @@ body:has(> .services-doc) button {
   font-weight: 400;
 }
 
-@media (max-height: 700px) {
+/* Short phones: still two lines, no giant empty band. */
+@media (max-width: 767px) and (max-height: 700px) {
   .hero-story-stage {
-    height: clamp(148px, 24dvh, 230px);
-    min-height: 148px;
-    margin-bottom: 8px;
+    height: clamp(6.25rem, 1.95em + 1.75rem, 8rem);
+    min-height: 6.25rem;
+    margin-bottom: 0.4rem;
   }
   .hero-clock-wrap {
-    margin-bottom: 6px;
-    gap: 4px;
+    margin-bottom: 0.3rem;
+    gap: 3px;
   }
   .hero-copy .hero-intro {
-    margin-bottom: 0.65rem;
+    margin-bottom: 0.6rem;
   }
   .hero-copy .hero-ctas {
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.55rem;
   }
   .hero-copy .hero-motto {
     font-size: 10px;
   }
 }
 
-@media (max-height: 640px) {
+@media (max-width: 767px) and (max-height: 640px) {
   .hero-story-stage {
-    height: clamp(136px, 22dvh, 200px);
-    min-height: 136px;
+    height: clamp(5.85rem, 1.85em + 1.5rem, 7.35rem);
+    min-height: 5.85rem;
+    margin-bottom: 0.35rem;
   }
   .page-fill--hero {
+    padding-top: clamp(52px, 8dvh, 64px);
     padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
   }
 }
 
+/* Desktop — preserve approved cinematic composition (do not inherit mobile compact). */
 @media (min-width: 768px) {
+  .hero-clock-wrap {
+    gap: 6px;
+    margin-bottom: clamp(10px, 1.6dvh, 16px);
+  }
   .hero-story-stage {
-    height: clamp(200px, 30dvh, 340px);
-    min-height: 200px;
+    font-size: clamp(3.5rem, 6.5vw, 6.6rem);
+    height: clamp(9.5rem, 2.15em + 1.25rem, 14rem);
+    min-height: 9.5rem;
     max-width: 50rem;
-    margin-bottom: 1.15rem;
+    margin-bottom: 1.1rem;
   }
   .hero-copy .hero-role {
     margin-bottom: 0.55rem;
@@ -1669,10 +1685,9 @@ body:has(> .services-doc) button {
   }
 }
 
-/* Wide desktop: two full name-scale lines without clipping. */
 @media (min-width: 1200px) {
   .hero-story-stage {
-    height: clamp(220px, 32dvh, 360px);
+    height: clamp(10.5rem, 2.2em + 1.5rem, 15.5rem);
     max-width: 54rem;
   }
 }
