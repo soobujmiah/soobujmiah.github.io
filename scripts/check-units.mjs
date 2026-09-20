@@ -62,7 +62,19 @@ writeFileSync(
         strict: false,
         plugins: [],
       },
-      include: ['app/graphemes.ts', 'app/sections.ts', 'app/language.tsx', 'app/geo.ts', 'app/name-motion.ts', 'app/design-tokens.ts', 'app/clock.ts', 'app/story-world.ts'],
+      include: [
+        'app/graphemes.ts',
+        'app/sections.ts',
+        'app/language.tsx',
+        'app/geo.ts',
+        'app/name-motion.ts',
+        'app/design-tokens.ts',
+        'app/clock.ts',
+        'app/story-world.ts',
+        'app/site-guide.ts',
+        'app/site-guide-knowledge.ts',
+        'app/services.ts',
+      ],
     },
     null,
     2
@@ -129,8 +141,19 @@ if (!storyPath) {
   console.error('check-units FAIL: compiled app/story-world.ts not found');
   process.exit(1);
 }
-const { STORY_BEATS } = await import(pathToFileURL(storyPath).href);
+const {
+  STORY_BEATS,
+  serviceKeywords,
+  NAME_HOLD_MS,
+  KEYWORD_HOLD_MS,
+} = await import(pathToFileURL(storyPath).href);
 const { MOTION } = await import(pathToFileURL(tokensPath).href);
+const guidePath = pick('app/site-guide.js', 'site-guide.js');
+if (!guidePath) {
+  console.error('check-units FAIL: compiled app/site-guide.ts not found');
+  process.exit(1);
+}
+const { answerSiteQuestion } = await import(pathToFileURL(guidePath).href);
 
 console.log('\nBengali grapheme segmentation (Intl.Segmenter path)');
 eq('সবুজ মিয়া → 6 clusters, not 9 code points', segmentGraphemes('সবুজ মিয়া'), ['স', 'বু', 'জ', ' ', 'মি', 'য়া']);
@@ -336,7 +359,7 @@ eq('the settle overshoot stays subtle', NA.settleBack > 0 && NA.settleBack <= 1.
 eq('name-hold micro-drift stays subtle enough to keep the name readable', NA.microPx <= 0.35, true);
 eq('name-hold breath stays minimal', NA.breathPx <= 1.5, true);
 
-console.log('\nStory world — service-driven particle narrative');
+console.log('\nStory world — compact keyword morph cycle');
 eq('easeInOutQuint starts and ends at the endpoints', [easeInOutQuint(0), easeInOutQuint(1)], [0, 1]);
 eq('flowPoint starts at A and ends at B', (() => {
   const a = flowPoint(0, 0, 10, 0, 0, 4);
@@ -355,26 +378,61 @@ eq('spatialPairing handles unequal populations without throwing', (() => {
   const map = spatialPairing(from, to);
   return map.length === 4 && [...map].every((i) => i === 0 || i === 1);
 })(), true);
-eq('the story covers the Services pillars', STORY_BEATS.length >= 7, true);
-eq('the story is deterministic (no random bag of forms)', Array.isArray(STORY_BEATS) && STORY_BEATS.every((b) => b.id && b.holdMs > 0 && b.morphMs > 0), true);
-eq('every beat cites real service slugs', STORY_BEATS.every((b) => Array.isArray(b.services) && b.services.length > 0), true);
-eq('first beat is website development', STORY_BEATS[0].id, 'website');
-eq('last beat is data/admin before name return', STORY_BEATS[STORY_BEATS.length - 1].id, 'data');
-const ids = STORY_BEATS.map((b) => b.id);
-eq('software-engineering arc is present', ids.includes('website') && ids.includes('software'), true);
-eq('practical-technology arc is present', ids.includes('devices') && ids.includes('business'), true);
-eq('digital-admin arc is present', ids.includes('graphics') && ids.includes('office') && ids.includes('data'), true);
-const allServices = STORY_BEATS.flatMap((b) => b.services);
-eq('web-development is represented', allServices.includes('web-development'), true);
-eq('software-development is represented', allServices.includes('software-development'), true);
-eq('computer + android support are represented', allServices.includes('computer-support') && allServices.includes('android-support'), true);
-eq('business-technology is represented', allServices.includes('business-technology'), true);
-eq('graphics-design is represented', allServices.includes('graphics-design'), true);
-eq('office-administration is represented', allServices.includes('office-administration'), true);
-eq('data-entry is represented', allServices.includes('data-entry'), true);
-eq('retired life-cycle / bedroom ids are gone', !ids.some((id) => ['bed_sleep', 'bed_stir', 'wake_sleep', 'game', 'read', 'sleep', 'phone_land'].includes(id)), true);
-eq('website hold is long enough to read', STORY_BEATS[0].holdMs >= 2000, true);
+eq('one beat per service slug', STORY_BEATS.length, 8);
+eq(
+  'beats are deterministic keyword holds (no scene bags)',
+  Array.isArray(STORY_BEATS) &&
+    STORY_BEATS.every(
+      (b) =>
+        typeof b.serviceIndex === 'number' &&
+        typeof b.slug === 'string' &&
+        b.holdMs > 0 &&
+        b.morphMs > 0 &&
+        b.motion === 'precise',
+    ),
+  true,
+);
+eq('first beat is web-development', STORY_BEATS[0].slug, 'web-development');
+eq('last beat is data-entry', STORY_BEATS[STORY_BEATS.length - 1].slug, 'data-entry');
+const slugs = STORY_BEATS.map((b) => b.slug);
+eq(
+  'canonical service order is preserved',
+  slugs,
+  [
+    'web-development',
+    'software-development',
+    'computer-support',
+    'android-support',
+    'business-technology',
+    'graphics-design',
+    'office-administration',
+    'data-entry',
+  ],
+);
+eq('service indices are sequential', STORY_BEATS.map((b) => b.serviceIndex), [0, 1, 2, 3, 4, 5, 6, 7]);
+eq('keyword hold is long enough to read', STORY_BEATS[0].holdMs >= 2000, true);
+eq('name hold is long enough to read', NAME_HOLD_MS >= 2000, true);
+eq('default keyword hold matches beat hold', KEYWORD_HOLD_MS, STORY_BEATS[0].holdMs);
+const enKw = serviceKeywords('en');
+const bnKw = serviceKeywords('bn');
+eq('EN keywords cover every service', enKw.length, 8);
+eq('BN keywords cover every service', bnKw.length, 8);
+eq('first EN keyword is Website Development', enKw[0], 'Website Development');
+eq('EN keywords stay Latin-script titles', enKw.every((k) => /[A-Za-z]/.test(k)), true);
+eq('BN keywords carry Bengali script', bnKw.every((k) => /[\u0980-\u09FF]/.test(k)), true);
+eq('no bedroom / life-cycle leftovers on beats', !JSON.stringify(STORY_BEATS).includes('bed_sleep'), true);
 eq('name-hold micro-drift stays subtle enough to keep the name readable', NA.microPx <= 0.35, true);
+
+console.log('\nSite guide — local knowledge only (no external AI)');
+eq('services list intent returns on-site copy', answerSiteQuestion('What services are available?', 'en').text.includes('Website Development'), true);
+eq('contact intent returns email', answerSiteQuestion('How can I contact Sobuj?', 'en').text.includes('soobujmiah@gmail.com'), true);
+eq('website soft-match routes to web-development', answerSiteQuestion('I need a website', 'en').href, '/services/web-development/');
+eq('android soft-match routes to android-support', answerSiteQuestion('android phone help', 'en').href, '/services/android-support/');
+eq('projects intent lists featured work', answerSiteQuestion('What projects are featured?', 'en').text.includes('LAI'), true);
+eq('empty question gets empty prompt', answerSiteQuestion('   ', 'en').text.length > 0, true);
+eq('off-site / unknown is refused', answerSiteQuestion('What is the weather in Tokyo?', 'en').text.includes('do not have information'), true);
+eq('BN services intent answers in Bengali', /[\u0980-\u09FF]/.test(answerSiteQuestion('কী কী সেবা আছে?', 'bn').text), true);
+eq('BN unknown is refused in Bengali', /[\u0980-\u09FF]/.test(answerSiteQuestion('টোকিওর আবহাওয়া কী?', 'bn').text), true);
 
 rmSync(cfgPath, { force: true });
 rmSync(tmp, { recursive: true, force: true });

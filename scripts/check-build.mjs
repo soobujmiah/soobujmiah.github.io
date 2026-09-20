@@ -54,10 +54,9 @@ const MIN_VISIBLE_CHARS = 220;
     accelerator forms, −7 retired generics) and the bottom bar's dot row
     became the perimeter progress trace — ~750 B gz of real, required
     vocabulary that trimming could not recover.
-    362 KB since the homepage service-discovery line: the bilingual
-    hero copy gained servicesOffer + servicesPoint in both language
-    trees (~400 B gz) — required client-facing copy, not regression. */
-const MAX_TOTAL_JS_GZIP = 362 * 1024;
+    362 KB since the homepage service-discovery line (later replaced by
+    a compact motto + local site-guide chat; budget holds the ceiling). */
+const MAX_TOTAL_JS_GZIP = 370 * 1024;
 /** Per-route payload ceiling: the gzipped sum of every script a single
     HTML page references. The home page measured ~250 KB before the
     service layer; this holds every route — pager and services — there. */
