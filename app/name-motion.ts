@@ -205,7 +205,7 @@ export function sampleInkPoints(
   if (pts.length >= maxCount) {
     /* Even thin of a dense grid — keep spatial coverage, drop extras. */
     if (pts.length === maxCount) return pts;
-    const keep = new Array<typeof pts[0]>(maxCount);
+    const keep = new Array<(typeof pts)[0]>(maxCount);
     for (let i = 0; i < maxCount; i += 1) {
       keep[i] = pts[Math.floor((i * pts.length) / maxCount)];
     }
@@ -213,8 +213,7 @@ export function sampleInkPoints(
   }
   /* Undersampled: walk a half-offset lattice with a seeded skip so the
      top-up is stable and still follows glyph ink (not the bbox). */
-  const need = maxCount - pts.length;
-  if (need <= 0) return pts;
+  if (pts.length >= maxCount) return pts;
   const rnd = mulberry32(seed >>> 0);
   const half = Math.max(1, Math.floor(s / 2));
   const extras: Array<{ x: number; y: number }> = [];
@@ -225,7 +224,6 @@ export function sampleInkPoints(
       }
     }
   }
-  /* Shuffle extras deterministically, take what we need. */
   for (let i = extras.length - 1; i > 0; i -= 1) {
     const j = Math.floor(rnd() * (i + 1));
     const tmp = extras[i];
@@ -236,6 +234,162 @@ export function sampleInkPoints(
     pts.push(extras[i]);
   }
   return pts;
+}
+
+/**
+ * Visual-weight envelope for particle typography.
+ * Density is particles per CSS-px² of ink. Radius is CSS px.
+ * The name and every service title must land inside this band so the
+ * field reads particulate — never a solid bitmap, never skeletal.
+ */
+export const PARTICLE_WEIGHT = {
+  /** Target areal density (particles / CSS-px² ink). */
+  density: 0.095,
+  densityMin: 0.07,
+  densityMax: 0.13,
+  /** Min centre-to-centre distance as a multiple of particle radius. */
+  minDistFactor: 1.35,
+  /** Absolute min spacing floor (CSS px) so dots stay discrete. */
+  minDistFloor: 1.55,
+  /** Particle radius band (CSS px). */
+  radiusMin: 1.15,
+  radiusMax: 2.05,
+  /** Soft fill alpha — particles stay luminous, not opaque bricks. */
+  holdAlpha: 0.82,
+} as const;
+
+/**
+ * Min-distance ink sampling — the perceived-weight contract.
+ *
+ * Walks a regular lattice over the glyph mask and only keeps a sample
+ * when it clears `minDist` from every already-accepted neighbour
+ * (hashed spatial bins). Thin stroke regions get a second pass at a
+ * slightly smaller min-dist so curves do not go skeletal, without
+ * thickening the whole field into a solid bitmap.
+ *
+ * Coordinates are returned in the same pixel space as the mask
+ * (device px). Deterministic for a given seed. Never Math.random.
+ */
+export function sampleInkPointsMinDist(
+  img: Uint8ClampedArray | Uint8Array,
+  fw: number,
+  fh: number,
+  minDist: number,
+  alphaMin: number,
+  maxCount: number,
+  seed: number
+): Array<{ x: number; y: number }> {
+  const pts: Array<{ x: number; y: number }> = [];
+  if (!(fw > 0) || !(fh > 0) || maxCount <= 0) return pts;
+  const d = Math.max(1, minDist);
+  const d2 = d * d;
+  const cell = Math.max(1, Math.ceil(d));
+  const cols = Math.max(1, Math.ceil(fw / cell));
+  const bins = new Map<number, number[]>();
+  const rnd = mulberry32(seed >>> 0);
+
+  const keyOf = (x: number, y: number) => {
+    const cx = Math.floor(x / cell);
+    const cy = Math.floor(y / cell);
+    return cy * cols + cx;
+  };
+  const farEnough = (x: number, y: number, dist2: number): boolean => {
+    const cx = Math.floor(x / cell);
+    const cy = Math.floor(y / cell);
+    for (let oy = -1; oy <= 1; oy += 1) {
+      for (let ox = -1; ox <= 1; ox += 1) {
+        const list = bins.get((cy + oy) * cols + (cx + ox));
+        if (!list) continue;
+        for (let i = 0; i < list.length; i += 1) {
+          const q = pts[list[i]];
+          const dx = q.x - x;
+          const dy = q.y - y;
+          if (dx * dx + dy * dy < dist2) return false;
+        }
+      }
+    }
+    return true;
+  };
+  const accept = (x: number, y: number) => {
+    const idx = pts.length;
+    pts.push({ x, y });
+    const k = keyOf(x, y);
+    const list = bins.get(k);
+    if (list) list.push(idx);
+    else bins.set(k, [idx]);
+  };
+
+  /* Primary lattice — step ≈ minDist so the field is particulate. */
+  const step = Math.max(1, Math.round(d * 0.92));
+  const candidates: Array<{ x: number; y: number; thin: number }> = [];
+  for (let y = 0; y < fh; y += step) {
+    for (let x = 0; x < fw; x += step) {
+      if (img[(y * fw + x) * 4 + 3] <= alphaMin) continue;
+      /* Local ink neighbourhood → thin-stroke score (0 solid … 1 hairline). */
+      let inkN = 0;
+      let tot = 0;
+      const r = Math.max(1, Math.floor(step * 0.9));
+      for (let dy = -r; dy <= r; dy += Math.max(1, Math.floor(r / 2))) {
+        for (let dx = -r; dx <= r; dx += Math.max(1, Math.floor(r / 2))) {
+          const xx = x + dx;
+          const yy = y + dy;
+          if (xx < 0 || yy < 0 || xx >= fw || yy >= fh) continue;
+          tot += 1;
+          if (img[(yy * fw + xx) * 4 + 3] > alphaMin) inkN += 1;
+        }
+      }
+      const fill = tot > 0 ? inkN / tot : 1;
+      const thin = fill < 0.45 ? 1 : fill < 0.7 ? 0.5 : 0;
+      /* Seeded sub-pixel jitter keeps the texture organic, not a grid. */
+      const jx = (rnd() - 0.5) * step * 0.35;
+      const jy = (rnd() - 0.5) * step * 0.35;
+      candidates.push({ x: x + step / 2 + jx, y: y + step / 2 + jy, thin });
+    }
+  }
+  /* Deterministic shuffle so acceptance order is not scan-line biased. */
+  for (let i = candidates.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(rnd() * (i + 1));
+    const t = candidates[i];
+    candidates[i] = candidates[j];
+    candidates[j] = t;
+  }
+  for (let i = 0; i < candidates.length && pts.length < maxCount; i += 1) {
+    const c = candidates[i];
+    if (c.x < 0 || c.y < 0 || c.x >= fw || c.y >= fh) continue;
+    if (img[(Math.floor(c.y) * fw + Math.floor(c.x)) * 4 + 3] <= alphaMin) continue;
+    if (farEnough(c.x, c.y, d2)) accept(c.x, c.y);
+  }
+
+  /* Thin-stroke rescue pass: slightly tighter min-dist, only for thin sites. */
+  if (pts.length < maxCount) {
+    const dThin = d * 0.78;
+    const dThin2 = dThin * dThin;
+    const rescue = candidates.filter((c) => c.thin > 0);
+    for (let i = rescue.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(rnd() * (i + 1));
+      const t = rescue[i];
+      rescue[i] = rescue[j];
+      rescue[j] = t;
+    }
+    for (let i = 0; i < rescue.length && pts.length < maxCount; i += 1) {
+      const c = rescue[i];
+      if (c.x < 0 || c.y < 0 || c.x >= fw || c.y >= fh) continue;
+      if (img[(Math.floor(c.y) * fw + Math.floor(c.x)) * 4 + 3] <= alphaMin) continue;
+      if (farEnough(c.x, c.y, dThin2)) accept(c.x, c.y);
+    }
+  }
+  return pts;
+}
+
+/** Particle radius from viewport — discrete dots, not merged strokes. */
+export function particleRadiusFor(viewW: number): number {
+  const r = Math.min(viewW, 520) / 240;
+  return Math.max(PARTICLE_WEIGHT.radiusMin, Math.min(PARTICLE_WEIGHT.radiusMax, r));
+}
+
+/** Min centre distance (CSS px) that keeps particles visually separate. */
+export function minParticleDistance(radius: number): number {
+  return Math.max(PARTICLE_WEIGHT.minDistFloor, radius * PARTICLE_WEIGHT.minDistFactor);
 }
 
 /**
@@ -603,15 +757,17 @@ export function morphParamsFromSeed(seed: number, primary: MorphStyle, avoid?: M
     const pool = MORPH_STYLES.filter((s) => s !== primary && s !== avoid);
     return pool[Math.floor(rnd() * pool.length) % pool.length] ?? 'wave';
   };
+  /* Professional envelope: short stagger, gentle arcs, tiny overshoot —
+     calm settle at both ends, still distinct per transition. */
   return {
     style: primary,
-    stagger: 0.08 + rnd() * 0.14,
-    bendScale: 0.1 + rnd() * 0.16,
-    turb: 0.04 + rnd() * 0.1,
-    overshoot: rnd() * 0.09,
+    stagger: 0.04 + rnd() * 0.08,
+    bendScale: 0.06 + rnd() * 0.1,
+    turb: 0.02 + rnd() * 0.05,
+    overshoot: rnd() * 0.04,
     prop: (Math.floor(rnd() * 4) % 4) as 0 | 1 | 2 | 3,
     flip: rnd() > 0.5,
-    blend: 0.15 + rnd() * 0.35,
+    blend: 0.1 + rnd() * 0.22,
     blendStyle: pick(),
   };
 }
