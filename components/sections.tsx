@@ -40,10 +40,10 @@ function PageNumeral({ index }: { index: number }) {
    Replaces the old opaque landscape band. The person artwork is a
    blended, edge-masked layer that dissolves into the page background
    (no rectangle, no card); the informational structure from the
-   supplied composition — stat rail, project chips, motto quote — is
-   rebuilt as real bilingual DOM floating over the existing hero
-   environment. A transparent PNG dropped at /images/home-figure.png
-   is the artwork layer; the blend simply respects its alpha.        */
+   supplied composition — stat rail, project chips — is rebuilt as
+   real bilingual DOM floating over the existing hero environment.
+   A transparent PNG dropped at /images/home-figure.png is the
+   artwork layer; the blend simply respects its alpha.              */
 
 /* ── 00c · SOCIAL ICON RESOLUTION ────────────────────────────────
    Icons resolve from the link target, so both language trees share
@@ -89,9 +89,9 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
 
       <div className="page-content page-content--hero flex flex-col items-center text-center">
         {/* Compact vertical rhythm: clock → name morph → role/status/
-            tagline/intro → CTAs → learning motto. Services discovery
-            lives in top nav; no redundant offer/point block. HUD safe
-            zone is page-fill--hero bottom padding. */}
+            tagline/intro → CTAs. Services discovery lives in top nav;
+            no redundant offer/point block. HUD safe zone is
+            page-fill--hero bottom padding. */}
         <div className="hero-clock-wrap">
           <IdentityClock part="time" />
           <IdentityClock part="date" />
@@ -170,17 +170,6 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
               {t.hero.ctaGithub}
             </Magnetic>
           </motion.div>
-
-          {/* Supporting motto — quiet, below CTAs; does not compete with name/title. */}
-          <motion.p
-            className="hero-motto mx-auto max-w-md px-2 text-[11px] leading-relaxed sm:text-xs"
-            style={{ color: 'rgba(228,226,223,0.48)' }}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.15, duration: 0.65 }}
-          >
-            {t.hero.motto}
-          </motion.p>
         </div>
       </div>
     </div>

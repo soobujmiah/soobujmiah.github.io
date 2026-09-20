@@ -159,7 +159,11 @@ export function SignatureName({
     let budgetNow = 1600;
     let fontSize = 64;
 
-    /** Sample a service title into the fixed story slot (≤2 lines, centred). */
+    /**
+     * Sample a service title into the FULL story-stage canvas (≤2 lines).
+     * Bounds come from real font metrics + a small safety pad — never from
+     * the single-line name box. Service scale stays ≈ name scale.
+     */
     const sampleTextPoints = (label: string, maxCount: number): Pt[] => {
       if (!label || !(storyW > 0) || !(storyH > 0)) return [];
       const fw = Math.max(1, Math.ceil(storyW * dpr));
@@ -174,41 +178,67 @@ export function SignatureName({
 
       const family = window.getComputedStyle(stage).fontFamily;
       // SERVICE SIZE ≈ NAME SIZE. Prefer two lines over shrinking.
-      // Only reduce after wrapping if the two-line block still overflows the slot.
       let size = fontSize;
-      const maxW = storyW * 0.96;
+      const maxW = storyW * 0.94;
       const applyFont = (px: number) => {
         sctx.font = `700 ${Math.round(px)}px ${family}`;
       };
       applyFont(size);
       sctx.textAlign = 'center';
-      sctx.textBaseline = 'middle';
+      sctx.textBaseline = 'alphabetic';
       sctx.fillStyle = '#ffffff';
 
       const measure = (s: string) => sctx.measureText(s).width;
-      // 1) Try full name size with 1–2 lines.
-      // 2) If two-line block exceeds slot height, reduce ONLY enough to fit —
-      //    floor stays high so keywords never become subtitles.
-      const minSize = Math.max(fontSize * 0.82, Math.min(storyH * 0.36, fontSize));
-      for (let guard = 0; guard < 16; guard += 1) {
-        const lines = splitTwoLines(label, measure, maxW);
-        const lineH = size * 1.02;
+      const glyphMetrics = () => {
+        const m = sctx.measureText('HgÁy|@');
+        const ascent =
+          (typeof m.fontBoundingBoxAscent === 'number' && m.fontBoundingBoxAscent) ||
+          (typeof m.actualBoundingBoxAscent === 'number' && m.actualBoundingBoxAscent) ||
+          size * 0.8;
+        const descent =
+          (typeof m.fontBoundingBoxDescent === 'number' && m.fontBoundingBoxDescent) ||
+          (typeof m.actualBoundingBoxDescent === 'number' && m.actualBoundingBoxDescent) ||
+          size * 0.22;
+        return { ascent, descent, content: ascent + descent };
+      };
+
+      /* Fit at name scale using REAL glyph extents (ascent+descent), not an
+         inflated line-box guess. Prefer wrap over shrink; floor stays high. */
+      const minSize = Math.max(fontSize * 0.96, Math.min(storyH * 0.44, fontSize));
+      let lines = splitTwoLines(label, measure, maxW);
+      let met = glyphMetrics();
+      /* Content box + tiny leading — dense two-line unit matching the name. */
+      let lineH = met.content + Math.max(1, size * 0.04);
+      /* Minimal safety pad so anti-aliased edges / descenders never kiss the rim. */
+      let vPad = Math.max(2.5, Math.min(storyH * 0.04, size * 0.06));
+      for (let guard = 0; guard < 8; guard += 1) {
+        lines = splitTwoLines(label, measure, maxW);
+        met = glyphMetrics();
+        lineH = met.content + Math.max(1, size * 0.04);
+        vPad = Math.max(2.5, Math.min(storyH * 0.04, size * 0.06));
         const blockH = lines.length * lineH;
         const widest = Math.max(...lines.map(measure), 0);
-        if (widest <= maxW && blockH <= storyH * 0.96) break;
-        if (size <= minSize + 0.5) break;
-        size = Math.max(minSize, size * 0.96);
+        if (widest <= maxW && blockH + 2 * vPad <= storyH) break;
+        if (size <= minSize + 0.2) break;
+        size = Math.max(minSize, size * 0.99);
         applyFont(size);
       }
 
-      const lines = splitTwoLines(label, measure, maxW);
-      /* Tight two-line unit — same visual density as the name, not airy stack. */
-      const lineH = size * 1.02;
+      lines = splitTwoLines(label, measure, maxW);
+      met = glyphMetrics();
+      lineH = met.content + Math.max(1, size * 0.04);
+      vPad = Math.max(2.5, Math.min(storyH * 0.04, size * 0.06));
       const blockH = lines.length * lineH;
-      const startY = storyH / 2 - blockH / 2 + lineH / 2;
+      /* Center the complete 1–2 line object on the same visual center as the name. */
+      let blockTop = (storyH - blockH) / 2;
+      if (blockTop < vPad) blockTop = vPad;
+      if (blockTop + blockH > storyH - vPad) blockTop = Math.max(vPad, storyH - vPad - blockH);
+
       applyFont(size);
       for (let i = 0; i < lines.length; i += 1) {
-        sctx.fillText(lines[i], storyW / 2, startY + i * lineH);
+        const boxTop = blockTop + i * lineH;
+        const baseline = baselineWithinBox(boxTop, lineH, met.ascent, met.descent);
+        sctx.fillText(lines[i], storyW / 2, baseline);
       }
 
       const img = sctx.getImageData(0, 0, fw, fh).data;
@@ -223,11 +253,23 @@ export function SignatureName({
         return n;
       };
       const step = denseStepFor(countAt(baseStep), baseStep, Math.max(280, maxCount));
+      /* Keep every settled particle inside the drawable slot (dot radius air). */
+      const edge = Math.max(1.5, (dot || 2) * 0.6);
+      const xMin = edge;
+      const xMax = Math.max(edge + 1, storyW - edge);
+      const yMin = edge;
+      const yMax = Math.max(edge + 1, storyH - edge);
       const pts: Pt[] = [];
       for (let y = 0; y < fh; y += step) {
         for (let x = 0; x < fw; x += step) {
           if (img[(y * fw + x) * 4 + 3] > 100) {
-            pts.push({ x: (x + step / 2) / dpr, y: (y + step / 2) / dpr });
+            let px = (x + step / 2) / dpr;
+            let py = (y + step / 2) / dpr;
+            if (px < xMin) px = xMin;
+            else if (px > xMax) px = xMax;
+            if (py < yMin) py = yMin;
+            else if (py > yMax) py = yMax;
+            pts.push({ x: px, y: py });
           }
         }
       }
@@ -351,10 +393,18 @@ export function SignatureName({
         return true;
       }
 
-      const layerBox = canvas.getBoundingClientRect();
+      /* Drawable field = the reserved story slot (≤2-line height), NOT the
+         single-line name box. Canvas is positioned on .hero-story-stage so
+         two-line service glyphs never clip against the name's shorter box. */
+      const fieldEl =
+        (stage.closest('.hero-story-stage') as HTMLElement | null) ??
+        (stage.parentElement as HTMLElement | null);
+      const fieldBox = fieldEl ? fieldEl.getBoundingClientRect() : stageBox;
+
       const unset = (r: DOMRect, el: HTMLElement) =>
         Math.abs(r.width - el.offsetWidth) < 0.75 && Math.abs(r.height - el.offsetHeight) < 0.75;
-      const calm = unset(stageBox, stage) && unset(layerBox, canvas);
+      const calm =
+        unset(stageBox, stage) && (!fieldEl || unset(fieldBox, fieldEl));
       if (!calm && calmTries < 120) {
         calmTries += 1;
         if (!calmRaf)
@@ -368,15 +418,15 @@ export function SignatureName({
 
       dpr = Math.min(window.devicePixelRatio || 1, T.maxDpr);
       const maxArea = 3.5e6;
-      const areaAt = (d: number) => layerBox.width * d * (layerBox.height * d);
+      const areaAt = (d: number) => fieldBox.width * d * (fieldBox.height * d);
       while (dpr > 1 && areaAt(dpr) > maxArea) dpr -= 0.25;
 
-      storyW = layerBox.width;
-      storyH = layerBox.height;
+      storyW = fieldBox.width;
+      storyH = fieldBox.height;
       fieldCx = storyW * 0.5;
       fieldCy = storyH * 0.5;
-      ox = stageBox.left - layerBox.left;
-      oy = stageBox.top - layerBox.top;
+      ox = stageBox.left - fieldBox.left;
+      oy = stageBox.top - fieldBox.top;
 
       cw = Math.max(1, Math.round(nameW * dpr));
       chh = Math.max(1, Math.round(nameH * dpr));
@@ -639,7 +689,14 @@ export function SignatureName({
           lc = 1;
         }
 
-        buckets[bucketFor(lc, RAMP_BUCKETS)].rect(x - s / 2, y - s / 2, s, s);
+        /* Keep every painted particle inside the story-stage bitmap —
+           mid-flight arcs/overshoot must not vanish off the canvas edge. */
+        const half = s / 2;
+        if (x < half) x = half;
+        else if (x > storyW - half) x = storyW - half;
+        if (y < half) y = half;
+        else if (y > storyH - half) y = storyH - half;
+        buckets[bucketFor(lc, RAMP_BUCKETS)].rect(x - half, y - half, s, s);
       }
 
       ctx.fillStyle = WAITING_INK;

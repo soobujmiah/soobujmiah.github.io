@@ -134,8 +134,6 @@ export interface Content {
     availability: string;
     ctaWork: string;
     ctaGithub: string;
-    /** Compact supporting statement under the CTAs. */
-    motto: string;
   };
   presence: {
     eyebrow: string;
@@ -289,8 +287,6 @@ const en: Content = {
     availability: 'Open to remote',
     ctaWork: 'Explore my work',
     ctaGithub: 'View GitHub ↗',
-    motto:
-      'Learning. Building. Solving. Creating practical digital solutions for people, offices, and businesses.',
   },
   presence: {
     eyebrow: '02 — What I Build',
@@ -759,8 +755,6 @@ const bn: Content = {
     availability: 'রিমোটে উন্মুক্ত',
     ctaWork: 'আমার কাজ দেখুন',
     ctaGithub: 'গিটহাব দেখুন ↗',
-    motto:
-      'শেখি। বানাই। সমাধান করি। মানুষ, অফিস ও ব্যবসার জন্য ব্যবহারযোগ্য ডিজিটাল সমাধান তৈরি করি।',
   },
   presence: {
     eyebrow: '০২ — আমি যা তৈরি করি',
