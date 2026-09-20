@@ -55,7 +55,7 @@ const MIN_VISIBLE_CHARS = 220;
     became the perimeter progress trace — ~750 B gz of real, required
     vocabulary that trimming could not recover.
     362 KB since the homepage service-discovery line (later replaced by
-    a compact motto + local site-guide chat; budget holds the ceiling). */
+    hero CTAs close the stack; budget holds the ceiling). */
 const MAX_TOTAL_JS_GZIP = 370 * 1024;
 /** Per-route payload ceiling: the gzipped sum of every script a single
     HTML page references. The home page measured ~250 KB before the
