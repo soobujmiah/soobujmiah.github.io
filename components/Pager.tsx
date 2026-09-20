@@ -13,7 +13,6 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import dynamic from 'next/dynamic';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { MOTION } from '@/app/design-tokens';
 import { PAGE_COUNT, SECTION_IDS, indexFromPathname, sectionHref } from '@/app/sections';
@@ -29,14 +28,6 @@ import {
 } from '@/components/ui';
 import { NavOverlay } from '@/components/NavOverlay';
 import { PullToRefresh } from '@/components/PullToRefresh';
-
-/* Site guide is local knowledge only, but its answer table pulls the
-   full services + content trees. Lazy-load so pager routes stay under
-   the per-route JS ceiling; the FAB mounts after first paint. */
-const SiteGuide = dynamic(
-  () => import('@/components/SiteGuide').then((m) => m.SiteGuide),
-  { ssr: false, loading: () => null },
-);
 import {
   HeroScene,
   StatsScene,
@@ -391,11 +382,11 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
         </AnimatePresence>
 
         <HudControl total={PAGE_COUNT} active={index} labels={t.ui.pageLabels} navOpen={navOpen} />
-        <SiteGuide />
         <PullToRefresh enabled={index === 0} scrollerRef={activeScroller} onRefresh={onRefresh} />
       </div>
 
-      <Footer />
+      {/* Site progress = section index / (count − 1); footer seam only. */}
+      <Footer progress={PAGE_COUNT > 1 ? index / (PAGE_COUNT - 1) : 0} />
       <NavOverlay open={navOpen} onClose={closeNav} index={index} onGo={goToScene} />
     </NavProvider>
   );

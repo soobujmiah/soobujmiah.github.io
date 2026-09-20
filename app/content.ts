@@ -254,15 +254,6 @@ export interface Content {
     refreshing: string;
     mapFocus: string;
     downloadCv: string;
-    /** Local site-guide chat (no external AI). */
-    siteGuideOpen: string;
-    siteGuideTitle: string;
-    siteGuideClose: string;
-    siteGuidePlaceholder: string;
-    siteGuideSubmit: string;
-    siteGuideEmpty: string;
-    siteGuideUnknown: string;
-    siteGuideHints: string[];
   };
   preloader: { status: string };
   /* Per-route search metadata, aligned with SECTION_IDS in
@@ -679,19 +670,6 @@ const en: Content = {
     refreshing: 'Refreshing',
     mapFocus: 'Background map focus',
     downloadCv: 'Download CV',
-    siteGuideOpen: 'Ask about this site',
-    siteGuideTitle: 'Site guide',
-    siteGuideClose: 'Close site guide',
-    siteGuidePlaceholder: 'Ask about services, projects, or contact…',
-    siteGuideSubmit: 'Ask',
-    siteGuideEmpty: 'Ask a short question about this portfolio.',
-    siteGuideUnknown: 'I do not have information about that on this site.',
-    siteGuideHints: [
-      'What services are available?',
-      'What is Website Development?',
-      'How can I contact Sobuj?',
-      'What projects are featured?',
-    ],
   },
   footer: {
     built: 'Built from a phone.',
@@ -1171,19 +1149,6 @@ const bn: Content = {
     refreshing: 'রিফ্রেশ হচ্ছে',
     mapFocus: 'পটভূমি মানচিত্রের কেন্দ্র',
     downloadCv: 'সিভি ডাউনলোড করুন',
-    siteGuideOpen: 'সাইট সম্পর্কে জিজ্ঞাসা',
-    siteGuideTitle: 'সাইট গাইড',
-    siteGuideClose: 'সাইট গাইড বন্ধ করুন',
-    siteGuidePlaceholder: 'সেবা, প্রকল্প বা যোগাযোগ সম্পর্কে জিজ্ঞাসা…',
-    siteGuideSubmit: 'জিজ্ঞাসা',
-    siteGuideEmpty: 'এই পোর্টফোলিও সম্পর্কে একটি সংক্ষিপ্ত প্রশ্ন করুন।',
-    siteGuideUnknown: 'এই সাইটে সেই বিষয়ে তথ্য নেই।',
-    siteGuideHints: [
-      'কী কী সেবা আছে?',
-      'ওয়েবসাইট তৈরি কী?',
-      'কীভাবে যোগাযোগ করব?',
-      'কোন প্রকল্পগুলো আছে?',
-    ],
   },
   footer: {
     built: 'ফোন থেকে তৈরি।',

@@ -229,58 +229,17 @@ export function Reveal({
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PAGE PROGRESS — the HUD bar's border is the instrument.
-   ═══════════════════════════════════════════════════════════════ */
+   TOC CONTROL — ONE bottom navigation affordance.
 
-/* The old top-of-page progress bar is gone: page position now travels
-   around the bottom HUD control's border (see HudControl), so the progress read
-   and the navigation it describes are one instrument. */
+   Opens the section index (NavOverlay). Scroll progress lives on the
+   footer seam — not on this control. One TOC system, one purpose.
+   ═══════════════════════════════════════════════════════════════ */
 
 /** Three stacked rails — reads as "index", not "hamburger". */
 function IndexGlyph() {
   return (
     <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden>
       <path d="M1 3h12M1 7h12M1 11h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   HUD CONTROL — ONE bottom control: the progress bar IS the button.
-
-   The bar is a fixed-size pill in the header pills' geometry family;
-   its border is the progress instrument (PerimeterTrace): a green
-   trace travels clockwise from a fixed origin at bottom-centre —
-   bottom edge → right cap → top edge → left cap — pathLength = 1,
-   strokeDashoffset = 1 − progress, page 1 = 0% … page 9 = 100%.
-   Only the trace endpoint moves: the origin never re-centres, the
-   control never resizes or shifts. Pressing anywhere on it opens the
-   index HUD; the index glyph is part of the same button, never a
-   second control. No numbering inside — every page carries its own
-   numeral, and the HUD lists the pages.
-   ═══════════════════════════════════════════════════════════════ */
-
-function PerimeterTrace({ w, h, progress, reduced }: { w: number; h: number; progress: number; reduced: boolean }) {
-  /* 0.75px inset keeps the 1.5px stroke centred on the pill's border;
-     the caps are true semicircles (r = half the inset height) */
-  const r = (h - 1.5) / 2;
-  const y0 = 0.75;
-  const y1 = h - 0.75;
-  const xL = 0.75 + r;
-  const xR = w - 0.75 - r;
-  const d = `M${w / 2} ${y1}H${xR}A${r} ${r} 0 0 1 ${xR} ${y0}H${xL}A${r} ${r} 0 0 1 ${xL} ${y1}H${w / 2}`;
-  return (
-    <svg className="hud-perim" viewBox={`0 0 ${w} ${h}`} aria-hidden focusable="false">
-      <path className="hud-perim-base" d={d} pathLength={1} />
-      <motion.path
-        className="hud-perim-fill"
-        d={d}
-        pathLength={1}
-        strokeDasharray="1 1"
-        initial={false}
-        animate={{ strokeDashoffset: 1 - progress }}
-        transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 170, damping: 26 }}
-      />
     </svg>
   );
 }
@@ -298,16 +257,9 @@ export function HudControl({
 }) {
   const { t } = useLang();
   const { openNav } = useNav();
-  const prefersReduced = useReducedMotion();
-  /* Same instrument as the open panel's bottom-edge trace:
-     progress = active / (total − 1), fixed origin, monotonic. */
-  const progress = total > 1 ? active / (total - 1) : 0;
-  /* One fixed HUD pill for all breakpoints — CSS sizes it; SVG viewBox
-     matches the design-token geometry so the perimeter trace stays true. */
-  const w = 76;
-  const h = 40;
+  void total;
   return (
-    <div className="pager-hud-slot" aria-hidden={false}>
+    <div className="pager-hud-slot">
       <button
         type="button"
         onClick={openNav}
@@ -317,8 +269,10 @@ export function HudControl({
         data-nav-open={navOpen ? 'true' : 'false'}
         className="pager-hud"
       >
-        <PerimeterTrace w={w} h={h} progress={progress} reduced={!!prefersReduced} />
         <IndexGlyph />
+        <span className="pager-hud-label" aria-hidden>
+          {labels[active] ?? ''}
+        </span>
         <span className="sr-only">{labels[active] ?? ''}</span>
       </button>
     </div>
@@ -625,27 +579,48 @@ export function Header() {
    FOOTER — fixed.
    ═══════════════════════════════════════════════════════════════ */
 
-export function Footer() {
+/* ═══════════════════════════════════════════════════════════════
+   FOOTER + scroll progress seam.
+
+   Progress is a thin green fill on the top edge of the footer —
+   immediately above the existing footer bar. TOC navigation is a
+   separate control; this only answers "how far through the site?"
+   ═══════════════════════════════════════════════════════════════ */
+
+export function Footer({ progress = 0 }: { progress?: number }) {
   const { t, lang } = useLang();
+  const p = Math.max(0, Math.min(1, progress));
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-[9997] border-t py-2.5" style={{ borderColor: 'rgba(228,226,223,0.04)', background: 'rgba(6,6,8,0.6)', backdropFilter: 'blur(12px)' }}>
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-1 px-6 sm:flex-row">
-        <p className="font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>
-          © {localizeDigits(new Date().getFullYear(), lang)} {t.profile.nameFull}. {t.footer.built}
-        </p>
-        {/* The promise is made checkable rather than merely asserted: the
-            link opens the repository's claim-verification log, where each
-            figure is tied to a commit, a CI run or a device record. */}
-        <a
-          href="https://github.com/soobujmiah/soobujmiah.github.io#claim-verification-log"
-          target="_blank"
-          rel="noreferrer"
-          data-magnetic
-          className="font-mono text-[10px] transition-colors duration-300 hover:text-[#4ade80]"
-          style={{ color: 'rgba(228,226,223,0.35)' }}
-        >
-          {t.footer.claims} <span aria-hidden>↗</span>
-        </a>
+    <footer className="site-footer fixed bottom-0 left-0 right-0 z-[9997]">
+      <div
+        className="footer-progress"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(p * 100)}
+        aria-label="Page progress"
+      >
+        <div className="footer-progress-fill" style={{ transform: `scaleX(${p})` }} />
+      </div>
+      <div
+        className="footer-bar border-t py-2.5"
+        style={{ borderColor: 'rgba(228,226,223,0.04)', background: 'rgba(6,6,8,0.6)', backdropFilter: 'blur(12px)' }}
+      >
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-1 px-6 sm:flex-row">
+          <p className="font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>
+            © {localizeDigits(new Date().getFullYear(), lang)} {t.profile.nameFull}. {t.footer.built}
+          </p>
+          <a
+            href="https://github.com/soobujmiah/soobujmiah.github.io#claim-verification-log"
+            target="_blank"
+            rel="noreferrer"
+            data-magnetic
+            className="font-mono text-[10px] transition-colors duration-300 hover:text-[#4ade80]"
+            style={{ color: 'rgba(228,226,223,0.35)' }}
+          >
+            {t.footer.claims} <span aria-hidden>↗</span>
+          </a>
+        </div>
       </div>
     </footer>
   );

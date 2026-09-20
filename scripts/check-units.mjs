@@ -71,8 +71,6 @@ writeFileSync(
         'app/design-tokens.ts',
         'app/clock.ts',
         'app/story-world.ts',
-        'app/site-guide.ts',
-        'app/site-guide-knowledge.ts',
         'app/services.ts',
       ],
     },
@@ -150,12 +148,6 @@ const {
   KEYWORD_HOLD_MS,
 } = await import(pathToFileURL(storyPath).href);
 const { MOTION } = await import(pathToFileURL(tokensPath).href);
-const guidePath = pick('app/site-guide.js', 'site-guide.js');
-if (!guidePath) {
-  console.error('check-units FAIL: compiled app/site-guide.ts not found');
-  process.exit(1);
-}
-const { answerSiteQuestion } = await import(pathToFileURL(guidePath).href);
 
 console.log('\nBengali grapheme segmentation (Intl.Segmenter path)');
 eq('সবুজ মিয়া → 6 clusters, not 9 code points', segmentGraphemes('সবুজ মিয়া'), ['স', 'বু', 'জ', ' ', 'মি', 'য়া']);
@@ -333,12 +325,12 @@ eq('an edge particle disperses further than a central one', (() => {
 })(), true);
 
 console.log('\nSignature name — the colour ramp');
-const ramp = rampPalette('#7dd3fc', '#eab308', '#4ade80', 8, 0.72);
+const ramp = rampPalette('#22c55e', '#a3e635', '#4ade80', 8, 0.55);
 eq('the ramp has one entry per bucket', ramp.length, 8);
-eq('it starts on the cool assembly ink', ramp[0], 'rgba(125,211,252,1)');
+eq('it starts on the assembly green', ramp[0], 'rgba(34,197,94,1)');
 eq('it ends on the resolved green', ramp[7], 'rgba(74,222,128,1)');
 eq('every stop is a valid rgba()', ramp.every((c) => /^rgba\(\d+,\d+,\d+,1\)$/.test(c)), true);
-eq('a two-bucket ramp still spans cool to green', rampPalette('#7dd3fc', '#eab308', '#4ade80', 2, 0.72), ['rgba(125,211,252,1)', 'rgba(74,222,128,1)']);
+eq('a two-bucket ramp stays green-family', rampPalette('#22c55e', '#a3e635', '#4ade80', 2, 0.55), ['rgba(34,197,94,1)', 'rgba(74,222,128,1)']);
 eq('bucketFor clamps low', bucketFor(-1, 8), 0);
 eq('bucketFor clamps high', bucketFor(4, 8), 7);
 eq('bucketFor maps arrival to the last bucket', bucketFor(1, 8), 7);
@@ -368,7 +360,7 @@ eq('flowPoint starts at A and ends at B', (() => {
   const b = flowPoint(0, 0, 10, 0, 1, 4);
   return Math.hypot(a.x, a.y) < 1e-9 && Math.hypot(b.x - 10, b.y) < 1e-9;
 })(), true);
-const STYLES = ['axis', 'sweep', 'compress', 'converge', 'wave'];
+const STYLES = ['radial', 'horizontal', 'vertical', 'orbital', 'wave', 'edge', 'grid', 'dispersion'];
 eq(
   'styledFlowPoint lands on endpoints for every morph style',
   STYLES.every((style) => {
@@ -416,7 +408,7 @@ eq('spatialPairing handles unequal populations without throwing', (() => {
 })(), true);
 eq('one beat per service slug', STORY_BEATS.length, 8);
 eq(
-  'beats are deterministic keyword holds with morph styles',
+  'beats are deterministic keyword holds with dual morph styles',
   Array.isArray(STORY_BEATS) &&
     STORY_BEATS.every(
       (b) =>
@@ -424,13 +416,29 @@ eq(
         typeof b.slug === 'string' &&
         b.holdMs > 0 &&
         b.morphMs > 0 &&
-        STYLES.includes(b.style),
+        STYLES.includes(b.styleOut) &&
+        STYLES.includes(b.styleBack) &&
+        b.styleOut !== b.styleBack,
     ),
   true,
 );
 eq(
-  'at least three distinct morph styles are used across the cycle',
-  new Set(STORY_BEATS.map((b) => b.style)).size >= 3,
+  'at least five distinct outbound morph styles across the cycle',
+  new Set(STORY_BEATS.map((b) => b.styleOut)).size >= 5,
+  true,
+);
+eq(
+  'no two consecutive transitions share the same style',
+  (() => {
+    const seq = [];
+    for (const b of STORY_BEATS) {
+      seq.push(b.styleOut, b.styleBack);
+    }
+    for (let i = 1; i < seq.length; i += 1) {
+      if (seq[i] === seq[i - 1]) return false;
+    }
+    return true;
+  })(),
   true,
 );
 eq('first beat is web-development', STORY_BEATS[0].slug, 'web-development');
@@ -464,16 +472,6 @@ eq('BN keywords carry Bengali script', bnKw.every((k) => /[\u0980-\u09FF]/.test(
 eq('no bedroom / life-cycle leftovers on beats', !JSON.stringify(STORY_BEATS).includes('bed_sleep'), true);
 eq('name-hold micro-drift stays subtle enough to keep the name readable', NA.microPx <= 0.35, true);
 
-console.log('\nSite guide — local knowledge only (no external AI)');
-eq('services list intent returns on-site copy', answerSiteQuestion('What services are available?', 'en').text.includes('Website Development'), true);
-eq('contact intent returns email', answerSiteQuestion('How can I contact Sobuj?', 'en').text.includes('soobujmiah@gmail.com'), true);
-eq('website soft-match routes to web-development', answerSiteQuestion('I need a website', 'en').href, '/services/web-development/');
-eq('android soft-match routes to android-support', answerSiteQuestion('android phone help', 'en').href, '/services/android-support/');
-eq('projects intent lists featured work', answerSiteQuestion('What projects are featured?', 'en').text.includes('LAI'), true);
-eq('empty question gets empty prompt', answerSiteQuestion('   ', 'en').text.length > 0, true);
-eq('off-site / unknown is refused', answerSiteQuestion('What is the weather in Tokyo?', 'en').text.includes('do not have information'), true);
-eq('BN services intent answers in Bengali', /[\u0980-\u09FF]/.test(answerSiteQuestion('কী কী সেবা আছে?', 'bn').text), true);
-eq('BN unknown is refused in Bengali', /[\u0980-\u09FF]/.test(answerSiteQuestion('টোকিওর আবহাওয়া কী?', 'bn').text), true);
 
 rmSync(cfgPath, { force: true });
 rmSync(tmp, { recursive: true, force: true });
