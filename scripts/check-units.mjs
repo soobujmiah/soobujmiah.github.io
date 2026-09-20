@@ -125,6 +125,10 @@ const {
   densityStepFor,
   particleCountForInk,
   sampleInkPoints,
+  sampleInkPointsMinDist,
+  particleRadiusFor,
+  minParticleDistance,
+  PARTICLE_WEIGHT,
   pointsBounds,
   centerPointsInSafeRect,
   startOffset,
@@ -356,6 +360,42 @@ eq('particleCountForInk is deterministic', particleCountForInk(300, 3, 0.1, 50, 
     const unique = new Set(xs.map((v) => v.toFixed(2)));
     return unique.size >= 3;
   })(), true);
+})();
+
+console.log('\\nSignature name — min-distance visual weight (particulate, not solid)');
+eq('PARTICLE_WEIGHT density band is particulate', PARTICLE_WEIGHT.densityMax < 0.2 && PARTICLE_WEIGHT.densityMin > 0.04, true);
+eq('PARTICLE_WEIGHT density sits inside its band', PARTICLE_WEIGHT.density >= PARTICLE_WEIGHT.densityMin && PARTICLE_WEIGHT.density <= PARTICLE_WEIGHT.densityMax, true);
+eq('particleRadiusFor stays discrete', particleRadiusFor(390) <= PARTICLE_WEIGHT.radiusMax && particleRadiusFor(390) >= PARTICLE_WEIGHT.radiusMin, true);
+eq('minParticleDistance clears radius', minParticleDistance(1.5) >= 1.5 * PARTICLE_WEIGHT.minDistFactor - 0.01 || minParticleDistance(1.5) >= PARTICLE_WEIGHT.minDistFloor, true);
+(() => {
+  const fw = 48;
+  const fh = 48;
+  const img = new Uint8ClampedArray(fw * fh * 4);
+  for (let y = 8; y < 40; y += 1) {
+    for (let x = 8; x < 40; x += 1) {
+      const i = (y * fw + x) * 4;
+      img[i] = 255; img[i + 1] = 255; img[i + 2] = 255; img[i + 3] = 255;
+    }
+  }
+  const dense = sampleInkPoints(img, fw, fh, 2, 100, 800, 7);
+  const spaced = sampleInkPointsMinDist(img, fw, fh, 4, 100, 800, 7);
+  eq('min-dist sampling is sparser than grid fill', spaced.length < dense.length, true);
+  eq('min-dist sampling stays under maxCount', spaced.length <= 800, true);
+  eq('min-dist sampling has real coverage', spaced.length >= 20, true);
+  eq('min-dist sampling is deterministic', sampleInkPointsMinDist(img, fw, fh, 4, 100, 800, 7).length, spaced.length);
+  /* Neighbours should roughly respect minDist (allow thin-pass 0.78×). */
+  let violations = 0;
+  const floor2 = (4 * 0.75) * (4 * 0.75);
+  for (let i = 0; i < spaced.length; i += 1) {
+    for (let j = i + 1; j < spaced.length; j += 1) {
+      const dx = spaced[i].x - spaced[j].x;
+      const dy = spaced[i].y - spaced[j].y;
+      if (dx * dx + dy * dy < floor2 * 0.85) violations += 1;
+    }
+  }
+  eq('min-dist neighbours rarely collide', violations < spaced.length * 0.05, true);
+  eq('morphParamsFromSeed stagger stays short', morphParamsFromSeed(11, 'radial').stagger <= 0.14, true);
+  eq('morphParamsFromSeed overshoot stays gentle', morphParamsFromSeed(11, 'radial').overshoot <= 0.05, true);
 })();
 eq('the widened step actually brings the count under the ceiling', (() => {
   const step = sampleStepFor(6800, 2, 1700);
