@@ -192,17 +192,18 @@ export function SignatureName({
       const minSize = Math.max(fontSize * 0.82, Math.min(storyH * 0.36, fontSize));
       for (let guard = 0; guard < 16; guard += 1) {
         const lines = splitTwoLines(label, measure, maxW);
-        const lineH = size * 1.12;
+        const lineH = size * 1.02;
         const blockH = lines.length * lineH;
         const widest = Math.max(...lines.map(measure), 0);
-        if (widest <= maxW && blockH <= storyH * 0.94) break;
+        if (widest <= maxW && blockH <= storyH * 0.96) break;
         if (size <= minSize + 0.5) break;
         size = Math.max(minSize, size * 0.96);
         applyFont(size);
       }
 
       const lines = splitTwoLines(label, measure, maxW);
-      const lineH = size * 1.12;
+      /* Tight two-line unit — same visual density as the name, not airy stack. */
+      const lineH = size * 1.02;
       const blockH = lines.length * lineH;
       const startY = storyH / 2 - blockH / 2 + lineH / 2;
       applyFont(size);
