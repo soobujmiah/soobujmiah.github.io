@@ -134,6 +134,9 @@ const {
   flowPoint,
   styledFlowPoint,
   splitTwoLines,
+  morphParamsFromSeed,
+  staggerOrder,
+  MORPH_STYLES,
   easeInOutQuint,
 } = await import(pathToFileURL(motionPath).href);
 const storyPath = pick('app/story-world.js', 'story-world.js');
@@ -325,12 +328,12 @@ eq('an edge particle disperses further than a central one', (() => {
 })(), true);
 
 console.log('\nSignature name — the colour ramp');
-const ramp = rampPalette('#22c55e', '#a3e635', '#4ade80', 8, 0.55);
+const ramp = rampPalette('#22c55e', '#4ade80', '#4ade80', 8, 0.5);
 eq('the ramp has one entry per bucket', ramp.length, 8);
 eq('it starts on the assembly green', ramp[0], 'rgba(34,197,94,1)');
 eq('it ends on the resolved green', ramp[7], 'rgba(74,222,128,1)');
 eq('every stop is a valid rgba()', ramp.every((c) => /^rgba\(\d+,\d+,\d+,1\)$/.test(c)), true);
-eq('a two-bucket ramp stays green-family', rampPalette('#22c55e', '#a3e635', '#4ade80', 2, 0.55), ['rgba(34,197,94,1)', 'rgba(74,222,128,1)']);
+eq('a two-bucket ramp stays green-family', rampPalette('#22c55e', '#4ade80', '#4ade80', 2, 0.5), ['rgba(34,197,94,1)', 'rgba(74,222,128,1)']);
 eq('bucketFor clamps low', bucketFor(-1, 8), 0);
 eq('bucketFor clamps high', bucketFor(4, 8), 7);
 eq('bucketFor maps arrival to the last bucket', bucketFor(1, 8), 7);
@@ -360,7 +363,7 @@ eq('flowPoint starts at A and ends at B', (() => {
   const b = flowPoint(0, 0, 10, 0, 1, 4);
   return Math.hypot(a.x, a.y) < 1e-9 && Math.hypot(b.x - 10, b.y) < 1e-9;
 })(), true);
-const STYLES = ['radial', 'horizontal', 'vertical', 'orbital', 'wave', 'edge', 'grid', 'dispersion'];
+const STYLES = ['radial', 'horizontal', 'vertical', 'orbital', 'wave', 'edge', 'grid', 'dispersion', 'crossflow', 'focal'];
 eq(
   'styledFlowPoint lands on endpoints for every morph style',
   STYLES.every((style) => {
@@ -375,10 +378,28 @@ eq(
   (() => {
     const mids = STYLES.map((s) => styledFlowPoint(0, 0, 40, 0, 0.5, 8, s, 20, 10));
     const keys = new Set(mids.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`));
-    return keys.size >= 4;
+    return keys.size >= 6;
   })(),
   true,
 );
+eq(
+  'morphParamsFromSeed is deterministic',
+  morphParamsFromSeed(42, 'radial'),
+  morphParamsFromSeed(42, 'radial'),
+);
+eq(
+  'morphParamsFromSeed varies by seed',
+  morphParamsFromSeed(1, 'wave').turb !== morphParamsFromSeed(99, 'wave').turb ||
+    morphParamsFromSeed(1, 'wave').prop !== morphParamsFromSeed(99, 'wave').prop,
+  true,
+);
+eq(
+  'staggerOrder respects flip',
+  staggerOrder(0.2, 0.5, 0, false) < staggerOrder(0.8, 0.5, 0, false) &&
+    staggerOrder(0.2, 0.5, 0, true) > staggerOrder(0.8, 0.5, 0, true),
+  true,
+);
+eq('MORPH_STYLES enumerates every family', MORPH_STYLES.length >= 8, true);
 eq(
   'splitTwoLines keeps short labels on one line',
   splitTwoLines('Graphics Design', (s) => s.length * 8, 400),

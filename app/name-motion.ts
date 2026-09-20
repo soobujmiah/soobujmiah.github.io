@@ -356,7 +356,9 @@ export type MorphStyle =
   | 'wave'
   | 'edge'
   | 'grid'
-  | 'dispersion';
+  | 'dispersion'
+  | 'crossflow'
+  | 'focal';
 
 export const MORPH_STYLES: readonly MorphStyle[] = [
   'radial',
@@ -367,12 +369,131 @@ export const MORPH_STYLES: readonly MorphStyle[] = [
   'edge',
   'grid',
   'dispersion',
+  'crossflow',
+  'focal',
 ] as const;
 
+/** Seeded parameters that combine with a morph family for variety. */
+export type MorphParams = {
+  style: MorphStyle;
+  /** 0..1 stagger span (activation delay budget). */
+  stagger: number;
+  /** Arc / bend magnitude scale. */
+  bendScale: number;
+  /** Low-amplitude coherent turbulence (0..1). */
+  turb: number;
+  /** Slight destination overshoot (0..0.12 of travel). */
+  overshoot: number;
+  /** Propagation axis: 0=x, 1=y, 2=radial, 3=angular. */
+  prop: 0 | 1 | 2 | 3;
+  /** Flip propagation direction. */
+  flip: boolean;
+  /** Secondary family blend 0..1 into a second style. */
+  blend: number;
+  blendStyle: MorphStyle;
+};
+
+/** Deterministic 0..1 from a 32-bit seed stream. */
+export function seededUnit(seed: number, salt: number): number {
+  return mulberry32((seed ^ Math.imul(salt, 0x9e3779b9)) >>> 0)();
+}
+
 /**
- * Geometric trajectory from source → destination under a morph style.
- * Bidirectional: swap endpoints (or t → 1−t) for the reverse path.
- * Mid-field waypoints are deterministic from endpoints + style.
+ * Build controlled morph parameters from a transition seed.
+ * Same seed → same physics. Never Math.random in the hot path.
+ */
+export function morphParamsFromSeed(seed: number, primary: MorphStyle, avoid?: MorphStyle): MorphParams {
+  const rnd = mulberry32(seed >>> 0);
+  const pick = (): MorphStyle => {
+    const pool = MORPH_STYLES.filter((s) => s !== primary && s !== avoid);
+    return pool[Math.floor(rnd() * pool.length) % pool.length] ?? 'wave';
+  };
+  return {
+    style: primary,
+    stagger: 0.08 + rnd() * 0.14,
+    bendScale: 0.1 + rnd() * 0.16,
+    turb: 0.04 + rnd() * 0.1,
+    overshoot: rnd() * 0.09,
+    prop: (Math.floor(rnd() * 4) % 4) as 0 | 1 | 2 | 3,
+    flip: rnd() > 0.5,
+    blend: 0.15 + rnd() * 0.35,
+    blendStyle: pick(),
+  };
+}
+
+function familyMid(
+  style: MorphStyle,
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+  e: number,
+  bend: number,
+  fieldCx: number,
+  fieldCy: number,
+  pull: number,
+  nx: number,
+  ny: number
+): { x: number; y: number } {
+  let mx = (ax + bx) * 0.5;
+  let my = (ay + by) * 0.5;
+  const k = Math.sin(e * Math.PI);
+
+  if (style === 'radial' || style === 'focal') {
+    const strength = style === 'focal' ? 0.88 : 0.78;
+    mx = lerp(mx, fieldCx, strength * k + 0.12);
+    my = lerp(my, fieldCy, strength * k + 0.12);
+    mx += nx * bend * 0.35;
+    my += ny * bend * 0.35;
+  } else if (style === 'horizontal') {
+    mx += Math.sign(bx - ax || 1) * pull * 0.95;
+    my += bend * 0.5 + ny * bend * 0.2;
+  } else if (style === 'vertical') {
+    mx += nx * bend * 0.35;
+    my = lerp(my, fieldCy, 0.85);
+  } else if (style === 'orbital') {
+    const ang = (e - 0.5) * Math.PI * 0.65;
+    const rad = Math.min(32, Math.hypot(bx - ax, by - ay) * 0.18);
+    mx = lerp(mx, fieldCx, 0.38) + Math.cos(ang) * rad * 0.6 + nx * bend * 0.3;
+    my = lerp(my, fieldCy, 0.38) + Math.sin(ang) * rad * 0.6 + ny * bend * 0.3;
+  } else if (style === 'wave') {
+    const wave = Math.sin(e * Math.PI * 1.6) * Math.min(26, Math.hypot(bx - ax, by - ay) * 0.16);
+    mx += nx * (bend * 0.45 + wave);
+    my += ny * (bend * 0.45 + wave * 0.4);
+  } else if (style === 'edge') {
+    mx = lerp(mx, fieldCx, 0.72 * k);
+    my = lerp(my, fieldCy, 0.48 * k);
+    mx += nx * bend * 0.55;
+    my += ny * bend * 0.55;
+  } else if (style === 'grid') {
+    const cell = 12;
+    const gx = Math.round(mx / cell) * cell;
+    const gy = Math.round(my / cell) * cell;
+    mx = lerp(mx, gx, 0.8 * k);
+    my = lerp(my, gy, 0.8 * k);
+    mx += nx * bend * 0.22;
+    my += ny * bend * 0.22;
+  } else if (style === 'crossflow') {
+    // Two axes cross: horizontal pull then vertical release.
+    mx += Math.sign(bx - ax || 1) * pull * (1 - e) * 0.7;
+    my += Math.sign(by - ay || 1) * pull * e * 0.55;
+    mx += nx * bend * 0.4;
+    my += ny * bend * 0.4;
+  } else {
+    // dispersion
+    const out = Math.min(28, Math.hypot(bx - ax, by - ay) * 0.15) * k;
+    const ox = (ax - fieldCx) || nx;
+    const oy = (ay - fieldCy) || ny;
+    const ol = Math.hypot(ox, oy) || 1;
+    mx += (ox / ol) * out + nx * bend * 0.3;
+    my += (oy / ol) * out + ny * bend * 0.3;
+  }
+  return { x: mx, y: my };
+}
+
+/**
+ * Multi-family geometric trajectory with seeded turbulence + overshoot.
+ * Endpoints are exact at t=0 and t=1. Hue is never involved.
  */
 export function styledFlowPoint(
   ax: number,
@@ -383,7 +504,8 @@ export function styledFlowPoint(
   bend: number,
   style: MorphStyle,
   fieldCx: number,
-  fieldCy: number
+  fieldCy: number,
+  params?: Partial<MorphParams>
 ): { x: number; y: number } {
   const e = easeInOutQuint(t);
   const dx = bx - ax;
@@ -391,67 +513,62 @@ export function styledFlowPoint(
   const len = Math.hypot(dx, dy) || 1;
   const nx = -dy / len;
   const ny = dx / len;
-  const pull = Math.min(40, len * 0.22);
+  const pull = Math.min(44, len * 0.24);
+  const turb = params?.turb ?? 0;
+  const overshoot = params?.overshoot ?? 0;
+  const blend = params?.blend ?? 0;
+  const blendStyle = params?.blendStyle ?? style;
 
-  let mx = (ax + bx) * 0.5;
-  let my = (ay + by) * 0.5;
-
-  if (style === 'radial') {
-    // Converge through field centre, then expand to destination.
-    const k = Math.sin(e * Math.PI); // peak at mid
-    mx = lerp(mx, fieldCx, 0.78 * k + 0.15);
-    my = lerp(my, fieldCy, 0.78 * k + 0.15);
-    mx += nx * bend * 0.35;
-    my += ny * bend * 0.35;
-  } else if (style === 'horizontal') {
-    mx += Math.sign(bx - ax || 1) * pull * 0.95;
-    my += bend * 0.5 + ny * bend * 0.2;
-  } else if (style === 'vertical') {
-    mx += nx * bend * 0.35;
-    my = lerp(my, fieldCy, 0.82);
-  } else if (style === 'orbital') {
-    // Subtle arc around field centre — not a giant circle.
-    const ang = (e - 0.5) * Math.PI * 0.55;
-    const rad = Math.min(28, len * 0.16);
-    mx = lerp(mx, fieldCx, 0.35) + Math.cos(ang) * rad * 0.55 + nx * bend * 0.3;
-    my = lerp(my, fieldCy, 0.35) + Math.sin(ang) * rad * 0.55 + ny * bend * 0.3;
-  } else if (style === 'wave') {
-    const wave = Math.sin(e * Math.PI * 1.5) * Math.min(24, len * 0.15);
-    mx += nx * (bend * 0.4 + wave);
-    my += ny * (bend * 0.4 + wave * 0.4);
-  } else if (style === 'edge') {
-    // Pull toward centre from edges, then out.
-    const k = Math.sin(e * Math.PI);
-    mx = lerp(mx, fieldCx, 0.7 * k);
-    my = lerp(my, fieldCy, 0.45 * k);
-    mx += nx * bend * 0.55;
-    my += ny * bend * 0.55;
-  } else if (style === 'grid') {
-    // Snap midpoint toward a coarse lattice cell, then release.
-    const cell = 14;
-    const gx = Math.round(mx / cell) * cell;
-    const gy = Math.round(my / cell) * cell;
-    const k = Math.sin(e * Math.PI);
-    mx = lerp(mx, gx, 0.75 * k);
-    my = lerp(my, gy, 0.75 * k);
-    mx += nx * bend * 0.25;
-    my += ny * bend * 0.25;
-  } else {
-    // dispersion — controlled loosen (outward) then reassemble.
-    const k = Math.sin(e * Math.PI);
-    const out = Math.min(26, len * 0.14) * k;
-    const ox = (ax - fieldCx) || nx;
-    const oy = (ay - fieldCy) || ny;
-    const ol = Math.hypot(ox, oy) || 1;
-    mx += (ox / ol) * out + nx * bend * 0.3;
-    my += (oy / ol) * out + ny * bend * 0.3;
+  const a = familyMid(style, ax, ay, bx, by, e, bend, fieldCx, fieldCy, pull, nx, ny);
+  let mx = a.x;
+  let my = a.y;
+  if (blend > 0.02 && blendStyle !== style) {
+    const b = familyMid(blendStyle, ax, ay, bx, by, e, bend * 0.8, fieldCx, fieldCy, pull, nx, ny);
+    mx = lerp(mx, b.x, blend);
+    my = lerp(my, b.y, blend);
   }
+
+  // Coherent low-amplitude turbulence (seeded via bend phase, not Math.random).
+  if (turb > 0) {
+    const w = Math.sin(e * Math.PI * 2 + bend * 0.17) * turb * Math.min(18, len * 0.1);
+    const w2 = Math.cos(e * Math.PI * 1.3 + bend * 0.31) * turb * Math.min(12, len * 0.07);
+    mx += nx * w + ny * w2 * 0.5;
+    my += ny * w - nx * w2 * 0.5;
+  }
+
+  // Slight overshoot past destination near the end, then settle (still ends at B).
+  let destX = bx;
+  let destY = by;
+  if (overshoot > 0 && e > 0.55 && e < 1) {
+    const o = Math.sin(((e - 0.55) / 0.45) * Math.PI) * overshoot;
+    destX = bx + dx * o;
+    destY = by + dy * o;
+  }
+  // Re-anchor so t=1 lands exactly on B.
+  const landX = e >= 1 ? bx : destX;
+  const landY = e >= 1 ? by : destY;
 
   const u = 1 - e;
   return {
-    x: u * u * ax + 2 * u * e * mx + e * e * bx,
-    y: u * u * ay + 2 * u * e * my + e * e * by,
+    x: u * u * ax + 2 * u * e * mx + e * e * landX,
+    y: u * u * ay + 2 * u * e * my + e * e * landY,
   };
+}
+
+/** Stagger order key for a particle under a propagation mode. */
+export function staggerOrder(
+  nx: number,
+  ny: number,
+  prop: 0 | 1 | 2 | 3,
+  flip: boolean
+): number {
+  let o = 0;
+  if (prop === 0) o = nx;
+  else if (prop === 1) o = ny;
+  else if (prop === 2) o = Math.hypot(nx - 0.5, ny - 0.5) * 1.4;
+  else o = (Math.atan2(ny - 0.5, nx - 0.5) + Math.PI) / (Math.PI * 2);
+  if (flip) o = 1 - o;
+  return clamp01(o);
 }
 
 /**

@@ -35,18 +35,24 @@ import {
   startOffset,
   styledFlowPoint,
   splitTwoLines,
+  morphParamsFromSeed,
+  staggerOrder,
   type MorphStyle,
+  type MorphParams,
 } from '@/app/name-motion';
 import { STORY_BEATS, serviceKeywords, NAME_HOLD_MS } from '@/app/story-world';
 
 const INKS = ['#a3e635', '#4ade80', '#22c55e', '#34d399', '#10b981', '#2dd4bf', '#84cc16', '#16a34a'];
-/* Green-only identity — no amber/gold, no cyan detour, no near-white mint. */
+/* Green-only identity lock — one hue family, no amber/gold/cyan detour.
+   Morph brightness may vary; HUE never leaves brand green. */
 const ASSEMBLE_INKS = ['#22c55e', '#16a34a', '#4ade80', '#34d399'];
-const LOCK_INK = '#a3e635';
+const LOCK_INK = '#4ade80';
 const RAMP_BUCKETS = 8;
-const WARM_AT = 0.55;
+const WARM_AT = 0.5;
 const RESOLVED_INK = '#4ade80';
-const WAITING_INK = 'rgba(74,222,128,0.18)';
+const WAITING_INK = 'rgba(34,197,94,0.16)';
+/** Solid identity ink used for hold + morph (no hue ramp mid-flight). */
+const IDENTITY_INK = '#4ade80';
 
 type Particle = {
   tx: number;
@@ -167,10 +173,10 @@ export function SignatureName({
       sctx.clearRect(0, 0, storyW, storyH);
 
       const family = window.getComputedStyle(stage).fontFamily;
-      // Keyword ≈ name visual weight — same identity role, not a subtitle.
-      // Fit into the fixed slot with ≤2 lines; never shrink into decoration.
-      let size = Math.min(Math.max(fontSize * 0.88, 28), storyH * 0.42, fontSize * 1.02);
-      const maxW = storyW * 0.94;
+      // SERVICE SIZE ≈ NAME SIZE. Prefer two lines over shrinking.
+      // Only reduce after wrapping if the two-line block still overflows the slot.
+      let size = fontSize;
+      const maxW = storyW * 0.96;
       const applyFont = (px: number) => {
         sctx.font = `700 ${Math.round(px)}px ${family}`;
       };
@@ -180,19 +186,23 @@ export function SignatureName({
       sctx.fillStyle = '#ffffff';
 
       const measure = (s: string) => sctx.measureText(s).width;
-      // Shrink until a two-line layout fits both width and slot height.
-      for (let guard = 0; guard < 12; guard += 1) {
+      // 1) Try full name size with 1–2 lines.
+      // 2) If two-line block exceeds slot height, reduce ONLY enough to fit —
+      //    floor stays high so keywords never become subtitles.
+      const minSize = Math.max(fontSize * 0.82, Math.min(storyH * 0.36, fontSize));
+      for (let guard = 0; guard < 16; guard += 1) {
         const lines = splitTwoLines(label, measure, maxW);
-        const lineH = size * 1.18;
+        const lineH = size * 1.12;
         const blockH = lines.length * lineH;
         const widest = Math.max(...lines.map(measure), 0);
-        if (widest <= maxW && blockH <= storyH * 0.92) break;
-        size *= 0.92;
+        if (widest <= maxW && blockH <= storyH * 0.94) break;
+        if (size <= minSize + 0.5) break;
+        size = Math.max(minSize, size * 0.96);
         applyFont(size);
       }
 
       const lines = splitTwoLines(label, measure, maxW);
-      const lineH = size * 1.18;
+      const lineH = size * 1.12;
       const blockH = lines.length * lineH;
       const startY = storyH / 2 - blockH / 2 + lineH / 2;
       applyFont(size);
@@ -402,12 +412,15 @@ export function SignatureName({
       return true;
     };
 
+    let morphParams: MorphParams = morphParamsFromSeed(1, 'radial');
+
     const aimToPoints = (
       pts: Pt[],
       now: number,
       morphDuration: number,
       towardName: boolean,
-      style: MorphStyle
+      style: MorphStyle,
+      transitionKey: string
     ) => {
       const n = particles.length;
       if (n === 0) return;
@@ -422,10 +435,16 @@ export function SignatureName({
       );
       const toPts = towardName ? particles.map((p) => ({ x: p.tx, y: p.ty })) : pts;
       const map = spatialPairing(fromPts, toPts);
-      const rnd = mulberry32((fieldSeed ^ Math.imul(beatIndex + 11, 0x85ebca6b) ^ hashSeed(style)) >>> 0);
+      const seed =
+        (fieldSeed ^
+          Math.imul(beatIndex + 19, 0x85ebca6b) ^
+          hashSeed(style + ':' + transitionKey + (towardName ? ':back' : ':out'))) >>>
+        0;
+      const params = morphParamsFromSeed(seed, style, morphStyle);
+      morphParams = params;
+      const rnd = mulberry32(seed);
       let stgMax = 0;
 
-      // Style-aware stagger: sweep left→right, compress top→bottom, etc.
       for (let i = 0; i < n; i += 1) {
         const p = particles[i];
         const dest = toPts[map[i]] || toPts[i % toPts.length];
@@ -434,34 +453,15 @@ export function SignatureName({
         p.toX = dest.x;
         p.toY = dest.y;
         const dist = Math.hypot(p.toX - p.fromX, p.toY - p.fromY);
-        // Restrained geometric bend — style scales the arc strength.
-        const bendScale =
-          style === 'wave' || style === 'orbital'
-            ? 0.22
-            : style === 'dispersion'
-              ? 0.18
-              : style === 'horizontal'
-                ? 0.14
-                : style === 'grid'
-                  ? 0.08
-                  : 0.12;
-        p.bend = (rnd() - 0.5) * Math.min(32, dist * bendScale);
+        p.bend = (rnd() - 0.5) * Math.min(36, dist * params.bendScale);
 
         const nx = storyW > 0 ? p.fromX / storyW : 0.5;
         const ny = storyH > 0 ? p.fromY / storyH : 0.5;
-        let order = i / Math.max(1, n - 1);
-        if (style === 'horizontal') order = nx;
-        else if (style === 'vertical') order = ny;
-        else if (style === 'radial' || style === 'edge' || style === 'dispersion') {
-          const dx = nx - 0.5;
-          const dy = ny - 0.5;
-          order = Math.hypot(dx, dy) * 1.4;
-        } else if (style === 'wave') order = nx * 0.7 + ny * 0.3;
-        else if (style === 'grid') order = ((Math.round(nx * 8) + Math.round(ny * 6)) % 14) / 14;
-        else if (style === 'orbital') order = (Math.atan2(ny - 0.5, nx - 0.5) + Math.PI) / (Math.PI * 2);
-        else order = (nx + ny) * 0.5;
-
-        p.stg = clamp01(order) * 0.1 + rnd() * 0.025;
+        // Multi-group activation: core / flow / edge via z + stagger.
+        const order = staggerOrder(nx, ny, params.prop, params.flip);
+        const group = p.z < 0.2 ? 0 : p.z < 0.55 ? 1 : p.z < 0.85 ? 2 : 3;
+        const groupBias = group * 0.035;
+        p.stg = clamp01(order) * params.stagger + groupBias + rnd() * 0.02;
         if (p.stg > stgMax) stgMax = p.stg;
       }
 
@@ -480,15 +480,15 @@ export function SignatureName({
       const label = keywordsRef.current[beat.serviceIndex] ?? '';
       const pts = sampleTextPoints(label, budgetNow);
       holdMs = beat.holdMs;
-      aimToPoints(pts, now, beat.morphMs, false, beat.styleOut);
+      aimToPoints(pts, now, beat.morphMs, false, beat.styleOut, beat.slug);
     };
 
     const returnToName = (now: number) => {
       holdMs = NAME_HOLD_MS;
-      // Distinct reverse physics — consecutive transitions never identical.
-      const style = STORY_BEATS[Math.max(0, beatIndex)]?.styleBack ?? morphStyle;
+      const beat = STORY_BEATS[Math.max(0, beatIndex)];
+      const style = beat?.styleBack ?? morphStyle;
       const namePts = particles.map((p) => ({ x: p.tx, y: p.ty }));
-      aimToPoints(namePts, now, 1700, true, style);
+      aimToPoints(namePts, now, 1800, true, style, beat?.slug ?? 'name');
     };
 
     const advanceFromHold = (now: number) => {
@@ -607,7 +607,6 @@ export function SignatureName({
           s = dot * (1.35 - 0.35 * lcc);
         } else if (morphing) {
           const local = clamp01(mRaw - p.stg);
-          // Two-stage ease: settle slightly into motion, then arrive soft.
           const e = easeInOutQuint(local);
           const pos = styledFlowPoint(
             p.fromX,
@@ -618,26 +617,24 @@ export function SignatureName({
             p.bend,
             morphStyle,
             fieldCx,
-            fieldCy
+            fieldCy,
+            morphParams
           );
           x = pos.x;
           y = pos.y;
-          const nameS = dot * 1.05;
-          const keyS = dot * 1.15;
-          const fromS = morphFromName ? nameS : keyS;
-          const toS = morphToName ? nameS : keyS;
-          // Mid-flight scale pulse for depth without 3D overdesign.
-          const pulse = 1 + glow * 0.22 * Math.sin(e * Math.PI);
-          s = (fromS + (toS - fromS) * e) * pulse;
-          // Colour locks toward destination as the glyph becomes readable.
-          lc = 0.55 + 0.45 * e;
+          // Same particle scale for name and service — identical visual role.
+          const baseS = dot * 1.08;
+          const pulse = 1 + glow * 0.18 * Math.sin(e * Math.PI);
+          s = baseS * pulse;
+          // Brightness only (green lock) — never a hue shift.
+          lc = 0.85 + 0.15 * e;
         } else {
           // Hold — near-static for readability (name or keyword).
           const hx = onNameTargets ? p.tx : p.toX;
           const hy = onNameTargets ? p.ty : p.toY;
           x = hx + T.microPx * Math.sin(ts * 1.1 + p.ph1);
           y = hy + T.microPx * Math.cos(ts * 0.95 + p.ph2);
-          s = onNameTargets ? dot * 1.05 : dot * 1.12;
+          s = dot * 1.08;
           lc = 1;
         }
 
@@ -646,24 +643,26 @@ export function SignatureName({
 
       ctx.fillStyle = WAITING_INK;
       ctx.fill(waiting);
-      // Soft destination glow during morph only.
+      // Soft green glow only (same hue) during morph.
       if (glow > 0.02) {
         ctx.globalCompositeOperation = 'source-over';
-        ctx.globalAlpha = glow * 0.12;
-        ctx.fillStyle = 'rgba(34,197,94,1)';
-        const g = Math.min(storyW, storyH) * 0.42;
+        ctx.globalAlpha = glow * 0.1;
+        const g = Math.min(storyW, storyH) * 0.4;
         const grd = ctx.createRadialGradient(fieldCx, fieldCy, 4, fieldCx, fieldCy, g);
-        grd.addColorStop(0, 'rgba(74,222,128,0.35)');
+        grd.addColorStop(0, 'rgba(74,222,128,0.28)');
         grd.addColorStop(1, 'rgba(74,222,128,0)');
         ctx.fillStyle = grd;
         ctx.fillRect(0, 0, storyW, storyH);
         ctx.globalAlpha = 1;
         ctx.globalCompositeOperation = 'lighter';
       }
+      // Identity green lock — single fill for hold/morph (no multi-hue ramp).
+      ctx.fillStyle = IDENTITY_INK;
       for (let b = 0; b < RAMP_BUCKETS; b += 1) {
-        ctx.fillStyle = ramp[b];
+        ctx.globalAlpha = 0.72 + (b / Math.max(1, RAMP_BUCKETS - 1)) * 0.28;
         ctx.fill(buckets[b]);
       }
+      ctx.globalAlpha = 1;
 
       raf = requestAnimationFrame(frame);
     };

@@ -2,12 +2,9 @@
    STORY WORLD — identity ⇄ service keyword cycle (data only).
 
    Particles morph between the full name and each canonical service
-   title (SERVICE_SLUGS order). Titles are inlined (not imported from
-   services-content) so the pager never pulls the service-page tree.
-
-   Each transition uses a distinct morph physics profile. Forward and
-   reverse legs of the same beat pair use related but different styles
-   so consecutive transitions never feel identical.
+   title (SERVICE_SLUGS order). Each transition uses a distinct morph
+   family; forward and reverse legs differ. Seeded MorphParams add
+   controlled variation without consecutive repetition.
    ═══════════════════════════════════════════════════════════════ */
 
 import { SERVICE_SLUGS, type ServiceSlug } from './services';
@@ -19,25 +16,23 @@ export type SceneBeat = {
   slug: ServiceSlug;
   holdMs: number;
   morphMs: number;
-  /** Name → service morph. */
   styleOut: MorphStyle;
-  /** Service → name morph (distinct from styleOut). */
   styleBack: MorphStyle;
 };
 
 /**
- * Eight outbound + eight return styles — no two consecutive transitions
- * share the same profile. Order locked to SERVICE_SLUGS.
+ * Outbound + return families — no two consecutive transitions share a
+ * primary style. Includes crossflow/focal for richer variety.
  */
 const BEAT_PHYSICS: readonly { out: MorphStyle; back: MorphStyle }[] = [
   { out: 'radial', back: 'horizontal' }, // Website Development
   { out: 'grid', back: 'wave' }, // Custom Software
   { out: 'edge', back: 'vertical' }, // Computer Setup
-  { out: 'orbital', back: 'horizontal' }, // Android & Phone
-  { out: 'dispersion', back: 'edge' }, // Small-Business Tech
+  { out: 'orbital', back: 'crossflow' }, // Android & Phone
+  { out: 'dispersion', back: 'focal' }, // Small-Business Tech
   { out: 'wave', back: 'radial' }, // Graphics Design
   { out: 'vertical', back: 'grid' }, // Office Administration
-  { out: 'horizontal', back: 'orbital' }, // Data Entry
+  { out: 'crossflow', back: 'orbital' }, // Data Entry
 ];
 
 export const STORY_BEATS: readonly SceneBeat[] = SERVICE_SLUGS.map((slug, serviceIndex) => {
@@ -45,14 +40,13 @@ export const STORY_BEATS: readonly SceneBeat[] = SERVICE_SLUGS.map((slug, servic
   return {
     serviceIndex,
     slug,
-    holdMs: 2500,
-    morphMs: 1800,
+    holdMs: 2600,
+    morphMs: 1900,
     styleOut: phys.out,
     styleBack: phys.back,
   };
 });
 
-/** Canonical service titles — aligned with services-content. */
 const KEYWORDS: Record<Lang, readonly string[]> = {
   en: [
     'Website Development',
@@ -82,4 +76,4 @@ export function serviceKeywords(lang: Lang): string[] {
 }
 
 export const NAME_HOLD_MS = 3000;
-export const KEYWORD_HOLD_MS = 2500;
+export const KEYWORD_HOLD_MS = 2600;
