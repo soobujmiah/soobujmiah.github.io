@@ -147,6 +147,7 @@ const {
   staggerOrder,
   MORPH_STYLES,
   easeInOutQuint,
+  hasBengaliScript,
 } = await import(pathToFileURL(motionPath).href);
 const storyPath = pick('app/story-world.js', 'story-world.js');
 if (!storyPath) {
@@ -396,6 +397,65 @@ eq('minParticleDistance clears radius', minParticleDistance(1.5) >= 1.5 * PARTIC
   eq('min-dist neighbours rarely collide', violations < spaced.length * 0.05, true);
   eq('morphParamsFromSeed stagger stays short', morphParamsFromSeed(11, 'radial').stagger <= 0.14, true);
   eq('morphParamsFromSeed overshoot stays gentle', morphParamsFromSeed(11, 'radial').overshoot <= 0.05, true);
+})();
+
+console.log('\\nSignature name — Bengali script detect + small-component mark rescue');
+eq('hasBengaliScript sees BN name', hasBengaliScript('সবুজ মিয়া'), true);
+eq('hasBengaliScript rejects Latin', hasBengaliScript('Sobuj Miah'), false);
+eq('hasBengaliScript rejects empty', hasBengaliScript(''), false);
+eq('hasBengaliScript sees mixed BN mark', hasBengaliScript('Office প্রশাসন'), true);
+(() => {
+  /* Body stroke + two tiny detached marks (কার / chandrabindu stand-ins).
+     Lattice min-dist alone can skip the flecks; component rescue must land
+     at least one sample on each so BN diacritics stay visible. */
+  const fw = 64;
+  const fh = 48;
+  const img = new Uint8ClampedArray(fw * fh * 4);
+  const paint = (x0, y0, x1, y1) => {
+    for (let y = y0; y <= y1; y += 1) {
+      for (let x = x0; x <= x1; x += 1) {
+        if (x < 0 || y < 0 || x >= fw || y >= fh) continue;
+        const i = (y * fw + x) * 4;
+        img[i] = 255;
+        img[i + 1] = 255;
+        img[i + 2] = 255;
+        img[i + 3] = 255;
+      }
+    }
+  };
+  paint(8, 18, 48, 30); /* main body */
+  paint(52, 6, 55, 10); /* upper mark (~16 px) */
+  paint(20, 36, 24, 39); /* lower mark (~20 px) */
+  const minD = 5;
+  const pts = sampleInkPointsMinDist(img, fw, fh, minD, 100, 200, 99);
+  const near = (cx, cy, r) => pts.some((p) => Math.hypot(p.x - cx, p.y - cy) <= r);
+  eq('component rescue covers upper detached mark', near(53.5, 8, 4.5), true);
+  eq('component rescue covers lower detached mark', near(22, 37.5, 4.5), true);
+  eq('component rescue still samples the body', near(28, 24, 8), true);
+  eq('component rescue stays under budget (no density inflate)', pts.length <= 200, true);
+  eq(
+    'component rescue is deterministic',
+    sampleInkPointsMinDist(img, fw, fh, minD, 100, 200, 99).length,
+    pts.length
+  );
+  /* Solid body alone must not explode count vs plain lattice — rescue is
+     only for zero-hit components, not a global density bump. */
+  const bodyOnly = new Uint8ClampedArray(fw * fh * 4);
+  for (let y = 18; y <= 30; y += 1) {
+    for (let x = 8; x <= 48; x += 1) {
+      const i = (y * fw + x) * 4;
+      bodyOnly[i] = 255;
+      bodyOnly[i + 1] = 255;
+      bodyOnly[i + 2] = 255;
+      bodyOnly[i + 3] = 255;
+    }
+  }
+  const bodyPts = sampleInkPointsMinDist(bodyOnly, fw, fh, minD, 100, 200, 99);
+  eq(
+    'rescue does not inflate solid-body density beyond thin-pass band',
+    pts.length <= bodyPts.length + 8,
+    true
+  );
 })();
 eq('the widened step actually brings the count under the ceiling', (() => {
   const step = sampleStepFor(6800, 2, 1700);
