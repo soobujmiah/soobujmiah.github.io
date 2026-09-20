@@ -337,6 +337,25 @@ eq('particleCountForInk is deterministic', particleCountForInk(300, 3, 0.1, 50, 
   const b2 = pointsBounds(pts);
   eq('centerPointsInSafeRect recentres the cloud', Math.abs(b2.cx - 100) < 2 && Math.abs(b2.cy - 80) < 2, true);
   eq('centerPointsInSafeRect stays inside the safe rect', b2.minX >= 90 - 0.01 && b2.maxX <= 110 + 0.01 && b2.minY >= 70 - 0.01 && b2.maxY <= 90 + 0.01, true);
+  /* Oversized cloud must SCALE into the safe box, not crush against edges. */
+  const wide = [
+    { x: 0, y: 40 },
+    { x: 50, y: 40 },
+    { x: 100, y: 40 },
+    { x: 200, y: 40 },
+    { x: 100, y: 10 },
+    { x: 100, y: 70 },
+  ];
+  centerPointsInSafeRect(wide, 100, 40, { left: 80, top: 20, right: 120, bottom: 60 });
+  const bw = pointsBounds(wide);
+  eq('centerPointsInSafeRect scales oversized width into safe', bw.width <= 40 + 0.5, true);
+  eq('centerPointsInSafeRect scales oversized height into safe', bw.height <= 40 + 0.5, true);
+  eq('centerPointsInSafeRect keeps interior points (no edge crush)', (() => {
+    /* After uniform scale, the middle of the cloud must not collapse to a rim. */
+    const xs = wide.map((p) => p.x).sort((a, b) => a - b);
+    const unique = new Set(xs.map((v) => v.toFixed(2)));
+    return unique.size >= 3;
+  })(), true);
 })();
 eq('the widened step actually brings the count under the ceiling', (() => {
   const step = sampleStepFor(6800, 2, 1700);
@@ -456,6 +475,28 @@ eq(
 eq(
   'splitTwoLines never invents a third line',
   splitTwoLines('Android & Phone Software Support', (s) => s.length * 12, 100).length <= 2,
+  true,
+);
+eq(
+  'splitTwoLines soft-breaks hyphen compounds (Small-Business)',
+  splitTwoLines('Small-Business Technology Support', (s) => s.length * 12, 160).length,
+  2,
+);
+eq(
+  'splitTwoLines keeps hyphen on the first half',
+  splitTwoLines('Small-Business Technology Support', (s) => s.length * 14, 140).some((l) =>
+    l.includes('Small-'),
+  ),
+  true,
+);
+eq(
+  'splitTwoLines Office Administration stays ≤2',
+  splitTwoLines('Office Administration & Operations Support', (s) => s.length * 11, 120).length <= 2,
+  true,
+);
+eq(
+  'splitTwoLines Computer Setup stays ≤2',
+  splitTwoLines('Computer Setup & Troubleshooting', (s) => s.length * 11, 120).length <= 2,
   true,
 );
 eq('spatialPairing is structure-preserving (sorted left-to-right)', (() => {
