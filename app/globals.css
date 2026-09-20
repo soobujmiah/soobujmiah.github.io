@@ -1537,15 +1537,15 @@ body:has(> .services-doc) button {
 }
 
 /* Fixed name ⇄ keyword morph slot.
-   Height is reserved for the larger name OR a two-line service title
-   so short/long keywords never shift role / status / CTAs / motto. */
+   Height reserves TWO full display lines at name scale so short/long
+   keywords never shift role / status / CTAs / motto (zero CLS). */
 .hero-story-stage {
   position: relative;
   width: 100%;
-  max-width: 42rem;
-  /* Two-line service titles + large name — fixed band, no CLS. */
-  height: clamp(148px, 24dvh, 268px);
-  min-height: 148px;
+  max-width: 44rem;
+  /* Two lines × large display size — fixed band, no CLS. */
+  height: clamp(168px, 28dvh, 300px);
+  min-height: 168px;
   margin: 0 auto clamp(12px, 1.8dvh, 18px);
   flex-shrink: 0;
   display: flex;
@@ -1553,7 +1553,6 @@ body:has(> .services-doc) button {
   justify-content: center;
   pointer-events: none;
   z-index: 2;
-  /* Isolation: nothing outside this box may reflow from morph content. */
   contain: layout style;
 }
 
@@ -1623,8 +1622,8 @@ body:has(> .services-doc) button {
 
 @media (max-height: 700px) {
   .hero-story-stage {
-    height: clamp(128px, 20dvh, 200px);
-    min-height: 128px;
+    height: clamp(148px, 24dvh, 230px);
+    min-height: 148px;
     margin-bottom: 8px;
   }
   .hero-clock-wrap {
@@ -1644,8 +1643,8 @@ body:has(> .services-doc) button {
 
 @media (max-height: 640px) {
   .hero-story-stage {
-    height: clamp(118px, 18dvh, 170px);
-    min-height: 118px;
+    height: clamp(136px, 22dvh, 200px);
+    min-height: 136px;
   }
   .page-fill--hero {
     padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
@@ -1654,9 +1653,9 @@ body:has(> .services-doc) button {
 
 @media (min-width: 768px) {
   .hero-story-stage {
-    height: clamp(180px, 26dvh, 300px);
-    min-height: 180px;
-    max-width: 48rem;
+    height: clamp(200px, 30dvh, 340px);
+    min-height: 200px;
+    max-width: 50rem;
     margin-bottom: 1.15rem;
   }
   .hero-copy .hero-role {
@@ -1670,11 +1669,11 @@ body:has(> .services-doc) button {
   }
 }
 
-/* Wide desktop: confident name presence without clipping. */
+/* Wide desktop: two full name-scale lines without clipping. */
 @media (min-width: 1200px) {
   .hero-story-stage {
-    height: clamp(200px, 28dvh, 320px);
-    max-width: 52rem;
+    height: clamp(220px, 32dvh, 360px);
+    max-width: 54rem;
   }
 }
 @keyframes hero-clock-in {
