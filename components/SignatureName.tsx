@@ -1,15 +1,16 @@
 'use client';
 
 /* ═══════════════════════════════════════════════════════════════
-   SIGNATURE NAME — compact geometric keyword morph.
+   SIGNATURE NAME — polished geometric keyword morph.
 
-   One particle population. No scene illustrations.
+   One particle population. Fixed story-stage slot (no layout shift).
 
-       NAME  ⇄  service keyword  ⇄  NAME  ⇄  next keyword  ⇄  …
+       NAME  ⇄  service keyword (≤2 lines)  ⇄  NAME  ⇄  …
 
-   Keywords come from servicesContent (SERVICE_SLUGS order).
-   Both name and keywords are sampled from real font ink via fillText
-   so density stays consistent and morphs stay geometric/deterministic.
+   Keywords from story-world (SERVICE_SLUGS order). Both name and
+   keywords are sampled from real font ink. Morph styles vary by beat
+   (axis / sweep / compress / converge / wave) — deterministic, reverse-
+   coherent trajectories via styledFlowPoint.
 
    Reduced motion: static multi-tone wordmark, no canvas loop.
    ═══════════════════════════════════════════════════════════════ */
@@ -25,7 +26,6 @@ import {
   disperseOrigin,
   easeOutSettle,
   easeInOutQuint,
-  flowPoint,
   hashSeed,
   mulberry32,
   particleBudget,
@@ -33,6 +33,9 @@ import {
   denseStepFor,
   spatialPairing,
   startOffset,
+  styledFlowPoint,
+  splitTwoLines,
+  type MorphStyle,
 } from '@/app/name-motion';
 import { STORY_BEATS, serviceKeywords, NAME_HOLD_MS } from '@/app/story-world';
 
@@ -124,11 +127,12 @@ export function SignatureName({
     let hiddenAt = 0;
     let beatIndex = -1;
     let holdMs = NAME_HOLD_MS;
-    let morphMs = 1600;
-    let morphSpan = 1600;
+    let morphMs = 1750;
+    let morphSpan = 1750;
     let onNameTargets = true;
     let morphFromName = true;
     let morphToName = true;
+    let morphStyle: MorphStyle = 'axis';
     let fieldSeed = 1;
     let nameW = 0;
     let nameH = 0;
@@ -141,17 +145,16 @@ export function SignatureName({
     let oy = 0;
     let storyW = 0;
     let storyH = 0;
+    let fieldCx = 0;
+    let fieldCy = 0;
     let edges: number[] = [];
-    let clustersNow: string[] = [];
     let ramp: string[] = [];
     let budgetNow = 1600;
-    let fontStr = '';
     let fontSize = 64;
 
-    /** Sample any string into story-stage CSS points using the identity font. */
+    /** Sample a service title into the fixed story slot (≤2 lines, centred). */
     const sampleTextPoints = (label: string, maxCount: number): Pt[] => {
       if (!label || !(storyW > 0) || !(storyH > 0)) return [];
-      const pad = 4;
       const fw = Math.max(1, Math.ceil(storyW * dpr));
       const fh = Math.max(1, Math.ceil(storyH * dpr));
       const sample = document.createElement('canvas');
@@ -162,40 +165,56 @@ export function SignatureName({
       sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       sctx.clearRect(0, 0, storyW, storyH);
 
-      // Fit keyword into the story stage — slightly smaller than the name.
-      let size = Math.min(fontSize * 0.72, storyH * 0.42, 48);
-      sctx.font = `700 ${Math.round(size)}px ${fontStr.replace(/^\s*\d+\s+/, '').replace(/^[^ ]+\s+/, '') || 'sans-serif'}`;
-      // Prefer computed family from stage
-      sctx.font = `700 ${Math.round(size)}px ${window.getComputedStyle(stage).fontFamily}`;
+      const family = window.getComputedStyle(stage).fontFamily;
+      // Keyword size: strong readable presence inside the fixed slot.
+      // Scales with slot height so long titles stay ≤2 lines.
+      let size = Math.min(Math.max(fontSize * 0.52, 22), storyH * 0.34, 44);
+      const maxW = storyW * 0.94;
+      const applyFont = (px: number) => {
+        sctx.font = `700 ${Math.round(px)}px ${family}`;
+      };
+      applyFont(size);
       sctx.textAlign = 'center';
       sctx.textBaseline = 'middle';
       sctx.fillStyle = '#ffffff';
 
-      let metrics = sctx.measureText(label);
-      const maxW = storyW * 0.92;
-      if (metrics.width > maxW && metrics.width > 0) {
-        size = size * (maxW / metrics.width);
-        sctx.font = `700 ${Math.round(size)}px ${window.getComputedStyle(stage).fontFamily}`;
-        metrics = sctx.measureText(label);
+      const measure = (s: string) => sctx.measureText(s).width;
+      // Shrink until a two-line layout fits both width and slot height.
+      for (let guard = 0; guard < 12; guard += 1) {
+        const lines = splitTwoLines(label, measure, maxW);
+        const lineH = size * 1.18;
+        const blockH = lines.length * lineH;
+        const widest = Math.max(...lines.map(measure), 0);
+        if (widest <= maxW && blockH <= storyH * 0.92) break;
+        size *= 0.92;
+        applyFont(size);
       }
-      sctx.fillText(label, storyW / 2, storyH / 2 + pad * 0.25);
+
+      const lines = splitTwoLines(label, measure, maxW);
+      const lineH = size * 1.18;
+      const blockH = lines.length * lineH;
+      const startY = storyH / 2 - blockH / 2 + lineH / 2;
+      applyFont(size);
+      for (let i = 0; i < lines.length; i += 1) {
+        sctx.fillText(lines[i], storyW / 2, startY + i * lineH);
+      }
 
       const img = sctx.getImageData(0, 0, fw, fh).data;
-      const baseStep = Math.max(1, Math.round(T.sampleStepPx * dpr));
+      const baseStep = Math.max(1, Math.round(T.sampleStepPx * dpr * 0.9));
       const countAt = (step: number) => {
         let n = 0;
         for (let y = 0; y < fh; y += step) {
           for (let x = 0; x < fw; x += step) {
-            if (img[(y * fw + x) * 4 + 3] > 110) n += 1;
+            if (img[(y * fw + x) * 4 + 3] > 100) n += 1;
           }
         }
         return n;
       };
-      const step = denseStepFor(countAt(baseStep), baseStep, Math.max(200, maxCount));
+      const step = denseStepFor(countAt(baseStep), baseStep, Math.max(280, maxCount));
       const pts: Pt[] = [];
       for (let y = 0; y < fh; y += step) {
         for (let x = 0; x < fw; x += step) {
-          if (img[(y * fw + x) * 4 + 3] > 110) {
+          if (img[(y * fw + x) * 4 + 3] > 100) {
             pts.push({ x: (x + step / 2) / dpr, y: (y + step / 2) / dpr });
           }
         }
@@ -210,7 +229,7 @@ export function SignatureName({
       sctx: CanvasRenderingContext2D
     ): Particle[] => {
       const cs = window.getComputedStyle(stage);
-      fontStr = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+      const fontStr = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
       fontSize = parseFloat(cs.fontSize) || 64;
       sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       sctx.clearRect(0, 0, cw, chh);
@@ -248,7 +267,7 @@ export function SignatureName({
       const img = sctx.getImageData(0, 0, cw, chh).data;
       const baseStep = Math.max(1, Math.round(T.sampleStepPx * dpr));
       const cores = typeof navigator !== 'undefined' ? navigator.hardwareConcurrency || 0 : 0;
-      budgetNow = particleBudget(Math.max(nameW, storyW * 0.55), cores, T.maxParticles);
+      budgetNow = particleBudget(Math.max(nameW, storyW * 0.6), cores, T.maxParticles);
 
       const countAt = (step: number) => {
         let n = 0;
@@ -342,6 +361,8 @@ export function SignatureName({
 
       storyW = layerBox.width;
       storyH = layerBox.height;
+      fieldCx = storyW * 0.5;
+      fieldCy = storyH * 0.5;
       ox = stageBox.left - layerBox.left;
       oy = stageBox.top - layerBox.top;
 
@@ -364,9 +385,9 @@ export function SignatureName({
       }
 
       particles = next;
-      clustersNow = clustersIn;
       ramp = rampPalette(ASSEMBLE_INKS[0], LOCK_INK, RESOLVED_INK, RAMP_BUCKETS, WARM_AT);
-      dot = Math.max(1.25, Math.min(2.6, Math.min(nameW, storyW) / 200));
+      // Slightly larger dots for stronger name/keyword presence.
+      dot = Math.max(1.4, Math.min(3.0, Math.min(nameW, storyW) / 175));
 
       canvas.width = Math.max(1, Math.round(storyW * dpr));
       canvas.height = Math.max(1, Math.round(storyH * dpr));
@@ -384,7 +405,8 @@ export function SignatureName({
       pts: Pt[],
       now: number,
       morphDuration: number,
-      towardName: boolean
+      towardName: boolean,
+      style: MorphStyle
     ) => {
       const n = particles.length;
       if (n === 0) return;
@@ -399,26 +421,40 @@ export function SignatureName({
       );
       const toPts = towardName ? particles.map((p) => ({ x: p.tx, y: p.ty })) : pts;
       const map = spatialPairing(fromPts, toPts);
-      const rnd = mulberry32((fieldSeed ^ Math.imul(beatIndex + 7, 0x85ebca6b)) >>> 0);
+      const rnd = mulberry32((fieldSeed ^ Math.imul(beatIndex + 11, 0x85ebca6b) ^ hashSeed(style)) >>> 0);
       let stgMax = 0;
 
+      // Style-aware stagger: sweep left→right, compress top→bottom, etc.
       for (let i = 0; i < n; i += 1) {
         const p = particles[i];
         const dest = toPts[map[i]] || toPts[i % toPts.length];
-        // tiny deterministic jitter only when many→few
-        const jx = towardName ? 0 : ((p.ph1 * 0.3183) % 1 - 0.5) * 1.1;
-        const jy = towardName ? 0 : ((p.ph2 * 0.3183) % 1 - 0.5) * 1.1;
         p.fromX = fromPts[i].x;
         p.fromY = fromPts[i].y;
-        p.toX = dest.x + jx;
-        p.toY = dest.y + jy;
+        p.toX = dest.x;
+        p.toY = dest.y;
         const dist = Math.hypot(p.toX - p.fromX, p.toY - p.fromY);
-        // geometric, restrained bend — no scatter explosion
-        p.bend = (rnd() - 0.5) * Math.min(28, dist * 0.12);
-        p.stg = (i / Math.max(1, n - 1)) * 0.06 + rnd() * 0.02;
+        // Restrained geometric bend — style scales the arc strength.
+        const bendScale =
+          style === 'wave' ? 0.2 : style === 'sweep' ? 0.14 : style === 'axis' ? 0.1 : 0.12;
+        p.bend = (rnd() - 0.5) * Math.min(32, dist * bendScale);
+
+        const nx = storyW > 0 ? p.fromX / storyW : 0.5;
+        const ny = storyH > 0 ? p.fromY / storyH : 0.5;
+        let order = i / Math.max(1, n - 1);
+        if (style === 'sweep') order = nx;
+        else if (style === 'compress') order = ny;
+        else if (style === 'converge') {
+          const dx = nx - 0.5;
+          const dy = ny - 0.5;
+          order = Math.hypot(dx, dy) * 1.4;
+        } else if (style === 'axis') order = Math.abs(nx - 0.5) * 2;
+        else order = (nx + ny) * 0.5;
+
+        p.stg = clamp01(order) * 0.1 + rnd() * 0.025;
         if (p.stg > stgMax) stgMax = p.stg;
       }
 
+      morphStyle = style;
       morphMs = morphDuration;
       morphSpan = morphDuration * (1 + stgMax);
       morphFromName = onNameTargets;
@@ -433,23 +469,23 @@ export function SignatureName({
       const label = keywordsRef.current[beat.serviceIndex] ?? '';
       const pts = sampleTextPoints(label, budgetNow);
       holdMs = beat.holdMs;
-      aimToPoints(pts, now, beat.morphMs, false);
+      aimToPoints(pts, now, beat.morphMs, false, beat.style);
     };
 
     const returnToName = (now: number) => {
       holdMs = NAME_HOLD_MS;
+      // Reverse the same style used for the outbound morph.
+      const style = STORY_BEATS[Math.max(0, beatIndex)]?.style ?? morphStyle;
       const namePts = particles.map((p) => ({ x: p.tx, y: p.ty }));
-      aimToPoints(namePts, now, 1500, true);
+      aimToPoints(namePts, now, 1650, true, style);
     };
 
     const advanceFromHold = (now: number) => {
       if (onNameTargets) {
-        // name → next keyword
         beatIndex = (beatIndex + 1) % STORY_BEATS.length;
         aimToKeyword(beatIndex, now);
         return;
       }
-      // keyword → name
       returnToName(now);
     };
 
@@ -534,6 +570,9 @@ export function SignatureName({
 
       const morphing = phase === 'morph';
       const mRaw = morphing ? (now - phaseT0) / morphMs : 0;
+      // Soft glow envelope during morph — peaks mid-flight, settles at ends.
+      const glow =
+        morphing ? Math.sin(Math.min(1, Math.max(0, mRaw)) * Math.PI) * 0.35 : 0;
 
       for (let i = 0; i < particles.length; i += 1) {
         const p = particles[i];
@@ -557,23 +596,37 @@ export function SignatureName({
           s = dot * (1.35 - 0.35 * lcc);
         } else if (morphing) {
           const local = clamp01(mRaw - p.stg);
+          // Two-stage ease: settle slightly into motion, then arrive soft.
           const e = easeInOutQuint(local);
-          const pos = flowPoint(p.fromX, p.fromY, p.toX, p.toY, e, p.bend);
+          const pos = styledFlowPoint(
+            p.fromX,
+            p.fromY,
+            p.toX,
+            p.toY,
+            e,
+            p.bend,
+            morphStyle,
+            fieldCx,
+            fieldCy
+          );
           x = pos.x;
           y = pos.y;
-          const nameS = dot;
-          const keyS = dot * 0.95;
+          const nameS = dot * 1.05;
+          const keyS = dot * 1.15;
           const fromS = morphFromName ? nameS : keyS;
           const toS = morphToName ? nameS : keyS;
-          s = fromS + (toS - fromS) * e;
-          lc = 0.95 + 0.05 * e;
+          // Mid-flight scale pulse for depth without 3D overdesign.
+          const pulse = 1 + glow * 0.22 * Math.sin(e * Math.PI);
+          s = (fromS + (toS - fromS) * e) * pulse;
+          // Colour locks toward destination as the glyph becomes readable.
+          lc = 0.55 + 0.45 * e;
         } else {
-          // hold — near-static for readability (name or keyword)
+          // Hold — near-static for readability (name or keyword).
           const hx = onNameTargets ? p.tx : p.toX;
           const hy = onNameTargets ? p.ty : p.toY;
           x = hx + T.microPx * Math.sin(ts * 1.1 + p.ph1);
           y = hy + T.microPx * Math.cos(ts * 0.95 + p.ph2);
-          s = onNameTargets ? dot : dot * 0.95;
+          s = onNameTargets ? dot * 1.05 : dot * 1.12;
           lc = 1;
         }
 
@@ -582,6 +635,20 @@ export function SignatureName({
 
       ctx.fillStyle = WAITING_INK;
       ctx.fill(waiting);
+      // Soft destination glow during morph only.
+      if (glow > 0.02) {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = glow * 0.12;
+        ctx.fillStyle = 'rgba(34,197,94,1)';
+        const g = Math.min(storyW, storyH) * 0.42;
+        const grd = ctx.createRadialGradient(fieldCx, fieldCy, 4, fieldCx, fieldCy, g);
+        grd.addColorStop(0, 'rgba(74,222,128,0.35)');
+        grd.addColorStop(1, 'rgba(74,222,128,0)');
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, storyW, storyH);
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'lighter';
+      }
       for (let b = 0; b < RAMP_BUCKETS; b += 1) {
         ctx.fillStyle = ramp[b];
         ctx.fill(buckets[b]);

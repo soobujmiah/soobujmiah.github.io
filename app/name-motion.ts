@@ -334,3 +334,110 @@ export function flowPoint(
     y: u * u * ay + 2 * u * e * cy + e * e * by,
   };
 }
+
+/**
+ * Controlled morph languages — same system, deliberate variation.
+ * Never random; assigned per service beat in story-world.
+ *
+ *   axis     — contract toward a central axis, then expand
+ *   sweep    — horizontal sweep field
+ *   compress — vertical compress / redistribute
+ *   converge — outer edges pull inward toward the destination
+ *   wave     — subtle geometric wave along the path
+ */
+export type MorphStyle = 'axis' | 'sweep' | 'compress' | 'converge' | 'wave';
+
+/**
+ * Geometric trajectory from source → destination under a morph style.
+ * Bidirectional: the same function with t→1−t (or swapped endpoints)
+ * yields the reverse path. Mid-field waypoints are deterministic from
+ * the endpoints + style — no noise, no Math.random.
+ */
+export function styledFlowPoint(
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+  t: number,
+  bend: number,
+  style: MorphStyle,
+  fieldCx: number,
+  fieldCy: number
+): { x: number; y: number } {
+  const e = easeInOutQuint(t);
+  const dx = bx - ax;
+  const dy = by - ay;
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len;
+  const ny = dx / len;
+
+  // Shared midpoint with style-specific bias.
+  let mx = (ax + bx) * 0.5;
+  let my = (ay + by) * 0.5;
+  const pull = Math.min(36, len * 0.18);
+
+  if (style === 'axis') {
+    // Contract toward the vertical centre line, then expand.
+    const midX = fieldCx;
+    const midY = (ay + by) * 0.5;
+    mx = lerp(mx, midX, 0.72);
+    my = lerp(my, midY, 0.35);
+    mx += nx * bend * 0.35;
+    my += ny * bend * 0.35;
+  } else if (style === 'sweep') {
+    // Horizontal sweep: midpoint pushed along +x with mild arc.
+    mx += Math.sign(bx - ax || 1) * pull * 0.85;
+    my += bend * 0.55 + ny * bend * 0.25;
+  } else if (style === 'compress') {
+    // Vertical compress toward horizontal mid-band.
+    mx += nx * bend * 0.4;
+    my = lerp(my, fieldCy, 0.7);
+  } else if (style === 'converge') {
+    // Edges pull toward field centre before resolving.
+    mx = lerp(mx, fieldCx, 0.55);
+    my = lerp(my, fieldCy, 0.55);
+    mx += nx * bend * 0.5;
+    my += ny * bend * 0.5;
+  } else {
+    // wave — single gentle sine offset along the path normal.
+    const wave = Math.sin(e * Math.PI) * Math.min(22, len * 0.14);
+    mx += nx * (bend * 0.45 + wave);
+    my += ny * (bend * 0.45 + wave * 0.35);
+  }
+
+  const u = 1 - e;
+  return {
+    x: u * u * ax + 2 * u * e * mx + e * e * bx,
+    y: u * u * ay + 2 * u * e * my + e * e * by,
+  };
+}
+
+/**
+ * Split a service title into at most two balanced lines for sampling.
+ * Prefers breaks on spaces near the midpoint; never forces 3+ lines.
+ */
+export function splitTwoLines(label: string, measure: (s: string) => number, maxWidth: number): string[] {
+  const words = label.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return [''];
+  if (words.length === 1) return [words[0]];
+  const full = words.join(' ');
+  if (measure(full) <= maxWidth) return [full];
+
+  // Find the break that keeps both lines under maxWidth and closest in length.
+  let best = 1;
+  let bestScore = Infinity;
+  for (let i = 1; i < words.length; i += 1) {
+    const a = words.slice(0, i).join(' ');
+    const b = words.slice(i).join(' ');
+    const wa = measure(a);
+    const wb = measure(b);
+    const overflow = Math.max(0, wa - maxWidth) + Math.max(0, wb - maxWidth);
+    const balance = Math.abs(wa - wb);
+    const score = overflow * 1000 + balance;
+    if (score < bestScore) {
+      bestScore = score;
+      best = i;
+    }
+  }
+  return [words.slice(0, best).join(' '), words.slice(best).join(' ')];
+}
