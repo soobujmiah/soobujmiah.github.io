@@ -28,6 +28,7 @@ import {
   easeOutSettle,
   easeInOutQuint,
   hashSeed,
+  hasBengaliScript,
   minParticleDistance,
   mulberry32,
   particleBudget,
@@ -193,14 +194,19 @@ export function SignatureName({
       const family = window.getComputedStyle(stage).fontFamily;
       // SERVICE SIZE ≈ NAME SIZE. Prefer two lines over shrinking.
       // Safe air for particle radius + anti-alias fringe — prevents edge crop.
-      const edgeAir = Math.max(4, (dot || 1.6) * 1.35 + 2.5);
+      // Bengali needs extra air: dependent marks extend outside Latin em-box.
+      const isBn = hasBengaliScript(label);
+      const edgeAir = Math.max(
+        isBn ? 5.5 : 4,
+        (dot || 1.6) * (isBn ? 1.55 : 1.35) + (isBn ? 3.5 : 2.5)
+      );
       const safeW = Math.max(8, storyW - edgeAir * 2);
       const safeH = Math.max(8, storyH - edgeAir * 2);
       let size = fontSize;
       /* Inner text width is stricter than the stage so long titles never
          paint into the particle air band (Office Admin / Small-Business /
          Computer Setup were clipping here). */
-      const maxW = safeW * 0.96;
+      const maxW = safeW * (isBn ? 0.94 : 0.96);
       const applyFont = (px: number) => {
         sctx.font = `700 ${Math.round(px)}px ${family}`;
       };
@@ -220,17 +226,26 @@ export function SignatureName({
         const span = left + right;
         return Math.max(m.width, span);
       };
-      const glyphMetrics = () => {
-        const m = sctx.measureText('HgÁy|@Wp');
+      /* Metrics from the ACTUAL line text (not a Latin probe). Bengali
+         dependent marks live outside Latin ascent/descent; measuring the
+         real shaped string is what keeps কার / phala inside the mask. */
+      const glyphMetricsFor = (probe: string) => {
+        const m = sctx.measureText(probe || 'HgÁy|@Wp');
         const ascent =
-          (typeof m.fontBoundingBoxAscent === 'number' && m.fontBoundingBoxAscent) ||
           (typeof m.actualBoundingBoxAscent === 'number' && m.actualBoundingBoxAscent) ||
-          size * 0.82;
+          (typeof m.fontBoundingBoxAscent === 'number' && m.fontBoundingBoxAscent) ||
+          size * (isBn ? 0.95 : 0.82);
         const descent =
-          (typeof m.fontBoundingBoxDescent === 'number' && m.fontBoundingBoxDescent) ||
           (typeof m.actualBoundingBoxDescent === 'number' && m.actualBoundingBoxDescent) ||
-          size * 0.24;
-        return { ascent, descent, content: ascent + descent };
+          (typeof m.fontBoundingBoxDescent === 'number' && m.fontBoundingBoxDescent) ||
+          size * (isBn ? 0.45 : 0.24);
+        /* Small pad so AA fringe of upper/lower marks is never cropped. */
+        const pad = isBn ? Math.max(2, size * 0.08) : Math.max(1, size * 0.02);
+        return {
+          ascent: ascent + pad,
+          descent: descent + pad,
+          content: ascent + descent + pad * 2,
+        };
       };
 
       /* Fit at name scale using REAL glyph extents. Prefer wrap over shrink.
@@ -239,13 +254,16 @@ export function SignatureName({
          long titles paint past the canvas and look cropped. */
       const minSize = Math.max(fontSize * 0.72, Math.min(storyH * 0.32, fontSize * 0.88));
       let lines = splitTwoLines(label, measure, maxW);
-      let met = glyphMetrics();
-      /* Slightly airier two-line leading so lines don't collide. */
-      let lineH = met.content + Math.max(2, size * 0.08);
+      let met = glyphMetricsFor(lines.join(' '));
+      /* Slightly airier two-line leading so lines don't collide.
+         Bengali needs more leading so marks of line1 don't hit line2. */
+      const leadFor = (px: number) =>
+        isBn ? Math.max(3, px * 0.14) : Math.max(2, px * 0.08);
+      let lineH = met.content + leadFor(size);
       for (let guard = 0; guard < 32; guard += 1) {
         lines = splitTwoLines(label, measure, maxW);
-        met = glyphMetrics();
-        lineH = met.content + Math.max(2, size * 0.08);
+        met = glyphMetricsFor(lines.join(' '));
+        lineH = met.content + leadFor(size);
         const blockH = lines.length * lineH;
         const widest = Math.max(...lines.map(lineWidth), 0);
         if (widest <= maxW && blockH <= safeH) break;
@@ -255,13 +273,13 @@ export function SignatureName({
       }
 
       lines = splitTwoLines(label, measure, maxW);
-      met = glyphMetrics();
-      lineH = met.content + Math.max(2, size * 0.08);
+      met = glyphMetricsFor(lines.join(' '));
+      lineH = met.content + leadFor(size);
       /* If still overflowing at the floor, compress line box slightly (not
          a third line, not a global redesign). */
       let blockH = lines.length * lineH;
       if (blockH > safeH && lines.length > 1) {
-        lineH = Math.max(met.content * 1.02, safeH / lines.length);
+        lineH = Math.max(met.content * (isBn ? 1.04 : 1.02), safeH / lines.length);
         blockH = lines.length * lineH;
       }
       let blockTop = (storyH - blockH) / 2;
@@ -270,10 +288,13 @@ export function SignatureName({
         blockTop = Math.max(edgeAir, storyH - edgeAir - blockH);
       }
 
+      /* Draw COMPLETE shaped lines (browser shaping — not code-point walk). */
       applyFont(size);
       for (let i = 0; i < lines.length; i += 1) {
         const boxTop = blockTop + i * lineH;
-        const baseline = baselineWithinBox(boxTop, lineH, met.ascent, met.descent);
+        /* Per-line metrics so each line's own marks set the baseline. */
+        const lm = glyphMetricsFor(lines[i]);
+        const baseline = baselineWithinBox(boxTop, lineH, lm.ascent, lm.descent);
         sctx.fillText(lines[i], storyW / 2, baseline);
       }
 
@@ -323,11 +344,12 @@ export function SignatureName({
         applyFont(size);
         sctx.clearRect(0, 0, storyW, storyH);
         lines = splitTwoLines(label, measure, maxW);
-        met = glyphMetrics();
-        lineH = met.content + Math.max(2, size * 0.08);
+        met = glyphMetricsFor(lines.join(' '));
+        const lead2 = isBn ? Math.max(3, size * 0.14) : Math.max(2, size * 0.08);
+        lineH = met.content + lead2;
         blockH = lines.length * lineH;
         if (blockH > safeH && lines.length > 1) {
-          lineH = Math.max(met.content * 1.02, safeH / lines.length);
+          lineH = Math.max(met.content * (isBn ? 1.04 : 1.02), safeH / lines.length);
           blockH = lines.length * lineH;
         }
         blockTop = (storyH - blockH) / 2;
@@ -337,7 +359,8 @@ export function SignatureName({
         }
         for (let i = 0; i < lines.length; i += 1) {
           const boxTop = blockTop + i * lineH;
-          const baseline = baselineWithinBox(boxTop, lineH, met.ascent, met.descent);
+          const lm = glyphMetricsFor(lines[i]);
+          const baseline = baselineWithinBox(boxTop, lineH, lm.ascent, lm.descent);
           sctx.fillText(lines[i], storyW / 2, baseline);
         }
         img = sctx.getImageData(0, 0, fw, fh).data;
@@ -387,8 +410,23 @@ export function SignatureName({
       const cs = window.getComputedStyle(stage);
       const fontStr = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
       fontSize = parseFloat(cs.fontSize) || 64;
+      const isBnName = hasBengaliScript(textNow);
+      /* Bengali dependent marks (কার, chandrabindu, phala) extend past the
+         DOM cell box. Sample on a padded offscreen mask so ink is never
+         clipped by Latin-style cell bounds; EN path stays cell-aligned. */
+      const padCss = isBnName ? Math.max(6, fontSize * 0.22) : 0;
+      const padDev = Math.ceil(padCss * dpr);
+      const maskW = Math.max(1, cw + padDev * 2);
+      const maskH = Math.max(1, chh + padDev * 2);
+      /* Rebind the offscreen canvas when BN needs padding. */
+      if (sctx.canvas.width !== maskW || sctx.canvas.height !== maskH) {
+        sctx.canvas.width = maskW;
+        sctx.canvas.height = maskH;
+      }
       sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      sctx.clearRect(0, 0, cw, chh);
+      const drawW = maskW / dpr;
+      const drawH = maskH / dpr;
+      sctx.clearRect(0, 0, drawW, drawH);
       sctx.font = fontStr;
       sctx.textBaseline = 'alphabetic';
       sctx.textAlign = 'left';
@@ -396,31 +434,71 @@ export function SignatureName({
 
       edges = [];
       ruleY = 0;
-      clustersIn.forEach((cluster, i) => {
-        const cell = cellRefs.current[i];
-        if (!cell) {
-          edges.push(0);
-          return;
-        }
-        const r = cell.getBoundingClientRect();
-        edges.push(r.left - stageBox.left);
-        if (cluster === ' ') return;
-        const m = sctx.measureText(cluster);
+
+      if (isBnName) {
+        /* Full shaped string once — browser OpenType shaping keeps every
+           mark attached. Cell edges still drive cluster stagger only. */
+        let firstCell: DOMRect | null = null;
+        clustersIn.forEach((cluster, i) => {
+          const cell = cellRefs.current[i];
+          if (!cell) {
+            edges.push(padCss);
+            return;
+          }
+          const r = cell.getBoundingClientRect();
+          edges.push(r.left - stageBox.left + padCss);
+          if (!firstCell && cluster !== ' ') firstCell = r;
+        });
+        const anchor = firstCell ?? stageBox;
+        const m = sctx.measureText(textNow);
         const ascent =
-          (typeof m.fontBoundingBoxAscent === 'number' && m.fontBoundingBoxAscent) ||
           (typeof m.actualBoundingBoxAscent === 'number' && m.actualBoundingBoxAscent) ||
-          fontSize * 0.78;
+          (typeof m.fontBoundingBoxAscent === 'number' && m.fontBoundingBoxAscent) ||
+          fontSize * 0.95;
         const descent =
-          (typeof m.fontBoundingBoxDescent === 'number' && m.fontBoundingBoxDescent) ||
           (typeof m.actualBoundingBoxDescent === 'number' && m.actualBoundingBoxDescent) ||
-          fontSize * 0.22;
-        const baseline = baselineWithinBox(r.top - stageBox.top, r.height, ascent, descent);
-        if (!ruleY) ruleY = baseline;
-        sctx.fillText(cluster, r.left - stageBox.left, baseline);
-      });
+          (typeof m.fontBoundingBoxDescent === 'number' && m.fontBoundingBoxDescent) ||
+          fontSize * 0.45;
+        const markPad = Math.max(2, fontSize * 0.08);
+        const boxTop = anchor.top - stageBox.top + padCss;
+        const boxH = Math.max(anchor.height, ascent + descent + markPad * 2);
+        const baseline = baselineWithinBox(
+          boxTop,
+          boxH,
+          ascent + markPad,
+          descent + markPad
+        );
+        ruleY = baseline - padCss;
+        /* Draw at first non-space cell x so layout matches the DOM wordmark. */
+        const x0 = anchor.left - stageBox.left + padCss;
+        sctx.fillText(textNow, x0, baseline);
+      } else {
+        clustersIn.forEach((cluster, i) => {
+          const cell = cellRefs.current[i];
+          if (!cell) {
+            edges.push(0);
+            return;
+          }
+          const r = cell.getBoundingClientRect();
+          edges.push(r.left - stageBox.left);
+          if (cluster === ' ') return;
+          const m = sctx.measureText(cluster);
+          const ascent =
+            (typeof m.fontBoundingBoxAscent === 'number' && m.fontBoundingBoxAscent) ||
+            (typeof m.actualBoundingBoxAscent === 'number' && m.actualBoundingBoxAscent) ||
+            fontSize * 0.78;
+          const descent =
+            (typeof m.fontBoundingBoxDescent === 'number' && m.fontBoundingBoxDescent) ||
+            (typeof m.actualBoundingBoxDescent === 'number' && m.actualBoundingBoxDescent) ||
+            fontSize * 0.22;
+          const baseline = baselineWithinBox(r.top - stageBox.top, r.height, ascent, descent);
+          if (!ruleY) ruleY = baseline;
+          sctx.fillText(cluster, r.left - stageBox.left, baseline);
+        });
+      }
       if (!ruleY) ruleY = nameH * 0.78;
 
-      const img = sctx.getImageData(0, 0, cw, chh).data;
+      const img = sctx.getImageData(0, 0, maskW, maskH).data;
       const cores = typeof navigator !== 'undefined' ? navigator.hardwareConcurrency || 0 : 0;
       /* Cap is a hard ceiling, not a fill target — particulate > solid. */
       budgetNow = particleBudget(Math.max(nameW, storyW * 0.6), cores, Math.min(T.maxParticles, 1800));
@@ -429,12 +507,15 @@ export function SignatureName({
       dot = particleRadiusFor(Math.max(nameW, storyW * 0.5));
       const minDistCss = minParticleDistance(dot);
       const minDistDev = Math.max(1.2, minDistCss * dpr);
+      /* Slightly softer alpha for BN AA fringe of thin marks — still no
+         density inflate (same minDist + budget). */
+      const alphaCut = isBnName ? 90 : 110;
       const raw = sampleInkPointsMinDist(
         img,
-        cw,
-        chh,
+        maskW,
+        maskH,
         minDistDev,
-        110,
+        alphaCut,
         budgetNow,
         hashSeed(textNow + ':name')
       );
@@ -451,10 +532,12 @@ export function SignatureName({
       fieldSeed = hashSeed(textNow);
       const next: Particle[] = [];
       const clusterCount = clustersIn.length;
+      /* Map padded-mask device px → stage-local CSS (pad offset removed). */
+      const padOff = padCss;
 
       for (let i = 0; i < raw.length; i += 1) {
-        const lx = raw[i].x / dpr;
-        const ly = raw[i].y / dpr;
+        const lx = raw[i].x / dpr - padOff;
+        const ly = raw[i].y / dpr - padOff;
         const tx = lx + ox;
         const ty = ly + oy;
         const o = disperseOrigin(lx, ly, nameW, nameH, rnd, T.disperseRadius * 0.85);
@@ -463,7 +546,7 @@ export function SignatureName({
           ty,
           ox: o.x + ox,
           oy: o.y + oy,
-          at: startOffset(clusterOf(lx), clusterCount, rnd, T.clusterShare, T.jitterShare),
+          at: startOffset(clusterOf(lx + padOff), clusterCount, rnd, T.clusterShare, T.jitterShare),
           dur: T.travelShare,
           ph1: rnd() * Math.PI * 2,
           ph2: rnd() * Math.PI * 2,
@@ -480,9 +563,9 @@ export function SignatureName({
       /* Reference density for services — always inside the weight envelope. */
       let inkHits = 0;
       const probe = Math.max(1, Math.round(minDistDev));
-      for (let y = 0; y < chh; y += probe) {
-        for (let x = 0; x < cw; x += probe) {
-          if (img[(y * cw + x) * 4 + 3] > 110) inkHits += 1;
+      for (let y = 0; y < maskH; y += probe) {
+        for (let x = 0; x < maskW; x += probe) {
+          if (img[(y * maskW + x) * 4 + 3] > alphaCut) inkHits += 1;
         }
       }
       const inkAreaCss = inkHits * (probe / dpr) * (probe / dpr);

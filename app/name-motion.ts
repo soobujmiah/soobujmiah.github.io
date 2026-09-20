@@ -378,7 +378,106 @@ export function sampleInkPointsMinDist(
       if (farEnough(c.x, c.y, dThin2)) accept(c.x, c.y);
     }
   }
+
+  /* Connected-component rescue — keeps tiny shaped marks (Bengali kar,
+     chandrabindu, phala, below-base signs) that the lattice can miss.
+     Does NOT raise global density: only fills components with zero hits,
+     with a tiny budget. Generic for any script with detached ink. */
+  if (pts.length < maxCount) {
+    const seen = new Uint8Array(fw * fh);
+    const stackX: number[] = [];
+    const stackY: number[] = [];
+    const hitOf = (x: number, y: number) => {
+      for (let i = 0; i < pts.length; i += 1) {
+        if (Math.hypot(pts[i].x - x, pts[i].y - y) <= d * 0.9) return true;
+      }
+      return false;
+    };
+    for (let y0 = 0; y0 < fh && pts.length < maxCount; y0 += 1) {
+      for (let x0 = 0; x0 < fw && pts.length < maxCount; x0 += 1) {
+        const i0 = y0 * fw + x0;
+        if (seen[i0] || img[i0 * 4 + 3] <= alphaMin) continue;
+        /* Flood-fill one 4-connected ink component. */
+        stackX.length = 0;
+        stackY.length = 0;
+        stackX.push(x0);
+        stackY.push(y0);
+        seen[i0] = 1;
+        let minX = x0;
+        let minY = y0;
+        let maxX = x0;
+        let maxY = y0;
+        let area = 0;
+        let sx = 0;
+        let sy = 0;
+        let hasHit = false;
+        while (stackX.length) {
+          const x = stackX.pop() as number;
+          const y = stackY.pop() as number;
+          area += 1;
+          sx += x;
+          sy += y;
+          if (x < minX) minX = x;
+          if (y < minY) minY = y;
+          if (x > maxX) maxX = x;
+          if (y > maxY) maxY = y;
+          if (!hasHit && hitOf(x + 0.5, y + 0.5)) hasHit = true;
+          const nbs: Array<[number, number]> = [
+            [x - 1, y],
+            [x + 1, y],
+            [x, y - 1],
+            [x, y + 1],
+          ];
+          for (let k = 0; k < 4; k += 1) {
+            const nx = nbs[k][0];
+            const ny = nbs[k][1];
+            if (nx < 0 || ny < 0 || nx >= fw || ny >= fh) continue;
+            const ni = ny * fw + nx;
+            if (seen[ni] || img[ni * 4 + 3] <= alphaMin) continue;
+            seen[ni] = 1;
+            stackX.push(nx);
+            stackY.push(ny);
+          }
+        }
+        if (hasHit) continue;
+        /* Ignore noise flecks; keep real marks (কার, phala, etc.). */
+        if (area < 3 || area > d * d * 18) continue;
+        const cx = sx / area + 0.5;
+        const cy = sy / area + 0.5;
+        const bw = maxX - minX + 1;
+        const bh = maxY - minY + 1;
+        /* One sample at the centroid — always. */
+        if (farEnough(cx, cy, (d * 0.55) * (d * 0.55))) accept(cx, cy);
+        /* Elongated marks get one extra endpoint sample (still tiny budget). */
+        if (pts.length >= maxCount) continue;
+        if (Math.max(bw, bh) >= d * 1.4) {
+          const ex = bw >= bh ? minX + 0.5 : cx;
+          const ey = bh > bw ? minY + 0.5 : cy;
+          const ex2 = bw >= bh ? maxX + 0.5 : cx;
+          const ey2 = bh > bw ? maxY + 0.5 : cy;
+          if (farEnough(ex, ey, (d * 0.5) * (d * 0.5))) accept(ex, ey);
+          if (pts.length < maxCount && farEnough(ex2, ey2, (d * 0.5) * (d * 0.5))) {
+            accept(ex2, ey2);
+          }
+        }
+      }
+    }
+  }
   return pts;
+}
+
+/**
+ * True if the string contains Bengali script code points.
+ * Used only to widen raster padding / metrics — never to special-case
+ * individual characters.
+ */
+export function hasBengaliScript(s: string): boolean {
+  for (let i = 0; i < s.length; ) {
+    const cp = s.codePointAt(i) ?? 0;
+    if (cp >= 0x0980 && cp <= 0x09ff) return true;
+    i += cp > 0xffff ? 2 : 1;
+  }
+  return false;
 }
 
 /** Particle radius from viewport — discrete dots, not merged strokes. */
