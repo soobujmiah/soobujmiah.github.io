@@ -425,7 +425,8 @@ if (nameComp) {
       fail(`${NAME_COMPONENT} uses an off-family ink ${hex} (hue ${Math.round(c.h)}) — the identity is green, not a rainbow`);
     }
   }
-  /* assembly inks: cool technical tones — cyan→blue band, light, restrained */
+  /* assembly inks: lighter green family — motion stays on-identity
+     (no cyan/blue or amber detours). Same green band as the wordmark. */
   const assembly = [...(nameComp.match(/ASSEMBLE_INKS\s*=\s*\[([^\]]*)\]/)?.[1].match(/#[0-9a-f]{6}/gi) ?? [])];
   if (assembly.length < 2) {
     fail(`${NAME_COMPONENT} must define assembly inks for material still in motion`);
@@ -433,18 +434,18 @@ if (nameComp) {
   for (const hex of assembly) {
     const c = hue(hex);
     if (!c) continue;
-    if (c.h < 180 || c.h > 265 || c.l < 0.55 || c.l > 0.95) {
-      fail(`${NAME_COMPONENT} assembly ink ${hex} leaves the restrained cool band (hue ${Math.round(c.h)}, lightness ${c.l.toFixed(2)})`);
+    if (c.h < 75 || c.h > 190 || c.g < c.r || c.g < c.b || c.l < 0.35 || c.l > 0.95) {
+      fail(`${NAME_COMPONENT} assembly ink ${hex} leaves the green technical band (hue ${Math.round(c.h)}, lightness ${c.l.toFixed(2)})`);
     }
   }
-  /* the seating highlight: one warm accent, nothing else */
-  const warm = nameComp.match(/LOCK_INK\s*=\s*'(#[0-9a-f]{6})'/i)?.[1];
-  if (!warm) {
-    fail(`${NAME_COMPONENT} must define the warm seating ink`);
+  /* seating highlight: brighter green lock — never amber/gold */
+  const lock = nameComp.match(/LOCK_INK\s*=\s*'(#[0-9a-f]{6})'/i)?.[1];
+  if (!lock) {
+    fail(`${NAME_COMPONENT} must define the seating lock ink`);
   } else {
-    const c = hue(warm);
-    if (!c || c.h < 20 || c.h > 70) {
-      fail(`${NAME_COMPONENT} seating ink ${warm} must stay in the warm amber band (hue 20..70)`);
+    const c = hue(lock);
+    if (!c || c.h < 75 || c.h > 190 || c.g < c.r || c.g < c.b) {
+      fail(`${NAME_COMPONENT} seating ink ${lock} must stay in the brand green family (no amber/gold)`);
     }
   }
   /* what the field condenses into must still be a brand green */
@@ -457,7 +458,7 @@ if (nameComp) {
       fail(`${NAME_COMPONENT} resolved ink ${resolved} is off-family — the field must condense into the brand green`);
     }
   }
-  /* waiting material stays faint: it is a field, not a light show */
+  /* waiting material stays faint green: a field, not a light show */
   const waiting = nameComp.match(/WAITING_INK\s*=\s*'rgba\((\d+),(\d+),(\d+),([\d.]+)\)'/i);
   if (!waiting) {
     fail(`${NAME_COMPONENT} must define the waiting-material ink as an rgba() value`);
@@ -466,8 +467,8 @@ if (nameComp) {
     if (Number(waiting[4]) > 0.35) {
       fail(`${NAME_COMPONENT} waiting ink alpha ${waiting[4]} is too strong — dispersed material must stay restrained`);
     }
-    if (!c || c.h < 180 || c.h > 265) {
-      fail(`${NAME_COMPONENT} waiting ink must stay in the same cool band as the assembly inks`);
+    if (!c || c.h < 75 || c.h > 190 || c.g < c.r || c.g < c.b) {
+      fail(`${NAME_COMPONENT} waiting ink must stay in the green technical band`);
     }
   }
 }

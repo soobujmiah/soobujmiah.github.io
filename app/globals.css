@@ -630,9 +630,8 @@ body.lang-bn .worldmap-pin {
 /* Desktop rail lives in the dedicated lower navigation strip — the
    same safe zone as the phone row — so it never sits over content,
    imagery or controls. Horizontal, centred, above the footer. */
-/* ── bottom HUD control — ONE fixed pill for all breakpoints ──
-   Progress bar IS the button. Centred above the footer with safe-area.
-   Never two controls. Touch target ≥ 40×40. PerimeterTrace maps 1:1. */
+/* ── TOC control — ONE bottom navigation pill (not progress) ──
+   Opens the section index. Progress lives on the footer seam. */
 .pager-hud-slot {
   position: absolute;
   z-index: 30;
@@ -642,7 +641,6 @@ body.lang-bn .worldmap-pin {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Isolation so the control never collides with footer copy. */
   pointer-events: none;
 }
 
@@ -650,14 +648,15 @@ body.lang-bn .worldmap-pin {
   position: relative;
   pointer-events: auto;
   z-index: 1;
-  width: 76px;
-  height: 40px;
   min-width: 44px;
   min-height: 40px;
-  display: flex;
+  height: 40px;
+  max-width: min(220px, calc(100vw - 48px));
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  gap: 8px;
+  padding: 0 14px 0 12px;
   border-radius: 999px;
   border: 1px solid rgba(34, 197, 94, 0.35);
   background: rgba(8, 10, 8, 0.62);
@@ -667,6 +666,18 @@ body.lang-bn .worldmap-pin {
   cursor: pointer;
   transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+.pager-hud-label {
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(228, 226, 223, 0.72);
+  max-width: 9.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pager-hud:hover {
@@ -684,38 +695,51 @@ body.lang-bn .worldmap-pin {
   box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
 }
 
-/* Perimeter trace — the control's border carries the progress read.
-   The SVG maps 1:1 onto the fixed pill box (viewBox = CSS size), the
-   origin sits at bottom-centre and never moves; only the trace
-   endpoint travels (stroke-dashoffset = 1 − progress, pathLength 1),
-   so nothing re-centres, resizes or shifts. */
-.hud-perim {
-  position: absolute;
-  left: -1px;
-  top: -1px;
-  width: calc(100% + 2px);
-  height: calc(100% + 2px);
-  pointer-events: none;
-  overflow: visible;
-}
-
-.hud-perim-base {
-  fill: none;
-  stroke: rgba(34, 197, 94, 0.14);
-  stroke-width: 1.5;
-}
-
-.hud-perim-fill {
-  fill: none;
-  stroke: #22c55e;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  filter: drop-shadow(0 0 3px rgba(34, 197, 94, 0.6));
-}
-
 @media (min-width: 768px) {
   .pager-hud-slot {
     bottom: calc(52px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 360px) {
+  .pager-hud-label {
+    display: none;
+  }
+  .pager-hud {
+    padding: 0 12px;
+  }
+}
+
+/* Footer + scroll-progress seam (immediately above the footer bar). */
+.site-footer {
+  pointer-events: none;
+}
+
+.site-footer .footer-bar {
+  pointer-events: auto;
+}
+
+.footer-progress {
+  position: relative;
+  height: 2px;
+  width: 100%;
+  background: rgba(34, 197, 94, 0.12);
+  overflow: hidden;
+}
+
+.footer-progress-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  background: linear-gradient(90deg, #16a34a, #4ade80);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.45);
+  will-change: transform;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-progress-fill {
+    transition: none;
   }
 }
 
@@ -1857,273 +1881,4 @@ body:has(> .services-doc) button {
   border-color: rgba(74, 222, 128, 0.4);
 }
 
-/* ── Site guide — local knowledge chat (no external AI) ─────────
-   Bottom-start floating trigger + panel. Stays clear of the centred
-   name morph, primary CTAs, and the bottom HUD control. */
-.site-guide {
-  position: absolute;
-  z-index: 35;
-  left: max(12px, env(safe-area-inset-left, 0px));
-  bottom: calc(58px + env(safe-area-inset-bottom, 0px));
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  max-width: min(320px, calc(100vw - 24px));
-  pointer-events: none;
-}
 
-.site-guide-fab {
-  pointer-events: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 40px;
-  padding: 0 12px 0 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(34, 197, 94, 0.32);
-  background: rgba(8, 10, 8, 0.7);
-  color: #4ade80;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-  transition: border-color 0.25s ease, background 0.25s ease;
-}
-
-.site-guide-fab:hover,
-.site-guide-fab:focus-visible {
-  border-color: rgba(74, 222, 128, 0.55);
-  background: rgba(34, 197, 94, 0.12);
-}
-
-.site-guide-fab:focus-visible {
-  outline: 2px solid rgba(74, 222, 128, 0.65);
-  outline-offset: 2px;
-}
-
-.site-guide-fab-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  background: rgba(34, 197, 94, 0.15);
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1;
-}
-
-.site-guide-fab-label {
-  max-width: 11rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: rgba(228, 226, 223, 0.78);
-}
-
-.site-guide-panel {
-  pointer-events: auto;
-  width: min(300px, calc(100vw - 28px));
-  max-height: min(380px, calc(100dvh - 180px));
-  display: flex;
-  flex-direction: column;
-  border-radius: 14px;
-  border: 1px solid rgba(34, 197, 94, 0.22);
-  background: rgba(6, 8, 6, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
-  overflow: hidden;
-}
-
-.site-guide-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 10px 12px 8px;
-  border-bottom: 1px solid rgba(228, 226, 223, 0.06);
-}
-
-.site-guide-title {
-  margin: 0;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #4ade80;
-}
-
-.site-guide-x {
-  width: 28px;
-  height: 28px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: rgba(228, 226, 223, 0.55);
-  font-size: 18px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.site-guide-x:hover,
-.site-guide-x:focus-visible {
-  color: #e4e2df;
-  background: rgba(228, 226, 223, 0.06);
-}
-
-.site-guide-body {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  scrollbar-width: thin;
-}
-
-.site-guide-empty p {
-  margin: 0 0 8px;
-  font-size: 12px;
-  line-height: 1.45;
-  color: rgba(228, 226, 223, 0.55);
-}
-
-.site-guide-hints {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.site-guide-hint {
-  width: 100%;
-  text-align: left;
-  border: 1px solid rgba(34, 197, 94, 0.18);
-  border-radius: 8px;
-  background: rgba(34, 197, 94, 0.06);
-  color: rgba(228, 226, 223, 0.78);
-  font-size: 11px;
-  line-height: 1.35;
-  padding: 7px 9px;
-  cursor: pointer;
-}
-
-.site-guide-hint:hover,
-.site-guide-hint:focus-visible {
-  border-color: rgba(74, 222, 128, 0.4);
-  color: #e4e2df;
-}
-
-.site-guide-msg {
-  border-radius: 10px;
-  padding: 8px 10px;
-  font-size: 12px;
-  line-height: 1.45;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.site-guide-msg--user {
-  align-self: flex-end;
-  max-width: 92%;
-  background: rgba(34, 197, 94, 0.14);
-  color: #e4e2df;
-}
-
-.site-guide-msg--guide {
-  align-self: stretch;
-  background: rgba(228, 226, 223, 0.05);
-  color: rgba(228, 226, 223, 0.82);
-}
-
-.site-guide-msg-text {
-  margin: 0;
-}
-
-.site-guide-link {
-  display: inline-block;
-  margin-top: 6px;
-  font-family: ui-monospace, monospace;
-  font-size: 10px;
-  color: #4ade80;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.site-guide-form {
-  display: flex;
-  gap: 6px;
-  padding: 8px 10px 10px;
-  border-top: 1px solid rgba(228, 226, 223, 0.06);
-}
-
-.site-guide-input {
-  flex: 1 1 auto;
-  min-width: 0;
-  height: 36px;
-  border-radius: 9px;
-  border: 1px solid rgba(228, 226, 223, 0.12);
-  background: rgba(0, 0, 0, 0.35);
-  color: #e4e2df;
-  padding: 0 10px;
-  font-size: 12px;
-  outline: none;
-}
-
-.site-guide-input:focus {
-  border-color: rgba(74, 222, 128, 0.45);
-}
-
-.site-guide-input::placeholder {
-  color: rgba(228, 226, 223, 0.35);
-}
-
-.site-guide-send {
-  flex: 0 0 auto;
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 9px;
-  border: 0;
-  background: #22c55e;
-  color: #060608;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.site-guide-send:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-@media (min-width: 768px) {
-  .site-guide {
-    bottom: calc(52px + env(safe-area-inset-bottom, 0px));
-    left: max(20px, env(safe-area-inset-left, 0px));
-  }
-}
-
-@media (max-width: 380px) {
-  .site-guide-fab-label {
-    display: none;
-  }
-  .site-guide-fab {
-    padding: 0 10px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .site-guide-fab,
-  .site-guide-hint,
-  .site-guide-x {
-    transition: none;
-  }
-}

@@ -336,22 +336,43 @@ export function flowPoint(
 }
 
 /**
- * Controlled morph languages — same system, deliberate variation.
- * Never random; assigned per service beat in story-world.
+ * Controlled morph physics profiles — same engine, deliberate variation.
+ * Never random; assigned per service transition in story-world.
  *
- *   axis     — contract toward a central axis, then expand
- *   sweep    — horizontal sweep field
- *   compress — vertical compress / redistribute
- *   converge — outer edges pull inward toward the destination
- *   wave     — subtle geometric wave along the path
+ *   radial      — outer material converges through the centre
+ *   horizontal  — lateral sweep / flow
+ *   vertical    — compress to a mid-band, then expand
+ *   orbital     — subtle curved / orbital arcs
+ *   wave        — progressive wave along the word
+ *   edge        — edges collapse inward, then redistribute
+ *   grid        — brief lattice reconfiguration
+ *   dispersion  — controlled loosen → reassemble (not explosion)
  */
-export type MorphStyle = 'axis' | 'sweep' | 'compress' | 'converge' | 'wave';
+export type MorphStyle =
+  | 'radial'
+  | 'horizontal'
+  | 'vertical'
+  | 'orbital'
+  | 'wave'
+  | 'edge'
+  | 'grid'
+  | 'dispersion';
+
+export const MORPH_STYLES: readonly MorphStyle[] = [
+  'radial',
+  'horizontal',
+  'vertical',
+  'orbital',
+  'wave',
+  'edge',
+  'grid',
+  'dispersion',
+] as const;
 
 /**
  * Geometric trajectory from source → destination under a morph style.
- * Bidirectional: the same function with t→1−t (or swapped endpoints)
- * yields the reverse path. Mid-field waypoints are deterministic from
- * the endpoints + style — no noise, no Math.random.
+ * Bidirectional: swap endpoints (or t → 1−t) for the reverse path.
+ * Mid-field waypoints are deterministic from endpoints + style.
  */
 export function styledFlowPoint(
   ax: number,
@@ -370,39 +391,60 @@ export function styledFlowPoint(
   const len = Math.hypot(dx, dy) || 1;
   const nx = -dy / len;
   const ny = dx / len;
+  const pull = Math.min(40, len * 0.22);
 
-  // Shared midpoint with style-specific bias.
   let mx = (ax + bx) * 0.5;
   let my = (ay + by) * 0.5;
-  const pull = Math.min(36, len * 0.18);
 
-  if (style === 'axis') {
-    // Contract toward the vertical centre line, then expand.
-    const midX = fieldCx;
-    const midY = (ay + by) * 0.5;
-    mx = lerp(mx, midX, 0.72);
-    my = lerp(my, midY, 0.35);
+  if (style === 'radial') {
+    // Converge through field centre, then expand to destination.
+    const k = Math.sin(e * Math.PI); // peak at mid
+    mx = lerp(mx, fieldCx, 0.78 * k + 0.15);
+    my = lerp(my, fieldCy, 0.78 * k + 0.15);
     mx += nx * bend * 0.35;
     my += ny * bend * 0.35;
-  } else if (style === 'sweep') {
-    // Horizontal sweep: midpoint pushed along +x with mild arc.
-    mx += Math.sign(bx - ax || 1) * pull * 0.85;
-    my += bend * 0.55 + ny * bend * 0.25;
-  } else if (style === 'compress') {
-    // Vertical compress toward horizontal mid-band.
-    mx += nx * bend * 0.4;
-    my = lerp(my, fieldCy, 0.7);
-  } else if (style === 'converge') {
-    // Edges pull toward field centre before resolving.
-    mx = lerp(mx, fieldCx, 0.55);
-    my = lerp(my, fieldCy, 0.55);
-    mx += nx * bend * 0.5;
-    my += ny * bend * 0.5;
+  } else if (style === 'horizontal') {
+    mx += Math.sign(bx - ax || 1) * pull * 0.95;
+    my += bend * 0.5 + ny * bend * 0.2;
+  } else if (style === 'vertical') {
+    mx += nx * bend * 0.35;
+    my = lerp(my, fieldCy, 0.82);
+  } else if (style === 'orbital') {
+    // Subtle arc around field centre — not a giant circle.
+    const ang = (e - 0.5) * Math.PI * 0.55;
+    const rad = Math.min(28, len * 0.16);
+    mx = lerp(mx, fieldCx, 0.35) + Math.cos(ang) * rad * 0.55 + nx * bend * 0.3;
+    my = lerp(my, fieldCy, 0.35) + Math.sin(ang) * rad * 0.55 + ny * bend * 0.3;
+  } else if (style === 'wave') {
+    const wave = Math.sin(e * Math.PI * 1.5) * Math.min(24, len * 0.15);
+    mx += nx * (bend * 0.4 + wave);
+    my += ny * (bend * 0.4 + wave * 0.4);
+  } else if (style === 'edge') {
+    // Pull toward centre from edges, then out.
+    const k = Math.sin(e * Math.PI);
+    mx = lerp(mx, fieldCx, 0.7 * k);
+    my = lerp(my, fieldCy, 0.45 * k);
+    mx += nx * bend * 0.55;
+    my += ny * bend * 0.55;
+  } else if (style === 'grid') {
+    // Snap midpoint toward a coarse lattice cell, then release.
+    const cell = 14;
+    const gx = Math.round(mx / cell) * cell;
+    const gy = Math.round(my / cell) * cell;
+    const k = Math.sin(e * Math.PI);
+    mx = lerp(mx, gx, 0.75 * k);
+    my = lerp(my, gy, 0.75 * k);
+    mx += nx * bend * 0.25;
+    my += ny * bend * 0.25;
   } else {
-    // wave — single gentle sine offset along the path normal.
-    const wave = Math.sin(e * Math.PI) * Math.min(22, len * 0.14);
-    mx += nx * (bend * 0.45 + wave);
-    my += ny * (bend * 0.45 + wave * 0.35);
+    // dispersion — controlled loosen (outward) then reassemble.
+    const k = Math.sin(e * Math.PI);
+    const out = Math.min(26, len * 0.14) * k;
+    const ox = (ax - fieldCx) || nx;
+    const oy = (ay - fieldCy) || ny;
+    const ol = Math.hypot(ox, oy) || 1;
+    mx += (ox / ol) * out + nx * bend * 0.3;
+    my += (oy / ol) * out + ny * bend * 0.3;
   }
 
   const u = 1 - e;
@@ -423,7 +465,6 @@ export function splitTwoLines(label: string, measure: (s: string) => number, max
   const full = words.join(' ');
   if (measure(full) <= maxWidth) return [full];
 
-  // Find the break that keeps both lines under maxWidth and closest in length.
   let best = 1;
   let bestScore = Infinity;
   for (let i = 1; i < words.length; i += 1) {

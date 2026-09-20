@@ -40,12 +40,13 @@ import {
 import { STORY_BEATS, serviceKeywords, NAME_HOLD_MS } from '@/app/story-world';
 
 const INKS = ['#a3e635', '#4ade80', '#22c55e', '#34d399', '#10b981', '#2dd4bf', '#84cc16', '#16a34a'];
-const ASSEMBLE_INKS = ['#7dd3fc', '#a5b4fc', '#93c5fd', '#67e8f9'];
-const LOCK_INK = '#eab308';
+/* Green-only identity — no amber/gold, no cyan detour, no near-white mint. */
+const ASSEMBLE_INKS = ['#22c55e', '#16a34a', '#4ade80', '#34d399'];
+const LOCK_INK = '#a3e635';
 const RAMP_BUCKETS = 8;
-const WARM_AT = 0.72;
+const WARM_AT = 0.55;
 const RESOLVED_INK = '#4ade80';
-const WAITING_INK = 'rgba(147,197,253,0.20)';
+const WAITING_INK = 'rgba(74,222,128,0.18)';
 
 type Particle = {
   tx: number;
@@ -132,7 +133,7 @@ export function SignatureName({
     let onNameTargets = true;
     let morphFromName = true;
     let morphToName = true;
-    let morphStyle: MorphStyle = 'axis';
+    let morphStyle: MorphStyle = 'radial';
     let fieldSeed = 1;
     let nameW = 0;
     let nameH = 0;
@@ -166,9 +167,9 @@ export function SignatureName({
       sctx.clearRect(0, 0, storyW, storyH);
 
       const family = window.getComputedStyle(stage).fontFamily;
-      // Keyword size: strong readable presence inside the fixed slot.
-      // Scales with slot height so long titles stay ≤2 lines.
-      let size = Math.min(Math.max(fontSize * 0.52, 22), storyH * 0.34, 44);
+      // Keyword ≈ name visual weight — same identity role, not a subtitle.
+      // Fit into the fixed slot with ≤2 lines; never shrink into decoration.
+      let size = Math.min(Math.max(fontSize * 0.88, 28), storyH * 0.42, fontSize * 1.02);
       const maxW = storyW * 0.94;
       const applyFont = (px: number) => {
         sctx.font = `700 ${Math.round(px)}px ${family}`;
@@ -435,19 +436,29 @@ export function SignatureName({
         const dist = Math.hypot(p.toX - p.fromX, p.toY - p.fromY);
         // Restrained geometric bend — style scales the arc strength.
         const bendScale =
-          style === 'wave' ? 0.2 : style === 'sweep' ? 0.14 : style === 'axis' ? 0.1 : 0.12;
+          style === 'wave' || style === 'orbital'
+            ? 0.22
+            : style === 'dispersion'
+              ? 0.18
+              : style === 'horizontal'
+                ? 0.14
+                : style === 'grid'
+                  ? 0.08
+                  : 0.12;
         p.bend = (rnd() - 0.5) * Math.min(32, dist * bendScale);
 
         const nx = storyW > 0 ? p.fromX / storyW : 0.5;
         const ny = storyH > 0 ? p.fromY / storyH : 0.5;
         let order = i / Math.max(1, n - 1);
-        if (style === 'sweep') order = nx;
-        else if (style === 'compress') order = ny;
-        else if (style === 'converge') {
+        if (style === 'horizontal') order = nx;
+        else if (style === 'vertical') order = ny;
+        else if (style === 'radial' || style === 'edge' || style === 'dispersion') {
           const dx = nx - 0.5;
           const dy = ny - 0.5;
           order = Math.hypot(dx, dy) * 1.4;
-        } else if (style === 'axis') order = Math.abs(nx - 0.5) * 2;
+        } else if (style === 'wave') order = nx * 0.7 + ny * 0.3;
+        else if (style === 'grid') order = ((Math.round(nx * 8) + Math.round(ny * 6)) % 14) / 14;
+        else if (style === 'orbital') order = (Math.atan2(ny - 0.5, nx - 0.5) + Math.PI) / (Math.PI * 2);
         else order = (nx + ny) * 0.5;
 
         p.stg = clamp01(order) * 0.1 + rnd() * 0.025;
@@ -469,15 +480,15 @@ export function SignatureName({
       const label = keywordsRef.current[beat.serviceIndex] ?? '';
       const pts = sampleTextPoints(label, budgetNow);
       holdMs = beat.holdMs;
-      aimToPoints(pts, now, beat.morphMs, false, beat.style);
+      aimToPoints(pts, now, beat.morphMs, false, beat.styleOut);
     };
 
     const returnToName = (now: number) => {
       holdMs = NAME_HOLD_MS;
-      // Reverse the same style used for the outbound morph.
-      const style = STORY_BEATS[Math.max(0, beatIndex)]?.style ?? morphStyle;
+      // Distinct reverse physics — consecutive transitions never identical.
+      const style = STORY_BEATS[Math.max(0, beatIndex)]?.styleBack ?? morphStyle;
       const namePts = particles.map((p) => ({ x: p.tx, y: p.ty }));
-      aimToPoints(namePts, now, 1650, true, style);
+      aimToPoints(namePts, now, 1700, true, style);
     };
 
     const advanceFromHold = (now: number) => {
