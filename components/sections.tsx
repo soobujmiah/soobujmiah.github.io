@@ -97,9 +97,10 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
           <IdentityClock part="date" />
         </div>
 
-        {/* Compact name ⇄ keyword morph stage — name is the hero visual. */}
+        {/* Fixed name ⇄ keyword slot — reserved height supports ≤2-line
+            service titles so copy/CTAs never shift when the keyword changes. */}
         <div className="hero-story-stage">
-          <h1 className="hero-name text-[clamp(min(2.75rem,11vw),9vw,5.6rem)] font-semibold leading-[1.05] tracking-tight">
+          <h1 className="hero-name text-[clamp(min(3.1rem,12.5vw),10.5vw,6.4rem)] font-semibold leading-[1.02] tracking-tight">
             <SignatureName text={t.profile.nameFull} reducedMotion={reducedMotion} armed={armed} />
           </h1>
         </div>

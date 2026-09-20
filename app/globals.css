@@ -1512,19 +1512,25 @@ body:has(> .services-doc) button {
   animation: hero-clock-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
 }
 
-/* Compact name ⇄ keyword morph stage — larger name, tighter band. */
+/* Fixed name ⇄ keyword morph slot.
+   Height is reserved for the larger name OR a two-line service title
+   so short/long keywords never shift role / status / CTAs / motto. */
 .hero-story-stage {
   position: relative;
   width: 100%;
-  max-width: 38rem;
-  height: clamp(112px, 18dvh, 200px);
-  margin: 0 auto clamp(10px, 1.6dvh, 16px);
+  max-width: 42rem;
+  /* Two-line service titles + large name — fixed band, no CLS. */
+  height: clamp(148px, 24dvh, 268px);
+  min-height: 148px;
+  margin: 0 auto clamp(12px, 1.8dvh, 18px);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
   z-index: 2;
+  /* Isolation: nothing outside this box may reflow from morph content. */
+  contain: layout style;
 }
 
 .hero-story-stage .hero-name {
@@ -1533,6 +1539,18 @@ body:has(> .services-doc) button {
   z-index: 1;
   margin: 0;
   max-width: 100%;
+  /* Name sits vertically centred in the fixed slot. */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hero-story-stage .sig-name {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .hero-story-stage .sig-canvas {
@@ -1543,7 +1561,7 @@ body:has(> .services-doc) button {
   z-index: 0;
 }
 
-/* Identity copy stack — denser rhythm, motto last. */
+/* Identity copy stack — denser rhythm under a stable morph slot. */
 .hero-copy {
   display: flex;
   flex-direction: column;
@@ -1554,23 +1572,23 @@ body:has(> .services-doc) button {
 }
 
 .hero-copy .hero-role {
-  margin: 0 0 0.5rem;
-}
-
-.hero-copy .hero-status {
   margin: 0 0 0.45rem;
 }
 
+.hero-copy .hero-status {
+  margin: 0 0 0.4rem;
+}
+
 .hero-copy .hero-tagline {
-  margin: 0 0 0.7rem;
+  margin: 0 0 0.65rem;
 }
 
 .hero-copy .hero-intro {
-  margin: 0 0 0.95rem;
+  margin: 0 0 0.9rem;
 }
 
 .hero-copy .hero-ctas {
-  margin: 0 0 0.85rem;
+  margin: 0 0 0.8rem;
 }
 
 .hero-copy .hero-motto {
@@ -1581,7 +1599,8 @@ body:has(> .services-doc) button {
 
 @media (max-height: 700px) {
   .hero-story-stage {
-    height: clamp(96px, 15dvh, 150px);
+    height: clamp(128px, 20dvh, 200px);
+    min-height: 128px;
     margin-bottom: 8px;
   }
   .hero-clock-wrap {
@@ -1589,10 +1608,10 @@ body:has(> .services-doc) button {
     gap: 4px;
   }
   .hero-copy .hero-intro {
-    margin-bottom: 0.7rem;
+    margin-bottom: 0.65rem;
   }
   .hero-copy .hero-ctas {
-    margin-bottom: 0.65rem;
+    margin-bottom: 0.6rem;
   }
   .hero-copy .hero-motto {
     font-size: 10px;
@@ -1601,7 +1620,8 @@ body:has(> .services-doc) button {
 
 @media (max-height: 640px) {
   .hero-story-stage {
-    height: clamp(88px, 14dvh, 130px);
+    height: clamp(118px, 18dvh, 170px);
+    min-height: 118px;
   }
   .page-fill--hero {
     padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
@@ -1610,18 +1630,27 @@ body:has(> .services-doc) button {
 
 @media (min-width: 768px) {
   .hero-story-stage {
-    height: clamp(140px, 20dvh, 220px);
-    max-width: 44rem;
-    margin-bottom: 1.1rem;
+    height: clamp(180px, 26dvh, 300px);
+    min-height: 180px;
+    max-width: 48rem;
+    margin-bottom: 1.15rem;
   }
   .hero-copy .hero-role {
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.55rem;
   }
   .hero-copy .hero-intro {
-    margin-bottom: 1.1rem;
+    margin-bottom: 1.05rem;
   }
   .hero-copy .hero-ctas {
-    margin-bottom: 1rem;
+    margin-bottom: 0.95rem;
+  }
+}
+
+/* Wide desktop: confident name presence without clipping. */
+@media (min-width: 1200px) {
+  .hero-story-stage {
+    height: clamp(200px, 28dvh, 320px);
+    max-width: 52rem;
   }
 }
 @keyframes hero-clock-in {

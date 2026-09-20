@@ -134,6 +134,8 @@ const {
   rgbToCss,
   spatialPairing,
   flowPoint,
+  styledFlowPoint,
+  splitTwoLines,
   easeInOutQuint,
 } = await import(pathToFileURL(motionPath).href);
 const storyPath = pick('app/story-world.js', 'story-world.js');
@@ -366,6 +368,40 @@ eq('flowPoint starts at A and ends at B', (() => {
   const b = flowPoint(0, 0, 10, 0, 1, 4);
   return Math.hypot(a.x, a.y) < 1e-9 && Math.hypot(b.x - 10, b.y) < 1e-9;
 })(), true);
+const STYLES = ['axis', 'sweep', 'compress', 'converge', 'wave'];
+eq(
+  'styledFlowPoint lands on endpoints for every morph style',
+  STYLES.every((style) => {
+    const a = styledFlowPoint(0, 0, 40, 20, 0, 6, style, 20, 10);
+    const b = styledFlowPoint(0, 0, 40, 20, 1, 6, style, 20, 10);
+    return Math.hypot(a.x, a.y) < 1e-6 && Math.hypot(b.x - 40, b.y - 20) < 1e-6;
+  }),
+  true,
+);
+eq(
+  'styledFlowPoint midpoints differ by style (controlled variation)',
+  (() => {
+    const mids = STYLES.map((s) => styledFlowPoint(0, 0, 40, 0, 0.5, 8, s, 20, 10));
+    const keys = new Set(mids.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`));
+    return keys.size >= 4;
+  })(),
+  true,
+);
+eq(
+  'splitTwoLines keeps short labels on one line',
+  splitTwoLines('Graphics Design', (s) => s.length * 8, 400),
+  ['Graphics Design'],
+);
+eq(
+  'splitTwoLines wraps long titles to at most two lines',
+  splitTwoLines('Office Administration & Operations Support', (s) => s.length * 10, 180).length,
+  2,
+);
+eq(
+  'splitTwoLines never invents a third line',
+  splitTwoLines('Android & Phone Software Support', (s) => s.length * 12, 100).length <= 2,
+  true,
+);
 eq('spatialPairing is structure-preserving (sorted left-to-right)', (() => {
   const from = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 20, y: 0 }];
   const to = [{ x: 0, y: 5 }, { x: 10, y: 5 }, { x: 20, y: 5 }];
@@ -380,7 +416,7 @@ eq('spatialPairing handles unequal populations without throwing', (() => {
 })(), true);
 eq('one beat per service slug', STORY_BEATS.length, 8);
 eq(
-  'beats are deterministic keyword holds (no scene bags)',
+  'beats are deterministic keyword holds with morph styles',
   Array.isArray(STORY_BEATS) &&
     STORY_BEATS.every(
       (b) =>
@@ -388,8 +424,13 @@ eq(
         typeof b.slug === 'string' &&
         b.holdMs > 0 &&
         b.morphMs > 0 &&
-        b.motion === 'precise',
+        STYLES.includes(b.style),
     ),
+  true,
+);
+eq(
+  'at least three distinct morph styles are used across the cycle',
+  new Set(STORY_BEATS.map((b) => b.style)).size >= 3,
   true,
 );
 eq('first beat is web-development', STORY_BEATS[0].slug, 'web-development');
