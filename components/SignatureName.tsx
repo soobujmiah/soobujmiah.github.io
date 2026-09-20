@@ -193,8 +193,15 @@ export function SignatureName({
 
       const family = window.getComputedStyle(stage).fontFamily;
       // SERVICE SIZE ≈ NAME SIZE. Prefer two lines over shrinking.
+      // Safe air for particle radius + anti-alias fringe — prevents edge crop.
+      const edgeAir = Math.max(3.5, (dot || 2) * 1.15 + 2);
+      const safeW = Math.max(8, storyW - edgeAir * 2);
+      const safeH = Math.max(8, storyH - edgeAir * 2);
       let size = fontSize;
-      const maxW = storyW * 0.92;
+      /* Inner text width is stricter than the stage so long titles never
+         paint into the particle air band (Office Admin / Small-Business /
+         Computer Setup were clipping here). */
+      const maxW = safeW * 0.98;
       const applyFont = (px: number) => {
         sctx.font = `700 ${Math.round(px)}px ${family}`;
       };
@@ -204,47 +211,64 @@ export function SignatureName({
       sctx.fillStyle = '#ffffff';
 
       const measure = (s: string) => sctx.measureText(s).width;
+      const lineWidth = (s: string) => {
+        const m = sctx.measureText(s);
+        const left =
+          typeof m.actualBoundingBoxLeft === 'number' ? m.actualBoundingBoxLeft : 0;
+        const right =
+          typeof m.actualBoundingBoxRight === 'number' ? m.actualBoundingBoxRight : m.width;
+        /* actual boxes are from the anchor; for center-aligned we need full span. */
+        const span = left + right;
+        return Math.max(m.width, span);
+      };
       const glyphMetrics = () => {
-        const m = sctx.measureText('HgÁy|@');
+        const m = sctx.measureText('HgÁy|@Wp');
         const ascent =
           (typeof m.fontBoundingBoxAscent === 'number' && m.fontBoundingBoxAscent) ||
           (typeof m.actualBoundingBoxAscent === 'number' && m.actualBoundingBoxAscent) ||
-          size * 0.8;
+          size * 0.82;
         const descent =
           (typeof m.fontBoundingBoxDescent === 'number' && m.fontBoundingBoxDescent) ||
           (typeof m.actualBoundingBoxDescent === 'number' && m.actualBoundingBoxDescent) ||
-          size * 0.22;
+          size * 0.24;
         return { ascent, descent, content: ascent + descent };
       };
 
-      /* Fit at name scale using REAL glyph extents. Prefer wrap over shrink. */
-      const minSize = Math.max(fontSize * 0.92, Math.min(storyH * 0.4, fontSize));
+      /* Fit at name scale using REAL glyph extents. Prefer wrap over shrink.
+         Floor stays high (not subtitle), but MUST keep reducing while the
+         measured two-line block still overflows the safe rect — otherwise
+         long titles paint past the canvas and look cropped. */
+      const minSize = Math.max(fontSize * 0.78, Math.min(storyH * 0.34, fontSize * 0.9));
       let lines = splitTwoLines(label, measure, maxW);
       let met = glyphMetrics();
-      let lineH = met.content + Math.max(1, size * 0.04);
-      let vPad = Math.max(2.5, Math.min(storyH * 0.04, size * 0.06));
-      let hPad = Math.max(4, storyW * 0.03);
-      for (let guard = 0; guard < 12; guard += 1) {
+      let lineH = met.content + Math.max(1, size * 0.05);
+      for (let guard = 0; guard < 28; guard += 1) {
         lines = splitTwoLines(label, measure, maxW);
         met = glyphMetrics();
-        lineH = met.content + Math.max(1, size * 0.04);
-        vPad = Math.max(2.5, Math.min(storyH * 0.04, size * 0.06));
+        lineH = met.content + Math.max(1, size * 0.05);
         const blockH = lines.length * lineH;
-        const widest = Math.max(...lines.map(measure), 0);
-        if (widest <= maxW - hPad * 0.5 && blockH + 2 * vPad <= storyH) break;
-        if (size <= minSize + 0.2) break;
-        size = Math.max(minSize, size * 0.985);
+        const widest = Math.max(...lines.map(lineWidth), 0);
+        if (widest <= maxW && blockH <= safeH) break;
+        if (size <= minSize + 0.15) break;
+        size = Math.max(minSize, size * 0.97);
         applyFont(size);
       }
 
       lines = splitTwoLines(label, measure, maxW);
       met = glyphMetrics();
-      lineH = met.content + Math.max(1, size * 0.04);
-      vPad = Math.max(2.5, Math.min(storyH * 0.04, size * 0.06));
-      const blockH = lines.length * lineH;
+      lineH = met.content + Math.max(1, size * 0.05);
+      /* If still overflowing at the floor, compress line box slightly (not
+         a third line, not a global redesign). */
+      let blockH = lines.length * lineH;
+      if (blockH > safeH && lines.length > 1) {
+        lineH = Math.max(met.content * 0.98, safeH / lines.length);
+        blockH = lines.length * lineH;
+      }
       let blockTop = (storyH - blockH) / 2;
-      if (blockTop < vPad) blockTop = vPad;
-      if (blockTop + blockH > storyH - vPad) blockTop = Math.max(vPad, storyH - vPad - blockH);
+      if (blockTop < edgeAir) blockTop = edgeAir;
+      if (blockTop + blockH > storyH - edgeAir) {
+        blockTop = Math.max(edgeAir, storyH - edgeAir - blockH);
+      }
 
       applyFont(size);
       for (let i = 0; i < lines.length; i += 1) {
@@ -253,7 +277,73 @@ export function SignatureName({
         sctx.fillText(lines[i], storyW / 2, baseline);
       }
 
-      const img = sctx.getImageData(0, 0, fw, fh).data;
+      /* Second-pass: if any ink still sits outside the safe rect (true glyph
+         overhang past measureText), clear and re-draw at a reduced scale
+         from the measured ink bounds — guarantees no raster crop. */
+      let img = sctx.getImageData(0, 0, fw, fh).data;
+      const inkBounds = () => {
+        let minX = fw;
+        let minY = fh;
+        let maxX = -1;
+        let maxY = -1;
+        for (let y = 0; y < fh; y += 1) {
+          for (let x = 0; x < fw; x += 1) {
+            if (img[(y * fw + x) * 4 + 3] > 80) {
+              if (x < minX) minX = x;
+              if (y < minY) minY = y;
+              if (x > maxX) maxX = x;
+              if (y > maxY) maxY = y;
+            }
+          }
+        }
+        if (maxX < 0) return null;
+        return {
+          minX: minX / dpr,
+          minY: minY / dpr,
+          maxX: (maxX + 1) / dpr,
+          maxY: (maxY + 1) / dpr,
+          w: (maxX - minX + 1) / dpr,
+          h: (maxY - minY + 1) / dpr,
+        };
+      };
+      let bounds = inkBounds();
+      if (
+        bounds &&
+        (bounds.w > safeW * 1.01 ||
+          bounds.h > safeH * 1.01 ||
+          bounds.minX < edgeAir - 0.5 ||
+          bounds.minY < edgeAir - 0.5 ||
+          bounds.maxX > storyW - edgeAir + 0.5 ||
+          bounds.maxY > storyH - edgeAir + 0.5)
+      ) {
+        const sx = safeW / Math.max(1e-3, bounds.w);
+        const sy = safeH / Math.max(1e-3, bounds.h);
+        const k = Math.min(1, sx, sy) * 0.97;
+        size = Math.max(minSize * 0.95, size * k);
+        applyFont(size);
+        sctx.clearRect(0, 0, storyW, storyH);
+        lines = splitTwoLines(label, measure, maxW);
+        met = glyphMetrics();
+        lineH = met.content + Math.max(1, size * 0.05);
+        blockH = lines.length * lineH;
+        if (blockH > safeH && lines.length > 1) {
+          lineH = Math.max(met.content * 0.98, safeH / lines.length);
+          blockH = lines.length * lineH;
+        }
+        blockTop = (storyH - blockH) / 2;
+        if (blockTop < edgeAir) blockTop = edgeAir;
+        if (blockTop + blockH > storyH - edgeAir) {
+          blockTop = Math.max(edgeAir, storyH - edgeAir - blockH);
+        }
+        for (let i = 0; i < lines.length; i += 1) {
+          const boxTop = blockTop + i * lineH;
+          const baseline = baselineWithinBox(boxTop, lineH, met.ascent, met.descent);
+          sctx.fillText(lines[i], storyW / 2, baseline);
+        }
+        img = sctx.getImageData(0, 0, fw, fh).data;
+        bounds = inkBounds();
+      }
+
       /* Probe ink at a stable base grid, then lock areal density to the name. */
       const probe = Math.max(1, Math.round(T.sampleStepPx * dpr * 0.9));
       let inkAtProbe = 0;
@@ -278,14 +368,13 @@ export function SignatureName({
         Math.max(probe, Math.ceil(probe * 1.35))
       );
       const raw = sampleInkPoints(img, fw, fh, step, 100, want, hashSeed(label + cacheKey));
-      /* CSS space */
+      /* CSS space — uniform scale-fit into safe rect (no edge crush). */
       const pts: Pt[] = raw.map((p) => ({ x: p.x / dpr, y: p.y / dpr }));
-      const edge = Math.max(2, (dot || 2) * 0.75);
       centerPointsInSafeRect(pts, storyW * 0.5, storyH * 0.5, {
-        left: edge,
-        top: edge,
-        right: Math.max(edge + 1, storyW - edge),
-        bottom: Math.max(edge + 1, storyH - edge),
+        left: edgeAir,
+        top: edgeAir,
+        right: Math.max(edgeAir + 1, storyW - edgeAir),
+        bottom: Math.max(edgeAir + 1, storyH - edgeAir),
       });
       if (keywordCache.size > 24) keywordCache.clear();
       keywordCache.set(cacheKey, pts);

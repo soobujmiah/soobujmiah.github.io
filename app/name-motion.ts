@@ -278,8 +278,16 @@ export function pointsBounds(pts: Array<{ x: number; y: number }>): {
 }
 
 /**
- * Translate a point cloud so its bounds centre lands on (cx, cy), then
- * soft-clamp into a safe rectangle. Mutates in place; returns pts.
+ * Fit a point cloud into a safe rectangle without crushing edges.
+ *
+ * 1) Uniformly scale so width/height fit inside the safe box (never
+ *    stretch axes independently — keeps glyph proportions).
+ * 2) Translate so the scaled bounds centre lands on (cx, cy).
+ * 3) Only if a single outlier still escapes (fp noise), soft-clamp.
+ *
+ * Edge-only clamping used to flatten long titles against the rim and
+ * looked like horizontal/vertical cropping. Scale-then-center keeps
+ * every glyph complete.
  */
 export function centerPointsInSafeRect(
   pts: Array<{ x: number; y: number }>,
@@ -288,12 +296,24 @@ export function centerPointsInSafeRect(
   safe: { left: number; top: number; right: number; bottom: number }
 ): Array<{ x: number; y: number }> {
   if (pts.length === 0) return pts;
-  const b = pointsBounds(pts);
-  const dx = cx - b.cx;
-  const dy = cy - b.cy;
+  const safeW = Math.max(1, safe.right - safe.left);
+  const safeH = Math.max(1, safe.bottom - safe.top);
+  let b = pointsBounds(pts);
+  const bw = Math.max(1e-3, b.width);
+  const bh = Math.max(1e-3, b.height);
+  /* Tiny air so anti-aliased edges + particle radius never kiss the rim. */
+  const fit = Math.min(1, (safeW * 0.98) / bw, (safeH * 0.98) / bh);
+  if (fit < 0.999 || Math.abs(b.cx - cx) > 0.25 || Math.abs(b.cy - cy) > 0.25) {
+    for (let i = 0; i < pts.length; i += 1) {
+      pts[i].x = cx + (pts[i].x - b.cx) * fit;
+      pts[i].y = cy + (pts[i].y - b.cy) * fit;
+    }
+    b = pointsBounds(pts);
+  }
+  /* Final soft clamp — only outliers from float error, not bulk crop. */
   for (let i = 0; i < pts.length; i += 1) {
-    let x = pts[i].x + dx;
-    let y = pts[i].y + dy;
+    let x = pts[i].x;
+    let y = pts[i].y;
     if (x < safe.left) x = safe.left;
     else if (x > safe.right) x = safe.right;
     if (y < safe.top) y = safe.top;
@@ -747,21 +767,52 @@ export function staggerOrder(
 }
 
 /**
+ * Tokenise a service title for two-line wrapping.
+ * Spaces are hard breaks; hyphens (Small-Business) are soft breaks that
+ * keep the hyphen on the first half so long compounds can split cleanly.
+ */
+function wrapTokens(label: string): string[] {
+  const raw = label.trim().split(/\s+/).filter(Boolean);
+  const out: string[] = [];
+  for (const w of raw) {
+    if (w.includes('-') && w.length > 6) {
+      const parts = w.split('-');
+      for (let i = 0; i < parts.length; i += 1) {
+        if (!parts[i]) continue;
+        out.push(i < parts.length - 1 ? `${parts[i]}-` : parts[i]);
+      }
+    } else {
+      out.push(w);
+    }
+  }
+  return out;
+}
+
+/**
  * Split a service title into at most two balanced lines for sampling.
- * Prefers breaks on spaces near the midpoint; never forces 3+ lines.
+ * Prefers breaks on spaces (and soft hyphen splits) near the midpoint;
+ * never forces 3+ lines.
  */
 export function splitTwoLines(label: string, measure: (s: string) => number, maxWidth: number): string[] {
-  const words = label.trim().split(/\s+/).filter(Boolean);
+  const words = wrapTokens(label);
   if (words.length === 0) return [''];
   if (words.length === 1) return [words[0]];
-  const full = words.join(' ');
+  const join = (from: number, to: number) =>
+    words
+      .slice(from, to)
+      .join(' ')
+      .replace(/-\s+/g, '-')
+      .replace(/\s+/g, ' ')
+      .trim();
+  const full = join(0, words.length);
   if (measure(full) <= maxWidth) return [full];
 
   let best = 1;
   let bestScore = Infinity;
   for (let i = 1; i < words.length; i += 1) {
-    const a = words.slice(0, i).join(' ');
-    const b = words.slice(i).join(' ');
+    const a = join(0, i);
+    const b = join(i, words.length);
+    if (!a || !b) continue;
     const wa = measure(a);
     const wb = measure(b);
     const overflow = Math.max(0, wa - maxWidth) + Math.max(0, wb - maxWidth);
@@ -772,5 +823,5 @@ export function splitTwoLines(label: string, measure: (s: string) => number, max
       best = i;
     }
   }
-  return [words.slice(0, best).join(' '), words.slice(best).join(' ')];
+  return [join(0, best), join(best, words.length)];
 }
