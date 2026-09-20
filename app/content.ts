@@ -134,10 +134,8 @@ export interface Content {
     availability: string;
     ctaWork: string;
     ctaGithub: string;
-    /** Service discovery — the practical-services offer, and the
-        pointer to the canonical Services entry (top navigation). */
-    servicesOffer: string;
-    servicesPoint: string;
+    /** Compact supporting statement under the CTAs. */
+    motto: string;
   };
   presence: {
     eyebrow: string;
@@ -256,6 +254,15 @@ export interface Content {
     refreshing: string;
     mapFocus: string;
     downloadCv: string;
+    /** Local site-guide chat (no external AI). */
+    siteGuideOpen: string;
+    siteGuideTitle: string;
+    siteGuideClose: string;
+    siteGuidePlaceholder: string;
+    siteGuideSubmit: string;
+    siteGuideEmpty: string;
+    siteGuideUnknown: string;
+    siteGuideHints: string[];
   };
   preloader: { status: string };
   /* Per-route search metadata, aligned with SECTION_IDS in
@@ -291,9 +298,8 @@ const en: Content = {
     availability: 'Open to remote',
     ctaWork: 'Explore my work',
     ctaGithub: 'View GitHub ↗',
-    servicesOffer:
-      'Need a website, custom software, Android support, computer help, business technology, design or digital office support?',
-    servicesPoint: 'Explore Services at the top to see available services, scope and how to get started',
+    motto:
+      'Learning. Building. Solving. Creating practical digital solutions for people, offices, and businesses.',
   },
   presence: {
     eyebrow: '02 — What I Build',
@@ -673,6 +679,19 @@ const en: Content = {
     refreshing: 'Refreshing',
     mapFocus: 'Background map focus',
     downloadCv: 'Download CV',
+    siteGuideOpen: 'Ask about this site',
+    siteGuideTitle: 'Site guide',
+    siteGuideClose: 'Close site guide',
+    siteGuidePlaceholder: 'Ask about services, projects, or contact…',
+    siteGuideSubmit: 'Ask',
+    siteGuideEmpty: 'Ask a short question about this portfolio.',
+    siteGuideUnknown: 'I do not have information about that on this site.',
+    siteGuideHints: [
+      'What services are available?',
+      'What is Website Development?',
+      'How can I contact Sobuj?',
+      'What projects are featured?',
+    ],
   },
   footer: {
     built: 'Built from a phone.',
@@ -762,9 +781,8 @@ const bn: Content = {
     availability: 'রিমোটে উন্মুক্ত',
     ctaWork: 'আমার কাজ দেখুন',
     ctaGithub: 'গিটহাব দেখুন ↗',
-    servicesOffer:
-      'ওয়েবসাইট, কাস্টম সফটওয়্যার, অ্যান্ড্রয়েড ও ফোন সহায়তা, কম্পিউটার সমস্যা সমাধান, ছোট ব্যবসার প্রযুক্তি, গ্রাফিক্স ডিজাইন কিংবা ডিজিটাল অফিস সহায়তা প্রয়োজন?',
-    servicesPoint: 'উপরের ন্যাভিগেশনের সার্ভিস তালিকায় সব সেবা, পরিসর ও শুরু করার নিয়ম দেখে নিন',
+    motto:
+      'শেখা। তৈরি। সমাধান। মানুষ, অফিস ও ব্যবসার জন্য ব্যবহারিক ডিজিটাল সমাধান।',
   },
   presence: {
     eyebrow: '০২ — আমি যা তৈরি করি',
@@ -1153,6 +1171,19 @@ const bn: Content = {
     refreshing: 'রিফ্রেশ হচ্ছে',
     mapFocus: 'পটভূমি মানচিত্রের কেন্দ্র',
     downloadCv: 'সিভি ডাউনলোড করুন',
+    siteGuideOpen: 'সাইট সম্পর্কে জিজ্ঞাসা',
+    siteGuideTitle: 'সাইট গাইড',
+    siteGuideClose: 'সাইট গাইড বন্ধ করুন',
+    siteGuidePlaceholder: 'সেবা, প্রকল্প বা যোগাযোগ সম্পর্কে জিজ্ঞাসা…',
+    siteGuideSubmit: 'জিজ্ঞাসা',
+    siteGuideEmpty: 'এই পোর্টফোলিও সম্পর্কে একটি সংক্ষিপ্ত প্রশ্ন করুন।',
+    siteGuideUnknown: 'এই সাইটে সেই বিষয়ে তথ্য নেই।',
+    siteGuideHints: [
+      'কী কী সেবা আছে?',
+      'ওয়েবসাইট তৈরি কী?',
+      'কীভাবে যোগাযোগ করব?',
+      'কোন প্রকল্পগুলো আছে?',
+    ],
   },
   footer: {
     built: 'ফোন থেকে তৈরি।',

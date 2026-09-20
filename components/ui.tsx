@@ -302,28 +302,26 @@ export function HudControl({
   /* Same instrument as the open panel's bottom-edge trace:
      progress = active / (total − 1), fixed origin, monotonic. */
   const progress = total > 1 ? active / (total - 1) : 0;
-  const bar = (w: number, h: number, cls: string, magnetic: boolean) => (
-    <button
-      type="button"
-      onClick={openNav}
-      aria-label={t.ui.navOpen}
-      aria-expanded={navOpen}
-      data-magnetic={magnetic || undefined}
-      data-nav-open={navOpen ? 'true' : 'false'}
-      className={`pager-hud ${cls}`}
-    >
-      <PerimeterTrace w={w} h={h} progress={progress} reduced={!!prefersReduced} />
-      <IndexGlyph />
-      <span className="sr-only">{labels[active] ?? ''}</span>
-    </button>
-  );
+  /* One fixed HUD pill for all breakpoints — CSS sizes it; SVG viewBox
+     matches the design-token geometry so the perimeter trace stays true. */
+  const w = 76;
+  const h = 40;
   return (
-    <>
-      {/* one control per breakpoint (rail on desktop, row on phones) —
-          never both visible, never a second trigger inside */}
-      {bar(72, 38, 'pager-dots-rail', true)}
-      {bar(64, 36, 'pager-dots-row', false)}
-    </>
+    <div className="pager-hud-slot" aria-hidden={false}>
+      <button
+        type="button"
+        onClick={openNav}
+        aria-label={t.ui.navOpen}
+        aria-expanded={navOpen}
+        data-magnetic
+        data-nav-open={navOpen ? 'true' : 'false'}
+        className="pager-hud"
+      >
+        <PerimeterTrace w={w} h={h} progress={progress} reduced={!!prefersReduced} />
+        <IndexGlyph />
+        <span className="sr-only">{labels[active] ?? ''}</span>
+      </button>
+    </div>
   );
 }
 

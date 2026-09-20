@@ -88,19 +88,18 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
       <PageNumeral index={0} />
 
       <div className="page-content page-content--hero flex flex-col items-center text-center">
-        {/* Vertical rhythm is owned by .page-content--hero + utility
-            gaps below — deliberate breathing room between clock, story,
-            identity lines, CTAs, services hand-off, and the HUD safe
-            zone (page-fill--hero bottom padding). Never overlap the
-            bottom navigation control. */}
+        {/* Compact vertical rhythm: clock → name morph → role/status/
+            tagline/intro → CTAs → learning motto. Services discovery
+            lives in top nav; no redundant offer/point block. HUD safe
+            zone is page-fill--hero bottom padding. */}
         <div className="hero-clock-wrap">
           <IdentityClock part="time" />
           <IdentityClock part="date" />
         </div>
 
-        {/* Particle identity + service story — reserved band. */}
+        {/* Compact name ⇄ keyword morph stage — name is the hero visual. */}
         <div className="hero-story-stage">
-          <h1 className="hero-name text-[clamp(min(2.4rem,10.5vw),8vw,5.2rem)] font-semibold leading-[1.08] tracking-tight">
+          <h1 className="hero-name text-[clamp(min(2.75rem,11vw),9vw,5.6rem)] font-semibold leading-[1.05] tracking-tight">
             <SignatureName text={t.profile.nameFull} reducedMotion={reducedMotion} armed={armed} />
           </h1>
         </div>
@@ -171,28 +170,16 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
             </Magnetic>
           </motion.div>
 
-          {/* Service discovery — last content before the HUD safe zone. */}
-          <motion.div
-            className="hero-services flex flex-col items-center gap-2"
-            initial={{ opacity: 0, y: 14 }}
+          {/* Supporting motto — quiet, below CTAs; does not compete with name/title. */}
+          <motion.p
+            className="hero-motto mx-auto max-w-md px-2 text-[11px] leading-relaxed sm:text-xs"
+            style={{ color: 'rgba(228,226,223,0.48)' }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.1, duration: 0.7 }}
+            transition={{ delay: 2.15, duration: 0.65 }}
           >
-            <p
-              className="mx-auto max-w-xl px-2 text-[13px] leading-relaxed sm:text-sm"
-              style={{ color: 'rgba(228,226,223,0.72)' }}
-            >
-              {t.hero.servicesOffer}
-            </p>
-            <a
-              href={serviceHref()}
-              className="font-mono text-[10px] tracking-[0.18em] underline decoration-[rgba(74,222,128,0.35)] underline-offset-4 transition-opacity duration-300 hover:opacity-80 sm:text-[11px]"
-              style={{ color: '#4ade80' }}
-            >
-              {t.hero.servicesPoint}
-              <span aria-hidden="true"> →</span>
-            </a>
-          </motion.div>
+            {t.hero.motto}
+          </motion.p>
         </div>
       </div>
     </div>

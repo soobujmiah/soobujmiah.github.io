@@ -1,18 +1,15 @@
 'use client';
 
 /* ═══════════════════════════════════════════════════════════════
-   SIGNATURE NAME — service-driven particle storytelling canvas.
+   SIGNATURE NAME — compact geometric keyword morph.
 
-   One particle population continuously morphs:
+   One particle population. No scene illustrations.
 
-       NAME → website → software → devices → business
-            → graphics → office → data → NAME → …
+       NAME  ⇄  service keyword  ⇄  NAME  ⇄  next keyword  ⇄  …
 
-   Scene geometry (app/story-world.ts) abstracts the real Services
-   pillars — never invents offerings, never day-in-the-life theatre.
-   Correspondence is spatial; morphs use flow curves.
-   The canvas is bound to .hero-story-stage so it never paints over
-   the clock, role copy, CTAs, or the bottom HUD.
+   Keywords come from servicesContent (SERVICE_SLUGS order).
+   Both name and keywords are sampled from real font ink via fillText
+   so density stays consistent and morphs stay geometric/deterministic.
 
    Reduced motion: static multi-tone wordmark, no canvas loop.
    ═══════════════════════════════════════════════════════════════ */
@@ -21,6 +18,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import { segmentGraphemes } from '@/app/graphemes';
 import { MOTION } from '@/app/design-tokens';
+import { useLang } from '@/app/language';
 import {
   baselineWithinBox,
   bucketFor,
@@ -36,7 +34,7 @@ import {
   spatialPairing,
   startOffset,
 } from '@/app/name-motion';
-import { STORY_BEATS, sampleWorldScene, type SceneBeat } from '@/app/story-world';
+import { STORY_BEATS, serviceKeywords, NAME_HOLD_MS } from '@/app/story-world';
 
 const INKS = ['#a3e635', '#4ade80', '#22c55e', '#34d399', '#10b981', '#2dd4bf', '#84cc16', '#16a34a'];
 const ASSEMBLE_INKS = ['#7dd3fc', '#a5b4fc', '#93c5fd', '#67e8f9'];
@@ -45,7 +43,6 @@ const RAMP_BUCKETS = 8;
 const WARM_AT = 0.72;
 const RESOLVED_INK = '#4ade80';
 const WAITING_INK = 'rgba(147,197,253,0.20)';
-const NAME_HOLD_MS = 3800;
 
 type Particle = {
   tx: number;
@@ -67,30 +64,9 @@ type Particle = {
 };
 
 type Phase = 'forming' | 'hold' | 'morph' | 'dissolve';
+type Pt = { x: number; y: number };
 
 const clamp01 = (t: number): number => (t < 0 ? 0 : t > 1 ? 1 : t);
-
-function motionEase(kind: SceneBeat['motion'], t: number): number {
-  const x = clamp01(t);
-  switch (kind) {
-    case 'organic':
-      return easeInOutQuint(x * 0.94 + 0.06 * x * x);
-    case 'mechanical': {
-      if (x < 0.18) return easeInOutQuint(x / 0.18) * 0.1;
-      if (x < 0.82) return 0.1 + ((x - 0.18) / 0.64) * 0.8;
-      return 0.9 + easeInOutQuint((x - 0.82) / 0.18) * 0.1;
-    }
-    case 'energetic':
-      return easeInOutQuint(Math.pow(x, 0.88));
-    case 'precise':
-      return easeInOutQuint(x);
-    case 'settle':
-      return easeOutSettle(x, 0.32);
-    case 'gentle':
-    default:
-      return easeInOutQuint(x);
-  }
-}
 
 export function SignatureName({
   text,
@@ -101,11 +77,15 @@ export function SignatureName({
   reducedMotion?: boolean;
   armed?: boolean;
 }) {
+  const { lang } = useLang();
   const clusters = useMemo(() => segmentGraphemes(text), [text]);
+  const keywords = useMemo(() => serviceKeywords(lang), [lang]);
   const textRef = useRef(text);
   const clustersRef = useRef(clusters);
+  const keywordsRef = useRef(keywords);
   textRef.current = text;
   clustersRef.current = clusters;
+  keywordsRef.current = keywords;
   const stageRef = useRef<HTMLSpanElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cellRefs = useRef<Array<HTMLSpanElement | null>>([]);
@@ -143,11 +123,9 @@ export function SignatureName({
     let dissolveT0 = 0;
     let hiddenAt = 0;
     let beatIndex = -1;
-    let currentBeat: SceneBeat | null = null;
     let holdMs = NAME_HOLD_MS;
-    let morphMs = 1800;
-    let morphSpan = 1800;
-    let morphMotion: SceneBeat['motion'] = 'gentle';
+    let morphMs = 1600;
+    let morphSpan = 1600;
     let onNameTargets = true;
     let morphFromName = true;
     let morphToName = true;
@@ -166,8 +144,64 @@ export function SignatureName({
     let edges: number[] = [];
     let clustersNow: string[] = [];
     let ramp: string[] = [];
-    let compact = false;
-    let budgetNow = 2000;
+    let budgetNow = 1600;
+    let fontStr = '';
+    let fontSize = 64;
+
+    /** Sample any string into story-stage CSS points using the identity font. */
+    const sampleTextPoints = (label: string, maxCount: number): Pt[] => {
+      if (!label || !(storyW > 0) || !(storyH > 0)) return [];
+      const pad = 4;
+      const fw = Math.max(1, Math.ceil(storyW * dpr));
+      const fh = Math.max(1, Math.ceil(storyH * dpr));
+      const sample = document.createElement('canvas');
+      sample.width = fw;
+      sample.height = fh;
+      const sctx = sample.getContext('2d', { alpha: true, willReadFrequently: true });
+      if (!sctx) return [];
+      sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      sctx.clearRect(0, 0, storyW, storyH);
+
+      // Fit keyword into the story stage — slightly smaller than the name.
+      let size = Math.min(fontSize * 0.72, storyH * 0.42, 48);
+      sctx.font = `700 ${Math.round(size)}px ${fontStr.replace(/^\s*\d+\s+/, '').replace(/^[^ ]+\s+/, '') || 'sans-serif'}`;
+      // Prefer computed family from stage
+      sctx.font = `700 ${Math.round(size)}px ${window.getComputedStyle(stage).fontFamily}`;
+      sctx.textAlign = 'center';
+      sctx.textBaseline = 'middle';
+      sctx.fillStyle = '#ffffff';
+
+      let metrics = sctx.measureText(label);
+      const maxW = storyW * 0.92;
+      if (metrics.width > maxW && metrics.width > 0) {
+        size = size * (maxW / metrics.width);
+        sctx.font = `700 ${Math.round(size)}px ${window.getComputedStyle(stage).fontFamily}`;
+        metrics = sctx.measureText(label);
+      }
+      sctx.fillText(label, storyW / 2, storyH / 2 + pad * 0.25);
+
+      const img = sctx.getImageData(0, 0, fw, fh).data;
+      const baseStep = Math.max(1, Math.round(T.sampleStepPx * dpr));
+      const countAt = (step: number) => {
+        let n = 0;
+        for (let y = 0; y < fh; y += step) {
+          for (let x = 0; x < fw; x += step) {
+            if (img[(y * fw + x) * 4 + 3] > 110) n += 1;
+          }
+        }
+        return n;
+      };
+      const step = denseStepFor(countAt(baseStep), baseStep, Math.max(200, maxCount));
+      const pts: Pt[] = [];
+      for (let y = 0; y < fh; y += step) {
+        for (let x = 0; x < fw; x += step) {
+          if (img[(y * fw + x) * 4 + 3] > 110) {
+            pts.push({ x: (x + step / 2) / dpr, y: (y + step / 2) / dpr });
+          }
+        }
+      }
+      return pts;
+    };
 
     const sampleNameTargets = (
       textNow: string,
@@ -176,8 +210,8 @@ export function SignatureName({
       sctx: CanvasRenderingContext2D
     ): Particle[] => {
       const cs = window.getComputedStyle(stage);
-      const fontStr = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-      const fontSize = parseFloat(cs.fontSize) || 64;
+      fontStr = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+      fontSize = parseFloat(cs.fontSize) || 64;
       sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       sctx.clearRect(0, 0, cw, chh);
       sctx.font = fontStr;
@@ -239,8 +273,6 @@ export function SignatureName({
       const next: Particle[] = [];
       const clusterCount = clustersIn.length;
 
-      // Name targets are in name-local CSS px; convert to story-stage space
-      // via ox/oy (name origin inside the story stage).
       for (let y = 0; y < chh; y += step) {
         for (let x = 0; x < cw; x += step) {
           if (img[(y * cw + x) * 4 + 3] <= 110) continue;
@@ -248,7 +280,7 @@ export function SignatureName({
           const ly = (y + step / 2) / dpr;
           const tx = lx + ox;
           const ty = ly + oy;
-          const o = disperseOrigin(lx, ly, nameW, nameH, rnd, T.disperseRadius);
+          const o = disperseOrigin(lx, ly, nameW, nameH, rnd, T.disperseRadius * 0.85);
           next.push({
             tx,
             ty,
@@ -304,7 +336,7 @@ export function SignatureName({
       calmTries = 0;
 
       dpr = Math.min(window.devicePixelRatio || 1, T.maxDpr);
-      const maxArea = 4.5e6;
+      const maxArea = 3.5e6;
       const areaAt = (d: number) => layerBox.width * d * (layerBox.height * d);
       while (dpr > 1 && areaAt(dpr) > maxArea) dpr -= 0.25;
 
@@ -312,7 +344,6 @@ export function SignatureName({
       storyH = layerBox.height;
       ox = stageBox.left - layerBox.left;
       oy = stageBox.top - layerBox.top;
-      compact = storyW < 420 || storyH < 210;
 
       cw = Math.max(1, Math.round(nameW * dpr));
       chh = Math.max(1, Math.round(nameH * dpr));
@@ -335,16 +366,14 @@ export function SignatureName({
       particles = next;
       clustersNow = clustersIn;
       ramp = rampPalette(ASSEMBLE_INKS[0], LOCK_INK, RESOLVED_INK, RAMP_BUCKETS, WARM_AT);
-      dot = Math.max(1.2, Math.min(2.5, Math.min(nameW, storyW) / 220));
+      dot = Math.max(1.25, Math.min(2.6, Math.min(nameW, storyW) / 200));
 
       canvas.width = Math.max(1, Math.round(storyW * dpr));
       canvas.height = Math.max(1, Math.round(storyH * dpr));
-      // Story-stage coordinates: origin at top-left of .hero-story-stage
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       stage.dataset.asm = 'run';
       builtText = textNow;
       beatIndex = -1;
-      currentBeat = null;
       onNameTargets = true;
       holdMs = NAME_HOLD_MS;
       phase = 'forming';
@@ -352,9 +381,8 @@ export function SignatureName({
     };
 
     const aimToPoints = (
-      pts: Array<{ x: number; y: number }>,
+      pts: Pt[],
       now: number,
-      motion: SceneBeat['motion'],
       morphDuration: number,
       towardName: boolean
     ) => {
@@ -371,35 +399,26 @@ export function SignatureName({
       );
       const toPts = towardName ? particles.map((p) => ({ x: p.tx, y: p.ty })) : pts;
       const map = spatialPairing(fromPts, toPts);
-      const rnd = mulberry32((fieldSeed ^ Math.imul(beatIndex + 5, 0x85ebca6b)) >>> 0);
+      const rnd = mulberry32((fieldSeed ^ Math.imul(beatIndex + 7, 0x85ebca6b)) >>> 0);
       let stgMax = 0;
 
       for (let i = 0; i < n; i += 1) {
         const p = particles[i];
         const dest = toPts[map[i]] || toPts[i % toPts.length];
-        const jx = towardName ? 0 : ((p.ph1 * 0.3183) % 1 - 0.5) * 1.4;
-        const jy = towardName ? 0 : ((p.ph2 * 0.3183) % 1 - 0.5) * 1.4;
+        // tiny deterministic jitter only when many→few
+        const jx = towardName ? 0 : ((p.ph1 * 0.3183) % 1 - 0.5) * 1.1;
+        const jy = towardName ? 0 : ((p.ph2 * 0.3183) % 1 - 0.5) * 1.1;
         p.fromX = fromPts[i].x;
         p.fromY = fromPts[i].y;
         p.toX = dest.x + jx;
         p.toY = dest.y + jy;
         const dist = Math.hypot(p.toX - p.fromX, p.toY - p.fromY);
-        const bendScale =
-          motion === 'mechanical'
-            ? 0.16
-            : motion === 'organic'
-              ? 0.26
-              : motion === 'energetic'
-                ? 0.3
-                : motion === 'precise'
-                  ? 0.14
-                  : 0.2;
-        p.bend = (rnd() - 0.5) * Math.min(56, dist * bendScale);
-        p.stg = (i / Math.max(1, n - 1)) * 0.08 + rnd() * 0.03;
+        // geometric, restrained bend — no scatter explosion
+        p.bend = (rnd() - 0.5) * Math.min(28, dist * 0.12);
+        p.stg = (i / Math.max(1, n - 1)) * 0.06 + rnd() * 0.02;
         if (p.stg > stgMax) stgMax = p.stg;
       }
 
-      morphMotion = motion;
       morphMs = morphDuration;
       morphSpan = morphDuration * (1 + stgMax);
       morphFromName = onNameTargets;
@@ -409,34 +428,29 @@ export function SignatureName({
       phaseT0 = now;
     };
 
-    const aimToBeat = (beat: SceneBeat, now: number) => {
-      currentBeat = beat;
-      const pts = sampleWorldScene(beat.id, storyW, storyH, dpr, budgetNow, compact);
+    const aimToKeyword = (index: number, now: number) => {
+      const beat = STORY_BEATS[index];
+      const label = keywordsRef.current[beat.serviceIndex] ?? '';
+      const pts = sampleTextPoints(label, budgetNow);
       holdMs = beat.holdMs;
-      aimToPoints(pts, now, beat.motion, beat.morphMs, false);
+      aimToPoints(pts, now, beat.morphMs, false);
     };
 
     const returnToName = (now: number) => {
-      currentBeat = null;
       holdMs = NAME_HOLD_MS;
       const namePts = particles.map((p) => ({ x: p.tx, y: p.ty }));
-      aimToPoints(namePts, now, 'settle', 2400, true);
+      aimToPoints(namePts, now, 1500, true);
     };
 
     const advanceFromHold = (now: number) => {
       if (onNameTargets) {
-        beatIndex = 0;
-        aimToBeat(STORY_BEATS[0], now);
+        // name → next keyword
+        beatIndex = (beatIndex + 1) % STORY_BEATS.length;
+        aimToKeyword(beatIndex, now);
         return;
       }
-      const next = beatIndex + 1;
-      if (next >= STORY_BEATS.length) {
-        beatIndex = -1;
-        returnToName(now);
-        return;
-      }
-      beatIndex = next;
-      aimToBeat(STORY_BEATS[next], now);
+      // keyword → name
+      returnToName(now);
     };
 
     const frame = (now: number) => {
@@ -469,9 +483,9 @@ export function SignatureName({
         for (let b = 0; b < RAMP_BUCKETS; b += 1) buckets.push(new Path2D());
         for (let i = 0; i < particles.length; i += 1) {
           const p = particles[i];
-          const x = p.tx + Math.cos(p.ph1) * ease * 12;
-          const y = p.ty + Math.sin(p.ph2) * ease * 12;
-          const s = dot * (1 + 0.2 * ease);
+          const x = p.tx + Math.cos(p.ph1) * ease * 10;
+          const y = p.ty + Math.sin(p.ph2) * ease * 10;
+          const s = dot * (1 + 0.15 * ease);
           buckets[bucketFor(1, RAMP_BUCKETS)].rect(x - s / 2, y - s / 2, s, s);
         }
         ctx.globalCompositeOperation = 'lighter';
@@ -506,19 +520,10 @@ export function SignatureName({
         ctx.globalCompositeOperation = 'source-over';
         ctx.lineWidth = 1;
         const gy = Math.round(ruleY + oy) + 0.5;
-        ctx.strokeStyle = `rgba(34,197,94,${(0.18 * guideFade).toFixed(3)})`;
+        ctx.strokeStyle = `rgba(34,197,94,${(0.16 * guideFade).toFixed(3)})`;
         ctx.beginPath();
         ctx.moveTo(ox, gy);
         ctx.lineTo(ox + nameW, gy);
-        ctx.stroke();
-        ctx.strokeStyle = `rgba(165,180,252,${(0.3 * guideFade).toFixed(3)})`;
-        ctx.beginPath();
-        edges.forEach((bx, i) => {
-          if (clustersNow[i] === ' ') return;
-          const gx = Math.round(ox + bx) + 0.5;
-          ctx.moveTo(gx, oy + ruleY - 3.5);
-          ctx.lineTo(gx, oy + ruleY + 3.5);
-        });
         ctx.stroke();
       }
 
@@ -549,50 +554,27 @@ export function SignatureName({
           x = p.ox + (p.tx - p.ox) * e;
           y = p.oy + (p.ty - p.oy) * e;
           lc = lcc;
-          s = dot * (1.4 - 0.4 * lcc);
-          if (lcc > 0.12 && lcc < 0.78) {
-            const bx2 = x + (p.ox - x) * 0.18;
-            const by2 = y + (p.oy - y) * 0.18;
-            buckets[bucketFor(lc, RAMP_BUCKETS)].rect(bx2 - s * 0.26, by2 - s * 0.26, s * 0.52, s * 0.52);
-          }
+          s = dot * (1.35 - 0.35 * lcc);
         } else if (morphing) {
           const local = clamp01(mRaw - p.stg);
-          const e = motionEase(morphMotion, local);
+          const e = easeInOutQuint(local);
           const pos = flowPoint(p.fromX, p.fromY, p.toX, p.toY, e, p.bend);
           x = pos.x;
           y = pos.y;
           const nameS = dot;
-          const sceneS = dot * (0.9 + 0.22 * p.z);
-          const fromS = morphFromName ? nameS : sceneS;
-          const toS = morphToName ? nameS : sceneS;
+          const keyS = dot * 0.95;
+          const fromS = morphFromName ? nameS : keyS;
+          const toS = morphToName ? nameS : keyS;
           s = fromS + (toS - fromS) * e;
-          lc = 0.94 + 0.06 * e;
-        } else if (onNameTargets) {
-          // NAME HOLD — dense, stable, clearly readable
-          x = p.tx + T.microPx * Math.sin(ts * 1.15 + p.ph1);
-          y = p.ty + T.microPx * Math.cos(ts * 0.95 + p.ph2);
-          const c = (ts / T.breathSeconds + p.ph3 * 0.08) % 1;
-          if (c < T.breathWindow) {
-            const env = Math.sin(Math.PI * (c / T.breathWindow));
-            x += Math.cos(p.ph1) * T.breathPx * env * 0.45;
-            y += Math.sin(p.ph2) * T.breathPx * env * 0.45;
-          }
-          s = dot;
-          lc = 1;
+          lc = 0.95 + 0.05 * e;
         } else {
-          // scene hold — soft depth shimmer, restrained breath on sleep
-          x = p.toX + T.microPx * 0.85 * Math.sin(ts * 1.05 + p.ph1);
-          y = p.toY + T.microPx * 0.85 * Math.cos(ts * 0.9 + p.ph2);
-          // soft depth shimmer on service holds — denser on data climax
-          if (currentBeat?.id === 'data') {
-            const pulse = 0.5 + 0.5 * Math.sin(ts * 1.6);
-            s = dot * (0.94 + 0.18 * p.z + 0.04 * pulse);
-          } else if (currentBeat?.id === 'devices') {
-            s = dot * (0.9 + 0.2 * p.z + 0.02 * Math.sin(ts * 2.2 + p.ph3));
-          } else {
-            s = dot * (0.9 + 0.2 * p.z);
-          }
-          lc = 0.96 + 0.04 * p.z;
+          // hold — near-static for readability (name or keyword)
+          const hx = onNameTargets ? p.tx : p.toX;
+          const hy = onNameTargets ? p.ty : p.toY;
+          x = hx + T.microPx * Math.sin(ts * 1.1 + p.ph1);
+          y = hy + T.microPx * Math.cos(ts * 0.95 + p.ph2);
+          s = onNameTargets ? dot : dot * 0.95;
+          lc = 1;
         }
 
         buckets[bucketFor(lc, RAMP_BUCKETS)].rect(x - s / 2, y - s / 2, s, s);
@@ -632,8 +614,8 @@ export function SignatureName({
       if (cancelled) return;
       try {
         const cs = window.getComputedStyle(stage);
-        const fontStr = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-        const loaded = document.fonts?.load(fontStr, textRef.current);
+        const fs = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+        const loaded = document.fonts?.load(fs, textRef.current);
         if (loaded && typeof loaded.then === 'function') {
           loaded.then(() => document.fonts.ready).then(start, start);
         } else {
@@ -673,7 +655,7 @@ export function SignatureName({
       delete stage.dataset.asm;
       stage.style.removeProperty('--sig-resolve');
     };
-  }, [reducedMotion, armed]);
+  }, [reducedMotion, armed, lang]);
 
   return (
     <span className={`sig-name${reducedMotion ? ' sig-static' : ''}`}>
