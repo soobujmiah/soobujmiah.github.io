@@ -23,14 +23,18 @@ import { useLang } from '@/app/language';
 import {
   baselineWithinBox,
   bucketFor,
+  centerPointsInSafeRect,
   disperseOrigin,
   easeOutSettle,
   easeInOutQuint,
   hashSeed,
   mulberry32,
   particleBudget,
+  particleCountForInk,
+  densityStepFor,
   rampPalette,
   denseStepFor,
+  sampleInkPoints,
   spatialPairing,
   startOffset,
   styledFlowPoint,
@@ -158,14 +162,25 @@ export function SignatureName({
     let ramp: string[] = [];
     let budgetNow = 1600;
     let fontSize = 64;
+    /** Name-field areal density (particles / CSS-px² of ink) — reference weight. */
+    let nameInkDensity = 0.12;
+    /** Cache: service label + viewport key → densified CSS points. */
+    const keywordCache = new Map<string, Pt[]>();
 
     /**
      * Sample a service title into the FULL story-stage canvas (≤2 lines).
-     * Bounds come from real font metrics + a small safety pad — never from
-     * the single-line name box. Service scale stays ≈ name scale.
+     *
+     * Pipeline: fit scale → raster mask → areal density → sample ink →
+     * center actual particle bounds. Density matches the name field so
+     * long titles never go skeletal. One particle pool expands when a
+     * keyword needs more samples than the name held.
      */
-    const sampleTextPoints = (label: string, maxCount: number): Pt[] => {
+    const sampleTextPoints = (label: string, poolCap: number): Pt[] => {
       if (!label || !(storyW > 0) || !(storyH > 0)) return [];
+      const cacheKey = `${label}|${Math.round(storyW)}x${Math.round(storyH)}|${Math.round(fontSize)}|${dpr.toFixed(2)}`;
+      const hit = keywordCache.get(cacheKey);
+      if (hit) return hit;
+
       const fw = Math.max(1, Math.ceil(storyW * dpr));
       const fh = Math.max(1, Math.ceil(storyH * dpr));
       const sample = document.createElement('canvas');
@@ -179,7 +194,7 @@ export function SignatureName({
       const family = window.getComputedStyle(stage).fontFamily;
       // SERVICE SIZE ≈ NAME SIZE. Prefer two lines over shrinking.
       let size = fontSize;
-      const maxW = storyW * 0.94;
+      const maxW = storyW * 0.92;
       const applyFont = (px: number) => {
         sctx.font = `700 ${Math.round(px)}px ${family}`;
       };
@@ -202,25 +217,23 @@ export function SignatureName({
         return { ascent, descent, content: ascent + descent };
       };
 
-      /* Fit at name scale using REAL glyph extents (ascent+descent), not an
-         inflated line-box guess. Prefer wrap over shrink; floor stays high. */
-      const minSize = Math.max(fontSize * 0.96, Math.min(storyH * 0.44, fontSize));
+      /* Fit at name scale using REAL glyph extents. Prefer wrap over shrink. */
+      const minSize = Math.max(fontSize * 0.92, Math.min(storyH * 0.4, fontSize));
       let lines = splitTwoLines(label, measure, maxW);
       let met = glyphMetrics();
-      /* Content box + tiny leading — dense two-line unit matching the name. */
       let lineH = met.content + Math.max(1, size * 0.04);
-      /* Minimal safety pad so anti-aliased edges / descenders never kiss the rim. */
       let vPad = Math.max(2.5, Math.min(storyH * 0.04, size * 0.06));
-      for (let guard = 0; guard < 8; guard += 1) {
+      let hPad = Math.max(4, storyW * 0.03);
+      for (let guard = 0; guard < 12; guard += 1) {
         lines = splitTwoLines(label, measure, maxW);
         met = glyphMetrics();
         lineH = met.content + Math.max(1, size * 0.04);
         vPad = Math.max(2.5, Math.min(storyH * 0.04, size * 0.06));
         const blockH = lines.length * lineH;
         const widest = Math.max(...lines.map(measure), 0);
-        if (widest <= maxW && blockH + 2 * vPad <= storyH) break;
+        if (widest <= maxW - hPad * 0.5 && blockH + 2 * vPad <= storyH) break;
         if (size <= minSize + 0.2) break;
-        size = Math.max(minSize, size * 0.99);
+        size = Math.max(minSize, size * 0.985);
         applyFont(size);
       }
 
@@ -229,7 +242,6 @@ export function SignatureName({
       lineH = met.content + Math.max(1, size * 0.04);
       vPad = Math.max(2.5, Math.min(storyH * 0.04, size * 0.06));
       const blockH = lines.length * lineH;
-      /* Center the complete 1–2 line object on the same visual center as the name. */
       let blockTop = (storyH - blockH) / 2;
       if (blockTop < vPad) blockTop = vPad;
       if (blockTop + blockH > storyH - vPad) blockTop = Math.max(vPad, storyH - vPad - blockH);
@@ -242,37 +254,41 @@ export function SignatureName({
       }
 
       const img = sctx.getImageData(0, 0, fw, fh).data;
-      const baseStep = Math.max(1, Math.round(T.sampleStepPx * dpr * 0.9));
-      const countAt = (step: number) => {
-        let n = 0;
-        for (let y = 0; y < fh; y += step) {
-          for (let x = 0; x < fw; x += step) {
-            if (img[(y * fw + x) * 4 + 3] > 100) n += 1;
-          }
-        }
-        return n;
-      };
-      const step = denseStepFor(countAt(baseStep), baseStep, Math.max(280, maxCount));
-      /* Keep every settled particle inside the drawable slot (dot radius air). */
-      const edge = Math.max(1.5, (dot || 2) * 0.6);
-      const xMin = edge;
-      const xMax = Math.max(edge + 1, storyW - edge);
-      const yMin = edge;
-      const yMax = Math.max(edge + 1, storyH - edge);
-      const pts: Pt[] = [];
-      for (let y = 0; y < fh; y += step) {
-        for (let x = 0; x < fw; x += step) {
-          if (img[(y * fw + x) * 4 + 3] > 100) {
-            let px = (x + step / 2) / dpr;
-            let py = (y + step / 2) / dpr;
-            if (px < xMin) px = xMin;
-            else if (px > xMax) px = xMax;
-            if (py < yMin) py = yMin;
-            else if (py > yMax) py = yMax;
-            pts.push({ x: px, y: py });
-          }
+      /* Probe ink at a stable base grid, then lock areal density to the name. */
+      const probe = Math.max(1, Math.round(T.sampleStepPx * dpr * 0.9));
+      let inkAtProbe = 0;
+      for (let y = 0; y < fh; y += probe) {
+        for (let x = 0; x < fw; x += probe) {
+          if (img[(y * fw + x) * 4 + 3] > 100) inkAtProbe += 1;
         }
       }
+      /* Density in device-px²: name density is CSS → convert via dpr². */
+      const targetDensityDev = Math.max(0.04, nameInkDensity / (dpr * dpr));
+      const maxPts = Math.min(
+        Math.max(poolCap, budgetNow),
+        Math.max(480, Math.round(T.maxParticles * (storyW < 700 ? 0.85 : 1)))
+      );
+      const minPts = Math.max(220, Math.round(budgetNow * 0.55));
+      const want = particleCountForInk(inkAtProbe, probe, targetDensityDev, minPts, maxPts);
+      const step = densityStepFor(
+        inkAtProbe,
+        probe,
+        targetDensityDev,
+        Math.max(1, Math.floor(probe * 0.45)),
+        Math.max(probe, Math.ceil(probe * 1.35))
+      );
+      const raw = sampleInkPoints(img, fw, fh, step, 100, want, hashSeed(label + cacheKey));
+      /* CSS space */
+      const pts: Pt[] = raw.map((p) => ({ x: p.x / dpr, y: p.y / dpr }));
+      const edge = Math.max(2, (dot || 2) * 0.75);
+      centerPointsInSafeRect(pts, storyW * 0.5, storyH * 0.5, {
+        left: edge,
+        top: edge,
+        right: Math.max(edge + 1, storyW - edge),
+        bottom: Math.max(edge + 1, storyH - edge),
+      });
+      if (keywordCache.size > 24) keywordCache.clear();
+      keywordCache.set(cacheKey, pts);
       return pts;
     };
 
@@ -332,7 +348,9 @@ export function SignatureName({
         }
         return n;
       };
-      const step = denseStepFor(countAt(baseStep), baseStep, budgetNow);
+      /* Name uses denseStepFor toward budget — still the visual reference. */
+      const inkAtBase = countAt(baseStep);
+      const step = denseStepFor(inkAtBase, baseStep, budgetNow);
       const clusterOf = (xCss: number) => {
         let idx = 0;
         for (let i = 0; i < edges.length; i += 1) {
@@ -374,6 +392,17 @@ export function SignatureName({
           });
         }
       }
+      /* Lock areal density from the assembled name so service titles match. */
+      const inkAreaCss =
+        inkAtBase * (baseStep / dpr) * (baseStep / dpr);
+      if (inkAreaCss > 1 && next.length > 0) {
+        nameInkDensity = next.length / inkAreaCss;
+      } else {
+        nameInkDensity = 0.12;
+      }
+      /* Clamp density into a readable band (particles / CSS-px² of ink). */
+      if (nameInkDensity < 0.08) nameInkDensity = 0.08;
+      if (nameInkDensity > 0.28) nameInkDensity = 0.28;
       return next;
     };
 
@@ -448,8 +477,10 @@ export function SignatureName({
 
       particles = next;
       ramp = rampPalette(ASSEMBLE_INKS[0], LOCK_INK, RESOLVED_INK, RAMP_BUCKETS, WARM_AT);
-      // Slightly larger dots for stronger name/keyword presence.
-      dot = Math.max(1.4, Math.min(3.0, Math.min(nameW, storyW) / 175));
+      // Stable particle radius for name AND services — same material weight.
+      // Slightly larger than pure hairline so strokes read solid, not dotted.
+      dot = Math.max(1.55, Math.min(2.85, Math.min(nameW, storyW) / 165));
+      keywordCache.clear();
 
       canvas.width = Math.max(1, Math.round(storyW * dpr));
       canvas.height = Math.max(1, Math.round(storyH * dpr));
@@ -465,6 +496,42 @@ export function SignatureName({
 
     let morphParams: MorphParams = morphParamsFromSeed(1, 'radial');
 
+    /**
+     * Grow the shared particle pool when a denser keyword target needs
+     * more samples than the name held. New particles clone nearest
+     * existing ones so the morph stays continuous (no pop-in field).
+     */
+    const ensurePoolSize = (need: number, seed: number) => {
+      const cap = Math.max(480, Math.round(T.maxParticles * (storyW < 700 ? 0.9 : 1)));
+      const target = Math.min(need, cap);
+      if (particles.length >= target || particles.length === 0) return;
+      const rnd = mulberry32(seed >>> 0);
+      const base = particles.length;
+      while (particles.length < target) {
+        const src = particles[Math.floor(rnd() * base) % base];
+        const jx = (rnd() - 0.5) * 1.2;
+        const jy = (rnd() - 0.5) * 1.2;
+        particles.push({
+          tx: src.tx + jx,
+          ty: src.ty + jy,
+          ox: src.ox + jx,
+          oy: src.oy + jy,
+          at: src.at,
+          dur: src.dur,
+          ph1: rnd() * Math.PI * 2,
+          ph2: rnd() * Math.PI * 2,
+          ph3: rnd() * Math.PI * 2,
+          fromX: src.fromX + jx,
+          fromY: src.fromY + jy,
+          toX: src.toX + jx,
+          toY: src.toY + jy,
+          bend: 0,
+          stg: 0,
+          z: rnd(),
+        });
+      }
+    };
+
     const aimToPoints = (
       pts: Pt[],
       now: number,
@@ -473,18 +540,31 @@ export function SignatureName({
       style: MorphStyle,
       transitionKey: string
     ) => {
-      const n = particles.length;
-      if (n === 0) return;
+      if (particles.length === 0) return;
       if (pts.length === 0) {
         phase = 'hold';
         phaseT0 = now;
         return;
       }
 
+      /* Expand pool toward keyword density before pairing (no mid-morph spawn). */
+      if (!towardName && pts.length > particles.length) {
+        ensurePoolSize(
+          pts.length,
+          (fieldSeed ^ Math.imul(beatIndex + 7, 0x27d4eb2d) ^ hashSeed(transitionKey)) >>> 0
+        );
+      }
+
+      const n = particles.length;
       const fromPts = particles.map((p) =>
         onNameTargets ? { x: p.tx, y: p.ty } : { x: p.toX, y: p.toY }
       );
-      const toPts = towardName ? particles.map((p) => ({ x: p.tx, y: p.ty })) : pts;
+      /* Toward name: pair onto the name anchors (tx/ty). Surplus particles
+         that were cloned for a dense keyword collapse onto nearest name pts
+         via spatialPairing's stretch — continuous, no despawn flash. */
+      const toPts = towardName
+        ? particles.map((p) => ({ x: p.tx, y: p.ty }))
+        : pts;
       const map = spatialPairing(fromPts, toPts);
       const seed =
         (fieldSeed ^
@@ -529,7 +609,8 @@ export function SignatureName({
     const aimToKeyword = (index: number, now: number) => {
       const beat = STORY_BEATS[index];
       const label = keywordsRef.current[beat.serviceIndex] ?? '';
-      const pts = sampleTextPoints(label, budgetNow);
+      /* Cap = maxParticles band so density can grow past the name pool. */
+      const pts = sampleTextPoints(label, Math.max(budgetNow, Math.round(T.maxParticles * 0.85)));
       holdMs = beat.holdMs;
       aimToPoints(pts, now, beat.morphMs, false, beat.styleOut, beat.slug);
     };

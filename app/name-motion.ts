@@ -130,6 +130,181 @@ export function denseStepFor(inkPixels: number, baseStep: number, target: number
 }
 
 /**
+ * Constant areal particle density — the visual-weight contract for
+ * name ⇄ service morph targets.
+ *
+ * `inkPixels` is the lit-pixel count measured at `probeStep` on the
+ * offscreen mask (device pixels). The returned step keeps ≈ the same
+ * particles-per-ink-area for every title so long two-line services do
+ * not look skeletal next to the name. Floor/ceiling protect mobile
+ * fill rate and anti-sparsity respectively.
+ *
+ * probeStep is the grid used to *measure* ink (usually baseStep);
+ * the returned step is the grid used to *sample* particles.
+ */
+export function densityStepFor(
+  inkAtProbe: number,
+  probeStep: number,
+  targetDensity: number,
+  minStep: number,
+  maxStep: number
+): number {
+  if (!(inkAtProbe > 0) || !(probeStep > 0) || !(targetDensity > 0)) {
+    return Math.max(1, Math.round(probeStep) || 1);
+  }
+  /* inkArea ≈ inkAtProbe * probeStep²  →  step = 1/√density */
+  const step = 1 / Math.sqrt(targetDensity);
+  const lo = Math.max(1, minStep);
+  const hi = Math.max(lo, maxStep);
+  return Math.max(lo, Math.min(hi, Math.round(step)));
+}
+
+/**
+ * Target particle count from measured ink area and a density goal.
+ * Clamped so small titles stay readable and large ones stay mobile-safe.
+ */
+export function particleCountForInk(
+  inkAtProbe: number,
+  probeStep: number,
+  targetDensity: number,
+  minCount: number,
+  maxCount: number
+): number {
+  if (!(inkAtProbe > 0) || !(probeStep > 0) || !(targetDensity > 0)) {
+    return Math.max(0, Math.floor(minCount));
+  }
+  const inkArea = inkAtProbe * probeStep * probeStep;
+  const n = Math.round(inkArea * targetDensity);
+  return Math.max(Math.floor(minCount), Math.min(Math.floor(maxCount), n));
+}
+
+/**
+ * Sample ink pixels on a regular grid, then top-up with a seeded
+ * sub-grid walk when the regular pass undershoots the density target.
+ * Deterministic: same mask + seed → same points. Never Math.random.
+ */
+export function sampleInkPoints(
+  img: Uint8ClampedArray | Uint8Array,
+  fw: number,
+  fh: number,
+  step: number,
+  alphaMin: number,
+  maxCount: number,
+  seed: number
+): Array<{ x: number; y: number }> {
+  const pts: Array<{ x: number; y: number }> = [];
+  if (!(fw > 0) || !(fh > 0) || !(step > 0) || maxCount <= 0) return pts;
+  const s = Math.max(1, Math.floor(step));
+  for (let y = 0; y < fh; y += s) {
+    for (let x = 0; x < fw; x += s) {
+      if (img[(y * fw + x) * 4 + 3] > alphaMin) {
+        pts.push({ x: x + s / 2, y: y + s / 2 });
+      }
+    }
+  }
+  if (pts.length >= maxCount) {
+    /* Even thin of a dense grid — keep spatial coverage, drop extras. */
+    if (pts.length === maxCount) return pts;
+    const keep = new Array<typeof pts[0]>(maxCount);
+    for (let i = 0; i < maxCount; i += 1) {
+      keep[i] = pts[Math.floor((i * pts.length) / maxCount)];
+    }
+    return keep;
+  }
+  /* Undersampled: walk a half-offset lattice with a seeded skip so the
+     top-up is stable and still follows glyph ink (not the bbox). */
+  const need = maxCount - pts.length;
+  if (need <= 0) return pts;
+  const rnd = mulberry32(seed >>> 0);
+  const half = Math.max(1, Math.floor(s / 2));
+  const extras: Array<{ x: number; y: number }> = [];
+  for (let y = half; y < fh; y += s) {
+    for (let x = half; x < fw; x += s) {
+      if (img[(y * fw + x) * 4 + 3] > alphaMin) {
+        extras.push({ x: x + half / 2, y: y + half / 2 });
+      }
+    }
+  }
+  /* Shuffle extras deterministically, take what we need. */
+  for (let i = extras.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(rnd() * (i + 1));
+    const tmp = extras[i];
+    extras[i] = extras[j];
+    extras[j] = tmp;
+  }
+  for (let i = 0; i < extras.length && pts.length < maxCount; i += 1) {
+    pts.push(extras[i]);
+  }
+  return pts;
+}
+
+/**
+ * Axis-aligned bounds of a point cloud (CSS or device px — caller units).
+ */
+export function pointsBounds(pts: Array<{ x: number; y: number }>): {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+  width: number;
+  height: number;
+  cx: number;
+  cy: number;
+} {
+  if (pts.length === 0) {
+    return { minX: 0, minY: 0, maxX: 0, maxY: 0, width: 0, height: 0, cx: 0, cy: 0 };
+  }
+  let minX = pts[0].x;
+  let minY = pts[0].y;
+  let maxX = pts[0].x;
+  let maxY = pts[0].y;
+  for (let i = 1; i < pts.length; i += 1) {
+    const p = pts[i];
+    if (p.x < minX) minX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.x > maxX) maxX = p.x;
+    if (p.y > maxY) maxY = p.y;
+  }
+  return {
+    minX,
+    minY,
+    maxX,
+    maxY,
+    width: maxX - minX,
+    height: maxY - minY,
+    cx: (minX + maxX) * 0.5,
+    cy: (minY + maxY) * 0.5,
+  };
+}
+
+/**
+ * Translate a point cloud so its bounds centre lands on (cx, cy), then
+ * soft-clamp into a safe rectangle. Mutates in place; returns pts.
+ */
+export function centerPointsInSafeRect(
+  pts: Array<{ x: number; y: number }>,
+  cx: number,
+  cy: number,
+  safe: { left: number; top: number; right: number; bottom: number }
+): Array<{ x: number; y: number }> {
+  if (pts.length === 0) return pts;
+  const b = pointsBounds(pts);
+  const dx = cx - b.cx;
+  const dy = cy - b.cy;
+  for (let i = 0; i < pts.length; i += 1) {
+    let x = pts[i].x + dx;
+    let y = pts[i].y + dy;
+    if (x < safe.left) x = safe.left;
+    else if (x > safe.right) x = safe.right;
+    if (y < safe.top) y = safe.top;
+    else if (y > safe.bottom) y = safe.bottom;
+    pts[i].x = x;
+    pts[i].y = y;
+  }
+  return pts;
+}
+
+/**
  * Where a particle starts.
  *
  * The field reads as a wordmark that has just been taken apart rather

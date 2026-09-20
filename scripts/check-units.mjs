@@ -122,6 +122,11 @@ const {
   baselineWithinBox,
   sampleStepFor,
   denseStepFor,
+  densityStepFor,
+  particleCountForInk,
+  sampleInkPoints,
+  pointsBounds,
+  centerPointsInSafeRect,
   startOffset,
   disperseOrigin,
   rampPalette,
@@ -295,6 +300,44 @@ eq('over target matches sampleStepFor', denseStepFor(6800, 2, 1700), sampleStepF
 eq('dense degenerate input returns the base step', denseStepFor(0, 3, 1700), 3);
 eq('the dense step never collapses below one pixel', denseStepFor(1, 8, 4000) >= 1, true);
 eq('over budget widens the step', sampleStepFor(6800, 2, 1700), 4);
+
+console.log('\\nSignature name — constant areal density (service weight = name weight)');
+eq('densityStepFor is finite and ≥1', densityStepFor(800, 3, 0.12, 1, 8) >= 1, true);
+eq('densityStepFor respects maxStep', densityStepFor(10, 8, 0.001, 1, 5) <= 5, true);
+eq('densityStepFor respects minStep', densityStepFor(9000, 2, 0.5, 3, 10) >= 3, true);
+eq('densityStepFor is deterministic', densityStepFor(500, 4, 0.1, 1, 6), densityStepFor(500, 4, 0.1, 1, 6));
+eq('particleCountForInk scales with area', particleCountForInk(400, 2, 0.15, 100, 5000) > particleCountForInk(100, 2, 0.15, 100, 5000), true);
+eq('particleCountForInk honours minimum', particleCountForInk(1, 8, 0.01, 220, 2000) >= 220, true);
+eq('particleCountForInk honours maximum', particleCountForInk(99999, 1, 1, 100, 900) <= 900, true);
+eq('particleCountForInk is deterministic', particleCountForInk(300, 3, 0.1, 50, 2000), particleCountForInk(300, 3, 0.1, 50, 2000));
+/* Synthetic 20×20 ink square in a 40×40 buffer — density must follow the square, not the bbox. */
+(() => {
+  const fw = 40;
+  const fh = 40;
+  const img = new Uint8ClampedArray(fw * fh * 4);
+  for (let y = 10; y < 30; y += 1) {
+    for (let x = 10; x < 30; x += 1) {
+      const i = (y * fw + x) * 4;
+      img[i] = 255; img[i + 1] = 255; img[i + 2] = 255; img[i + 3] = 255;
+    }
+  }
+  const pts = sampleInkPoints(img, fw, fh, 2, 100, 200, 42);
+  eq('sampleInkPoints only hits ink', pts.every((p) => {
+    const x = Math.min(fw - 1, Math.max(0, Math.floor(p.x)));
+    const y = Math.min(fh - 1, Math.max(0, Math.floor(p.y)));
+    return img[(y * fw + x) * 4 + 3] > 100;
+  }), true);
+  eq('sampleInkPoints is deterministic', sampleInkPoints(img, fw, fh, 2, 100, 200, 42).length, pts.length);
+  eq('sampleInkPoints stays under maxCount', pts.length <= 200, true);
+  eq('sampleInkPoints has real coverage', pts.length >= 40, true);
+  const b = pointsBounds(pts);
+  eq('pointsBounds width tracks the glyph, not the canvas', b.width <= 22 && b.width >= 14, true);
+  eq('pointsBounds height tracks the glyph, not the canvas', b.height <= 22 && b.height >= 14, true);
+  centerPointsInSafeRect(pts, 100, 80, { left: 90, top: 70, right: 110, bottom: 90 });
+  const b2 = pointsBounds(pts);
+  eq('centerPointsInSafeRect recentres the cloud', Math.abs(b2.cx - 100) < 2 && Math.abs(b2.cy - 80) < 2, true);
+  eq('centerPointsInSafeRect stays inside the safe rect', b2.minX >= 90 - 0.01 && b2.maxX <= 110 + 0.01 && b2.minY >= 70 - 0.01 && b2.maxY <= 90 + 0.01, true);
+})();
 eq('the widened step actually brings the count under the ceiling', (() => {
   const step = sampleStepFor(6800, 2, 1700);
   return Math.round(6800 * (2 * 2) / (step * step)) <= 1700;
