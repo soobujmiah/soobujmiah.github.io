@@ -117,7 +117,7 @@ export function NavOverlay({
     return () => window.removeEventListener('keydown', stop, true);
   }, [open]);
 
-  /* Same instrument as the bottom bar's track: page 1 = 0%, page 9 =
+  /* Same instrument as the bottom bar's track: page 1 = 0%, page 7 =
      100%, start anchor fixed. Drawn along the panel's bottom edge —
      the edge that faces the bar the HUD emerged from — so the open
      panel and the closed bar are one continuous progress language. */

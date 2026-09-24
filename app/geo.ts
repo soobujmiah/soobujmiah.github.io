@@ -68,7 +68,7 @@ export const HUB_POINTS = HUBS.map((h) => projectPoint(h.lon, h.lat));
    PAGE-TO-MAP CAMERA — one deterministic geographic focus per
    section, aligned with SECTION_IDS (app/sections.ts) by index.
 
-   Home is Bangladesh (the origin). The other eight positions are
+   Home is Bangladesh (the origin). The other six positions are
    chosen for meaningful global coverage AND for the owner's real
    geography: his work history in Saudi Arabia, freelance/remote
    ties toward North America and Europe, and the technology hubs
@@ -97,8 +97,6 @@ export const GEO_FOCUS: readonly PageFocus[] = [
   { section: 'about', place: 'Jeddah, Saudi Arabia', country: 'SAU', lon: 39.2, lat: 21.5, zoom: 2.8, placeBn: 'জেদ্দা, সৌদি আরব' },
   { section: 'work', place: 'London', country: 'GBR', lon: 0.1, lat: 51.5, zoom: 3.0, placeBn: 'লন্ডন' },
   { section: 'research', place: 'Toronto', country: 'CAN', lon: -79.4, lat: 43.7, zoom: 2.9, placeBn: 'টরন্টো' },
-  { section: 'stack', place: 'Bengaluru', country: 'IND', lon: 77.6, lat: 12.97, zoom: 3.0, placeBn: 'বেঙ্গালুরু' },
-  { section: 'open-source', place: 'Shenzhen', country: 'CHN', lon: 114.1, lat: 22.5, zoom: 3.0, placeBn: 'শেনচেন' },
   { section: 'experience', place: 'São Paulo', country: 'BRA', lon: -46.6, lat: -23.5, zoom: 2.9, placeBn: 'সাও পাওলো' },
   { section: 'contact', place: 'Singapore', country: 'SGP', lon: 103.8, lat: 1.4, zoom: 3.1, placeBn: 'সিঙ্গাপুর' },
 ] as const;
@@ -155,7 +153,7 @@ export function focusCamera(f: PageFocus) {
  * pinned to the southern crop, and every other page sat wherever the
  * clamp left it. `check-units` now asserts the focus lands on the
  * frame's centre — within a pixel, on phone and desktop viewports — for
- * all nine sections.
+ * all seven sections.
  *
  * If a future zoom were wide enough that even the slack cannot cover the
  * projected latitudes, the frame centres on the map instead of clamping

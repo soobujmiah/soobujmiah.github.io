@@ -4,7 +4,7 @@
    Runs against the real `out/` directory after `next build`.
    Proves, from the built artifact rather than from source, that:
 
-     1. every section has its own static route (9 real pages)
+     1. every section has its own static route (7 real pages)
      2. each route ships meaningful server-rendered visible text,
         not an empty shell that only fills in after JavaScript
      3. each route has a real <title>, description and canonical URL
@@ -29,19 +29,20 @@ const ORIGIN = 'https://soobujmiah.github.io';
 /* Kept in sync with app/sections.ts by construction: the route list is
    the source, and this asserts the built artifact matches it. */
 const SECTIONS = [
-  'home', 'presence', 'about', 'work', 'research', 'stack', 'open-source', 'experience', 'contact',
+  'home', 'presence', 'about', 'work', 'research', 'experience', 'contact',
 ];
+const LEGACY_ROUTES = [['stack', 'presence'], ['open-source', 'work']];
 /* The service-intent layer (app/services.ts): hub + eight pages. Kept
    separate from SECTIONS on purpose — these are documents outside the
    pager, so they are held to the metadata/content bar but not to the
-   world-map/camera invariants that belong to the nine scenes. */
+   world-map/camera invariants that belong to the seven scenes. */
 const SERVICE_ROUTES = [
   '/services/',
   '/services/web-development/', '/services/software-development/', '/services/computer-support/',
   '/services/android-support/', '/services/business-technology/', '/services/graphics-design/',
   '/services/office-administration/', '/services/data-entry/',
 ];
-const EXPECTED_PUBLIC_ROUTES = 2 * (SECTIONS.length + SERVICE_ROUTES.length); // English + Bengali
+const EXPECTED_PUBLIC_ROUTES = 2 * (SECTIONS.length + SERVICE_ROUTES.length + LEGACY_ROUTES.length); // English + Bengali, including legacy aliases
 
 /** Minimum visible server-rendered characters per route. */
 const MIN_VISIBLE_CHARS = 220;
@@ -152,6 +153,38 @@ for (const slug of SECTIONS) {
   if (!og) fail(`route "${slug}" has no og:image`);
 }
 ok(`${SECTIONS.length} section routes present with server-rendered HTML`);
+if (!/Delivery\s+Verification/.test(textByRoute.presence ?? '')) {
+  fail('merged /presence/ route is missing the former technical-stack content');
+}
+if (!textByRoute.work?.includes('Other selected repositories.')) {
+  fail('merged /work/ route is missing selected repositories');
+}
+
+/* Old section URLs remain usable, but identify the merged destination
+   as canonical and stay out of the sitemap. */
+for (const [oldSlug, destination] of LEGACY_ROUTES) {
+  for (const prefix of ['', 'bn/']) {
+    const file = join(OUT, prefix, oldSlug, 'index.html');
+    if (!existsSync(file)) {
+      fail(`missing legacy route /${prefix}${oldSlug}/`);
+      continue;
+    }
+    const html = readFileSync(file, 'utf8');
+    const canonical = new URL(`/${prefix}${destination}/`, ORIGIN).href;
+    if (!html.includes(`<link rel="canonical" href="${canonical}"`)) {
+      fail(`legacy /${prefix}${oldSlug}/ must canonicalize to ${canonical}`);
+    }
+    const en = new URL(`/${destination}/`, ORIGIN).href;
+    const bn = new URL(`/bn/${destination}/`, ORIGIN).href;
+    for (const [language, href] of [['en', en], ['bn', bn], ['x-default', en]]) {
+      if (!html.includes(`rel="alternate" hrefLang="${language}" href="${href}"`)) {
+        fail(`legacy /${prefix}${oldSlug}/ is missing ${language} alternate ${href}`);
+      }
+    }
+    if (visibleText(html).length < MIN_VISIBLE_CHARS) fail(`legacy /${prefix}${oldSlug}/ has no useful content`);
+  }
+}
+ok(`${LEGACY_ROUTES.length * 2} legacy language routes retain content and point to merged canonicals`);
 
 /* ── 1b. service routes: same bar (real HTML, title names the author,
        description, exact canonical, og:image, EN-only default render)
@@ -256,6 +289,12 @@ for (const [route] of localizedRoutes) {
   if (!html.includes('property="og:image"')) fail(`Bengali route ${route} has no og:image`);
 }
 ok(`${localizedRoutes.length} Bengali routes present with Bengali content, titles, descriptions, canonical and reciprocal hreflang`);
+for (const [route, phrase] of [['/bn/presence/', 'রিলিজ ও যাচাই'], ['/bn/work/', 'অন্যান্য নির্বাচিত রিপোজিটরি']]) {
+  const file = join(OUT, ...route.split('/').filter(Boolean), 'index.html');
+  if (existsSync(file) && !visibleText(readFileSync(file, 'utf8')).includes(phrase)) {
+    fail(`${route} is missing its merged Bengali content`);
+  }
+}
 ok(`${EXPECTED_PUBLIC_ROUTES} public routes in total: English + Bengali section and service pages`);
 
 /* Every rendered same-origin link must resolve to an exported file. */

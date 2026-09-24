@@ -473,7 +473,7 @@ if (nameComp) {
   }
 }
 
-/* ── 8. the map is page-aware: nine deterministic camera positions ──
+/* ── 8. the map is page-aware: seven deterministic camera positions ──
    One focus per section, indexed by the sections registry; Home is
    Bangladesh; WorldMap flies the viewBox between them. */
 const geo = tryRead('app/geo.ts');
@@ -486,8 +486,8 @@ if (!geo) {
       /\{\s*section:\s*'([^']+)',\s*place:\s*'([^']*)',\s*country:\s*'([A-Z]{3})',\s*lon:\s*(-?[\d.]+),\s*lat:\s*(-?[\d.]+),\s*zoom:\s*([\d.]+),\s*placeBn:\s*'([^']*)'\s*\}/g
     ),
   ];
-  if (entries.length !== 9) {
-    fail(`app/geo.ts GEO_FOCUS must define exactly one camera position per section (found ${entries.length}, need 9)`);
+  if (entries.length !== 7) {
+    fail(`app/geo.ts GEO_FOCUS must define exactly one camera position per section (found ${entries.length}, need 7)`);
   }
   if (entries[0]) {
     const [, section, , country, lon, lat] = entries[0];
@@ -498,7 +498,7 @@ if (!geo) {
     }
   }
   if (new Set(entries.map((e) => `${e[4]},${e[5]}`)).size !== entries.length) {
-    fail('GEO_FOCUS positions must be distinct — nine pages, nine geographies');
+    fail('GEO_FOCUS positions must be distinct — seven pages, seven geographies');
   }
   /* one source for the camera: the component renders what app/geo.ts
      derives. If WorldMap ever clamps or focuses a camera itself, two

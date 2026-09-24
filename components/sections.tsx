@@ -23,8 +23,8 @@ import type { Project, Repo } from '@/app/content';
 const CARD_BG = 'rgba(6,7,6,0.66)';
 
 const NUMERALS = {
-  en: ['01', '02', '03', '04', '05', '06', '07', '08', '09'],
-  bn: ['০১', '০২', '০৩', '০৪', '০৫', '০৬', '০৭', '০৮', '০৯'],
+  en: ['01', '02', '03', '04', '05', '06', '07'],
+  bn: ['০১', '০২', '০৩', '০৪', '০৫', '০৬', '০৭'],
 } as const;
 
 function PageNumeral({ index }: { index: number }) {
@@ -194,16 +194,19 @@ export function StatsScene() {
             {t.presence.heading}
           </h1>
         </Reveal>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 w-full">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 w-full">
           {t.presence.items.map((p, i) => (
             <Reveal key={p.label} delay={i * 0.08}>
               <div
-                className="rounded-xl p-5 sm:p-6 text-center backdrop-blur-md h-full"
+                className="rounded-xl p-3.5 sm:p-5 text-center backdrop-blur-md h-full"
                 style={{ border: '1px solid rgba(228,226,223,0.09)', background: CARD_BG }}
               >
-                <p className="text-base sm:text-lg font-semibold" style={{ color: '#e4e2df' }}>{p.label}</p>
+                <p className="text-sm sm:text-lg font-semibold" style={{ color: '#e4e2df' }}>{p.label}</p>
                 <p className="mt-1.5 font-mono text-[10px] leading-relaxed" style={{ color: 'rgba(228,226,223,0.55)' }}>
                   {p.detail}
+                </p>
+                <p className="mt-2 text-[10px] leading-relaxed" style={{ color: 'rgba(228,226,223,0.42)' }}>
+                  {p.tools}
                 </p>
               </div>
             </Reveal>
@@ -676,6 +679,8 @@ export function WorkScene() {
 
         {/* ecosystem: Ternux hosts the ARM64 environment for ADT */}
         <RelationshipBlock />
+
+        <SelectedRepositories />
       </div>
     </div>
   );
@@ -720,33 +725,7 @@ export function ResearchScene() {
   );
 }
 
-/* ── 06 · TECHNICAL FOCUS ────────────────────────────────────── */
-
-export function StackScene() {
-  const { t } = useLang();
-  return (
-    <div className="page-fill">
-      <PageNumeral index={5} />
-      <div className="page-content page-content-wide">
-        <PageHeading eyebrow={t.stack.eyebrow} heading={t.stack.heading} />
-        <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">
-          {t.stack.domains.map((d, i) => (
-            <Reveal key={d.name} delay={0.06 + i * 0.05}>
-              <div className="dense-card rounded-xl p-4 sm:p-5 h-full backdrop-blur-md" style={{ border: '1px solid rgba(228,226,223,0.08)', background: CARD_BG }}>
-                <h3 className="font-mono text-xs font-medium mb-2" style={{ color: '#22c55e' }}>{d.name}</h3>
-                <p className="text-[11px] sm:text-xs leading-relaxed" style={{ color: 'rgba(228,226,223,0.55)' }}>
-                  {d.items.join(' · ')}
-                </p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── 07 · OPEN SOURCE ────────────────────────────────────────── */
+/* ── Supporting repositories on the Work page ───────────────── */
 
 function RepoCard({ repo, liveLabel, codeLabel }: { repo: Repo; liveLabel: string; codeLabel: string }) {
   const { t, lang } = useLang();
@@ -811,7 +790,7 @@ function GithubRouteCard() {
   );
 }
 
-export function OpenSourceScene() {
+function SelectedRepositories() {
   const { t } = useLang();
   const selected = t.openSource.selected
     .map((name) => t.openSource.repos.find((r) => r.name === name))
@@ -827,37 +806,39 @@ export function OpenSourceScene() {
     );
 
   return (
-    <div className="page-fill">
-      <PageNumeral index={6} />
-      <div className="page-content page-content-wide">
-        <PageHeading eyebrow={t.openSource.eyebrow} heading={t.openSource.heading} />
-        <Reveal delay={0.1}>
-          <p className="text-xs mb-4 sm:mb-5" style={{ color: 'rgba(228,226,223,0.5)' }}>
-            {t.openSource.note}
-          </p>
-        </Reveal>
+    <section className="mt-6" aria-labelledby="selected-repositories">
+      <p className="ph-e font-mono text-[10px] uppercase tracking-[0.3em] mb-2" style={{ color: '#22c55e' }}>
+        {t.openSource.eyebrow}
+      </p>
+      <h2 id="selected-repositories" className="text-xl font-semibold mb-3" style={{ color: '#e4e2df' }}>
+        {t.openSource.heading}
+      </h2>
+      <Reveal delay={0.1}>
+        <p className="text-xs mb-4 sm:mb-5" style={{ color: 'rgba(228,226,223,0.5)' }}>
+          {t.openSource.note}
+        </p>
+      </Reveal>
 
-        {/* phones + tablets: 2 swipeable 2x2 slides */}
-        <div className="lg:hidden">
-          <SnapCarousel label={t.openSource.heading} prevLabel={t.ui.carouselPrev} nextLabel={t.ui.carouselNext}>
-            {slides.map((group, i) => (
-              <div key={i} className="grid grid-cols-2 gap-2.5">
-                {group.map((c, j) => renderCell(c, `${i}-${j}`))}
-              </div>
-            ))}
-          </SnapCarousel>
-        </div>
-
-        {/* desktop: fitted 4-column grid */}
-        <div className="hidden lg:grid gap-3 lg:grid-cols-4">
-          {cells.map((c, i) => renderCell(c, `d-${i}`))}
-        </div>
+      {/* phones + tablets: 2 swipeable 2x2 slides */}
+      <div className="lg:hidden">
+        <SnapCarousel label={t.openSource.heading} prevLabel={t.ui.carouselPrev} nextLabel={t.ui.carouselNext}>
+          {slides.map((group, i) => (
+            <div key={i} className="grid grid-cols-2 gap-2.5">
+              {group.map((c, j) => renderCell(c, `${i}-${j}`))}
+            </div>
+          ))}
+        </SnapCarousel>
       </div>
-    </div>
+
+      {/* desktop: fitted 4-column grid */}
+      <div className="hidden lg:grid gap-3 lg:grid-cols-4">
+        {cells.map((c, i) => renderCell(c, `d-${i}`))}
+      </div>
+    </section>
   );
 }
 
-/* ── 08 · EXPERIENCE ─────────────────────────────────────────── */
+/* ── 06 · EXPERIENCE ─────────────────────────────────────────── */
 
 function ExperienceAccordion() {
   const { t } = useLang();
@@ -915,7 +896,7 @@ export function ExperienceScene() {
   const { t, lang } = useLang();
   return (
     <div className="page-fill">
-      <PageNumeral index={7} />
+      <PageNumeral index={5} />
       <div className="page-content page-content-wide">
         <div className="grid gap-6 lg:grid-cols-[1fr_1.6fr] lg:gap-12">
           <div>
@@ -995,7 +976,7 @@ export function ContactScene() {
   const { t, lang } = useLang();
   return (
     <div className="page-fill">
-      <PageNumeral index={8} />
+      <PageNumeral index={6} />
       <div className="page-content page-content-wide">
         {/* pb keeps the content mass clear of the map's arrival label —
             the camera centres the focus country (Singapore here) in the

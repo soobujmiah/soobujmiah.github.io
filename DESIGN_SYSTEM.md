@@ -368,10 +368,11 @@ no model change needed.
 - Portfolio: discrete pager — wheel ticks, vertical swipes, arrows/PageUp/
   PageDown/Home/End, dots, nav links, and the section index overlay.
 - **Every section is a real route.** `/`, `/presence/`, `/about/`, `/work/`,
-  `/research/`, `/stack/`, `/open-source/`, `/experience/`, `/contact/` are
+  `/research/`, `/experience/`, `/contact/` are
   static pages with their own server-rendered HTML, title, description,
   canonical URL and social card. The pager is the *presentation*; the route is
-  the *address*. Legacy `#work`-style links are rewritten on load.
+  the *address*. Legacy `#work`-style links are rewritten on load;
+  `/stack/` and `/open-source/` remain canonicalized entry routes.
 - The **index overlay** opened from the pager control is a view onto the same
   sections, not a second navigation system. It is a
   `role="dialog" aria-modal="true"` with focus moved to the current row, focus
@@ -396,7 +397,7 @@ no model change needed.
   the same button — there is no second trigger, no readout and no numbering
   inside the control. On the open HUD, the same progress travels along the
   panel's bottom edge. The formula is deterministic —
-  `progress = activeIndex / (totalPages − 1)` — so page 1 = 0% and page 9 =
+  `progress = activeIndex / (totalPages − 1)` — so page 1 = 0% and page 7 =
   100%. Only the trace's end point moves; the origin never re-centres and no
   element resizes or shifts.
 - Pages center when they fit and **scroll internally** when they don't.
@@ -416,7 +417,7 @@ A **dark, deep-green global map** (`components/WorldMap.tsx`): Natural Earth
 latitudes and simplified by `tools/make-worldmap.py`. It is an environment,
 not a spectacle — and it **travels with the story**.
 
-**Page-aware camera.** Each of the nine sections owns one deterministic
+**Page-aware camera.** Each of the seven sections owns one deterministic
 geographic focus (`app/geo.ts` → `GEO_FOCUS`, aligned with `SECTION_IDS` by
 index; Home is Bangladesh). When the pager turns a page, the camera flies to
 the new focus by interpolating the SVG **viewBox attribute** (~1.25s,
@@ -532,7 +533,7 @@ app/sections.ts          the canonical section list — drives routes, sitemap,
 app/content.ts           bilingual copy + curated structure
 app/language.tsx         provider, persistence, digit localization, title sync
 app/page.tsx             home route (section 0)
-app/[section]/page.tsx   the eight other static section routes + metadata
+app/[section]/page.tsx   six section routes + two legacy aliases + metadata
 app/robots.ts            robots.txt
 app/sitemap.ts           sitemap.xml, one line per section
 app/globals.css          tokens (§1), pager, overlay, name, carousels, a11y
@@ -545,7 +546,7 @@ components/WorldMap.tsx   dark-green page-aware map environment (§9)
 components/world-map-path.ts  generated land contours (do not edit)
 components/world-map-countries.ts  generated per-country shapes (do not edit)
 tools/make-worldmap.py    regenerates the contours from Natural Earth
-components/sections.tsx  the nine curated pages
+components/sections.tsx  the seven curated pages
 components/ui.tsx        cursor, magnetic, reveals, dots, carousel, chrome
 scripts/check-content.mjs        bilingual parity + two-way purity gate
 scripts/check-purity-adversarial.mjs  adversarial purity suite

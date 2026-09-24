@@ -14,8 +14,6 @@ export const SECTION_IDS = [
   'about',
   'work',
   'research',
-  'stack',
-  'open-source',
   'experience',
   'contact',
 ] as const;
@@ -25,8 +23,10 @@ export type SectionLanguage = 'en' | 'bn';
 
 export const PAGE_COUNT = SECTION_IDS.length;
 
-/** Index of a section slug, or null when the slug is not a section. */
+/** Index of a section or supported legacy slug; null when unknown. */
 export function indexForSlug(slug: string): number | null {
+  if (slug === 'stack') return 1; // legacy URL for the merged technical page
+  if (slug === 'open-source') return 3; // legacy URL for selected repositories on Work
   const i = (SECTION_IDS as readonly string[]).indexOf(slug);
   return i >= 0 ? i : null;
 }

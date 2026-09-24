@@ -5,7 +5,7 @@
 
    Concept: a dark, deep-green cartographic atmosphere that says
    "global presence, Bangladeshi origin" — and TRAVELS. Each of the
-   nine sections owns one deterministic geographic focus
+   seven sections owns one deterministic geographic focus
    (app/geo.ts → GEO_FOCUS, aligned with SECTION_IDS by index), and
    the camera flies there whenever the pager turns a page.
 

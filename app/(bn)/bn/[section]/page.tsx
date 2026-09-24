@@ -7,7 +7,7 @@ import { sectionMetadata } from '@/app/route-seo';
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return SECTION_IDS.filter((id) => id !== 'home').map((section) => ({ section }));
+  return [...SECTION_IDS.filter((id) => id !== 'home'), 'stack', 'open-source'].map((section) => ({ section }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ section: string }> }): Promise<Metadata> {

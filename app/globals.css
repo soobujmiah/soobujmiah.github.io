@@ -1266,7 +1266,7 @@ body.lang-bn span {
 
 /* bottom-edge progress — the same instrument as the bar's track:
    fixed start anchor at the left, fill = index / (total − 1), so
-   page 1 = 0% and page 9 completes the cycle on the HUD's border */
+   page 1 = 0% and page 7 completes the cycle on the HUD's border */
 .nav-overlay-progress {
   position: absolute;
   left: 14px;
@@ -1500,7 +1500,7 @@ body.lang-bn span {
    live outside the pager. The pager owns `overflow:hidden` and the
    custom cursor on <body>; these pages opt back into normal document
    behaviour without touching any pager rule. Scoped by class, so the
-   nine sections are unaffected. */
+   seven sections are unaffected. */
 html:has(body > .services-doc) {
   overflow-y: auto;
 }

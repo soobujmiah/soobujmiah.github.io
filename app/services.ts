@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    SERVICE REGISTRY — the search-intent layer.
 
-   Deliberately NOT part of SECTION_IDS: the nine sections are the
+   Deliberately NOT part of SECTION_IDS: the seven sections are the
    pager (routes, nav overlay, world-map focus, page dots). Services
    are plain static pages under /services/ that share the design
    tokens, fonts, language provider and footer, but never become a

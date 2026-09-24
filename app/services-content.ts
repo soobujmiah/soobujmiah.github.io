@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    SERVICES CONTENT — the service-intent layer's copy, bilingual.
 
-   Kept in its own module (not inside content.ts) so the nine pager
+   Kept in its own module (not inside content.ts) so the seven pager
    routes never download it: only /services/* imports this file. The
    same parity/purity contract applies — scripts/check-content.mjs
    loads this module too and holds it to the identical rules

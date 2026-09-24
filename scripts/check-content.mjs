@@ -419,9 +419,9 @@ try {
   /* 5 ── labels, nav, accents, URLs ── */
   for (const lang of ['en', 'bn']) {
     const tree = content[lang];
-    if (tree.ui.pageLabels.length !== 9) fail(`${lang}.ui.pageLabels length != 9`);
+    if (tree.ui.pageLabels.length !== 7) fail(`${lang}.ui.pageLabels length != 7`);
     /* per-route search metadata must cover every section route */
-    if (tree.seo.sections.length !== 9) fail(`${lang}.seo.sections length != 9`);
+    if (tree.seo.sections.length !== 7) fail(`${lang}.seo.sections length != 7`);
     for (const s of tree.seo.sections) {
       if (!s.title || !s.description) fail(`${lang}.seo.sections has an entry missing title/description`);
     }
@@ -432,7 +432,7 @@ try {
     /* adversarial copies (CONTENT_FILE) exercise the main tree only */
     if (!OVERRIDE) checkServices(svc, lang);
     for (const l of tree.nav) {
-      if (!Number.isInteger(l.scene) || l.scene < 0 || l.scene > 8) {
+      if (!Number.isInteger(l.scene) || l.scene < 0 || l.scene >= tree.ui.pageLabels.length) {
         fail(`${lang}.nav scene out of range: ${l.scene}`);
       }
     }

@@ -12,14 +12,14 @@ import { sectionMetadata } from '@/app/route-seo';
    real URL per section, with the section's own server-rendered HTML,
    its own <title>/description/canonical, and its own social card.
    A visitor can be sent straight to the work page, a crawler can
-   index nine real pages instead of one, and the pager still turns.
+   index each section directly, and the pager still turns.
    ═══════════════════════════════════════════════════════════════ */
 
 export const dynamicParams = false;
 
-/** Home is served by `(en)/page.tsx`; the other eight are generated here. */
+/** Keep old stack/open-source URLs as canonicalized entry routes. */
 export function generateStaticParams() {
-  return SECTION_IDS.filter((id) => id !== 'home').map((id) => ({ section: id as string }));
+  return [...SECTION_IDS.filter((id) => id !== 'home'), 'stack', 'open-source'].map((id) => ({ section: id as string }));
 }
 
 /* Next 15 made route params asynchronous: await them once, at the top,

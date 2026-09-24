@@ -34,8 +34,6 @@ import {
   AboutScene,
   WorkScene,
   ResearchScene,
-  StackScene,
-  OpenSourceScene,
   ExperienceScene,
   ContactScene,
 } from '@/components/sections';
@@ -60,12 +58,8 @@ function PageBody({ index, reducedMotion, armed }: { index: number; reducedMotio
     case 4:
       return <ResearchScene />;
     case 5:
-      return <StackScene />;
-    case 6:
-      return <OpenSourceScene />;
-    case 7:
       return <ExperienceScene />;
-    case 8:
+    case 6:
       return <ContactScene />;
     default:
       return <HeroScene {...props} />;
@@ -133,6 +127,9 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
      rewritten to their real route so old shares keep working. */
   useEffect(() => {
     try {
+      const path = window.location.pathname;
+      if (path === '/stack/' || path === '/bn/stack/') window.history.replaceState(null, '', sectionHref(1, lang));
+      if (path === '/open-source/' || path === '/bn/open-source/') window.history.replaceState(null, '', sectionHref(3, lang));
       const hash = window.location.hash.replace(/^#/, '');
       if (!hash) return;
       const i = (SECTION_IDS as readonly string[]).indexOf(hash);

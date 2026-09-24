@@ -1,5 +1,14 @@
 # SEO Record — soobujmiah.github.io (Portfolio)
 
+## Current route consolidation
+
+The pager has seven sections in each language. `/presence/` combines the
+former overview and technical stack; `/work/` includes featured projects and
+other selected repositories. `/stack/` and `/open-source/` (and their Bengali
+equivalents) remain exported entry URLs with canonicals and language alternates
+pointing to the merged pages. The sitemap lists the 32 primary English/Bengali
+section and service URLs; the four legacy URLs remain available outside it.
+
 ## Portfolio refinement — 2026-09-24
 
 Repository-state audit and refinement at the working branch recorded in Git.

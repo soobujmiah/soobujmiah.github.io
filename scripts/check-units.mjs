@@ -183,11 +183,15 @@ try {
 }
 
 console.log('\nSection routing');
-eq('nine sections', SECTION_IDS.length, 9);
+eq('seven sections', SECTION_IDS.length, 7);
 eq('home is the site root', sectionHref(0), '/');
 eq('a section is a real directory route', sectionHref(3), '/work/');
 eq('index → slug → index round-trips for every section', SECTION_IDS.map((_, i) => indexForSlug(SECTION_IDS[i])), [...SECTION_IDS.keys()]);
 eq('unknown slug is null', indexForSlug('nope'), null);
+eq('legacy stack slug resolves to merged section', indexForSlug('stack'), 1);
+eq('legacy stack pathname resolves to merged section', indexFromPathname('/bn/stack/'), 1);
+eq('legacy open-source slug resolves to work', indexForSlug('open-source'), 3);
+eq('legacy open-source pathname resolves to work', indexFromPathname('/bn/open-source/'), 3);
 eq('pathname /work/ → index 3', indexFromPathname('/work/'), 3);
 eq('pathname / → home', indexFromPathname('/'), 0);
 eq('unknown pathname falls back to home', indexFromPathname('/nonsense/'), 0);
@@ -227,7 +231,7 @@ for (const [i, g] of GEO_FOCUS.entries()) {
 const cams = GEO_FOCUS.map((_, i) => cameraFor(i));
 eq('every section gets its own camera', new Set(cams.map((c) => `${c.x},${c.y},${c.hw}`)).size, GEO_FOCUS.length);
 eq('cameraFor is deterministic (same page, same frame, always)', cameraFor(4), cameraFor(4));
-eq('clamping an already-clamped camera changes nothing', clampCamera(cams[7].x, cams[7].y, cams[7].hw), cams[7]);
+eq('clamping an already-clamped camera changes nothing', clampCamera(cams[6].x, cams[6].y, cams[6].hw), cams[6]);
 eq(
   'a zoom wider than the projected map still yields a finite camera',
   Number.isFinite(clampCamera(500, -200, 400).y),

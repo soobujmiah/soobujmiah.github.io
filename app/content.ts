@@ -110,11 +110,6 @@ export interface ResearchEntry {
   description: string;
 }
 
-export interface Domain {
-  name: string;
-  items: string[];
-}
-
 export interface Content {
   profile: {
     name: string;
@@ -140,7 +135,7 @@ export interface Content {
   presence: {
     eyebrow: string;
     heading: string;
-    items: { label: string; detail: string }[];
+    items: { label: string; detail: string; tools: string }[];
   };
   about: {
     eyebrow: string;
@@ -190,11 +185,6 @@ export interface Content {
     eyebrow: string;
     heading: string;
     entries: ResearchEntry[];
-  };
-  stack: {
-    eyebrow: string;
-    heading: string;
-    domains: Domain[];
   };
   openSource: {
     eyebrow: string;
@@ -294,13 +284,15 @@ const en: Content = {
     ctaGithub: 'View GitHub ↗',
   },
   presence: {
-    eyebrow: '02 — What I Build',
-    heading: 'On-device AI, Android systems, ARM64 Linux, native tooling.',
+    eyebrow: '02 — Focus & Tools',
+    heading: 'What I build and the technologies behind it.',
     items: [
-      { label: 'On-Device AI', detail: 'LLM inference, NPU/GPU qualification' },
-      { label: 'Android Systems', detail: 'Kotlin, Accessibility, Shizuku' },
-      { label: 'ARM64 Linux', detail: 'AOSP builds, PRoot, Termux' },
-      { label: 'Native Tooling', detail: 'Build-tools from source, signed releases' },
+      { label: 'On-Device AI', detail: 'Local inference and GPU/NPU qualification.', tools: 'llama.cpp · GGUF · KV cache' },
+      { label: 'Android Systems', detail: 'Apps and consent-gated automation.', tools: 'Kotlin · Compose · Accessibility · Shizuku · JNI/C++' },
+      { label: 'ARM64 Linux & Tooling', detail: 'No-root Linux and native Android build tools.', tools: 'Termux · PRoot · AOSP · Clang · CMake · Ninja' },
+      { label: 'GPU & Graphics', detail: 'Renderer testing and compatibility work on real hardware.', tools: 'Vulkan · Mesa Turnip · Zink · Adreno KGSL' },
+      { label: 'Mobile & Web', detail: 'Software for practical mobile and web projects.', tools: 'Flutter · Dart · TypeScript · Python' },
+      { label: 'Delivery & Verification', detail: 'Reproducible builds, releases and device checks.', tools: 'GitHub Actions · signed releases · device validation' },
     ],
   },
   about: {
@@ -479,21 +471,9 @@ const en: Content = {
       },
     ],
   },
-  stack: {
-    eyebrow: '06 — Technical Focus',
-    heading: 'Core technologies in day-to-day use.',
-    domains: [
-      { name: 'On-Device AI', items: ['llama.cpp', 'GGUF', 'KV-cache', 'CPU/GPU/NPU routing'] },
-      { name: 'Android Systems', items: ['Kotlin', 'Compose', 'Accessibility', 'Shizuku', 'JNI/C++'] },
-      { name: 'Linux / ARM64', items: ['AOSP builds', 'Clang/CMake/Ninja', 'Termux + PRoot'] },
-      { name: 'GPU / Graphics', items: ['Vulkan', 'Mesa Turnip', 'Zink', 'Adreno KGSL'] },
-      { name: 'Mobile & Web', items: ['Flutter', 'Dart', 'TypeScript', 'Python'] },
-      { name: 'Eng Ops', items: ['GitHub Actions', 'Signed releases', 'Device validation'] },
-    ],
-  },
   openSource: {
-    eyebrow: '07 — Open Source',
-    heading: 'Selected repositories.',
+    eyebrow: 'More work',
+    heading: 'Other selected repositories.',
     liveLabel: 'Explore ↗',
     codeLabel: 'Code ↗',
     selected: ['docdr', 'datakhoj-android', 'apiloop', 'arms', 'iqra-online-mart', 'sobkichu'],
@@ -516,7 +496,7 @@ const en: Content = {
     ],
   },
   experience: {
-    eyebrow: '08 — Experience',
+    eyebrow: '07 — Experience',
     heading: 'A hands-on journey with technology, alongside professional work.',
     intro: 'My interest in computers and technology predates my listed professional roles. It has grown through exploration, troubleshooting, building and learning from practical problems. Professional work is one part of that story; the projects show what I continue to explore and build today.',
     professionalLabel: 'Professional experience',
@@ -588,7 +568,7 @@ const en: Content = {
     ],
   },
   contact: {
-    eyebrow: '09 — Contact',
+    eyebrow: '08 — Contact',
     headingA: 'Open to freelance,',
     headingB: 'remote, and collaboration.',
     sub: 'I work across software, AI and practical digital technology, with remote availability from Savar, Dhaka, Bangladesh. For a project or service enquiry, contact me directly.',
@@ -649,16 +629,16 @@ const en: Content = {
     ],
   },
   nav: [
+    { scene: 1, label: 'Focus & tools' },
     { scene: 3, label: 'Work' },
     { scene: 4, label: 'Research' },
-    { scene: 5, label: 'Stack' },
-    { scene: 8, label: 'Contact' },
+    { scene: 6, label: 'Contact' },
   ],
   header: { homeLabel: 'Back to home', githubLabel: 'GitHub', langLabel: 'Bangla', langAria: 'Switch to Bangla', githubAria: 'GitHub profile', cvLabel: 'CV', cvAria: 'Download CV (PDF)', servicesLabel: 'Services' },
   ui: {
     carouselPrev: 'Previous',
     carouselNext: 'Next',
-    pageLabels: ['Home', 'Presence', 'About', 'Featured work', 'Research', 'Technical focus', 'Open source', 'Experience', 'Contact'],
+    pageLabels: ['Home', 'Focus & tools', 'About', 'Work', 'Research', 'Experience', 'Contact'],
     repoWord: 'repository',
     liveSiteWord: 'live site',
     navOpen: 'Open section index',
@@ -690,9 +670,9 @@ const en: Content = {
           'Software, on-device AI, Android, computing and automation. A hands-on practice of learning, experimenting and building, with project evidence from real hardware and CI.',
       },
       {
-        title: 'What I Build — On-Device AI, Android & ARM64 Systems',
+        title: 'Focus & Tools — Software, AI, Android & ARM64',
         description:
-          'What Sobuj Miah builds: on-device AI and LLM inference, Android systems with consent-gated automation, ARM64 Linux from AOSP to PRoot, and native tooling with signed releases.',
+          'Sobuj Miah works across on-device AI, Android systems, ARM64 Linux, GPU graphics, mobile and web software, with native tooling and device-verified releases.',
       },
       {
         title: 'About — Independent Systems Builder in Dhaka',
@@ -700,24 +680,14 @@ const en: Content = {
           'About Sobuj Miah: a self-taught software and technology builder in Dhaka, Bangladesh, learning through practical projects, real devices and problem-solving.',
       },
       {
-        title: 'Featured Work — LAI, GGEN, ADT, Ternux',
+        title: 'Work & Repositories — Ternux, ADT, LAI & GGEN',
         description:
-          'Flagship systems by Sobuj Miah: LAI on-device AI runtime, GGEN creative & document studio, ADT ARM64 Android toolchain, and Ternux no-root Linux desktop — each with CI and device evidence.',
+          'Featured projects and selected repositories by Sobuj Miah: Ternux ARM64 Linux host, ADT Android toolchain, LAI on-device AI, GGEN creative software and supporting work.',
       },
       {
         title: 'Research — On-Device AI, NPU, Vulkan & ARM64 Experiments',
         description:
           'Evidence-graded research themes: on-device LLM inference, Hexagon NPU qualification, Adreno Vulkan/Turnip/Zink, consent-gated automation, Linux on Android, and native ARM64 tooling.',
-      },
-      {
-        title: 'Technical Stack — llama.cpp, Kotlin, Flutter, Vulkan, Termux',
-        description:
-          'Technologies Sobuj Miah works with: llama.cpp and GGUF, Kotlin and Flutter, Vulkan, Mesa Turnip and Zink, AOSP builds, Termux and PRoot, GitHub Actions CI.',
-      },
-      {
-        title: 'Open Source Projects — Applied & Supporting Work',
-        description:
-          'Applied products and supporting open-source work — DocDr, DataKhoj, ApiLoop, arms, Iqra Online Mart, and Sobkichu — with links to code, live sites, and repository evidence.',
       },
       {
         title: 'Experience — Operations, Administration & Engineering',
@@ -764,13 +734,15 @@ const bn: Content = {
     ctaGithub: 'গিটহাব দেখুন ↗',
   },
   presence: {
-    eyebrow: '০২ — আমি যা তৈরি করি',
-    heading: 'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ লিনাক্স, নেটিভ টুলিং।',
+    eyebrow: '০২ — ফোকাস ও টুলিং',
+    heading: 'আমি যা তৈরি করি এবং যে প্রযুক্তি ব্যবহার করি।',
     items: [
-      { label: 'অন-ডিভাইস এআই', detail: 'এলএলএম ইনফারেন্স, এনপিইউ/জিপিইউ যোগ্যতা-পরীক্ষা' },
-      { label: 'অ্যান্ড্রয়েড সিস্টেম', detail: 'কোটলিন, অ্যাক্সেসিবিলিটি, শিজুকু' },
-      { label: 'এআরএম ৬৪ লিনাক্স', detail: 'এওএসপি বিল্ড, পি-রুট, টারমাক্স' },
-      { label: 'নেটিভ টুলিং', detail: 'সোর্স থেকে বিল্ড-টুলস, সাইনড রিলিজ' },
+      { label: 'অন-ডিভাইস এআই', detail: 'লোকাল ইনফারেন্স এবং জিপিইউ/এনপিইউ যোগ্যতা-পরীক্ষা।', tools: 'লামা.সিপিপি · জিজিইউএফ · কেভি-ক্যাশ' },
+      { label: 'অ্যান্ড্রয়েড সিস্টেম', detail: 'অ্যাপ এবং সম্মতি-নিয়ন্ত্রিত স্বয়ংক্রিয়তা।', tools: 'কোটলিন · কম্পোজ · অ্যাক্সেসিবিলিটি · শিজুকু · জেএনআই/সি++' },
+      { label: 'এআরএম ৬৪ লিনাক্স ও টুলিং', detail: 'রুট ছাড়া লিনাক্স এবং নেটিভ অ্যান্ড্রয়েড বিল্ড টুল।', tools: 'টারমাক্স · পি-রুট · এওএসপি · ক্ল্যাং · সিএমেক · নিনজা' },
+      { label: 'জিপিইউ ও গ্রাফিক্স', detail: 'বাস্তব হার্ডওয়্যারে রেন্ডারার পরীক্ষা ও সামঞ্জস্যের কাজ।', tools: 'ভলকান · মেসা টার্নিপ · জিংক · অ্যাড্রেনো কেজিএসএল' },
+      { label: 'মোবাইল ও ওয়েব', detail: 'ব্যবহারিক মোবাইল ও ওয়েব প্রকল্পের সফটওয়্যার।', tools: 'ফ্লাটার · ডার্ট · টাইপস্ক্রিপ্ট · পাইথন' },
+      { label: 'রিলিজ ও যাচাই', detail: 'পুনরুৎপাদনযোগ্য বিল্ড, রিলিজ ও ডিভাইস যাচাই।', tools: 'গিটহাব অ্যাকশনস · স্বাক্ষরিত রিলিজ · ডিভাইস যাচাই' },
     ],
   },
   about: {
@@ -949,21 +921,9 @@ const bn: Content = {
       },
     ],
   },
-  stack: {
-    eyebrow: '০৬ — প্রযুক্তিগত ফোকাস',
-    heading: 'দৈনন্দিন কাজের মূল প্রযুক্তি।',
-    domains: [
-      { name: 'অন-ডিভাইস এআই', items: ['লামা.সিপিপি', 'জিজিইউএফ', 'কেভি-ক্যাশ', 'সিপিইউ/জিপিইউ/এনপিইউ রাউটিং'] },
-      { name: 'অ্যান্ড্রয়েড সিস্টেম', items: ['কোটলিন', 'কম্পোজ', 'অ্যাক্সেসিবিলিটি', 'শিজুকু', 'জেএনআই/সি++'] },
-      { name: 'লিনাক্স / এআরএম ৬৪', items: ['এওএসপি বিল্ড', 'ক্ল্যাং/সিএমেক/নিনজা', 'টারমাক্স + পি-রুট'] },
-      { name: 'জিপিইউ / গ্রাফিক্স', items: ['ভলকান', 'মেসা টার্নিপ', 'জিংক', 'অ্যাড্রেনো কেজিএসএল'] },
-      { name: 'মোবাইল ও ওয়েব', items: ['ফ্লাটার', 'ডার্ট', 'টাইপস্ক্রিপ্ট', 'পাইথন'] },
-      { name: 'প্রকৌশল পরিচালনা', items: ['গিটহাব অ্যাকশনস', 'সাইনড রিলিজ', 'ডিভাইস যাচাইকরণ'] },
-    ],
-  },
   openSource: {
-    eyebrow: '০৭ — ওপেন সোর্স',
-    heading: 'নির্বাচিত রিপোজিটরি।',
+    eyebrow: 'আরও কাজ',
+    heading: 'অন্যান্য নির্বাচিত রিপোজিটরি।',
     liveLabel: 'ঘুরে দেখুন ↗',
     codeLabel: 'কোড ↗',
     selected: ['docdr', 'datakhoj-android', 'apiloop', 'arms', 'iqra-online-mart', 'sobkichu'],
@@ -986,7 +946,7 @@ const bn: Content = {
     ],
   },
   experience: {
-    eyebrow: '০৮ — অভিজ্ঞতা',
+    eyebrow: '০৭ — অভিজ্ঞতা',
     heading: 'প্রযুক্তি নিয়ে হাতে-কলমে দীর্ঘ যাত্রা, পাশাপাশি পেশাগত কাজ।',
     intro: 'কম্পিউটার ও প্রযুক্তির প্রতি আমার আগ্রহ তালিকাভুক্ত পেশাগত কাজেরও আগে শুরু। অনুসন্ধান, সমস্যা সমাধান, নির্মাণ ও বাস্তব কাজ থেকে শেখার মধ্য দিয়ে তা বেড়েছে। পেশাগত কাজ এই পথের একটি অংশ; প্রকল্পগুলো দেখায় এখন কী নিয়ে পরীক্ষা ও নির্মাণ চালিয়ে যাচ্ছি।',
     professionalLabel: 'পেশাগত অভিজ্ঞতা',
@@ -1058,7 +1018,7 @@ const bn: Content = {
     ],
   },
   contact: {
-    eyebrow: '০৯ — যোগাযোগ',
+    eyebrow: '০৮ — যোগাযোগ',
     headingA: 'ফ্রিল্যান্স,',
     headingB: 'রিমোট ও সহযোগিতায় উন্মুক্ত।',
     sub: 'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ টুলিং ও লোকাল-ফার্স্ট প্রোডাক্টের পাশাপাশি ব্যবহারিক প্রযুক্তি কাজেও পাওয়া যাবে: ওয়েবসাইট তৈরি, কাস্টম সফটওয়্যার, কম্পিউটার বা অ্যান্ড্রয়েড সহায়তা। সাভার, ঢাকা, বাংলাদেশে অবস্থিত; বিশ্বব্যাপী রিমোট।',
@@ -1119,10 +1079,10 @@ const bn: Content = {
     ],
   },
   nav: [
+    { scene: 1, label: 'ফোকাস ও টুলিং' },
     { scene: 3, label: 'কাজ' },
     { scene: 4, label: 'গবেষণা' },
-    { scene: 5, label: 'স্ট্যাক' },
-    { scene: 8, label: 'যোগাযোগ' },
+    { scene: 6, label: 'যোগাযোগ' },
   ],
   header: {
     homeLabel: 'হোমে ফিরুন',
@@ -1137,7 +1097,7 @@ const bn: Content = {
   ui: {
     carouselPrev: 'আগের',
     carouselNext: 'পরের',
-    pageLabels: ['হোম', 'উপস্থিতি', 'পরিচিতি', 'নির্বাচিত কাজ', 'গবেষণা', 'প্রযুক্তিগত ফোকাস', 'ওপেন সোর্স', 'অভিজ্ঞতা', 'যোগাযোগ'],
+    pageLabels: ['হোম', 'ফোকাস ও টুলিং', 'পরিচিতি', 'কাজ', 'গবেষণা', 'অভিজ্ঞতা', 'যোগাযোগ'],
     repoWord: 'রিপোজিটরি',
     liveSiteWord: 'লাইভ সাইট',
     navOpen: 'সূচি খুলুন',
@@ -1166,9 +1126,9 @@ const bn: Content = {
           'সফটওয়্যার, অন-ডিভাইস এআই, অ্যান্ড্রয়েড, কম্পিউটিং ও অটোমেশন। হাতে-কলমে শেখা ও নির্মাণের দীর্ঘ যাত্রা, বাস্তব ডিভাইস ও সিআই-ভিত্তিক প্রকল্প প্রমাণসহ।',
       },
       {
-        title: 'আমি যা নির্মাণ করি — অন-ডিভাইস এআই, অ্যান্ড্রয়েড ও এআরএম ৬৪ সিস্টেম',
+        title: 'ফোকাস ও টুলিং — সফটওয়্যার, এআই, অ্যান্ড্রয়েড ও এআরএম ৬৪',
         description:
-          'সবুজ মিয়ার নির্মাণক্ষেত্র: অন-ডিভাইস এআই ও এলএলএম ইনফারেন্স, সম্মতি-নিয়ন্ত্রিত স্বয়ংক্রিয়তাসহ অ্যান্ড্রয়েড সিস্টেম, এওএসপি থেকে পি-রুট পর্যন্ত এআরএম ৬৪ লিনাক্স, এবং সাইনড রিলিজসহ নেটিভ টুলিং।',
+          'সবুজ মিয়ার প্রযুক্তিগত কাজ: অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ লিনাক্স, জিপিইউ গ্রাফিক্স, মোবাইল ও ওয়েব সফটওয়্যার; সঙ্গে নেটিভ টুলিং ও ডিভাইসে যাচাইকৃত রিলিজ।',
       },
       {
         title: 'পরিচিতি — ঢাকার স্বাধীন সিস্টেম নির্মাতা',
@@ -1176,24 +1136,14 @@ const bn: Content = {
           'সবুজ মিয়া সম্পর্কে: ঢাকার স্ব-শিক্ষিত সফটওয়্যার ও প্রযুক্তি নির্মাতা, যিনি ব্যবহারিক প্রকল্প, বাস্তব ডিভাইস ও সমস্যা সমাধানের মধ্য দিয়ে শেখেন।',
       },
       {
-        title: 'নির্বাচিত কাজ — লাই, জিজেন, এডিটি, টারনাক্স',
+        title: 'কাজ ও রিপোজিটরি — টারনাক্স, এডিটি, লাই ও জিজেন',
         description:
-          'সবুজ মিয়ার ফ্ল্যাগশিপ সিস্টেম: লাই অন-ডিভাইস এআই রানটাইম, জিজেন ক্রিয়েটিভ ও ডকুমেন্ট স্টুডিও, এডিটি এআরএম ৬৪ অ্যান্ড্রয়েড টুলচেইন, টারনাক্স রুট-ছাড়া লিনাক্স ডেস্কটপ — প্রতিটিতে সিআই ও ডিভাইস প্রমাণ।',
+          'সবুজ মিয়ার নির্বাচিত প্রকল্প ও রিপোজিটরি: টারনাক্স এআরএম ৬৪ লিনাক্স হোস্ট, এডিটি অ্যান্ড্রয়েড টুলচেইন, লাই অন-ডিভাইস এআই, জিজেন ক্রিয়েটিভ সফটওয়্যার এবং সহায়ক কাজ।',
       },
       {
         title: 'গবেষণা — অন-ডিভাইস এআই, এনপিইউ, ভলকান ও এআরএম ৬৪ পরীক্ষা',
         description:
           'প্রমাণ-স্তরবিন্যস্ত গবেষণা: অন-ডিভাইস এলএলএম ইনফারেন্স, হেক্সাগন এনপিইউ যোগ্যতা-পরীক্ষা, অ্যাড্রেনো ভলকান/টার্নিপ/জিংক, সম্মতি-নিয়ন্ত্রিত স্বয়ংক্রিয়তা, অ্যান্ড্রয়েডে লিনাক্স ও নেটিভ এআরএম ৬৪ টুলিং।',
-      },
-      {
-        title: 'প্রযুক্তিগত স্ট্যাক — লামা.সিপিপি, কোটলিন, ফ্লাটার, ভলকান, টারমাক্স',
-        description:
-          'সবুজ মিয়ার কাজের প্রযুক্তি: লামা.সিপিপি ও জিজিইউএফ, কোটলিন ও ফ্লাটার, ভলকান, মেসা টার্নিপ ও জিংক, এওএসপি বিল্ড, টারমাক্স ও পি-রুট, গিটহাব অ্যাকশনস সিআই।',
-      },
-      {
-        title: 'ওপেন সোর্স প্রজেক্ট — অ্যাপ্লাইড ও সহায়ক কাজ',
-        description:
-          'অ্যাপ্লাইড প্রোডাক্ট ও সহায়ক ওপেন সোর্স কাজ — ডকডিআর, ডেটাখোজ, এপিলুপ, আর্মস, ইকরা অনলাইন মার্ট ও সোবকিছু — কোড, লাইভ সাইট ও রিপোজিটরি প্রমাণের লিংকসহ।',
       },
       {
         title: 'অভিজ্ঞতা — অপারেশন, প্রশাসন ও ইঞ্জিনিয়ারিং',
