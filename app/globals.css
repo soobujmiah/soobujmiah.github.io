@@ -467,12 +467,10 @@ body.lang-bn .worldmap-pin {
   padding: 0 1.5rem;
 }
 
-/* Home only: start from the top with deliberate rhythm — do not
-   vertically centre the whole stack into the HUD. When content is
-   short on tall phones there is breathing room above the safe zone;
-   when it overflows, page-scroll still works from the top. */
+/* Home uses the same viewport-first centering as the other pages.
+   Auto margins collapse to zero when the stack needs to scroll. */
 .page-fill--hero .page-content--hero {
-  margin: 0 auto;
+  margin: auto;
   width: 100%;
   max-width: 40rem;
   padding-left: 1.25rem;
@@ -1895,4 +1893,3 @@ body:has(> .services-doc) button {
   color: #4ade80;
   border-color: rgba(74, 222, 128, 0.4);
 }
-

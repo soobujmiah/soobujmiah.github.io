@@ -139,6 +139,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
       if (i < 0) return;
       const href = sectionHref(i, lang);
       if (window.location.pathname !== href) window.history.replaceState(null, '', href);
+      indexRef.current = i;
       setIndex(i);
       setDir(1);
     } catch {
@@ -150,10 +151,12 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
   useEffect(() => {
     const onPop = () => {
       const i = indexFromPathname(window.location.pathname);
-      setIndex((prev) => {
-        if (i !== prev) setDir(i > prev ? 1 : -1);
-        return i;
-      });
+      const prev = indexRef.current;
+      if (i !== prev) {
+        indexRef.current = i;
+        setDir(i > prev ? 1 : -1);
+        setIndex(i);
+      }
       lastFlip.current = Date.now();
     };
     window.addEventListener('popstate', onPop);
@@ -176,23 +179,23 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
 
   const goToScene = useCallback((next: number) => {
     const clamped = Math.max(0, Math.min(PAGE_COUNT - 1, next));
-    setIndex((prev) => {
-      if (clamped === prev) return prev;
-      setDir(clamped > prev ? 1 : -1);
-      lastFlip.current = Date.now();
-      return clamped;
-    });
+    const prev = indexRef.current;
+    if (clamped === prev) return;
+    indexRef.current = clamped;
+    setDir(clamped > prev ? 1 : -1);
+    lastFlip.current = Date.now();
+    setIndex(clamped);
   }, []);
 
   const tryFlip = useCallback((delta: 1 | -1) => {
     const now = Date.now();
     if (now - lastFlip.current < PT.flipLockMs) return;
+    const next = Math.max(0, Math.min(PAGE_COUNT - 1, indexRef.current + delta));
+    if (next === indexRef.current) return;
     lastFlip.current = now;
-    setIndex((prev) => {
-      const next = Math.max(0, Math.min(PAGE_COUNT - 1, prev + delta));
-      if (next !== prev) setDir(delta);
-      return next;
-    });
+    indexRef.current = next;
+    setDir(delta);
+    setIndex(next);
   }, []);
 
   /* Touch: dominant-axis vertical swipes. If the page has further to
