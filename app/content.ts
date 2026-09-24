@@ -615,7 +615,7 @@ const en: Content = {
       {
         label: 'Direct',
         links: [
-          { label: 'Telegram', handle: '@soobujmiah', href: 'https://t.me/soobujmiah' },
+          { label: 'WhatsApp', handle: 'soobujmiah', href: 'https://wa.me/soobujmiah' },
           { label: 'Email', handle: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
         ],
       },
