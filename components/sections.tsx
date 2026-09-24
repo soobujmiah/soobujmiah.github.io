@@ -349,6 +349,9 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
               )}
             </h3>
             <p className="mt-0.5 text-xs" style={{ color: project.accent }}>{project.tagline}</p>
+            <p className="mt-1 font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.55)' }}>
+              {project.status}
+            </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {project.websiteUrl && (
@@ -477,7 +480,7 @@ function WorkSpotlight() {
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-semibold" style={{ color: '#e4e2df' }}>{p.name}</span>
-                <span className="block truncate text-[11px]" style={{ color: 'rgba(228,226,223,0.45)' }}>{p.tagline}</span>
+                <span className="block truncate text-[11px]" style={{ color: 'rgba(228,226,223,0.55)' }}>{p.status}</span>
               </span>
               <span
                 aria-hidden
@@ -554,8 +557,8 @@ function WorkSpotlight() {
   );
 }
 
-/* ── ecosystem relationship — ADT ↔ Ternux ──────────────────────
-   One physical Android device, two complementary layers. Compact by
+/* ── ecosystem relationship — Ternux → ADT ──────────────────────
+   One physical Android device, host and toolchain. Compact by
    design: a device rail, the two layer cards, then one evidence line
    each way (verified / not yet proven). It reuses the page's existing
    card idiom and each project's own accent, so it adds no animation,
@@ -671,7 +674,7 @@ export function WorkScene() {
         {/* desktop: interactive spotlight, always fits */}
         <WorkSpotlight />
 
-        {/* ecosystem: ADT ↔ Ternux — two layers of one device */}
+        {/* ecosystem: Ternux hosts the ARM64 environment for ADT */}
         <RelationshipBlock />
       </div>
     </div>

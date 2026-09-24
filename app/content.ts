@@ -56,6 +56,7 @@ export type Lang = 'en' | 'bn';
 
 export interface Project {
   name: string;
+  status: string;
   tagline: string;
   year: string;
   description: string;
@@ -164,7 +165,7 @@ export interface Content {
       cta: string;
       url: string;
     };
-    /* ADT ↔ Ternux: two layers of one Android/ARM64 workflow. Prose
+    /* Ternux → ADT: host and toolchain in one Android/ARM64 workflow. Prose
        only — the two repository/website links are identifiers, so they
        are declared in IDENTIFIER_PATHS alongside work.projects[].* */
     relationship: {
@@ -334,7 +335,38 @@ const en: Content = {
     codeLabel: 'Code ↗',
     projects: [
       {
+        name: 'Ternux',
+        status: 'Stable on tested hardware',
+        tagline: 'No-root Debian/Xfce Linux desktop on Android',
+        year: '2023–26',
+        description:
+          'Installs a real Debian ARM64 userspace, Xfce4 desktop, Termux:X11 display, PulseAudio bridge, and Zink/Turnip GPU route — one command, no root.',
+        role: 'Built the installation and desktop tooling; measured supported graphics paths on the reference device.',
+        evidence:
+          'Zink/Turnip renderer confirmed on Adreno 825: glmark2 score 140 (OpenGL 4.6), with a documented compatibility fallback route. Blender 4.3.2 launched, but its own report still named device type SOFTWARE — only the viewport OpenGL path through Zink/Turnip is proven, not Cycles GPU rendering.',
+        topics: ['Debian', 'Vulkan', 'Turnip', 'Zink', 'Adreno', 'PRoot'],
+        repo: 'https://github.com/soobujmiah/ternux',
+        websiteUrl: 'https://soobujmiah.github.io/ternux/',
+        accent: '#86efac',
+      },
+      {
+        name: 'ADT',
+        status: 'Stable on tested hardware',
+        tagline: 'Native ARM64 Android development toolchain',
+        year: '2023–26',
+        description:
+          'Builds Android SDK build-tools and platform-tools from AOSP source for Linux ARM64/glibc. SHA-256-verified offline release artifacts.',
+        role: 'Developed the source-build and release pipeline, then validated the APK workflow on ARM64 hardware.',
+        evidence:
+          'Full ARM64 native APK pipeline validated end-to-end on Snapdragon 8s Gen 4: source → APK → sign → install → JNI load → run.',
+        topics: ['AOSP', 'ARM64', 'Build Tools', 'Cross-compilation'],
+        repo: 'https://github.com/soobujmiah/adt',
+        websiteUrl: 'https://soobujmiah.github.io/adt/',
+        accent: '#10b981',
+      },
+      {
         name: 'LAI',
+        status: 'In development and research',
         tagline: 'Bangla-first local AI + consent-driven automation',
         year: '2024–26',
         description:
@@ -349,6 +381,7 @@ const en: Content = {
       },
       {
         name: 'GGEN',
+        status: 'In development and research',
         tagline: 'Android-first creative & document studio',
         year: '2024–26',
         description:
@@ -360,34 +393,6 @@ const en: Content = {
         repo: 'https://github.com/soobujmiah/ggen',
         websiteUrl: null,
         accent: '#4ade80',
-      },
-      {
-        name: 'ADT',
-        tagline: 'Native ARM64 Android development toolchain',
-        year: '2023–26',
-        description:
-          'Builds Android SDK build-tools and platform-tools from AOSP source for Linux ARM64/glibc. SHA-256-verified offline release artifacts.',
-        role: 'Developed the source-build and release pipeline, then validated the APK workflow on ARM64 hardware.',
-        evidence:
-          'Full ARM64 native APK pipeline validated end-to-end on Snapdragon 8s Gen 4: source → APK → sign → install → JNI load → run.',
-        topics: ['AOSP', 'ARM64', 'Build Tools', 'Cross-compilation'],
-        repo: 'https://github.com/soobujmiah/adt',
-        websiteUrl: 'https://soobujmiah.github.io/adt/',
-        accent: '#10b981',
-      },
-      {
-        name: 'Ternux',
-        tagline: 'No-root Debian/Xfce Linux desktop on Android',
-        year: '2023–26',
-        description:
-          'Installs a real Debian ARM64 userspace, Xfce4 desktop, Termux:X11 display, PulseAudio bridge, and Zink/Turnip GPU route — one command, no root.',
-        role: 'Built the installation and desktop tooling; measured supported graphics paths on the reference device.',
-        evidence:
-          'Zink/Turnip renderer confirmed on Adreno 825: glmark2 score 140 (OpenGL 4.6), with a documented compatibility fallback route. Blender 4.3.2 launched, but its own report still named device type SOFTWARE — only the viewport OpenGL path through Zink/Turnip is proven, not Cycles GPU rendering.',
-        topics: ['Debian', 'Vulkan', 'Turnip', 'Zink', 'Adreno', 'PRoot'],
-        repo: 'https://github.com/soobujmiah/ternux',
-        websiteUrl: 'https://soobujmiah.github.io/ternux/',
-        accent: '#86efac',
       },
     ],
     nowBuilding: {
@@ -401,23 +406,23 @@ const en: Content = {
     },
     relationship: {
       eyebrow: 'Ecosystem — two layers, one device',
-      heading: 'ADT and Ternux are two halves of the same Android/ARM64 workflow.',
-      body: 'One physical Android device, two complementary toolchains. ADT turns it into an Android development workstation — build, sign, install, debug. Ternux turns it into a Linux ARM64 desktop — Debian, Xfce4, GPU acceleration. Neither needs a conventional PC, and both are maintained as independent repositories with their own documentation and evidence.',
+      heading: 'Ternux hosts the ARM64 environment; ADT supplies Android development tools.',
+      body: 'Ternux provides the no-root Debian ARM64 host on an Android phone. ADT runs inside that environment with native ARM64 Android build-tools and platform-tools, including ADB, for building, signing, installing and debugging apps on real hardware.',
       deviceLabel: 'One physical Android device',
       layers: [
         {
-          name: 'ADT',
-          role: 'Android development layer',
-          note: 'Native aarch64 build-tools and platform-tools from AOSP source: build, sign, install and inspect real APKs from the phone itself.',
-          websiteUrl: 'https://soobujmiah.github.io/adt/',
-          repo: 'https://github.com/soobujmiah/adt',
-        },
-        {
           name: 'Ternux',
-          role: 'Linux desktop layer',
-          note: 'A real Debian ARM64 userspace with an Xfce4 desktop and an explicit graphics route, installed on the same device with no root.',
+          role: 'ARM64 host',
+          note: 'No-root Debian ARM64 userspace and Xfce4 desktop on the phone — the host in which the development toolchain runs.',
           websiteUrl: 'https://soobujmiah.github.io/ternux/',
           repo: 'https://github.com/soobujmiah/ternux',
+        },
+        {
+          name: 'ADT',
+          role: 'Android toolchain',
+          note: 'AOSP-derived native ARM64 build-tools and platform-tools, including ADB, for a real on-device APK development workflow.',
+          websiteUrl: 'https://soobujmiah.github.io/adt/',
+          repo: 'https://github.com/soobujmiah/adt',
         },
       ],
       verifiedLabel: 'Verified: ',
@@ -800,8 +805,39 @@ const bn: Content = {
     codeLabel: 'কোড ↗',
     projects: [
       {
+        name: 'Ternux',
+        tagline: 'রুট ছাড়াই অ্যান্ড্রয়েডে ডেবিয়ান/এক্সএফসিই লিনাক্স ডেস্কটপ',
+        status: 'পরীক্ষিত হার্ডওয়্যারে স্থিতিশীল',
+        year: '২০২৩–২৬',
+        description:
+          'এক কমান্ডে আসল ডেবিয়ান এআরএম ৬৪ ইউজারস্পেস, এক্সএফসিই৪ ডেস্কটপ, টারমাক্স:এক্স১১ ডিসপ্লে, পালসঅডিও ব্রিজ ও জিংক/টার্নিপ জিপিইউ রুট — রুট ছাড়াই।',
+        role: 'ইনস্টলেশন ও ডেস্কটপ টুলিং তৈরি; রেফারেন্স ডিভাইসে সমর্থিত গ্রাফিক্স পথ পরিমাপ।',
+        evidence:
+          'অ্যাড্রেনো ৮২৫-এ জিংক/টার্নিপ রেন্ডারার নিশ্চিত: গ্লমার্ক২ স্কোর ১৪০ (ওপেনজিএল ৪.৬), সঙ্গে নথিভুক্ত সামঞ্জস্য-ফলব্যাক রুট। ব্লেন্ডার ৪.৩.২ চালু হয়েছে, তবে তার নিজের রিপোর্টে ডিভাইস টাইপ সফটওয়্যার ছিল — কেবল জিংক/টার্নিপ দিয়ে ভিউপোর্ট ওপেনজিএল পথটিই প্রমাণিত, সাইকেলস জিপিইউ রেন্ডারিং নয়।',
+        topics: ['ডেবিয়ান', 'ভলকান', 'টার্নিপ', 'জিংক', 'অ্যাড্রেনো', 'পি-রুট'],
+        repo: 'https://github.com/soobujmiah/ternux',
+        websiteUrl: 'https://soobujmiah.github.io/ternux/',
+        accent: '#86efac',
+      },
+      {
+        name: 'ADT',
+        tagline: 'নেটিভ এআরএম ৬৪ অ্যান্ড্রয়েড ডেভেলপমেন্ট টুলচেইন',
+        status: 'পরীক্ষিত হার্ডওয়্যারে স্থিতিশীল',
+        year: '২০২৩–২৬',
+        description:
+          'লিনাক্স এআরএম ৬৪/গ্লিবসি-র জন্য এওএসপি সোর্স থেকে অ্যান্ড্রয়েড এসডিকে বিল্ড-টুলস ও প্লাটফর্ম-টুলস তৈরি করে। এসএইচএ-২৫৬-যাচাইকৃত অফলাইন রিলিজ আর্টিফ্যাক্ট।',
+        role: 'সোর্স-বিল্ড ও রিলিজ পাইপলাইন তৈরি; এআরএম ৬৪ হার্ডওয়্যারে এপিকে কর্মপ্রবাহ যাচাই।',
+        evidence:
+          'স্ন্যাপড্রাগন ৮এস জেন ৪-এ সম্পূর্ণ এআরএম ৬৪ নেটিভ এপিকে পাইপলাইন শুরু থেকে শেষ পর্যন্ত যাচাইকৃত: সোর্স → এপিকে → সাইন → ইনস্টল → জেএনআই লোড → রান।',
+        topics: ['এওএসপি', 'এআরএম ৬৪', 'বিল্ড টুলস', 'ক্রস-কম্পাইলেশন'],
+        repo: 'https://github.com/soobujmiah/adt',
+        websiteUrl: 'https://soobujmiah.github.io/adt/',
+        accent: '#10b981',
+      },
+      {
         name: 'LAI',
         tagline: 'বাংলা-ফার্স্ট লোকাল এআই + সম্মতি-চালিত স্বয়ংক্রিয়তা',
+        status: 'উন্নয়ন ও গবেষণাধীন',
         year: '২০২৪–২৬',
         description:
           'প্রাইভেট অন-ডিভাইস এলএলএম ইনফারেন্স ও অ্যাক্সেসিবিলিটি-নিয়ন্ত্রিত স্বয়ংক্রিয়তার অ্যান্ড্রয়েড রানটাইম। সিপিইউ ইনফারেন্স ডিভাইস-যাচাইকৃত; জিপিইউ/এনপিইউ এখনও যোগ্যতা-পরীক্ষায়।',
@@ -816,6 +852,7 @@ const bn: Content = {
       {
         name: 'GGEN',
         tagline: 'অ্যান্ড্রয়েড-ফার্স্ট ক্রিয়েটিভ ও ডকুমেন্ট স্টুডিও',
+        status: 'উন্নয়ন ও গবেষণাধীন',
         year: '২০২৪–২৬',
         description:
           'পেশাদার ভেক্টর, রাস্টার, ডকুমেন্ট ও পিডিএফ কাজের ফ্লাটার/ডার্ট ভিত্তি। এসএইচএ-২৫৬ স্টেট ইন্টিগ্রিটিসহ পিওর-ডার্ট কোরের ডকুমেন্টেশন-ফার্স্ট আর্কিটেকচার।',
@@ -826,34 +863,6 @@ const bn: Content = {
         repo: 'https://github.com/soobujmiah/ggen',
         websiteUrl: null,
         accent: '#4ade80',
-      },
-      {
-        name: 'ADT',
-        tagline: 'নেটিভ এআরএম ৬৪ অ্যান্ড্রয়েড ডেভেলপমেন্ট টুলচেইন',
-        year: '২০২৩–২৬',
-        description:
-          'লিনাক্স এআরএম ৬৪/গ্লিবসি-র জন্য এওএসপি সোর্স থেকে অ্যান্ড্রয়েড এসডিকে বিল্ড-টুলস ও প্লাটফর্ম-টুলস তৈরি করে। এসএইচএ-২৫৬-যাচাইকৃত অফলাইন রিলিজ আর্টিফ্যাক্ট।',
-        role: 'সোর্স-বিল্ড ও রিলিজ পাইপলাইন তৈরি; এআরএম ৬৪ হার্ডওয়্যারে এপিকে কর্মপ্রবাহ যাচাই।',
-        evidence:
-          'স্ন্যাপড্রাগন ৮এস জেন ৪-এ সম্পূর্ণ এআরএম ৬৪ নেটিভ এপিকে পাইপলাইন শুরু থেকে শেষ পর্যন্ত যাচাইকৃত: সোর্স → এপিকে → সাইন → ইনস্টল → জেএনআই লোড → রান।',
-        topics: ['এওএসপি', 'এআরএম ৬৪', 'বিল্ড টুলস', 'ক্রস-কম্পাইলেশন'],
-        repo: 'https://github.com/soobujmiah/adt',
-        websiteUrl: 'https://soobujmiah.github.io/adt/',
-        accent: '#10b981',
-      },
-      {
-        name: 'Ternux',
-        tagline: 'রুট ছাড়াই অ্যান্ড্রয়েডে ডেবিয়ান/এক্সএফসিই লিনাক্স ডেস্কটপ',
-        year: '২০২৩–২৬',
-        description:
-          'এক কমান্ডে আসল ডেবিয়ান এআরএম ৬৪ ইউজারস্পেস, এক্সএফসিই৪ ডেস্কটপ, টারমাক্স:এক্স১১ ডিসপ্লে, পালসঅডিও ব্রিজ ও জিংক/টার্নিপ জিপিইউ রুট — রুট ছাড়াই।',
-        role: 'ইনস্টলেশন ও ডেস্কটপ টুলিং তৈরি; রেফারেন্স ডিভাইসে সমর্থিত গ্রাফিক্স পথ পরিমাপ।',
-        evidence:
-          'অ্যাড্রেনো ৮২৫-এ জিংক/টার্নিপ রেন্ডারার নিশ্চিত: গ্লমার্ক২ স্কোর ১৪০ (ওপেনজিএল ৪.৬), সঙ্গে নথিভুক্ত সামঞ্জস্য-ফলব্যাক রুট। ব্লেন্ডার ৪.৩.২ চালু হয়েছে, তবে তার নিজের রিপোর্টে ডিভাইস টাইপ সফটওয়্যার ছিল — কেবল জিংক/টার্নিপ দিয়ে ভিউপোর্ট ওপেনজিএল পথটিই প্রমাণিত, সাইকেলস জিপিইউ রেন্ডারিং নয়।',
-        topics: ['ডেবিয়ান', 'ভলকান', 'টার্নিপ', 'জিংক', 'অ্যাড্রেনো', 'পি-রুট'],
-        repo: 'https://github.com/soobujmiah/ternux',
-        websiteUrl: 'https://soobujmiah.github.io/ternux/',
-        accent: '#86efac',
       },
     ],
     nowBuilding: {
@@ -867,23 +876,23 @@ const bn: Content = {
     },
     relationship: {
       eyebrow: 'ইকোসিস্টেম — এক ডিভাইস, দুই স্তর',
-      heading: 'এডিটি ও টার্নাক্স — একই অ্যান্ড্রয়েড/এআরএম ৬৪ কর্মপ্রবাহের দুই অর্ধ।',
-      body: 'একটিই ভৌত অ্যান্ড্রয়েড ডিভাইস, দুটি পরস্পর পূরক টুলচেইন। এডিটি তা অ্যান্ড্রয়েড ডেভেলপমেন্ট ওয়ার্কস্টেশনে বদলে দেয় — বিল্ড, সাইন, ইনস্টল, ডিবাগ। টার্নাক্স তা লিনাক্স এআরএম ৬৪ ডেস্কটপে বদলায় — ডেবিয়ান, এক্সএফসিই৪ ডেস্কটপ, জিপিইউ ত্বরণ। কোনোটিই প্রচলিত পিসির উপর নির্ভর করে না; দুটিই স্বতন্ত্র রিপোজিটরি হিসেবে নিজস্ব ডকুমেন্টেশন ও প্রমাণসহ রক্ষিত।',
+      heading: 'টার্নাক্স এআরএম ৬৪ পরিবেশ দেয়; তার ভেতরে এডিটি অ্যান্ড্রয়েড ডেভেলপমেন্ট টুল সরবরাহ করে।',
+      body: 'অ্যান্ড্রয়েড ফোনে টার্নাক্স রুট ছাড়া ডেবিয়ান এআরএম ৬৪ হোস্ট তৈরি করে। সেই পরিবেশে এডিটির নেটিভ এআরএম ৬৪ অ্যান্ড্রয়েড বিল্ড-টুলস ও প্ল্যাটফর্ম-টুলস, এডিবিসহ, বাস্তব হার্ডওয়্যারে অ্যাপ বিল্ড, সাইন, ইনস্টল ও ডিবাগ করার কাজে ব্যবহৃত হয়।',
       deviceLabel: 'একটিই ভৌত অ্যান্ড্রয়েড ডিভাইস',
       layers: [
         {
-          name: 'ADT',
-          role: 'অ্যান্ড্রয়েড ডেভেলপমেন্ট স্তর',
-          note: 'এওএসপি সোর্স থেকে নেটিভ এআরএম ৬৪ বিল্ড-টুলস ও প্লাটফর্ম-টুলস: ফোন থেকেই আসল এপিকে বিল্ড, সাইন, ইনস্টল ও পরিদর্শন।',
-          websiteUrl: 'https://soobujmiah.github.io/adt/',
-          repo: 'https://github.com/soobujmiah/adt',
-        },
-        {
           name: 'Ternux',
-          role: 'লিনাক্স ডেস্কটপ স্তর',
-          note: 'আসল ডেবিয়ান এআরএম ৬৪ ইউজারস্পেস ও এক্সএফসিই৪ ডেস্কটপ, সঙ্গে স্পষ্ট গ্রাফিক্স রুট — একই ডিভাইসে, রুট ছাড়াই।',
+          role: 'এআরএম ৬৪ হোস্ট',
+          note: 'ফোনে রুট ছাড়া ডেবিয়ান এআরএম ৬৪ ইউজারস্পেস ও এক্সএফসিই৪ ডেস্কটপ — যেখানে ডেভেলপমেন্ট টুলচেইন চলে।',
           websiteUrl: 'https://soobujmiah.github.io/ternux/',
           repo: 'https://github.com/soobujmiah/ternux',
+        },
+        {
+          name: 'ADT',
+          role: 'অ্যান্ড্রয়েড টুলচেইন',
+          note: 'এওএসপি সোর্সভিত্তিক নেটিভ এআরএম ৬৪ বিল্ড-টুলস ও প্ল্যাটফর্ম-টুলস, এডিবিসহ — ডিভাইসে বাস্তব এপিকে ডেভেলপমেন্টের জন্য।',
+          websiteUrl: 'https://soobujmiah.github.io/adt/',
+          repo: 'https://github.com/soobujmiah/adt',
         },
       ],
       verifiedLabel: 'যাচাইকৃত: ',

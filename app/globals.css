@@ -718,13 +718,11 @@ body.lang-bn .worldmap-pin {
   padding-bottom: calc(0.625rem + env(safe-area-inset-bottom, 0px));
 }
 
-/* SVG camera movement and page turns are costly alongside many live blur
-   surfaces on a phone. The card fills retain their contrast without blur. */
-@media (max-width: 767px) {
-  .page-scroll .backdrop-blur-md {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
+/* SVG camera movement and page turns compete with live card blur on both
+   phone and desktop. The translucent card fills retain their contrast. */
+.page-scroll .backdrop-blur-md {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .footer-progress {
