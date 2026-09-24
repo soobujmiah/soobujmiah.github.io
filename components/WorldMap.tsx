@@ -126,6 +126,7 @@ export function WorldMap({
   const svgRef = useRef<SVGSVGElement>(null);
   const glowRef = useRef<SVGCircleElement>(null);
   const labelRef = useRef<HTMLSpanElement>(null);
+  const hostSizeRef = useRef({ width: 0, height: 0 });
 
   /* Server-render the page's own camera so deep links and crawlers see
      the geography that belongs to the route. `cameraFor` is the only
@@ -170,12 +171,11 @@ export function WorldMap({
        no layout, no transition, nothing re-rasterised. */
     const label = labelRef.current;
     if (!label) return;
-    const p = projectToScreen(cam, focusPointRef.current, {
-      width: host.clientWidth,
-      height: host.clientHeight,
-    });
+    const size = hostSizeRef.current;
+    if (!size.width || !size.height) return;
+    const p = projectToScreen(cam, focusPointRef.current, size);
     const inside =
-      p.x > 8 && p.y > 8 && p.x < host.clientWidth - 8 && p.y < host.clientHeight - 8;
+      p.x > 8 && p.y > 8 && p.x < size.width - 8 && p.y < size.height - 8;
     label.style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0)`;
     label.dataset.on = inside ? 'true' : 'false';
   };
@@ -231,13 +231,19 @@ export function WorldMap({
     };
   }, [sectionIndex, reducedMotion]);
 
-  /* A resize changes the screen mapping (the square is fitted to the
-     smaller side), so the label is placed again. The camera itself does
-     not move — this is not a second thing driving the camera. */
+  /* Cache the host size outside the camera loop. Reading clientWidth after
+     changing the SVG viewBox on every frame can force synchronous layout. */
   useEffect(() => {
-    const onResize = () => applyCam(camRef.current);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    const host = hostRef.current;
+    if (!host) return;
+    const onResize = () => {
+      hostSizeRef.current = { width: host.clientWidth, height: host.clientHeight };
+      applyCam(camRef.current);
+    };
+    onResize();
+    const observer = new ResizeObserver(onResize);
+    observer.observe(host);
+    return () => observer.disconnect();
   }, []);
 
   /* The origin ring is the only CSS-animated thing here (opacity

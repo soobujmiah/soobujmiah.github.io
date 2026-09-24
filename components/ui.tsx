@@ -590,8 +590,23 @@ export function Header() {
 export function Footer({ progress = 0 }: { progress?: number }) {
   const { t, lang } = useLang();
   const p = Math.max(0, Math.min(1, progress));
+  const footerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const footer = footerRef.current;
+    if (!footer) return;
+    const updateHeight = () => {
+      document.documentElement.style.setProperty('--site-footer-height', `${footer.offsetHeight}px`);
+    };
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(footer);
+    return () => {
+      observer.disconnect();
+      document.documentElement.style.removeProperty('--site-footer-height');
+    };
+  }, []);
   return (
-    <footer className="site-footer fixed bottom-0 left-0 right-0 z-[9997]">
+    <footer ref={footerRef} className="site-footer fixed bottom-0 left-0 right-0 z-[9997]">
       <div
         className="footer-progress"
         role="progressbar"
