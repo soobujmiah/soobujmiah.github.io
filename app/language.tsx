@@ -3,14 +3,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { content, type Content, type Lang } from './content';
 import { indexFromPathname } from './sections';
-
-const STORAGE_KEY = 'sobuj-portfolio-lang';
+import { localizedPath } from './locales';
 
 /** Service routes own their document metadata (components/services);
     the pager's title swap must leave them alone — and must not pull the
     services copy into the pager bundle. */
 export function isServicePathname(pathname: string): boolean {
-  return /^\/services(\/|$)/.test(pathname);
+  return /^\/(?:bn\/)?services(\/|$)/.test(pathname);
 }
 
 interface LanguageValue {
@@ -27,25 +26,8 @@ const LanguageContext = createContext<LanguageValue>({
   toggleLang: () => {},
 });
 
-/* Read the stored preference defensively: localStorage can throw
-   (private mode) or be absent (old WebViews). Never let preference
-   loading break rendering. */
-function readStoredLang(): Lang {
-  try {
-    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return 'en';
-    return window.localStorage.getItem(STORAGE_KEY) === 'bn' ? 'bn' : 'en';
-  } catch {
-    return 'en';
-  }
-}
-
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>('en');
-
-  /* Hydrate the stored preference after mount (avoids SSR mismatch). */
-  useEffect(() => {
-    setLangState(readStoredLang());
-  }, []);
+export function LanguageProvider({ children, initialLang = 'en' }: { children: ReactNode; initialLang?: Lang }) {
+  const [lang] = useState<Lang>(initialLang);
 
   /* Keep <html lang>, tab title, meta description, and body font-stack
      in sync so each language is fully itself. Title and description
@@ -79,15 +61,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, [lang]);
 
   const setLang = useCallback((next: Lang) => {
-    setLangState(next);
-    try {
-      if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
-        window.localStorage.setItem(STORAGE_KEY, next);
-      }
-    } catch {
-      /* private mode: preference simply won't persist */
-    }
-  }, []);
+    if (next === lang || typeof window === 'undefined') return;
+    window.location.assign(localizedPath(window.location.pathname, next));
+  }, [lang]);
 
   const toggleLang = useCallback(() => {
     setLang(lang === 'en' ? 'bn' : 'en');

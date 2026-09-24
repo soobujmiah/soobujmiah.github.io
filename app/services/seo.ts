@@ -3,6 +3,7 @@ import { content } from '@/app/content';
 import { servicesContent } from '@/app/services-content';
 import { SITE_ORIGIN } from '@/app/sections';
 import { serviceUrl, type ServiceSlug } from '@/app/services';
+import type { Lang } from '@/app/content';
 
 /* ═══════════════════════════════════════════════════════════════
    SERVICE ROUTE METADATA + STRUCTURED DATA — derived from content.ts
@@ -12,38 +13,38 @@ import { serviceUrl, type ServiceSlug } from '@/app/services';
    does not visibly say.
    ═══════════════════════════════════════════════════════════════ */
 
-const en = content.en;
-const svc = servicesContent.en;
 const PERSON_ID = `${SITE_ORIGIN}/#person`;
-const OG = { url: '/og.png', width: 1200, height: 630, alt: en.profile.nameFull };
+const OG = { url: '/og.png', width: 1200, height: 630 };
 
-function meta(title: string, description: string, url: string): Metadata {
+function meta(title: string, description: string, url: string, enUrl: string, bnUrl: string, lang: Lang): Metadata {
+  const person = content[lang].profile.nameFull;
   return {
     title,
     description,
-    alternates: { canonical: url },
+    alternates: { canonical: url, languages: { en: enUrl, bn: bnUrl, 'x-default': enUrl } },
     robots: { index: true, follow: true },
     openGraph: {
       type: 'website',
-      locale: 'en_US',
-      alternateLocale: 'bn_BD',
+      locale: lang === 'en' ? 'en_US' : 'bn_BD',
+      alternateLocale: lang === 'en' ? 'bn_BD' : 'en_US',
       url,
-      siteName: en.profile.nameFull,
+      siteName: person,
       title,
       description,
-      images: [OG],
+      images: [{ ...OG, alt: person }],
     },
     twitter: { card: 'summary_large_image', title, description, images: [OG.url] },
   };
 }
 
-export function hubMetadata(): Metadata {
-  return meta(svc.hubSeoTitle, svc.hubSeoDescription, serviceUrl());
+export function hubMetadata(lang: Lang = 'en'): Metadata {
+  const svc = servicesContent[lang];
+  return meta(svc.hubSeoTitle, svc.hubSeoDescription, serviceUrl(undefined, lang), serviceUrl(), serviceUrl(undefined, 'bn'), lang);
 }
 
-export function pageMetadata(slug: ServiceSlug): Metadata {
-  const page = svc.pages.find((p) => p.slug === slug)!;
-  return meta(page.seoTitle, page.seoDescription, serviceUrl(slug));
+export function pageMetadata(slug: ServiceSlug, lang: Lang = 'en'): Metadata {
+  const page = servicesContent[lang].pages.find((p) => p.slug === slug)!;
+  return meta(page.seoTitle, page.seoDescription, serviceUrl(slug, lang), serviceUrl(slug), serviceUrl(slug, 'bn'), lang);
 }
 
 const crumb = (items: { name: string; item: string }[]) => ({
@@ -51,32 +52,39 @@ const crumb = (items: { name: string; item: string }[]) => ({
   itemListElement: items.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: c.item })),
 });
 
-export function hubJsonLd() {
+export function hubJsonLd(lang: Lang = 'en') {
+  const identity = content[lang];
+  const svc = servicesContent[lang];
+  const url = serviceUrl(undefined, lang);
+  const home = lang === 'en' ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}/bn/`;
   return {
     '@context': 'https://schema.org',
     '@graph': [
       {
         '@type': 'CollectionPage',
-        '@id': `${serviceUrl()}#page`,
-        url: serviceUrl(),
+        '@id': `${url}#page`,
+        url,
         name: svc.hubSeoTitle,
         description: svc.hubSeoDescription,
-        inLanguage: ['en', 'bn'],
-        isPartOf: { '@id': `${SITE_ORIGIN}/#website` },
+        inLanguage: lang,
+        isPartOf: { '@id': `${home}#website` },
         about: { '@id': PERSON_ID },
-        hasPart: svc.pages.map((p) => ({ '@type': 'Service', '@id': `${serviceUrl(p.slug as ServiceSlug)}#service`, name: p.title, url: serviceUrl(p.slug as ServiceSlug) })),
+        hasPart: svc.pages.map((p) => ({ '@type': 'Service', '@id': `${serviceUrl(p.slug as ServiceSlug, lang)}#service`, name: p.title, url: serviceUrl(p.slug as ServiceSlug, lang) })),
       },
       crumb([
-        { name: en.profile.nameFull, item: `${SITE_ORIGIN}/` },
-        { name: svc.labels.hub, item: serviceUrl() },
+        { name: identity.profile.nameFull, item: home },
+        { name: svc.labels.hub, item: url },
       ]),
     ],
   };
 }
 
-export function pageJsonLd(slug: ServiceSlug) {
+export function pageJsonLd(slug: ServiceSlug, lang: Lang = 'en') {
+  const identity = content[lang];
+  const svc = servicesContent[lang];
   const page = svc.pages.find((p) => p.slug === slug)!;
-  const url = serviceUrl(slug);
+  const url = serviceUrl(slug, lang);
+  const home = lang === 'en' ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}/bn/`;
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -94,7 +102,7 @@ export function pageJsonLd(slug: ServiceSlug) {
            hours, prices or ratings — nothing the page does not say. */
         areaServed: [{ '@type': 'City', name: 'Savar' }, { '@type': 'City', name: 'Dhaka' }, { '@type': 'Country', name: 'Bangladesh' }, { '@type': 'Place', name: 'Worldwide (remote)' }],
         availableChannel: { '@type': 'ServiceChannel', serviceUrl: url, availableLanguage: ['en', 'bn'] },
-        inLanguage: ['en', 'bn'],
+        inLanguage: lang,
       },
       ...(page.faq.length > 0
         ? [
@@ -106,8 +114,8 @@ export function pageJsonLd(slug: ServiceSlug) {
           ]
         : []),
       crumb([
-        { name: en.profile.nameFull, item: `${SITE_ORIGIN}/` },
-        { name: svc.labels.hub, item: serviceUrl() },
+        { name: identity.profile.nameFull, item: home },
+        { name: svc.labels.hub, item: serviceUrl(undefined, lang) },
         { name: page.title, item: url },
       ]),
     ],

@@ -133,14 +133,15 @@ try {
   }
 
   /* ── 3. the browser theme colour must match --bg ── */
-  const layout = readFileSync(join(ROOT, 'app', 'layout.tsx'), 'utf8');
+  const layoutPath = existsSync(join(ROOT, 'app', 'site-layout.tsx')) ? 'site-layout.tsx' : 'layout.tsx';
+  const layout = readFileSync(join(ROOT, 'app', layoutPath), 'utf8');
   const theme = layout.match(/themeColor:\s*(?:BRAND\.bg|'([^']+)')/);
-  if (!theme) fail(`app/layout.tsx must set themeColor to BRAND.bg (or the literal ${BRAND.bg})`);
+  if (!theme) fail(`app/${layoutPath} must set themeColor to BRAND.bg (or the literal ${BRAND.bg})`);
   else if (theme[1] && theme[1].toLowerCase() !== BRAND.bg.toLowerCase()) {
     fail(`themeColor (${theme[1]}) must equal the --bg token (${BRAND.bg})`);
   }
   if (!/from '\.\/design-tokens'|from '@\/app\/design-tokens'/.test(layout)) {
-    fail('app/layout.tsx must import its theme colour from design-tokens.ts rather than hard-coding it');
+    fail(`app/${layoutPath} must import its theme colour from design-tokens.ts rather than hard-coding it`);
   }
 
   /* ── 4. hero visual system ──

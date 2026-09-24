@@ -309,7 +309,7 @@ try {
      The owner set this wording explicitly; a silent rewording here would
      drift every surface that inherits it, so it is asserted rather than
      trusted. Retired positioning is asserted *absent*, not merely unused. */
-  const CANONICAL_TITLE = 'Independent Software & AI Systems Engineer';
+  const CANONICAL_TITLE = 'Independent Software & AI Systems Builder';
   const RETIRED_POSITIONING = ['Self-Taught Technology Builder'];
   if (content.en.profile.title !== CANONICAL_TITLE) {
     fail(`en.profile.title is "${content.en.profile.title}", expected the canonical "${CANONICAL_TITLE}"`);
@@ -323,6 +323,25 @@ try {
   /* the Bangla title must be Bangla prose, not the English string */
   if (content.bn.profile.title === content.en.profile.title) {
     fail('bn.profile.title is identical to en — the Bangla tree must translate the identity');
+  }
+  for (const lang of ['en', 'bn']) {
+    const tree = content[lang];
+    if (!tree.experience.intro || !tree.experience.professionalLabel) {
+      fail(`${lang}.experience must distinguish the technology journey from dated professional roles`);
+    }
+    if (/8\+\s*years?/i.test(tree.experience.heading) || /৮\s*\+\s*বছর/.test(tree.experience.heading)) {
+      fail(`${lang}.experience.heading must not frame the whole technology journey as a year-count`);
+    }
+    for (const project of tree.work.projects) {
+      if (!project.role?.trim()) fail(`${lang}.work.projects.${project.name} needs a concise role statement`);
+    }
+  }
+  for (const oldClaim of [
+    '8+ years across operations, engineering, and administration.',
+    '8+ years across operations, administration, and engineering',
+    'অপারেশন, ইঞ্জিনিয়ারিং ও প্রশাসনে ৮+ বছর।',
+  ]) {
+    if (JSON.stringify(content).includes(oldClaim)) fail(`retired overall experience framing remains: "${oldClaim}"`);
   }
 
   /* 4b ── the canonical social ecosystem ──

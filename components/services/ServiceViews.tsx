@@ -83,7 +83,7 @@ function ContactCard() {
           {t.contact.email.label}
         </a>
         <Link
-          href={sectionHref(8)}
+          href={sectionHref(8, lang)}
           className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm transition-colors duration-300 hover:text-[#4ade80]"
           style={{ border: '1px solid rgba(228,226,223,0.14)', color: 'rgba(228,226,223,0.75)' }}
         >
@@ -125,7 +125,7 @@ export function ServicesHub() {
                 return (
                   <Link
                     key={page.slug}
-                    href={serviceHref(page.slug as ServiceSlug)}
+                    href={serviceHref(page.slug as ServiceSlug, lang)}
                     className="group rounded-2xl p-5 transition-colors duration-300 hover:border-[rgba(34,197,94,0.35)]"
                     style={card}
                   >
@@ -237,11 +237,11 @@ export function ServiceDetail({ slug }: { slug: ServiceSlug }) {
         </h2>
         <div className="flex flex-wrap items-center justify-center gap-2">
           {related.map((r) => (
-            <Link key={r.slug} href={serviceHref(r.slug as ServiceSlug)} className="rounded-full px-4 py-1.5 text-[13px] transition-colors hover:text-[#4ade80]" style={card}>
+            <Link key={r.slug} href={serviceHref(r.slug as ServiceSlug, lang)} className="rounded-full px-4 py-1.5 text-[13px] transition-colors hover:text-[#4ade80]" style={card}>
               {r.title}
             </Link>
           ))}
-          <Link href={serviceHref()} className="rounded-full px-4 py-1.5 font-mono text-[12px] hover:text-[#4ade80]" style={{ ...card, ...faint }}>
+          <Link href={serviceHref(undefined, lang)} className="rounded-full px-4 py-1.5 font-mono text-[12px] hover:text-[#4ade80]" style={{ ...card, ...faint }}>
             {s.labels.allServices}
           </Link>
         </div>

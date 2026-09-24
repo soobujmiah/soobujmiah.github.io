@@ -71,17 +71,17 @@ export interface ServicesContent {
 
 const en: ServicesContent = {
   eyebrow: 'Services',
-  heading: 'Software engineering, practical technology services, and digital office support.',
+  heading: 'Software, AI, and practical digital technology.',
   intro:
-    'Alongside my engineering work in on-device AI, Android systems and ARM64 Linux tooling, I provide practical technology services for individuals, small businesses and institutions — from websites and custom software to computer and Android support, business technology, design, administration and data work. Each service below describes its scope, what it includes and what it does not.',
+    'For individuals, small businesses and institutions: software and websites, computer and Android support, and digital or office work. Each service page explains its scope, limits and examples.',
   pillars: [
-    { label: 'Software engineering', slugs: ['web-development', 'software-development'] },
-    { label: 'Practical technology services', slugs: ['computer-support', 'android-support', 'business-technology'] },
-    { label: 'Digital & administrative support', slugs: ['graphics-design', 'office-administration', 'data-entry'] },
+    { label: 'Software & web', slugs: ['web-development', 'software-development'] },
+    { label: 'Computer, Android & business technology', slugs: ['computer-support', 'android-support', 'business-technology'] },
+    { label: 'Design & office support', slugs: ['graphics-design', 'office-administration', 'data-entry'] },
   ],
-  hubSeoTitle: 'Services — Web, Software, Computer & Android Support, Design, Admin, Data',
+  hubSeoTitle: 'Services — Software, Web, Computer Support & Digital Office Work',
   hubSeoDescription:
-    'Services by Sobuj Miah: website development, custom software, computer and Android support, business technology, graphics design, office administration and data entry. Based in Savar, Dhaka, Bangladesh; remote worldwide.',
+    'Services by Sobuj Miah: websites and custom software, computer and Android support, plus design, administration and data work. Based in Savar, Dhaka; remote worldwide.',
   labels: {
     hub: 'Services',
     forWho: 'Who it is for',
@@ -111,7 +111,7 @@ const en: ServicesContent = {
       short: 'Fast, static-first websites for individuals and small businesses — built, deployed and kept working.',
       seoTitle: 'Website Development & Maintenance — Small-Business Websites',
       seoDescription:
-        'Website development, design and maintenance by Sobuj Miah: fast static sites, bilingual English/Bangla content, search-ready metadata, hosting on GitHub Pages or your host. Dhaka, Bangladesh; remote worldwide.',
+        'Websites for small businesses and professionals: design, bilingual content, technical SEO and maintenance. Based in Dhaka, Bangladesh; remote worldwide.',
       forWho: [
         'Small businesses, shops, schools and institutions that need a clear, trustworthy web presence',
         'Individuals and professionals who need a portfolio or profile site',
@@ -153,7 +153,7 @@ const en: ServicesContent = {
       short: 'Purpose-built tools, Android apps and automation — when off-the-shelf software does not fit the job.',
       seoTitle: 'Custom Software & Android App Development — Tools and Automation',
       seoDescription:
-        'Custom software development by Sobuj Miah: Android apps (Kotlin, Flutter), command-line tools, workflow automation and local-first applications with CI builds and real-device testing. Dhaka, Bangladesh; remote worldwide.',
+        'Custom software, Android apps and workflow automation by Sobuj Miah. Kotlin, Flutter and local-first tools. Dhaka, Bangladesh; remote worldwide.',
       forWho: [
         'Small businesses that run on spreadsheets and chat messages and need one reliable tool instead',
         'Teams that need an internal utility, a data pipeline or an automated report',
@@ -194,7 +194,7 @@ const en: ServicesContent = {
       short: 'Windows and Linux setup, configuration and problem-solving — done remotely, explained clearly.',
       seoTitle: 'Computer Setup & Troubleshooting — Windows and Linux Support',
       seoDescription:
-        'Remote computer support by Sobuj Miah: Windows and Linux setup, troubleshooting, software configuration, performance clean-up, backups and developer environments. Dhaka, Bangladesh; remote worldwide.',
+        'Remote help with Windows or Linux setup, software problems, backups and development environments. Based in Savar, Dhaka; available worldwide.',
       forWho: [
         'Home users and small offices with a computer that is slow, unstable or newly purchased',
         'People moving to Linux, or running Linux and Windows side by side',
@@ -235,7 +235,7 @@ const en: ServicesContent = {
       short: 'Android configuration, software troubleshooting, ADB and device setup, and realistic performance tuning.',
       seoTitle: 'Android Support — Phone Setup, Software Troubleshooting & ADB',
       seoDescription:
-        'Android phone software support by Sobuj Miah: setup and configuration, troubleshooting, ADB and wireless debugging, developer options, storage and battery optimisation, Termux and Linux on Android. Dhaka, Bangladesh; remote worldwide.',
+        'Android setup and troubleshooting, ADB, wireless debugging and Termux configuration. Remote support from Savar, Dhaka, Bangladesh.',
       forWho: [
         'Anyone whose Android phone is slow, out of storage, misconfigured or unstable',
         'People who want a clean, private, well-organised phone without root',
@@ -276,7 +276,7 @@ const en: ServicesContent = {
       short: 'Practical technology for small businesses and institutions — from the first spreadsheet to a real workflow tool.',
       seoTitle: 'Small-Business Technology Support — Workflow Tools & Automation',
       seoDescription:
-        'Small-business technology support by Sobuj Miah: choosing and setting up tools, workflow automation, digital records, simple business software, websites and staff onboarding. Dhaka, Bangladesh; remote worldwide.',
+        'Technology support for small businesses: digital workflows, records, practical software and tool setup. Savar, Dhaka; remote worldwide.',
       forWho: [
         'Shops, agencies, schools, coaching centres and family businesses',
         'Owners who know their operations well but have no one responsible for the technology',
@@ -315,7 +315,7 @@ const en: ServicesContent = {
       short: 'Clean, practical digital graphics — social media posts, posters, banners and promotional materials for everyday use.',
       seoTitle: 'Graphics Design — Social Media Graphics, Posters & Promotional Materials',
       seoDescription:
-        'Practical graphics design by Sobuj Miah: social media graphics, posters, banners, notices and promotional materials in Bangla and English for small businesses and institutions. Dhaka, Bangladesh; remote worldwide.',
+        'Bangla and English social graphics, posters, banners and notices for small businesses and institutions. Dhaka, Bangladesh; remote worldwide.',
       forWho: [
         'Small businesses, schools and institutions that need regular, tidy visual materials',
         'Anyone who needs a poster, banner or announcement graphic done properly and quickly',
@@ -348,7 +348,7 @@ const en: ServicesContent = {
       short: 'Organised, digital-first administrative support backed by years of real office and site-operations experience.',
       seoTitle: 'Office Administration & Operations Support — Remote Administrative Services',
       seoDescription:
-        'Office administration support by Sobuj Miah: document management, records and filing systems, registrations, scheduling, reporting and digital office workflows — 8+ years of operations experience. Dhaka, Bangladesh; remote worldwide.',
+        'Remote office support with records, documents, registrations, reporting and digital workflows. Based in Savar, Dhaka, Bangladesh.',
       forWho: [
         'Small offices, schools and institutions without a dedicated administrator',
         'Business owners who need reliable back-office follow-through',
@@ -383,7 +383,7 @@ const en: ServicesContent = {
       short: 'Accurate data entry, clean-up and structuring — from paper and PDFs to spreadsheets and databases you can trust.',
       seoTitle: 'Data Entry & Data Work — Data Cleanup, Spreadsheets and Structured Data',
       seoDescription:
-        'Data entry and data work by Sobuj Miah: bulk data entry, digitisation, cleanup and de-duplication, format conversion, spreadsheet structuring and preparation for databases — accurate and confidential. Dhaka, Bangladesh; remote worldwide.',
+        'Data entry, cleanup and spreadsheet structuring from paper, PDFs or scans to usable records. Remote support from Savar, Dhaka, Bangladesh.',
       forWho: [
         'Businesses and institutions with paper records, PDFs or scans that need to become usable data',
         'Teams with messy spreadsheets: duplicates, inconsistent formats, missing fields',
@@ -420,17 +420,17 @@ const en: ServicesContent = {
 
 const bn: ServicesContent = {
   eyebrow: 'সেবাসমূহ',
-  heading: 'সফটওয়্যার ইঞ্জিনিয়ারিং, ব্যবহারিক প্রযুক্তি সেবা ও ডিজিটাল অফিস সহায়তা।',
+  heading: 'সফটওয়্যার, এআই ও ব্যবহারিক ডিজিটাল প্রযুক্তি।',
   intro:
-    'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম ও এআরএম৬৪ লিনাক্স টুলিংয়ে আমার ইঞ্জিনিয়ারিং কাজের পাশাপাশি আমি ব্যক্তি, ছোট ব্যবসা ও প্রতিষ্ঠানের জন্য ব্যবহারিক প্রযুক্তি সেবা দিই — ওয়েবসাইট ও কাস্টম সফটওয়্যার থেকে শুরু করে কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, ব্যবসার প্রযুক্তি, ডিজাইন, প্রশাসন ও ডেটা প্রক্রিয়াকরণ পর্যন্ত। নিচের প্রতিটি সেবায় তার পরিধি, কী অন্তর্ভুক্ত এবং কী নয় — তা বলা আছে।',
+    'ব্যক্তি, ছোট ব্যবসা ও প্রতিষ্ঠানের জন্য সফটওয়্যার ও ওয়েবসাইট, কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, এবং ডিজিটাল বা অফিসের কাজ। প্রতিটি সেবার পাতায় কাজের পরিধি, সীমা ও উদাহরণ আছে।',
   pillars: [
-    { label: 'সফটওয়্যার ইঞ্জিনিয়ারিং', slugs: ['web-development', 'software-development'] },
-    { label: 'ব্যবহারিক প্রযুক্তি সেবা', slugs: ['computer-support', 'android-support', 'business-technology'] },
-    { label: 'ডিজিটাল ও প্রশাসনিক সহায়তা', slugs: ['graphics-design', 'office-administration', 'data-entry'] },
+    { label: 'সফটওয়্যার ও ওয়েব', slugs: ['web-development', 'software-development'] },
+    { label: 'কম্পিউটার, অ্যান্ড্রয়েড ও ব্যবসায়িক প্রযুক্তি', slugs: ['computer-support', 'android-support', 'business-technology'] },
+    { label: 'ডিজাইন ও অফিস সহায়তা', slugs: ['graphics-design', 'office-administration', 'data-entry'] },
   ],
-  hubSeoTitle: 'সেবাসমূহ — ওয়েব, সফটওয়্যার, কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, ডিজাইন, প্রশাসন, ডেটা',
+  hubSeoTitle: 'সেবা — সফটওয়্যার, ওয়েব, কম্পিউটার সহায়তা ও ডিজিটাল অফিসের কাজ',
   hubSeoDescription:
-    'সবুজ মিয়ার সেবাসমূহ: ওয়েবসাইট তৈরি, কাস্টম সফটওয়্যার, কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, ব্যবসার প্রযুক্তি, গ্রাফিক্স ডিজাইন, অফিস প্রশাসন ও ডেটা এন্ট্রি। সাভার, ঢাকা, বাংলাদেশে অবস্থিত; বিশ্বব্যাপী রিমোট।',
+    'সবুজ মিয়ার সেবা: ওয়েবসাইট ও কাস্টম সফটওয়্যার, কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, ডিজাইন, প্রশাসন ও ডেটার কাজ। সাভার, ঢাকা; বিশ্বব্যাপী রিমোট।',
   labels: {
     hub: 'সেবাসমূহ',
     forWho: 'কাদের জন্য',
@@ -460,7 +460,7 @@ const bn: ServicesContent = {
       short: 'ব্যক্তি ও ছোট ব্যবসার জন্য দ্রুত, স্ট্যাটিক-ফার্স্ট ওয়েবসাইট — তৈরি, ডিপ্লয় ও সচল রাখা।',
       seoTitle: 'ওয়েবসাইট তৈরি ও রক্ষণাবেক্ষণ — ছোট ব্যবসার ওয়েবসাইট',
       seoDescription:
-        'সবুজ মিয়ার ওয়েবসাইট তৈরি, ডিজাইন ও রক্ষণাবেক্ষণ: দ্রুত স্ট্যাটিক সাইট, ইংরেজি/বাংলা দ্বিভাষিক কনটেন্ট, সার্চ-প্রস্তুত মেটাডেটা, গিটহাব পেজেস বা আপনার হোস্টে হোস্টিং। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+        'ছোট ব্যবসা ও পেশাজীবীদের ওয়েবসাইট: ডিজাইন, দ্বিভাষিক কনটেন্ট, কারিগরি সার্চ অপটিমাইজেশন ও রক্ষণাবেক্ষণ। ঢাকা থেকে বিশ্বব্যাপী রিমোট।',
       forWho: [
         'ছোট ব্যবসা, দোকান, স্কুল ও প্রতিষ্ঠান যাদের একটি স্পষ্ট, বিশ্বাসযোগ্য ওয়েব উপস্থিতি দরকার',
         'ব্যক্তি ও পেশাজীবী যাদের পোর্টফোলিও বা প্রোফাইল সাইট দরকার',
@@ -502,7 +502,7 @@ const bn: ServicesContent = {
       short: 'উদ্দেশ্য-নির্মিত টুল, অ্যান্ড্রয়েড অ্যাপ ও অটোমেশন — যখন তৈরি সফটওয়্যার কাজের সাথে মেলে না।',
       seoTitle: 'কাস্টম সফটওয়্যার ও অ্যান্ড্রয়েড অ্যাপ তৈরি — টুল ও অটোমেশন',
       seoDescription:
-        'সবুজ মিয়ার কাস্টম সফটওয়্যার তৈরি: অ্যান্ড্রয়েড অ্যাপ (কোটলিন, ফ্লাটার), কমান্ড-লাইন টুল, ওয়ার্কফ্লো অটোমেশন ও লোকাল-ফার্স্ট অ্যাপ্লিকেশন — সিআই বিল্ড ও আসল ডিভাইসে পরীক্ষাসহ। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+        'কোটলিন ও ফ্লাটার দিয়ে কাস্টম সফটওয়্যার, অ্যান্ড্রয়েড অ্যাপ ও কর্মপ্রবাহের অটোমেশন। ঢাকা, বাংলাদেশ থেকে বিশ্বব্যাপী রিমোট।',
       forWho: [
         'যেসব ছোট ব্যবসা স্প্রেডশিট ও চ্যাট মেসেজে চলে এবং তার বদলে একটি নির্ভরযোগ্য টুল চায়',
         'যেসব টিমের একটি অভ্যন্তরীণ ইউটিলিটি, ডেটা পাইপলাইন বা স্বয়ংক্রিয় রিপোর্ট দরকার',
@@ -543,7 +543,7 @@ const bn: ServicesContent = {
       short: 'উইন্ডোজ ও লিনাক্স সেটআপ, কনফিগারেশন ও সমস্যা সমাধান — রিমোটে, স্পষ্ট ব্যাখ্যাসহ।',
       seoTitle: 'কম্পিউটার সেটআপ ও সমস্যা সমাধান — উইন্ডোজ ও লিনাক্স সহায়তা',
       seoDescription:
-        'সবুজ মিয়ার রিমোট কম্পিউটার সহায়তা: উইন্ডোজ ও লিনাক্স সেটআপ, সমস্যা সমাধান, সফটওয়্যার কনফিগারেশন, পারফরম্যান্স ক্লিন-আপ, ব্যাকআপ ও ডেভেলপার এনভায়রনমেন্ট। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+        'উইন্ডোজ বা লিনাক্স সেটআপ, সফটওয়্যার সমস্যা, ব্যাকআপ ও ডেভেলপমেন্ট পরিবেশে রিমোট সহায়তা। সাভার, ঢাকা থেকে বিশ্বব্যাপী।',
       forWho: [
         'বাড়ির ব্যবহারকারী ও ছোট অফিস যাদের কম্পিউটার ধীর, অস্থিতিশীল বা নতুন কেনা',
         'যারা লিনাক্সে যাচ্ছেন, বা লিনাক্স ও উইন্ডোজ পাশাপাশি চালান',
@@ -584,7 +584,7 @@ const bn: ServicesContent = {
       short: 'অ্যান্ড্রয়েড কনফিগারেশন, সফটওয়্যার সমস্যা সমাধান, এডিবি ও ডিভাইস সেটআপ, আর বাস্তবসম্মত পারফরম্যান্স টিউনিং।',
       seoTitle: 'অ্যান্ড্রয়েড সহায়তা — ফোন সেটআপ, সফটওয়্যার সমস্যা সমাধান ও এডিবি',
       seoDescription:
-        'সবুজ মিয়ার অ্যান্ড্রয়েড ফোন সফটওয়্যার সহায়তা: সেটআপ ও কনফিগারেশন, সমস্যা সমাধান, এডিবি ও ওয়্যারলেস ডিবাগিং, ডেভেলপার অপশন, স্টোরেজ ও ব্যাটারি অপ্টিমাইজেশন, টার্মাক্স ও অ্যান্ড্রয়েডে লিনাক্স। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+        'অ্যান্ড্রয়েড সেটআপ ও সমস্যা সমাধান, এডিবি, ওয়্যারলেস ডিবাগিং এবং টার্মাক্স কনফিগারেশন। সাভার, ঢাকা থেকে রিমোট সহায়তা।',
       forWho: [
         'যার অ্যান্ড্রয়েড ফোন ধীর, স্টোরেজ ভরা, ভুল কনফিগার করা বা অস্থিতিশীল',
         'যারা রুট ছাড়াই পরিষ্কার, গোপনীয়তা-রক্ষাকারী, সুসংগঠিত ফোন চান',
@@ -625,7 +625,7 @@ const bn: ServicesContent = {
       short: 'ছোট ব্যবসা ও প্রতিষ্ঠানের জন্য ব্যবহারিক প্রযুক্তি — প্রথম স্প্রেডশিট থেকে আসল ওয়ার্কফ্লো টুল পর্যন্ত।',
       seoTitle: 'ছোট ব্যবসার প্রযুক্তি সহায়তা — ওয়ার্কফ্লো টুল ও অটোমেশন',
       seoDescription:
-        'সবুজ মিয়ার ছোট ব্যবসার প্রযুক্তি সহায়তা: টুল নির্বাচন ও সেটআপ, ওয়ার্কফ্লো অটোমেশন, ডিজিটাল রেকর্ড, সহজ ব্যবসায়িক সফটওয়্যার, ওয়েবসাইট ও কর্মী প্রশিক্ষণ। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+        'ছোট ব্যবসার ডিজিটাল কর্মপ্রবাহ, রেকর্ড, ব্যবহারিক সফটওয়্যার ও টুল সেটআপে প্রযুক্তি সহায়তা। সাভার, ঢাকা থেকে বিশ্বব্যাপী রিমোট।',
       forWho: [
         'দোকান, এজেন্সি, স্কুল, কোচিং সেন্টার ও পারিবারিক ব্যবসা',
         'মালিক যারা নিজেদের কার্যক্রম ভালো জানেন, কিন্তু প্রযুক্তির দায়িত্বে কেউ নেই',
@@ -664,7 +664,7 @@ const bn: ServicesContent = {
       short: 'পরিচ্ছন্ন, ব্যবহারিক ডিজিটাল গ্রাফিক্স — দৈনন্দিন ব্যবহারের জন্য সোশ্যাল মিডিয়া পোস্ট, পোস্টার, ব্যানার ও প্রচারসামগ্রী।',
       seoTitle: 'গ্রাফিক্স ডিজাইন — সোশ্যাল মিডিয়া গ্রাফিক্স, পোস্টার ও প্রচারসামগ্রী',
       seoDescription:
-        'সবুজ মিয়ার ব্যবহারিক গ্রাফিক্স ডিজাইন: ছোট ব্যবসা ও প্রতিষ্ঠানের জন্য বাংলা ও ইংরেজিতে সোশ্যাল মিডিয়া গ্রাফিক্স, পোস্টার, ব্যানার, নোটিশ ও প্রচারসামগ্রী। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+        'ছোট ব্যবসা ও প্রতিষ্ঠানের জন্য বাংলা ও ইংরেজি সোশ্যাল গ্রাফিক্স, পোস্টার, ব্যানার ও নোটিশ। ঢাকা থেকে বিশ্বব্যাপী রিমোট।',
       forWho: [
         'ছোট ব্যবসা, স্কুল ও প্রতিষ্ঠান যাদের নিয়মিত, পরিপাটি ভিজ্যুয়াল সামগ্রী দরকার',
         'যার একটি পোস্টার, ব্যানার বা ঘোষণা গ্রাফিক ঠিকমতো ও দ্রুত দরকার',
@@ -697,7 +697,7 @@ const bn: ServicesContent = {
       short: 'বছরের পর বছরের বাস্তব অফিস ও সাইট-পরিচালনার অভিজ্ঞতায় সমর্থিত সুসংগঠিত, ডিজিটাল-প্রথম প্রশাসনিক সহায়তা।',
       seoTitle: 'অফিস প্রশাসন ও পরিচালনা সহায়তা — রিমোট প্রশাসনিক সেবা',
       seoDescription:
-        'সবুজ মিয়ার অফিস প্রশাসন সহায়তা: নথি ব্যবস্থাপনা, রেকর্ড ও ফাইলিং সিস্টেম, রেজিস্ট্রেশন, সময়সূচি, রিপোর্টিং ও ডিজিটাল অফিস কর্মপ্রবাহ — ৮+ বছরের পরিচালনা অভিজ্ঞতা। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+        'রেকর্ড, নথি, নিবন্ধন, রিপোর্টিং ও ডিজিটাল কর্মপ্রবাহে রিমোট অফিস সহায়তা। সাভার, ঢাকা থেকে বিশ্বব্যাপী কাজ।',
       forWho: [
         'নিবেদিত প্রশাসক ছাড়া ছোট অফিস, স্কুল ও প্রতিষ্ঠান',
         'ব্যবসার মালিক যাদের নির্ভরযোগ্য ব্যাক-অফিস ফলো-আপ দরকার',
@@ -732,7 +732,7 @@ const bn: ServicesContent = {
       short: 'নির্ভুল ডেটা এন্ট্রি, পরিষ্কারকরণ ও কাঠামোবদ্ধকরণ — কাগজ ও পিডিএফ থেকে বিশ্বাসযোগ্য স্প্রেডশিট ও ডেটাবেজ পর্যন্ত।',
       seoTitle: 'ডেটা এন্ট্রি ও ডেটা প্রক্রিয়াকরণ — ক্লিনআপ, স্প্রেডশিট ও কাঠামোবদ্ধ ডেটা',
       seoDescription:
-        'সবুজ মিয়ার ডেটা এন্ট্রি ও ডেটা প্রক্রিয়াকরণ: বড় আকারের এন্ট্রি, ডিজিটাইজেশন, ক্লিনআপ ও ডুপ্লিকেট অপসারণ, ফরম্যাট রূপান্তর, স্প্রেডশিট কাঠামোবদ্ধকরণ ও ডেটাবেজের জন্য প্রস্তুতি — নির্ভুল ও গোপনীয়। ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+        'কাগজ, পিডিএফ বা স্ক্যান থেকে ডেটা এন্ট্রি, পরিষ্কার ও স্প্রেডশিট সাজানো। সাভার, ঢাকা থেকে বিশ্বব্যাপী রিমোট সহায়তা।',
       forWho: [
         'ব্যবসা ও প্রতিষ্ঠান যাদের কাগজের রেকর্ড, পিডিএফ বা স্ক্যান ব্যবহারযোগ্য ডেটায় পরিণত করা দরকার',
         'অগোছালো স্প্রেডশিটওয়ালা টিম: ডুপ্লিকেট, অসামঞ্জস্যপূর্ণ ফরম্যাট, অনুপস্থিত ফিল্ড',

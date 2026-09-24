@@ -192,7 +192,7 @@ export function NavOverlay({
                       ref={(el) => {
                         rowRefs.current[i] = el;
                       }}
-                      href={sectionHref(i)}
+                      href={sectionHref(i, lang)}
                       className={`nav-row${isCurrent ? ' nav-row-current' : ''}`}
                       aria-current={isCurrent ? 'true' : undefined}
                       onClick={(e) => {
@@ -221,7 +221,7 @@ export function NavOverlay({
                   ref={(el) => {
                     rowRefs.current[total] = el;
                   }}
-                  href={serviceHref()}
+                  href={serviceHref(undefined, lang)}
                   className="nav-row"
                   tabIndex={open ? 0 : -1}
                 >

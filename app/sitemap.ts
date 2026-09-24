@@ -10,18 +10,24 @@ export const dynamic = 'force-static';
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
   return [
-    ...SECTION_IDS.map((_, i) => ({
-      url: sectionUrl(i),
-      lastModified,
-      changeFrequency: 'monthly' as const,
-      priority: i === 0 ? 1 : 0.7,
-    })),
+    ...SECTION_IDS.flatMap((_, i) => {
+      const en = sectionUrl(i, 'en');
+      const bn = sectionUrl(i, 'bn');
+      const priority = i === 0 ? 1 : 0.7;
+      return [
+        { url: en, lastModified, changeFrequency: 'monthly' as const, priority, alternates: { languages: { en, bn, 'x-default': en } } },
+        { url: bn, lastModified, changeFrequency: 'monthly' as const, priority, alternates: { languages: { en, bn, 'x-default': en } } },
+      ];
+    }),
     /* The service-intent layer: hub + eight pages, outside the pager. */
-    ...SERVICE_ROUTES.map((href, i) => ({
-      url: new URL(href, SITE_ORIGIN).href,
-      lastModified,
-      changeFrequency: 'monthly' as const,
-      priority: i === 0 ? 0.8 : 0.6,
-    })),
+    ...SERVICE_ROUTES.flatMap((href, i) => {
+      const en = new URL(href, SITE_ORIGIN).href;
+      const bn = new URL(`/bn${href}`, SITE_ORIGIN).href;
+      const priority = i === 0 ? 0.8 : 0.6;
+      return [
+        { url: en, lastModified, changeFrequency: 'monthly' as const, priority, alternates: { languages: { en, bn, 'x-default': en } } },
+        { url: bn, lastModified, changeFrequency: 'monthly' as const, priority, alternates: { languages: { en, bn, 'x-default': en } } },
+      ];
+    }),
   ];
 }

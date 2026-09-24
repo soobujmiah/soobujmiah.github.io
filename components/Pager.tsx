@@ -109,7 +109,7 @@ function canScrollInner(el: HTMLDivElement | null, dir: 1 | -1): boolean {
 function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
   const prefersReduced = useReducedMotion();
   const reducedMotion = prefersReduced ?? false;
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [ready, setReady] = useState(false);
   /* True only while the boot splash is actually covering the page. The
      hero's signature construction waits for this to clear, so the
@@ -137,14 +137,14 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
       if (!hash) return;
       const i = (SECTION_IDS as readonly string[]).indexOf(hash);
       if (i < 0) return;
-      const href = sectionHref(i);
+      const href = sectionHref(i, lang);
       if (window.location.pathname !== href) window.history.replaceState(null, '', href);
       setIndex(i);
       setDir(1);
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [lang]);
 
   /* Back/forward must move the pager, not just the URL. */
   useEffect(() => {
@@ -167,12 +167,12 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
       return;
     }
     try {
-      const href = sectionHref(index);
+      const href = sectionHref(index, lang);
       if (window.location.pathname !== href) window.history.pushState(null, '', href);
     } catch {
       /* ignore */
     }
-  }, [index]);
+  }, [index, lang]);
 
   const goToScene = useCallback((next: number) => {
     const clamped = Math.max(0, Math.min(PAGE_COUNT - 1, next));
@@ -392,9 +392,9 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
   );
 }
 
-export function Pager({ initialIndex = 0 }: { initialIndex?: number }) {
+export function Pager({ initialIndex = 0, initialLang = 'en' }: { initialIndex?: number; initialLang?: 'en' | 'bn' }) {
   return (
-    <LanguageProvider>
+    <LanguageProvider initialLang={initialLang}>
       <PagerInner initialIndex={initialIndex} />
     </LanguageProvider>
   );

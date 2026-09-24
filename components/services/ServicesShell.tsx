@@ -7,6 +7,7 @@ import { servicesContent } from '@/app/services-content';
 import { serviceHref } from '@/app/services';
 import { sectionHref } from '@/app/sections';
 import { BrandIcon } from '@/components/social-icons';
+import type { Lang } from '@/app/content';
 
 /* ═══════════════════════════════════════════════════════════════
    SERVICES SHELL — the chrome shared by /services/ and every service
@@ -50,7 +51,7 @@ function Chrome({ children, slug }: { children: React.ReactNode; slug?: string }
               it gets the same brand anchor home, not a breadcrumb
               announcing where you already are. */}
           <a
-            href={sectionHref(0)}
+            href={sectionHref(0, lang)}
             aria-label={t.header.homeLabel}
             className="font-mono text-sm font-medium tracking-tight transition-opacity hover:opacity-100"
             style={{ color: '#e4e2df' }}
@@ -109,9 +110,9 @@ function Chrome({ children, slug }: { children: React.ReactNode; slug?: string }
             © {localizeDigits(new Date().getFullYear(), lang)} {t.profile.nameFull}
           </p>
           <span className="flex flex-wrap items-center justify-center gap-4 font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>
-            <Link href={sectionHref(0)} className="transition-colors duration-300 hover:text-[#4ade80]">{s.labels.backHome}</Link>
-            <Link href={serviceHref()} className="transition-colors duration-300 hover:text-[#4ade80]">{s.labels.allServices}</Link>
-            <Link href={sectionHref(8)} className="transition-colors duration-300 hover:text-[#4ade80]">{s.labels.contactPage}</Link>
+            <Link href={sectionHref(0, lang)} className="transition-colors duration-300 hover:text-[#4ade80]">{s.labels.backHome}</Link>
+            <Link href={serviceHref(undefined, lang)} className="transition-colors duration-300 hover:text-[#4ade80]">{s.labels.allServices}</Link>
+            <Link href={sectionHref(8, lang)} className="transition-colors duration-300 hover:text-[#4ade80]">{s.labels.contactPage}</Link>
           </span>
         </div>
       </footer>
@@ -119,9 +120,9 @@ function Chrome({ children, slug }: { children: React.ReactNode; slug?: string }
   );
 }
 
-export function ServicesShell({ children, slug }: { children: React.ReactNode; slug?: string }) {
+export function ServicesShell({ children, slug, lang = 'en' }: { children: React.ReactNode; slug?: string; lang?: Lang }) {
   return (
-    <LanguageProvider>
+    <LanguageProvider initialLang={lang}>
       <div className="services-doc">
         <Chrome slug={slug}>{children}</Chrome>
       </div>

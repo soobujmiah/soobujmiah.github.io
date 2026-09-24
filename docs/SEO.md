@@ -1,14 +1,35 @@
 # SEO Record — soobujmiah.github.io (Portfolio)
 
+## Portfolio refinement — 2026-09-24
+
+Repository-state audit and refinement at the working branch recorded in Git.
+English routes keep their existing URLs; equivalent Bengali routes are now
+independently rendered under `/bn/`. The sitemap contains both languages and
+each page emits a self-canonical plus reciprocal `en`, `bn`, and `x-default`
+alternates. Metadata, language purity, translation presence, routes, schema,
+and sitemap output are covered by the source and exported-artifact checks.
+
+- Updated identity copy to describe a long-running hands-on technology journey
+  and current building, without inventing a start year or combining it with
+  dated professional employment.
+- Kept the existing pager, hero, transitions, service taxonomy, project
+  details, visual system, and original English URLs.
+- Clarified service categories and tightened repeated service descriptions;
+  added concise project role statements to featured work.
+- Shared Person/WebSite structured data continues to derive identity links
+  from the existing contact data. Page-level service schema remains intact.
+- Page-specific social images were not added; existing shared `og.png` remains
+  the social preview image. No browser/device run is implied by this record.
+
 | Field | Value |
 |---|---|
 | **SEO standard** | [soobujmiah SEO Standard v1](https://github.com/soobujmiah/soobujmiah.github.io/blob/main/docs/SEO_STANDARD.md) |
-| **Last audit** | 2026-09-19 17:14 +06:00 (Phase 4: Person `sameAs` mailto hygiene — final structured-data audit) |
+| **Last audit** | 2026-09-24 (portfolio content, route, and static-export audit; see refinement record below) |
 | **Site status** | `LIVE_SITE` — https://soobujmiah.github.io/ (GitHub Pages, workflow deploy) |
 | **Role in identity graph** | **Hub.** Every public project links back here; this site links to every public project. |
-| **Search intent** | `Sobuj Miah` / `soobujmiah` identity → engineering positioning + practical technology services |
+| **Search intent** | `Sobuj Miah` / `soobujmiah` identity → software, AI, practical technology, and digital services |
 
-## Audit result (2026-09-16)
+## Previous baseline (2026-09-16; superseded by the 2026-09-24 refinement above)
 
 | Check | Result |
 |---|---|
@@ -21,7 +42,13 @@
 | Practical/local service intent (Layer C/D) | **Implemented** — `/services/` hub + 8 intent pages (see below) |
 | Location intent | PASS (Dhaka, Bangladesh already present; extended with "remote worldwide") |
 
-## Changes made (2026-09-16)
+## Historical phase log
+
+The entries below preserve earlier decisions as dated snapshots; statements in
+those entries describe the site at that phase and are superseded where the
+current refinement record above differs.
+
+### Changes made (2026-09-16)
 
 Minimal, content-only, gate-verified. No route, component, animation, design token or URL changed.
 

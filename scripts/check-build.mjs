@@ -41,7 +41,7 @@ const SERVICE_ROUTES = [
   '/services/android-support/', '/services/business-technology/', '/services/graphics-design/',
   '/services/office-administration/', '/services/data-entry/',
 ];
-const EXPECTED_PUBLIC_ROUTES = SECTIONS.length + SERVICE_ROUTES.length; // 9 + 9 = 18
+const EXPECTED_PUBLIC_ROUTES = 2 * (SECTIONS.length + SERVICE_ROUTES.length); // English + Bengali
 
 /** Minimum visible server-rendered characters per route. */
 const MIN_VISIBLE_CHARS = 220;
@@ -76,6 +76,15 @@ if (!existsSync(OUT)) {
   process.exit(1);
 }
 
+function walkFiles(dir, acc = []) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) walkFiles(full, acc);
+    else acc.push(full);
+  }
+  return acc;
+}
+
 function visibleText(html) {
   return html
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
@@ -91,6 +100,8 @@ const routePath = (slug) => (slug === 'home' ? '/' : `/${slug}/`);
 
 /* ── 1–3. real routes with real, server-rendered content ── */
 const textByRoute = {};
+const publicTitles = new Set();
+const publicDescriptions = new Set();
 for (const slug of SECTIONS) {
   const file = routeFile(slug);
   if (!existsSync(file)) {
@@ -100,6 +111,7 @@ for (const slug of SECTIONS) {
   const html = readFileSync(file, 'utf8');
   const text = visibleText(html);
   textByRoute[slug] = text;
+  if (!/<html[^>]*lang="en"/.test(html)) fail(`route "${slug}" does not declare lang=en`);
 
   if (text.length < MIN_VISIBLE_CHARS) {
     fail(`route "${slug}" ships only ${text.length} visible chars (min ${MIN_VISIBLE_CHARS}) — content is not server-rendered`);
@@ -113,15 +125,28 @@ for (const slug of SECTIONS) {
   }
   const title = html.match(/<title>([^<]*)<\/title>/);
   if (!title) fail(`route "${slug}" has no <title>`);
-  else if (!title[1].includes('Sobuj Miah')) fail(`route "${slug}" title does not name the author: "${title[1]}"`);
+  else {
+    if (!title[1].includes('Sobuj Miah')) fail(`route "${slug}" title does not name the author: "${title[1]}"`);
+    if (publicTitles.has(title[1])) fail(`duplicate title across public routes: ${title[1]}`);
+    publicTitles.add(title[1]);
+  }
 
   const desc = html.match(/<meta name="description" content="([^"]*)"/);
   if (!desc) fail(`route "${slug}" has no meta description`);
+  else {
+    if (publicDescriptions.has(desc[1])) fail(`duplicate description across public routes: ${desc[1]}`);
+    publicDescriptions.add(desc[1]);
+  }
 
   const canonical = html.match(/<link rel="canonical" href="([^"]*)"/);
   const want = new URL(routePath(slug), ORIGIN).href;
   if (!canonical) fail(`route "${slug}" has no canonical link`);
   else if (canonical[1] !== want) fail(`route "${slug}" canonical is ${canonical[1]}, expected ${want}`);
+  const pairedPath = routePath(slug);
+  for (const [hreflang, path] of [['en', pairedPath], ['bn', pairedPath === '/' ? '/bn/' : `/bn${pairedPath}`], ['x-default', pairedPath]]) {
+    const href = new URL(path, ORIGIN).href;
+    if (!html.includes(`rel="alternate" hrefLang="${hreflang}" href="${href}"`)) fail(`route "${slug}" is missing ${hreflang} alternate ${href}`);
+  }
 
   const og = html.match(/<meta property="og:image" content="([^"]*)"/);
   if (!og) fail(`route "${slug}" has no og:image`);
@@ -131,8 +156,6 @@ ok(`${SECTIONS.length} section routes present with server-rendered HTML`);
 /* ── 1b. service routes: same bar (real HTML, title names the author,
        description, exact canonical, og:image, EN-only default render)
        plus Service/BreadcrumbList structured data ── */
-const titles = new Set();
-const descs = new Set();
 for (const route of SERVICE_ROUTES) {
   const file = join(OUT, ...route.split('/').filter(Boolean), 'index.html');
   if (!existsSync(file)) {
@@ -141,6 +164,7 @@ for (const route of SERVICE_ROUTES) {
   }
   const html = readFileSync(file, 'utf8');
   const text = visibleText(html);
+  if (!/<html[^>]*lang="en"/.test(html)) fail(`service route ${route} does not declare lang=en`);
   if (text.length < MIN_VISIBLE_CHARS) fail(`service route ${route} ships only ${text.length} visible chars`);
   const bengali = (text.match(/[\u0980-\u09FF]/g) || []).length;
   if (bengali > 0) fail(`service route ${route} ships ${bengali} Bengali char(s) in its default (English) render`);
@@ -148,19 +172,24 @@ for (const route of SERVICE_ROUTES) {
   if (!title) fail(`service route ${route} has no <title>`);
   else {
     if (!title[1].includes('Sobuj Miah')) fail(`service route ${route} title does not name the author: "${title[1]}"`);
-    if (titles.has(title[1])) fail(`duplicate <title> on ${route}: "${title[1]}"`);
-    titles.add(title[1]);
+    if (publicTitles.has(title[1])) fail(`duplicate <title> across public routes at ${route}: "${title[1]}"`);
+    publicTitles.add(title[1]);
   }
   const desc = html.match(/<meta name="description" content="([^"]*)"/);
   if (!desc) fail(`service route ${route} has no meta description`);
   else {
-    if (descs.has(desc[1])) fail(`duplicate meta description on ${route}`);
-    descs.add(desc[1]);
+    if (publicDescriptions.has(desc[1])) fail(`duplicate meta description across public routes on ${route}`);
+    publicDescriptions.add(desc[1]);
   }
   const canonical = html.match(/<link rel="canonical" href="([^"]*)"/);
   const want = new URL(route, ORIGIN).href;
   if (!canonical) fail(`service route ${route} has no canonical link`);
   else if (canonical[1] !== want) fail(`service route ${route} canonical is ${canonical[1]}, expected ${want}`);
+  const bnRoute = `/bn${route}`;
+  for (const [hreflang, path] of [['en', route], ['bn', bnRoute], ['x-default', route]]) {
+    const href = new URL(path, ORIGIN).href;
+    if (!html.includes(`rel="alternate" hrefLang="${hreflang}" href="${href}"`)) fail(`service route ${route} is missing ${hreflang} alternate ${href}`);
+  }
   if (!html.match(/<meta property="og:image" content="([^"]*)"/)) fail(`service route ${route} has no og:image`);
   if (/noindex/i.test(html)) fail(`service route ${route} carries a noindex directive`);
   const ld = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => m[1]);
@@ -184,7 +213,75 @@ for (const route of SERVICE_ROUTES) {
   if (!html.includes('href="/services/"') && route !== '/services/') fail(`service route ${route} does not link back to the hub`);
 }
 ok(`${SERVICE_ROUTES.length} service routes present with unique title/description, exact canonical, valid Service + BreadcrumbList JSON-LD`);
-ok(`${EXPECTED_PUBLIC_ROUTES} public routes in total: ${SECTIONS.length} pager sections + ${SERVICE_ROUTES.length} service pages`);
+/* Bangla is independently crawlable below /bn/. Verify the exported
+   documents, locale declarations, paired metadata, and translated text. */
+const localizedRoutes = [
+  ...SECTIONS.map((slug) => [slug === 'home' ? '/bn/' : `/bn/${slug}/`, slug]),
+  ...SERVICE_ROUTES.map((route) => [`/bn${route}`, route]),
+];
+/* GitHub Pages serves these separate project sites on this same hostname;
+   their paths intentionally do not live in this portfolio's export. */
+const SAME_HOST_PROJECT_PATHS = new Set(['/arms', '/iqra-online-mart', '/ternux', '/adt']);
+for (const [route] of localizedRoutes) {
+  const file = join(OUT, ...route.split('/').filter(Boolean), 'index.html');
+  if (!existsSync(file)) {
+    fail(`missing static Bengali route ${route}`);
+    continue;
+  }
+  const html = readFileSync(file, 'utf8');
+  const text = visibleText(html);
+  if (text.length < MIN_VISIBLE_CHARS) fail(`Bengali route ${route} ships only ${text.length} visible chars`);
+  if (!/<html[^>]*lang="bn"/.test(html)) fail(`Bengali route ${route} does not declare lang=bn`);
+  if (!/[\u0980-\u09FF]/.test(text)) fail(`Bengali route ${route} contains no Bengali visible text`);
+  const title = html.match(/<title>([^<]*)<\/title>/)?.[1];
+  if (!title) fail(`Bengali route ${route} has no title`);
+  else {
+    if (!/[\u0980-\u09FF]/.test(title)) fail(`Bengali route ${route} title is not translated`);
+    if (publicTitles.has(title)) fail(`duplicate title across public routes: ${title}`);
+    publicTitles.add(title);
+  }
+  const desc = html.match(/<meta name="description" content="([^"]*)"/)?.[1];
+  if (!desc) fail(`Bengali route ${route} has no description`);
+  else {
+    if (!/[\u0980-\u09FF]/.test(desc)) fail(`Bengali route ${route} description is not translated`);
+    if (publicDescriptions.has(desc)) fail(`duplicate description across public routes: ${desc}`);
+    publicDescriptions.add(desc);
+  }
+  const canonical = html.match(/<link rel="canonical" href="([^"]*)"/)?.[1];
+  if (canonical !== new URL(route, ORIGIN).href) fail(`Bengali route ${route} has incorrect canonical ${canonical}`);
+  for (const [hreflang, path] of [['en', route.replace(/^\/bn/, '') || '/'], ['bn', route], ['x-default', route.replace(/^\/bn/, '') || '/']]) {
+    const href = new URL(path, ORIGIN).href;
+    if (!html.includes(`rel="alternate" hrefLang="${hreflang}" href="${href}"`)) fail(`${route} is missing ${hreflang} alternate ${href}`);
+  }
+  if (!html.includes('property="og:image"')) fail(`Bengali route ${route} has no og:image`);
+}
+ok(`${localizedRoutes.length} Bengali routes present with Bengali content, titles, descriptions, canonical and reciprocal hreflang`);
+ok(`${EXPECTED_PUBLIC_ROUTES} public routes in total: English + Bengali section and service pages`);
+
+/* Every rendered same-origin link must resolve to an exported file. */
+let checkedLinks = 0;
+for (const file of walkFiles(OUT).filter((f) => f.endsWith('.html'))) {
+  const html = readFileSync(file, 'utf8');
+  for (const [, rawHref] of html.matchAll(/\bhref="([^"]+)"/g)) {
+    if (!rawHref || rawHref.startsWith('#') || rawHref.startsWith('/_next/')) continue;
+    let url;
+    try { url = new URL(rawHref.replaceAll('&amp;', '&'), ORIGIN); } catch { continue; }
+    if (url.origin !== ORIGIN) continue;
+    let pathname;
+    try { pathname = decodeURIComponent(url.pathname); } catch { pathname = url.pathname; }
+    if (SAME_HOST_PROJECT_PATHS.has(pathname.replace(/\/$/, ''))) continue;
+    const parts = pathname.split('/').filter(Boolean);
+    const direct = join(OUT, ...parts);
+    const candidates = pathname.endsWith('/')
+      ? [join(direct, 'index.html')]
+      : [direct, `${direct}.html`, join(direct, 'index.html')];
+    checkedLinks += 1;
+    if (!candidates.some((candidate) => existsSync(candidate))) {
+      fail(`broken internal link ${rawHref} in ${file.replace(OUT, 'out')}`);
+    }
+  }
+}
+ok(`${checkedLinks} same-origin HTML links resolve to exported files`);
 
 if (textByRoute['home']) ok(`home ships ${textByRoute['home'].length} visible chars without JavaScript (audit baseline: 226)`);
 
@@ -229,9 +326,21 @@ if (existsSync(join(OUT, 'sitemap.xml'))) {
     const url = new URL(route, ORIGIN).href;
     if (!xml.includes(url)) fail(`sitemap.xml is missing ${url}`);
   }
+  for (const [route] of localizedRoutes) {
+    const url = new URL(route, ORIGIN).href;
+    if (!xml.includes(url)) fail(`sitemap.xml is missing ${url}`);
+  }
+  if (!xml.includes('hreflang="bn"') || !xml.includes('hreflang="en"') || !xml.includes('hreflang="x-default"')) fail('sitemap.xml lacks language alternate links');
   const locs = (xml.match(/<loc>/g) || []).length;
   if (locs !== EXPECTED_PUBLIC_ROUTES) fail(`sitemap.xml lists ${locs} URLs, expected exactly ${EXPECTED_PUBLIC_ROUTES}`);
   else ok(`sitemap.xml lists exactly ${EXPECTED_PUBLIC_ROUTES} URLs (${SECTIONS.length} sections + ${SERVICE_ROUTES.length} services)`);
+}
+
+if (existsSync(join(OUT, 'robots.txt'))) {
+  const robots = readFileSync(join(OUT, 'robots.txt'), 'utf8');
+  if (!/User-Agent:\s*\*/i.test(robots) || !/Allow:\s*\//i.test(robots)) fail('robots.txt does not allow crawling');
+  if (!robots.includes(`${ORIGIN}/sitemap.xml`)) fail('robots.txt does not reference the canonical sitemap');
+  else ok('robots.txt allows crawling and references sitemap.xml');
 }
 
 /* ── 5. JavaScript budget ── */
@@ -268,6 +377,7 @@ if (existsSync(chunksDir)) {
   const routeHtml = [
     ...SECTIONS.map((slug) => [routePath(slug), routeFile(slug)]),
     ...SERVICE_ROUTES.map((r) => [r, join(OUT, ...r.split('/').filter(Boolean), 'index.html')]),
+    ...localizedRoutes.map(([route]) => [route, join(OUT, ...route.split('/').filter(Boolean), 'index.html')]),
   ];
   let heaviest = ['', 0];
   for (const [route, file] of routeHtml) {

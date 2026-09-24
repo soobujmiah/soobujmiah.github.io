@@ -1,9 +1,9 @@
 # Sobuj Miah — Portfolio
 
-Personal portfolio of **Sobuj Miah**, Independent Software & AI Systems Engineer.
+Personal portfolio of **Sobuj Miah**, an independent software and AI systems builder.
 Live at **https://soobujmiah.github.io**.
 
-[![SEO audited](https://img.shields.io/badge/SEO-audited%202026--09--19-22c55e?style=flat-square)](docs/SEO.md)
+[![SEO audited](https://img.shields.io/badge/SEO-audited%202026--09--24-22c55e?style=flat-square)](docs/SEO.md)
 
 Discrete paper-turn pager (Next.js static export + framer-motion),
 fully bilingual **English / বাংলা**, green-on-black theme. The hero name is
@@ -50,7 +50,7 @@ deliberate change, not cleanup.
 | `check:purity` | Adversarial suite — injects `"এটি AI Work Section GitHub"` and `"This is বাংলা বিভাগ"` into copies of the real content and asserts the gate rejects each, with an unmodified control that must pass. |
 | `check:design` | `app/design-tokens.ts` = `DESIGN_SYSTEM.md` = `globals.css :root` = browser `themeColor`. Documentation drift fails the build. Also asserts the identity mark's engineering contract (§6) and palette family (§7), and guards retired hero motifs — including the character-substitution wordmark — against returning. |
 | `check:units` | Bengali grapheme segmentation (both the `Intl.Segmenter` path and the fallback), section routing, digit localisation, and the signature-name motion logic: determinism, exact landing, baseline derivation, particle budget, cluster ordering, colour ramp, and the motion-token budget adding up to 1. |
-| `check:build` | From the built `out/`: 18 real routes (9 pager sections + 9 service pages) with server-rendered text, per-route title/canonical/social card, `robots.txt`/`sitemap.xml`/`og.png`, and the JavaScript budget. |
+| `check:build` | From the built `out/`: 36 crawlable routes (9 pager sections + 9 service pages in English and Bengali), server-rendered text, locale metadata and alternates, sitemap, social assets, and JavaScript budget. |
 
 ## Content model
 
@@ -62,10 +62,10 @@ alongside the copy so each language tree is complete and reviewable.
 `websiteUrl` is set ONLY for repositories with a verified live site (never
 fabricate); the UI maps it to `Explore`, repos to Source/Code links.
 
-- `app/language.tsx` — `LanguageProvider` + `useLang()` hook. Preference
-  persists to guarded `localStorage` (never throws in private mode / old
-  WebViews) and syncs `<html lang>`, tab title, and meta description.
-- `app/page.tsx` — **discrete pager**: fixed 100dvh root. Pages center when
+- `app/language.tsx` — `LanguageProvider` + `useLang()` hook. Locale is
+  determined by the URL (`/` English, `/bn/` Bengali), so both versions are
+  independently crawlable; switching language keeps the equivalent route.
+- `app/(en)/page.tsx` — **discrete pager**: fixed 100dvh root. Pages center when
   they fit and scroll internally when they don't (viewport-first when
   possible, content-first when necessary). Wheel ticks, vertical swipes,
   arrows/PageUp/PageDown/Home/End, dots, and nav links yield to inner
@@ -172,6 +172,11 @@ complete, de-duplicated and identical across both language trees.
 
 ## Routes
 
+English URLs retain their existing paths. Bengali equivalents use `/bn/` and
+the same route names (for example `/work/` and `/bn/work/`). Each pair has its
+own canonical plus reciprocal `en`, `bn`, and `x-default` alternates; both
+variants are included in the sitemap.
+
 Every section is a real static page. The pager is the presentation; the
 route is the address.
 
@@ -194,12 +199,15 @@ app/
   graphemes.ts       grapheme segmentation (Bengali-safe)
   name-motion.ts     pure motion logic for the identity construction
   language.tsx       language provider + hook + digit localization
-  layout.tsx         metadata, JSON-LD, fonts (Inter/JetBrains/Noto BN,
-                     + Chakra Petch and Anek Bangla as the wordmark faces)
+  site-layout.tsx    shared metadata, JSON-LD, fonts, and locale document shell
+  (en)/              English routes at their existing public URLs
+  (bn)/              crawlable Bengali routes under /bn/
+  route-seo.ts       per-route title/description/canonical/hreflang metadata
   robots.ts          robots.txt
   sitemap.ts         sitemap.xml, one line per section
-  page.tsx           home route (section 0)
-  [section]/page.tsx the eight other static routes + per-route metadata
+  (en)/page.tsx          English home route (section 0)
+  (en)/[section]/page.tsx the eight English section routes + metadata
+  (bn)/bn/...             Bengali home, sections, service hub + pages
   globals.css        tokens, pager, overlay, name, carousels, responsive, a11y
   icon.svg           favicon (also the social-card fallback mark)
   not-found.tsx      bilingual 404 → 404.html on export

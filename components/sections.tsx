@@ -80,7 +80,7 @@ function iconFor(href: string): 'portfolio' | BrandIconId {
 /* ── 01 · HERO ───────────────────────────────────────────────── */
 
 export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: boolean; armed?: boolean }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const { goToScene } = useNav();
 
   return (
@@ -152,7 +152,7 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
             transition={{ delay: 2.0, duration: 0.7 }}
           >
             <Magnetic
-              href={sectionHref(3)}
+              href={sectionHref(3, lang)}
               onClick={(e) => {
                 e.preventDefault();
                 goToScene(3);
@@ -376,6 +376,10 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
 
         <p className="text-xs leading-[1.7] mb-3" style={{ color: 'rgba(228,226,223,0.6)' }}>
           {project.description}
+        </p>
+
+        <p className="text-[11px] leading-[1.6] mb-3" style={{ color: 'rgba(228,226,223,0.48)' }}>
+          <span style={{ color: 'rgba(228,226,223,0.62)' }}>{t.work.roleLabel}</span>{project.role}
         </p>
 
         <p className="dc-evidence text-xs leading-[1.7] mb-4" style={{ color: 'rgba(228,226,223,0.5)' }}>
@@ -905,7 +909,7 @@ function ExperienceAccordion() {
 }
 
 export function ExperienceScene() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   return (
     <div className="page-fill">
       <PageNumeral index={7} />
@@ -913,6 +917,11 @@ export function ExperienceScene() {
         <div className="grid gap-6 lg:grid-cols-[1fr_1.6fr] lg:gap-12">
           <div>
             <PageHeading eyebrow={t.experience.eyebrow} heading={t.experience.heading} />
+            <Reveal delay={0.06}>
+              <p className="mt-3 text-center text-xs leading-relaxed lg:text-left" style={{ color: 'rgba(228,226,223,0.56)' }}>
+                {t.experience.intro}
+              </p>
+            </Reveal>
             {/* Practical professional layer — deliberately separate
                 from the engineering identity on the work pages. */}
             <Reveal delay={0.1} className="text-center">
@@ -933,7 +942,7 @@ export function ExperienceScene() {
               {/* Discovery link into the service-intent layer (/services/),
                   which lives outside the pager by design. */}
               <a
-                href={serviceHref()}
+                href={serviceHref(undefined, lang)}
                 className="mt-3 inline-block font-mono text-[10px] transition-colors duration-300 hover:text-[#4ade80]"
                 style={{ color: 'rgba(228,226,223,0.5)' }}
                 data-magnetic
@@ -943,6 +952,9 @@ export function ExperienceScene() {
             </Reveal>
           </div>
           <div>
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: 'rgba(228,226,223,0.42)' }}>
+              {t.experience.professionalLabel}
+            </p>
             {/* phones: accordion, one story at a time */}
             <div className="md:hidden">
               <ExperienceAccordion />
@@ -977,7 +989,7 @@ export function ExperienceScene() {
 /* ── 09 · CONTACT ────────────────────────────────────────────── */
 
 export function ContactScene() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   return (
     <div className="page-fill">
       <PageNumeral index={8} />
@@ -1004,7 +1016,7 @@ export function ContactScene() {
               <p className="mx-auto lg:mx-0 max-w-md text-sm" style={{ color: 'rgba(228,226,223,0.6)' }}>
                 {t.contact.sub}{' '}
                 <a
-                  href={serviceHref()}
+                  href={serviceHref(undefined, lang)}
                   className="transition-colors duration-300 hover:text-[#4ade80]"
                   style={{ color: 'rgba(228,226,223,0.85)', textDecoration: 'underline', textUnderlineOffset: 3 }}
                   data-magnetic

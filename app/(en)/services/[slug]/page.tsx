@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { SERVICE_SLUGS, isServiceSlug } from '@/app/services';
 import { ServicesShell } from '@/components/services/ServicesShell';
 import { ServiceDetail } from '@/components/services/ServiceViews';
-import { pageJsonLd, pageMetadata } from '../seo';
+import { pageJsonLd, pageMetadata } from '@/app/services/seo';
 
 /* /services/<slug>/ — one search intent per static page. */
 export const dynamicParams = false;

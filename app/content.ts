@@ -35,7 +35,7 @@
    copy AND its search infrastructure:
 
      profile/meta/hero ─► layout metadata (title, description, OG,
-                          Twitter, keywords) in app/layout.tsx
+                          Twitter, keywords) in app/site-layout.tsx
      seo.sections[9] ───► per-route <title>, meta description, OG and
                           Twitter cards in app/[section]/page.tsx and
                           the live title swap in app/language.tsx
@@ -59,6 +59,7 @@ export interface Project {
   tagline: string;
   year: string;
   description: string;
+  role: string;
   evidence: string;
   topics: string[];
   repo: string;
@@ -151,6 +152,7 @@ export interface Content {
     eyebrow: string;
     heading: string;
     evidenceLabel: string;
+    roleLabel: string;
     liveLabel: string;
     codeLabel: string;
     projects: Project[];
@@ -208,6 +210,8 @@ export interface Content {
   experience: {
     eyebrow: string;
     heading: string;
+    intro: string;
+    professionalLabel: string;
     services: { label: string; items: string[] };
     entries: WorkEntry[];
   };
@@ -268,8 +272,8 @@ const en: Content = {
   profile: {
     name: 'Sobuj',
     nameFull: 'Sobuj Miah',
-    title: 'Independent Software & AI Systems Engineer',
-    tagline: 'On-Device AI · Android · ARM64 Linux · Native Tooling · Software Systems',
+    title: 'Independent Software & AI Systems Builder',
+    tagline: 'Software · On-Device AI · Android · Computing · Automation',
     location: 'Dhaka, Bangladesh',
     github: 'https://github.com/soobujmiah',
     email: 'soobujmiah@gmail.com',
@@ -277,13 +281,13 @@ const en: Content = {
     linkedin: 'https://linkedin.com/in/soobujmiah',
   },
   meta: {
-    title: 'Sobuj Miah — Independent Software & AI Systems Engineer',
+    title: 'Sobuj Miah — Software, AI & Practical Technology',
     description:
-      'On-device AI, Android, ARM64 Linux, native tooling. Built under constraint. Verified on real hardware with CI builds, tests, and physical-device evidence.',
+      'Software, on-device AI, Android, computing and automation. I learn by experimenting, building and solving practical problems, with project evidence from real hardware and CI.',
   },
   hero: {
     intro:
-      'Independent software and AI systems engineer at the intersection of on-device AI, Android systems, and ARM64 Linux. Self-taught, and built under constraint — every build runs on CI, every claim checked against a physical device.',
+      'A long-running, hands-on journey with technology: learning, experimenting, building and solving practical problems. Today I work across software, on-device AI, Android, computing, automation and digital tools.',
     availability: 'Open to remote',
     ctaWork: 'Explore my work',
     ctaGithub: 'View GitHub ↗',
@@ -300,9 +304,9 @@ const en: Content = {
   },
   about: {
     eyebrow: '03 — About',
-    heading: 'Self-taught systems engineer, building from constraints rather than around them.',
+    heading: 'Learning through systems, constraints, and practical problems.',
     paragraphs: [
-      'I am a self-taught systems engineer based in Dhaka, Bangladesh. My work sits at the intersection of on-device AI, Android systems, and ARM64 Linux — areas I entered because the tools I needed did not yet exist on the hardware I had.',
+      'I am a self-taught software and technology builder based in Dhaka, Bangladesh. My interests range from software and on-device AI to Android, computing and automation.',
       'A defining constraint: I develop, build, and validate software primarily from an Android phone running Termux and PRoot Debian rather than a conventional PC. This shapes my tooling, my CI architecture, and how I verify results.',
       'I learn through real problems: hypothesis, test, observation, formal theory, comparison, iteration. Mechanism-first and evidence-backed — a working principle I summarise as “living till learning.”',
     ],
@@ -325,6 +329,7 @@ const en: Content = {
     eyebrow: '04 — Featured Work',
     heading: 'Selected projects with CI and device evidence.',
     evidenceLabel: 'Evidence: ',
+    roleLabel: 'My role: ',
     liveLabel: 'Explore ↗',
     codeLabel: 'Code ↗',
     projects: [
@@ -334,6 +339,7 @@ const en: Content = {
         year: '2024–26',
         description:
           'Source-only Android runtime for private on-device LLM inference and Accessibility-gated automation. CPU inference device-validated; GPU/NPU in qualification.',
+        role: 'Designed the runtime and Android integration; validated CPU inference and consent boundaries on-device.',
         evidence:
           'Real arm64 llama.cpp CPU inference, 12–20 tok/s decode, KV-prefix reuse. Root-cause diagnosis of an Adreno Vulkan driver crash that shaped a fail-closed CPU-default architecture.',
         topics: ['Kotlin', 'llama.cpp', 'Vulkan', 'Accessibility', 'Shizuku', 'GGUF'],
@@ -347,6 +353,7 @@ const en: Content = {
         year: '2024–26',
         description:
           'Flutter/Dart foundation for professional vector, raster, document, and PDF work. Documentation-first architecture with pure-Dart core and SHA-256 state integrity.',
+        role: 'Built the application and reusable Dart foundation; verified core behavior and Flutter interactions.',
         evidence:
           '143 pure-Dart unit tests, 353 widget/controller tests. Validated on a physical device round after round.',
         topics: ['Flutter', 'Dart', 'Document Generation', 'Vector Graphics'],
@@ -360,6 +367,7 @@ const en: Content = {
         year: '2023–26',
         description:
           'Builds Android SDK build-tools and platform-tools from AOSP source for Linux ARM64/glibc. SHA-256-verified offline release artifacts.',
+        role: 'Developed the source-build and release pipeline, then validated the APK workflow on ARM64 hardware.',
         evidence:
           'Full ARM64 native APK pipeline validated end-to-end on Snapdragon 8s Gen 4: source → APK → sign → install → JNI load → run.',
         topics: ['AOSP', 'ARM64', 'Build Tools', 'Cross-compilation'],
@@ -373,6 +381,7 @@ const en: Content = {
         year: '2023–26',
         description:
           'Installs a real Debian ARM64 userspace, Xfce4 desktop, Termux:X11 display, PulseAudio bridge, and Zink/Turnip GPU route — one command, no root.',
+        role: 'Built the installation and desktop tooling; measured supported graphics paths on the reference device.',
         evidence:
           'Zink/Turnip renderer confirmed on Adreno 825: glmark2 score 140 (OpenGL 4.6), with a documented compatibility fallback route. Blender 4.3.2 launched, but its own report still named device type SOFTWARE — only the viewport OpenGL path through Zink/Turnip is proven, not Cycles GPU rendering.',
         topics: ['Debian', 'Vulkan', 'Turnip', 'Zink', 'Adreno', 'PRoot'],
@@ -503,28 +512,21 @@ const en: Content = {
   },
   experience: {
     eyebrow: '08 — Experience',
-    heading: '8+ years across operations, engineering, and administration.',
+    heading: 'A hands-on journey with technology, alongside professional work.',
+    intro: 'My interest in computers and technology predates my listed professional roles. It has grown through exploration, troubleshooting, building and learning from practical problems. Professional work is one part of that story; the projects show what I continue to explore and build today.',
+    professionalLabel: 'Professional experience',
     services: {
-      label: 'Practical work beyond engineering',
+      label: 'Other practical work',
       items: [
-        'Office administration',
-        'Digital documentation',
-        'Records & data organization',
-        'Spreadsheet & workflow support',
-        'Website & content management',
-        'Website development & maintenance',
-        'Custom software & small-business tools',
-        'Digital workflow automation',
-        'IT & software support',
-        'Computer setup & troubleshooting (Windows / Linux)',
-        'Android & phone software support (setup, ADB, optimization)',
-        'Remote technical support — Bangladesh & worldwide',
+        'Office and digital administration',
+        'Software, websites, and workflow tools',
+        'Computer and Android support',
       ],
     },
     entries: [
       {
         period: 'Apr 2026 – Present',
-        role: 'Independent Systems Builder & Engineer',
+        role: 'Independent Software & AI Systems Builder',
         company: 'Pro-Jukti Info Tech',
         location: 'Self-employed',
         desc: 'Independent systems work — on-device AI, ARM64 Android tooling and Linux systems, delivered through Pro-Jukti Info Tech.',
@@ -584,7 +586,7 @@ const en: Content = {
     eyebrow: '09 — Contact',
     headingA: 'Open to freelance,',
     headingB: 'remote, and collaboration.',
-    sub: 'Available for on-device AI, Android systems, ARM64 tooling and local-first products, as well as practical technology work: website development, custom software, and computer or Android support. Based in Savar, Dhaka, Bangladesh; remote worldwide.',
+    sub: 'I work across software, AI and practical digital technology, with remote availability from Savar, Dhaka, Bangladesh. For a project or service enquiry, contact me directly.',
     telegram: { label: 'Telegram', value: '@soobujmiah', href: 'https://t.me/soobujmiah' },
     email: { label: 'Email', value: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
     servicesLink: 'View all services →',
@@ -678,9 +680,9 @@ const en: Content = {
        descriptions are factual, unique, and written from real content. */
     sections: [
       {
-        title: 'Sobuj Miah — Independent Software & AI Systems Engineer',
+        title: 'Sobuj Miah — Software, AI & Practical Technology',
         description:
-          'On-device AI, Android, ARM64 Linux, native tooling. Built under constraint. Verified on real hardware with CI builds, tests, and physical-device evidence.',
+          'Software, on-device AI, Android, computing and automation. A hands-on practice of learning, experimenting and building, with project evidence from real hardware and CI.',
       },
       {
         title: 'What I Build — On-Device AI, Android & ARM64 Systems',
@@ -690,7 +692,7 @@ const en: Content = {
       {
         title: 'About — Independent Systems Builder in Dhaka',
         description:
-          'Self-taught independent systems builder in Dhaka, Bangladesh — developing from an Android phone, with engineering principles of evidence before claims and real hardware closing the loop.',
+          'About Sobuj Miah: a self-taught software and technology builder in Dhaka, Bangladesh, learning through practical projects, real devices and problem-solving.',
       },
       {
         title: 'Featured Work — LAI, GGEN, ADT, Ternux',
@@ -715,12 +717,12 @@ const en: Content = {
       {
         title: 'Experience — Operations, Administration & Engineering',
         description:
-          '8+ years across operations, administration, and engineering — plus practical technology services: website development and maintenance, custom software, computer setup and troubleshooting (Windows/Linux), and Android phone software support. Savar, Dhaka, Bangladesh; remote worldwide.',
+          'A long-running technology journey of learning, experimenting, building and solving practical problems, alongside professional experience in operations and administration. View the dated roles and projects.',
       },
       {
         title: 'Contact — Freelance, Remote & Collaboration',
         description:
-          'Contact Sobuj Miah — open to freelance, remote, and collaboration on on-device AI, Android systems, ARM64 tooling, and local-first products. Also for website development, custom software, and computer or Android troubleshooting from Savar, Dhaka, Bangladesh.',
+          'Contact Sobuj Miah about software, AI, practical technology services or collaboration. Based in Savar, Dhaka, Bangladesh, and available for remote work.',
       },
     ],
   },
@@ -736,8 +738,8 @@ const bn: Content = {
   profile: {
     name: 'সবুজ',
     nameFull: 'সবুজ মিয়া',
-    title: 'স্বাধীন সফটওয়্যার ও এআই সিস্টেম ইঞ্জিনিয়ার',
-    tagline: 'অন-ডিভাইস এআই · অ্যান্ড্রয়েড · এআরএম ৬৪ লিনাক্স · নেটিভ টুলিং · সফটওয়্যার সিস্টেম',
+    title: 'স্বাধীন সফটওয়্যার ও এআই সিস্টেম নির্মাতা',
+    tagline: 'সফটওয়্যার · অন-ডিভাইস এআই · অ্যান্ড্রয়েড · কম্পিউটিং · অটোমেশন',
     location: 'ঢাকা, বাংলাদেশ',
     github: 'https://github.com/soobujmiah',
     email: 'soobujmiah@gmail.com',
@@ -745,13 +747,13 @@ const bn: Content = {
     linkedin: 'https://linkedin.com/in/soobujmiah',
   },
   meta: {
-    title: 'সবুজ মিয়া — স্বাধীন সফটওয়্যার ও এআই সিস্টেম ইঞ্জিনিয়ার',
+    title: 'সবুজ মিয়া — সফটওয়্যার, এআই ও ব্যবহারিক প্রযুক্তি',
     description:
-      'অন-ডিভাইস এআই, অ্যান্ড্রয়েড, এআরএম ৬৪ লিনাক্স, নেটিভ টুলিং। সীমাবদ্ধতাকে ভিত্তি করে নির্মিত; বাস্তব হার্ডওয়্যারে যাচাইকৃত — সিআই বিল্ড, টেস্ট ও ডিভাইস-প্রমাণ।',
+      'সফটওয়্যার, অন-ডিভাইস এআই, অ্যান্ড্রয়েড, কম্পিউটিং ও অটোমেশন। হাতে-কলমে শেখা ও নির্মাণের দীর্ঘ যাত্রা, বাস্তব ডিভাইস ও সিআই-ভিত্তিক প্রকল্প প্রমাণসহ।',
   },
   hero: {
     intro:
-      'অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম ও এআরএম ৬৪ লিনাক্সের সংযোগস্থলে কাজ করা স্বাধীন সফটওয়্যার ও এআই সিস্টেম ইঞ্জিনিয়ার। স্ব-শিক্ষিত; সীমাবদ্ধতাকে ভিত্তি করেই কাজ করি — প্রতিটি বিল্ড চলে সিআই-তে, প্রতিটি দাবি যাচাই হয় বাস্তব ডিভাইসে।',
+      'প্রযুক্তি নিয়ে দীর্ঘদিনের হাতে-কলমে শেখা, পরীক্ষা, নির্মাণ ও বাস্তব সমস্যা সমাধানের পথ। এখন সফটওয়্যার, অন-ডিভাইস এআই, অ্যান্ড্রয়েড, কম্পিউটিং, অটোমেশন ও ডিজিটাল টুল নিয়ে কাজ করি।',
     availability: 'রিমোট কাজের জন্য উন্মুক্ত',
     ctaWork: 'আমার কাজ দেখুন',
     ctaGithub: 'গিটহাব দেখুন ↗',
@@ -768,9 +770,9 @@ const bn: Content = {
   },
   about: {
     eyebrow: '০৩ — পরিচিতি',
-    heading: 'স্ব-শিক্ষিত সিস্টেম ইঞ্জিনিয়ার — সীমাবদ্ধতা এড়িয়ে নয়, তাকে ভিত্তি করে কাজ করি।',
+    heading: 'সিস্টেম, সীমাবদ্ধতা ও বাস্তব সমস্যা থেকে শেখা।',
     paragraphs: [
-      'আমি ঢাকা, বাংলাদেশের একজন স্ব-শিক্ষিত সিস্টেম ইঞ্জিনিয়ার। আমার কাজের কেন্দ্রে আছে অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম ও এআরএম ৬৪ লিনাক্স — এই ক্ষেত্রগুলোতে এসেছি কারণ আমার হাতে থাকা হার্ডওয়্যারে প্রয়োজনীয় টুলগুলো তখনো ছিল না।',
+      'আমি ঢাকা, বাংলাদেশের একজন স্ব-শিক্ষিত সফটওয়্যার ও প্রযুক্তি নির্মাতা। সফটওয়্যার ও অন-ডিভাইস এআই থেকে অ্যান্ড্রয়েড, কম্পিউটিং ও অটোমেশন পর্যন্ত নানা বিষয়ে আমার আগ্রহ।',
       'একটি নির্ধারক সীমাবদ্ধতা: প্রচলিত পিসি নয়, মূলত একটি অ্যান্ড্রয়েড ফোনে টারমাক্স ও পি-রুট ডেবিয়ান চালিয়ে আমি সফটওয়্যার তৈরি, বিল্ড ও যাচাই করি। এটিই গড়ে দিয়েছে আমার টুলিং, সিআই আর্কিটেকচার ও ফলাফল যাচাইয়ের পদ্ধতি।',
       'আমি শিখি বাস্তব সমস্যার মধ্য দিয়ে: প্রকল্প, পরীক্ষা, পর্যবেক্ষণ, প্রাতিষ্ঠানিক তত্ত্ব, তুলনা, পুনরাবৃত্তি। মেকানিজম-ফার্স্ট ও প্রমাণ-ভিত্তিক — একটি কর্মনীতি, যাকে সংক্ষেপে বলি “যতদিন শিখি, ততদিন বাঁচি”।',
     ],
@@ -793,6 +795,7 @@ const bn: Content = {
     eyebrow: '০৪ — নির্বাচিত কাজ',
     heading: 'সিআই ও ডিভাইস প্রমাণসহ নির্বাচিত প্রজেক্ট।',
     evidenceLabel: 'প্রমাণ: ',
+    roleLabel: 'আমার ভূমিকা: ',
     liveLabel: 'ঘুরে দেখুন ↗',
     codeLabel: 'কোড ↗',
     projects: [
@@ -802,6 +805,7 @@ const bn: Content = {
         year: '২০২৪–২৬',
         description:
           'প্রাইভেট অন-ডিভাইস এলএলএম ইনফারেন্স ও অ্যাক্সেসিবিলিটি-নিয়ন্ত্রিত স্বয়ংক্রিয়তার অ্যান্ড্রয়েড রানটাইম। সিপিইউ ইনফারেন্স ডিভাইস-যাচাইকৃত; জিপিইউ/এনপিইউ এখনও যোগ্যতা-পরীক্ষায়।',
+        role: 'রানটাইম ও অ্যান্ড্রয়েড সংযোগ তৈরি; ডিভাইসে সিপিইউ ইনফারেন্স ও সম্মতির সীমা যাচাই।',
         evidence:
           'বাস্তব এআরএম ৬৪ লামা.সিপিপি সিপিইউ ইনফারেন্স, ডিকোডে সেকেন্ডে ১২–২০ টোকেন, কেভি-প্রিফিক্স পুনর্ব্যবহার। অ্যাড্রেনো ভলকান ড্রাইভার ক্র্যাশের মূল কারণ নির্ণয় — যা গড়ে দিয়েছে ফেইল-ক্লোজড সিপিইউ-ডিফল্ট আর্কিটেকচার।',
         topics: ['কোটলিন', 'লামা.সিপিপি', 'ভলকান', 'অ্যাক্সেসিবিলিটি', 'শিজুকু', 'জিজিইউএফ'],
@@ -815,6 +819,7 @@ const bn: Content = {
         year: '২০২৪–২৬',
         description:
           'পেশাদার ভেক্টর, রাস্টার, ডকুমেন্ট ও পিডিএফ কাজের ফ্লাটার/ডার্ট ভিত্তি। এসএইচএ-২৫৬ স্টেট ইন্টিগ্রিটিসহ পিওর-ডার্ট কোরের ডকুমেন্টেশন-ফার্স্ট আর্কিটেকচার।',
+        role: 'অ্যাপ ও পুনর্ব্যবহারযোগ্য ডার্ট ভিত্তি তৈরি; কোর আচরণ ও ফ্লাটার ইন্টারঅ্যাকশন যাচাই।',
         evidence:
           '১৪৩টি পিওর-ডার্ট ইউনিট টেস্ট, ৩৫৩টি উইজেট/কন্ট্রোলার টেস্ট। বারবার বাস্তব ডিভাইসে যাচাইকৃত।',
         topics: ['ফ্লাটার', 'ডার্ট', 'ডকুমেন্ট জেনারেশন', 'ভেক্টর গ্রাফিক্স'],
@@ -828,6 +833,7 @@ const bn: Content = {
         year: '২০২৩–২৬',
         description:
           'লিনাক্স এআরএম ৬৪/গ্লিবসি-র জন্য এওএসপি সোর্স থেকে অ্যান্ড্রয়েড এসডিকে বিল্ড-টুলস ও প্লাটফর্ম-টুলস তৈরি করে। এসএইচএ-২৫৬-যাচাইকৃত অফলাইন রিলিজ আর্টিফ্যাক্ট।',
+        role: 'সোর্স-বিল্ড ও রিলিজ পাইপলাইন তৈরি; এআরএম ৬৪ হার্ডওয়্যারে এপিকে কর্মপ্রবাহ যাচাই।',
         evidence:
           'স্ন্যাপড্রাগন ৮এস জেন ৪-এ সম্পূর্ণ এআরএম ৬৪ নেটিভ এপিকে পাইপলাইন শুরু থেকে শেষ পর্যন্ত যাচাইকৃত: সোর্স → এপিকে → সাইন → ইনস্টল → জেএনআই লোড → রান।',
         topics: ['এওএসপি', 'এআরএম ৬৪', 'বিল্ড টুলস', 'ক্রস-কম্পাইলেশন'],
@@ -841,6 +847,7 @@ const bn: Content = {
         year: '২০২৩–২৬',
         description:
           'এক কমান্ডে আসল ডেবিয়ান এআরএম ৬৪ ইউজারস্পেস, এক্সএফসিই৪ ডেস্কটপ, টারমাক্স:এক্স১১ ডিসপ্লে, পালসঅডিও ব্রিজ ও জিংক/টার্নিপ জিপিইউ রুট — রুট ছাড়াই।',
+        role: 'ইনস্টলেশন ও ডেস্কটপ টুলিং তৈরি; রেফারেন্স ডিভাইসে সমর্থিত গ্রাফিক্স পথ পরিমাপ।',
         evidence:
           'অ্যাড্রেনো ৮২৫-এ জিংক/টার্নিপ রেন্ডারার নিশ্চিত: গ্লমার্ক২ স্কোর ১৪০ (ওপেনজিএল ৪.৬), সঙ্গে নথিভুক্ত সামঞ্জস্য-ফলব্যাক রুট। ব্লেন্ডার ৪.৩.২ চালু হয়েছে, তবে তার নিজের রিপোর্টে ডিভাইস টাইপ সফটওয়্যার ছিল — কেবল জিংক/টার্নিপ দিয়ে ভিউপোর্ট ওপেনজিএল পথটিই প্রমাণিত, সাইকেলস জিপিইউ রেন্ডারিং নয়।',
         topics: ['ডেবিয়ান', 'ভলকান', 'টার্নিপ', 'জিংক', 'অ্যাড্রেনো', 'পি-রুট'],
@@ -971,28 +978,21 @@ const bn: Content = {
   },
   experience: {
     eyebrow: '০৮ — অভিজ্ঞতা',
-    heading: 'অপারেশন, ইঞ্জিনিয়ারিং ও প্রশাসনে ৮+ বছর।',
+    heading: 'প্রযুক্তি নিয়ে হাতে-কলমে দীর্ঘ যাত্রা, পাশাপাশি পেশাগত কাজ।',
+    intro: 'কম্পিউটার ও প্রযুক্তির প্রতি আমার আগ্রহ তালিকাভুক্ত পেশাগত কাজেরও আগে শুরু। অনুসন্ধান, সমস্যা সমাধান, নির্মাণ ও বাস্তব কাজ থেকে শেখার মধ্য দিয়ে তা বেড়েছে। পেশাগত কাজ এই পথের একটি অংশ; প্রকল্পগুলো দেখায় এখন কী নিয়ে পরীক্ষা ও নির্মাণ চালিয়ে যাচ্ছি।',
+    professionalLabel: 'পেশাগত অভিজ্ঞতা',
     services: {
-      label: 'ইঞ্জিনিয়ারিং-এর বাইরের ব্যবহারিক কাজ',
+      label: 'অন্যান্য ব্যবহারিক কাজ',
       items: [
-        'অফিস প্রশাসন',
-        'ডিজিটাল ডকুমেন্টেশন',
-        'রেকর্ড ও ডেটা ব্যবস্থাপনা',
-        'স্প্রেডশিট ও ওয়ার্কফ্লো সহায়তা',
-        'ওয়েবসাইট ও কনটেন্ট ব্যবস্থাপনা',
-        'ওয়েবসাইট তৈরি ও রক্ষণাবেক্ষণ',
-        'কাস্টম সফটওয়্যার ও ছোট ব্যবসার টুল',
-        'ডিজিটাল ওয়ার্কফ্লো অটোমেশন',
-        'আইটি ও সফটওয়্যার সহায়তা',
-        'কম্পিউটার সেটআপ ও সমস্যা সমাধান (উইন্ডোজ / লিনাক্স)',
-        'অ্যান্ড্রয়েড ও মোবাইল সফটওয়্যার সহায়তা (সেটআপ, এডিবি, অপ্টিমাইজেশন)',
-        'রিমোট প্রযুক্তিগত সহায়তা — বাংলাদেশ ও বিশ্বব্যাপী',
+        'অফিস ও ডিজিটাল প্রশাসন',
+        'সফটওয়্যার, ওয়েবসাইট ও কর্মপ্রবাহের টুল',
+        'কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা',
       ],
     },
     entries: [
       {
         period: 'এপ্রিল ২০২৬ – বর্তমান',
-        role: 'স্বাধীন সিস্টেম নির্মাতা ও ইঞ্জিনিয়ার',
+        role: 'স্বাধীন সফটওয়্যার ও এআই সিস্টেম নির্মাতা',
         company: 'প্রো-জুকতি ইনফো টেক',
         location: 'স্ব-নিয়োজিত',
         desc: 'স্বাধীন সিস্টেম কাজ — অন-ডিভাইস এআই, এআরএম ৬৪ অ্যান্ড্রয়েড টুলিং ও লিনাক্স সিস্টেম, প্রো-জুকতি ইনফো টেক-এর মাধ্যমে পরিবেশিত।',
@@ -1152,9 +1152,9 @@ const bn: Content = {
   seo: {
     sections: [
       {
-        title: 'সবুজ মিয়া — স্বাধীন সফটওয়্যার ও এআই সিস্টেম ইঞ্জিনিয়ার',
+    title: 'সবুজ মিয়া — সফটওয়্যার, এআই ও ব্যবহারিক প্রযুক্তি',
         description:
-          'অন-ডিভাইস এআই, অ্যান্ড্রয়েড, এআরএম ৬৪ লিনাক্স, নেটিভ টুলিং। সীমাবদ্ধতার মধ্যে নির্মিত, বাস্তব হার্ডওয়্যারে যাচাইকৃত — সিআই বিল্ড, টেস্ট ও ফিজিক্যাল-ডিভাইস প্রমাণ।',
+          'সফটওয়্যার, অন-ডিভাইস এআই, অ্যান্ড্রয়েড, কম্পিউটিং ও অটোমেশন। হাতে-কলমে শেখা ও নির্মাণের দীর্ঘ যাত্রা, বাস্তব ডিভাইস ও সিআই-ভিত্তিক প্রকল্প প্রমাণসহ।',
       },
       {
         title: 'আমি যা নির্মাণ করি — অন-ডিভাইস এআই, অ্যান্ড্রয়েড ও এআরএম ৬৪ সিস্টেম',
@@ -1164,7 +1164,7 @@ const bn: Content = {
       {
         title: 'পরিচিতি — ঢাকার স্বাধীন সিস্টেম নির্মাতা',
         description:
-          'ঢাকা, বাংলাদেশের স্ব-শিক্ষিত স্বাধীন সিস্টেম নির্মাতা — অ্যান্ড্রয়েড ফোন থেকে কাজ করেন; দাবির আগে প্রমাণ আর বাস্তব হার্ডওয়্যারে যাচাই তাঁর ইঞ্জিনিয়ারিং নীতি।',
+          'সবুজ মিয়া সম্পর্কে: ঢাকার স্ব-শিক্ষিত সফটওয়্যার ও প্রযুক্তি নির্মাতা, যিনি ব্যবহারিক প্রকল্প, বাস্তব ডিভাইস ও সমস্যা সমাধানের মধ্য দিয়ে শেখেন।',
       },
       {
         title: 'নির্বাচিত কাজ — লাই, জিজেন, এডিটি, টারনাক্স',
@@ -1189,12 +1189,12 @@ const bn: Content = {
       {
         title: 'অভিজ্ঞতা — অপারেশন, প্রশাসন ও ইঞ্জিনিয়ারিং',
         description:
-          'অপারেশন, প্রশাসন ও ইঞ্জিনিয়ারিং জুড়ে ৮+ বছর — সঙ্গে ব্যবহারিক প্রযুক্তি সেবা: ওয়েবসাইট তৈরি ও রক্ষণাবেক্ষণ, কাস্টম সফটওয়্যার, কম্পিউটার সেটআপ ও সমস্যা সমাধান (উইন্ডোজ/লিনাক্স), অ্যান্ড্রয়েড মোবাইল সফটওয়্যার সহায়তা। সাভার, ঢাকা, বাংলাদেশ; বিশ্বব্যাপী রিমোট।',
+          'প্রযুক্তি নিয়ে দীর্ঘদিনের শেখা, পরীক্ষা, নির্মাণ ও বাস্তব সমস্যা সমাধানের পথ; পাশাপাশি অপারেশন ও প্রশাসনে পেশাগত অভিজ্ঞতা। তারিখসহ কাজের তালিকা ও প্রকল্প দেখুন।',
       },
       {
         title: 'যোগাযোগ — ফ্রিল্যান্স, রিমোট ও কোলাবরেশন',
         description:
-          'সবুজ মিয়ার সঙ্গে যোগাযোগ করুন — অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ টুলিং ও লোকাল-ফার্স্ট প্রোডাক্ট নিয়ে ফ্রিল্যান্স, রিমোট ও কোলাবরেশনে উন্মুক্ত। ওয়েবসাইট তৈরি, কাস্টম সফটওয়্যার এবং কম্পিউটার বা অ্যান্ড্রয়েড সমস্যা সমাধানেও — সাভার, ঢাকা, বাংলাদেশ থেকে।',
+          'সফটওয়্যার, এআই, ব্যবহারিক প্রযুক্তি সেবা বা সহযোগিতা নিয়ে সবুজ মিয়ার সঙ্গে যোগাযোগ করুন। সাভার, ঢাকা, বাংলাদেশ থেকে রিমোট কাজের জন্য উপলব্ধ।',
       },
     ],
   },

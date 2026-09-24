@@ -475,7 +475,7 @@ export function Header() {
         {/* Brand mark returns to the site root — the portfolio is the
             brand root of the ecosystem, so its own mark must lead home. */}
         <a
-          href={sectionHref(0)}
+          href={sectionHref(0, lang)}
           aria-label={t.header.homeLabel}
           className="font-mono text-sm font-medium tracking-tight"
           style={{ color: '#e4e2df' }}
@@ -487,7 +487,7 @@ export function Header() {
           {t.nav.map((l) => (
             <a
               key={l.scene}
-              href={sectionHref(l.scene)}
+              href={sectionHref(l.scene, lang)}
               onClick={(e) => {
                 e.preventDefault();
                 goToScene(l.scene);
@@ -501,7 +501,7 @@ export function Header() {
           ))}
           {/* the service-intent layer, reachable from every page */}
           <a
-            href={serviceHref()}
+            href={serviceHref(undefined, lang)}
             className="text-xs uppercase tracking-[0.1em] transition-colors duration-300 hover:opacity-100"
             style={{ color: 'rgba(228,226,223,0.4)' }}
             data-magnetic
@@ -531,7 +531,7 @@ export function Header() {
               once there is room for it. Same green outline language as
               the CV pill, so the cluster reads as one system. */}
           <a
-            href={serviceHref()}
+            href={serviceHref(undefined, lang)}
             aria-label={t.header.servicesLabel}
             title={t.header.servicesLabel}
             data-magnetic

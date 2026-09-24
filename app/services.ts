@@ -9,6 +9,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { SITE_ORIGIN } from './sections';
+import type { Lang } from './content';
 
 export const SERVICE_SLUGS = [
   'web-development',
@@ -30,13 +31,14 @@ export function isServiceSlug(slug: string): slug is ServiceSlug {
 }
 
 /** Canonical href: the hub or one service page. */
-export function serviceHref(slug?: ServiceSlug): string {
-  return slug ? `${SERVICES_BASE}${slug}/` : SERVICES_BASE;
+export function serviceHref(slug?: ServiceSlug, lang: Lang = 'en'): string {
+  const path = slug ? `${SERVICES_BASE}${slug}/` : SERVICES_BASE;
+  return lang === 'bn' ? `/bn${path}` : path;
 }
 
 /** Absolute URL (canonical / OG / sitemap / JSON-LD). */
-export function serviceUrl(slug?: ServiceSlug): string {
-  return new URL(serviceHref(slug), SITE_ORIGIN).href;
+export function serviceUrl(slug?: ServiceSlug, lang: Lang = 'en'): string {
+  return new URL(serviceHref(slug, lang), SITE_ORIGIN).href;
 }
 
 /** Every public service route, hub first — the sitemap and the build

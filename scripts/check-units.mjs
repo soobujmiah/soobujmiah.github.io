@@ -192,6 +192,10 @@ eq('pathname /work/ → index 3', indexFromPathname('/work/'), 3);
 eq('pathname / → home', indexFromPathname('/'), 0);
 eq('unknown pathname falls back to home', indexFromPathname('/nonsense/'), 0);
 eq('absolute section URL', sectionUrl(3), `${SITE_ORIGIN}/work/`);
+eq('Bengali section path has locale prefix', sectionHref(3, 'bn'), '/bn/work/');
+eq('Bengali home path has locale prefix', sectionHref(0, 'bn'), '/bn/');
+eq('Bengali section URL', sectionUrl(3, 'bn'), `${SITE_ORIGIN}/bn/work/`);
+eq('Bengali pathname maps to section', indexFromPathname('/bn/work/'), 3);
 
 /* ── the map's promise ──
    Every route promises one thing visually: its own geography, framed.

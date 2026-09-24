@@ -132,7 +132,7 @@ a, button {
 /* ═══════════════════════════════════════════════════════════════
    DISCRETE PAGER — one full-screen page at a time, zero vertical
    scrolling. Pages are transparent layers over the world-map
-   environment; gestures flip exactly one page (see app/page.tsx).
+   environment; gestures flip exactly one page (see app/(en)/page.tsx).
    ═══════════════════════════════════════════════════════════════ */
 
 .pager-root {
@@ -435,7 +435,7 @@ body.lang-bn .worldmap-pin {
 /* Inner page scroll: when a page fits, its content centers; when it
    overflows, the page scrolls internally instead of clipping.
    Viewport-first when possible, content-first when necessary.
-   Pager gestures yield to this scroller until its edges (app/page.tsx). */
+   Pager gestures yield to this scroller until its edges (app/(en)/page.tsx). */
 .page-scroll {
   height: 100%;
   overflow-y: auto;
@@ -1895,5 +1895,4 @@ body:has(> .services-doc) button {
   color: #4ade80;
   border-color: rgba(74, 222, 128, 0.4);
 }
-
 

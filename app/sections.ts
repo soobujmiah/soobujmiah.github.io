@@ -21,6 +21,7 @@ export const SECTION_IDS = [
 ] as const;
 
 export type SectionId = (typeof SECTION_IDS)[number];
+export type SectionLanguage = 'en' | 'bn';
 
 export const PAGE_COUNT = SECTION_IDS.length;
 
@@ -31,21 +32,22 @@ export function indexForSlug(slug: string): number | null {
 }
 
 /** Canonical, shareable href for a section. Home is the site root. */
-export function sectionHref(index: number): string {
+export function sectionHref(index: number, lang: SectionLanguage = 'en'): string {
   const id = SECTION_IDS[index];
-  return id === undefined || id === 'home' ? '/' : `/${id}/`;
+  const path = id === undefined || id === 'home' ? '/' : `/${id}/`;
+  return lang === 'bn' ? (path === '/' ? '/bn/' : `/bn${path}`) : path;
 }
 
 /** Absolute URL (canonical/OG/sitemap). */
 export const SITE_ORIGIN = 'https://soobujmiah.github.io';
 
-export function sectionUrl(index: number): string {
-  return new URL(sectionHref(index), SITE_ORIGIN).href;
+export function sectionUrl(index: number, lang: SectionLanguage = 'en'): string {
+  return new URL(sectionHref(index, lang), SITE_ORIGIN).href;
 }
 
 /** Resolve a browser pathname back to a section index. */
 export function indexFromPathname(pathname: string): number {
-  const cleaned = pathname.replace(/^\/+|\/+$/g, '');
+  const cleaned = pathname.replace(/^\/bn(?=\/|$)/, '').replace(/^\/+|\/+$/g, '');
   if (cleaned === '') return 0;
   const i = indexForSlug(cleaned);
   return i === null ? 0 : i;
