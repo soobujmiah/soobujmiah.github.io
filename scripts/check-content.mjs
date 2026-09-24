@@ -372,7 +372,7 @@ try {
     'https://threads.net/@soobujmiah',
     'https://facebook.com/soobujmiah',
     'https://youtube.com/@soobujmiah',
-    'https://t.me/soobujmiah',
+    'https://wa.me/soobujmiah',
     'https://about.me/soobujmiah',
     'https://buymeacoffee.com/soobujmiah',
   ];
