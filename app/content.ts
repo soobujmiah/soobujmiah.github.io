@@ -1065,7 +1065,7 @@ const bn: Content = {
       {
         label: 'সরাসরি',
         links: [
-          { label: 'টেলিগ্রাম', handle: '@soobujmiah', href: 'https://t.me/soobujmiah' },
+          { label: 'হোয়াটসঅ্যাপ', handle: 'soobujmiah', href: 'https://wa.me/soobujmiah' },
           { label: 'ইমেইল', handle: 'soobujmiah@gmail.com', href: 'mailto:soobujmiah@gmail.com' },
         ],
       },
