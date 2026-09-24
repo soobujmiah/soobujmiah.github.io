@@ -63,6 +63,7 @@ const SOCIAL_ICON_HOSTS: Record<string, BrandIconId> = {
   'facebook.com': 'facebook',
   'youtube.com': 'youtube',
   't.me': 'telegram',
+  'wa.me': 'whatsapp',
   'about.me': 'aboutdotme',
   'buymeacoffee.com': 'buymeacoffee',
 };
