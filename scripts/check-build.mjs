@@ -42,7 +42,8 @@ const SERVICE_ROUTES = [
   '/services/android-support/', '/services/business-technology/', '/services/graphics-design/',
   '/services/office-administration/', '/services/data-entry/',
 ];
-const EXPECTED_PUBLIC_ROUTES = 2 * (SECTIONS.length + SERVICE_ROUTES.length + LEGACY_ROUTES.length); // English + Bengali, including legacy aliases
+const EXPECTED_CANONICAL_ROUTES = 2 * (SECTIONS.length + SERVICE_ROUTES.length);
+const EXPECTED_EXPORTED_ROUTES = EXPECTED_CANONICAL_ROUTES + 2 * LEGACY_ROUTES.length;
 
 /** Minimum visible server-rendered characters per route. */
 const MIN_VISIBLE_CHARS = 220;
@@ -295,7 +296,7 @@ for (const [route, phrase] of [['/bn/presence/', 'রিলিজ ও যাচ�
     fail(`${route} is missing its merged Bengali content`);
   }
 }
-ok(`${EXPECTED_PUBLIC_ROUTES} public routes in total: English + Bengali section and service pages`);
+ok(`${EXPECTED_EXPORTED_ROUTES} exported routes: ${EXPECTED_CANONICAL_ROUTES} primary URLs and ${2 * LEGACY_ROUTES.length} legacy aliases`);
 
 /* Every rendered same-origin link must resolve to an exported file. */
 let checkedLinks = 0;
@@ -371,8 +372,8 @@ if (existsSync(join(OUT, 'sitemap.xml'))) {
   }
   if (!xml.includes('hreflang="bn"') || !xml.includes('hreflang="en"') || !xml.includes('hreflang="x-default"')) fail('sitemap.xml lacks language alternate links');
   const locs = (xml.match(/<loc>/g) || []).length;
-  if (locs !== EXPECTED_PUBLIC_ROUTES) fail(`sitemap.xml lists ${locs} URLs, expected exactly ${EXPECTED_PUBLIC_ROUTES}`);
-  else ok(`sitemap.xml lists exactly ${EXPECTED_PUBLIC_ROUTES} URLs (${SECTIONS.length} sections + ${SERVICE_ROUTES.length} services)`);
+  if (locs !== EXPECTED_CANONICAL_ROUTES) fail(`sitemap.xml lists ${locs} URLs, expected exactly ${EXPECTED_CANONICAL_ROUTES}`);
+  else ok(`sitemap.xml lists exactly ${EXPECTED_CANONICAL_ROUTES} primary URLs (${SECTIONS.length} sections + ${SERVICE_ROUTES.length} services in both languages)`);
 }
 
 if (existsSync(join(OUT, 'robots.txt'))) {
