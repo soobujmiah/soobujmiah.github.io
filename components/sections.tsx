@@ -1043,20 +1043,29 @@ export function ContactScene() {
             <p className="mb-4 text-center font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: 'rgba(228,226,223,0.4)' }}>
               {t.contact.groupsHeading}
             </p>
-            <div className="social-icons">
-              {t.contact.groups.flatMap((g) => g.links).map((l) => (
-                <a
-                  key={l.href}
-                  href={l.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  data-magnetic
-                  className="soc-btn"
-                  title={`${l.label} — ${l.handle}`}
-                  aria-label={`${l.label}: ${l.handle}`}
-                >
-                  <BrandIcon id={iconFor(l.href)} size={16} />
-                </a>
+            <div className="space-y-5">
+              {t.contact.groups.map((group) => (
+                <div key={group.label} className="text-center">
+                  <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.24em]" style={{ color: 'rgba(34,197,94,0.8)' }}>
+                    {group.label}
+                  </p>
+                  <div className="social-icons justify-center">
+                    {group.links.map((l) => (
+                      <a
+                        key={l.href}
+                        href={l.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        data-magnetic
+                        className="soc-btn"
+                        title={`${l.label} — ${l.handle}`}
+                        aria-label={`${l.label}: ${l.handle}`}
+                      >
+                        <BrandIcon id={iconFor(l.href)} size={16} />
+                      </a>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
             {/* Closing beat: the supporting line stays quiet, the
