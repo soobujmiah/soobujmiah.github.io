@@ -1,30 +1,33 @@
 schema_version: 1
 project_id: portfolio
 repository: soobujmiah/soobujmiah.github.io
-generated_at: '2026-09-25T13:29:08Z'
-generated_by: tools/repo_knowledge init
-version: 956d7ca
+generated_at: '2026-09-25T13:35:25Z'
+generated_by: tools/repo_knowledge collect
+version: 0550c28
 head:
-  commit: 956d7cab8cb6c708c1b99f5f887d74a11bdf3fff
+  commit: 0550c289728f6b20603e9248e4f79f357d55dca5
   branch: main
-  committed_at: '2026-09-24T14:31:37Z'
+  committed_at: '2026-09-25T13:34:05Z'
 phases:
   source: not_configured
   completed: []
   active: null
   next: null
 build:
-  status: unknown
-  run_id: null
-  at: null
+  status: passed
+  run_id: '36141777689'
+  at: '2026-09-25T13:35:25Z'
 test:
-  status: unknown
+  status: passed
   run_id: null
-  at: null
-  summary: null
-last_successful_build: null
+  at: '2026-09-25T13:35:25Z'
+  summary: check:build (static export validation)
+last_successful_build:
+  commit: 0550c289728f6b20603e9248e4f79f357d55dca5
+  at: '2026-09-25T13:35:25Z'
+  run_id: '36141777689'
 last_failed_build: null
 sync:
-  status: pending
-  last_synced_at: '2026-09-25T13:29:08Z'
-  source: local
+  status: ok
+  last_synced_at: '2026-09-25T13:35:25Z'
+  source: ci
