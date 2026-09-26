@@ -133,3 +133,19 @@ so it is byte-identical across runs.
 5. Run `python3 -m tools.verification build` and commit the regenerated state.
 6. Vendor `verification/claims.json` into any consumer repository, exactly as
    `tools/repo_knowledge/` and `schemas/*.schema.json` are already vendored.
+
+## Publication contract
+
+This public consumer independently resolves public evidence using its own repository token.
+Claim definitions are explicitly vendored from the canonical authority, not automatically
+transported from its private projection. No authority credential belongs in this repository.
+Build and Deploy refreshes and gates evidence BEFORE creating its Pages artifact, then commits
+that exact accepted projection/summary. It also runs daily and on manual dispatch. The
+Repo Knowledge Sync observer records the completed deployment workflow's actual CI results
+without rerunning builds or replacing the accepted public projection afterward.
+
+The site's own proof refers to the most recent completed recorded build available when
+publication starts; a build cannot certify its own future completion. The shown evidence
+source/timestamp is that snapshot, not a claim that every result was produced by this build.
+The next daily/push refresh incorporates the newly completed result. Human positioning and
+claim wording remain human controlled. Historical private-name exposure is not erased here.
