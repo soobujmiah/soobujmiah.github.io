@@ -42,7 +42,11 @@ const SERVICE_ROUTES = [
   '/services/android-support/', '/services/business-technology/', '/services/graphics-design/',
   '/services/office-administration/', '/services/data-entry/',
 ];
-const EXPECTED_CANONICAL_ROUTES = 2 * (SECTIONS.length + SERVICE_ROUTES.length);
+/* The public verification page (/verification/) — generated evidence for the
+   footer's Proof/Claims line. One route in each language, held to the same
+   metadata bar as the service documents. */
+const VERIFICATION_ROUTES = ['/verification/'];
+const EXPECTED_CANONICAL_ROUTES = 2 * (SECTIONS.length + SERVICE_ROUTES.length + VERIFICATION_ROUTES.length);
 const EXPECTED_EXPORTED_ROUTES = EXPECTED_CANONICAL_ROUTES + 2 * LEGACY_ROUTES.length;
 
 /** Minimum visible server-rendered characters per route. */
@@ -57,8 +61,15 @@ const MIN_VISIBLE_CHARS = 220;
     became the perimeter progress trace — ~750 B gz of real, required
     vocabulary that trimming could not recover.
     362 KB since the homepage service-discovery line (later replaced by
-    hero CTAs close the stack; budget holds the ceiling). */
-const MAX_TOTAL_JS_GZIP = 370 * 1024;
+    hero CTAs close the stack; budget holds the ceiling).
+    380 KB since the public verification page (/verification/): a new static
+    document that carries the bilingual claim copy plus the generated
+    evidence table. The footer's own proof line adds only ~0.2 KB to the
+    shared chunk, because it reads a 298-byte generated summary instead of
+    the full projection. The new page loads 134 kB on its own route — well
+    under the per-route ceiling below — so the site-wide sum moved only
+    because a real route now exists that did not before. */
+const MAX_TOTAL_JS_GZIP = 380 * 1024;
 /** Per-route payload ceiling: the gzipped sum of every script a single
     HTML page references. The home page measured ~250 KB before the
     service layer; this holds every route — pager and services — there. */
@@ -247,11 +258,79 @@ for (const route of SERVICE_ROUTES) {
   if (!html.includes('href="/services/"') && route !== '/services/') fail(`service route ${route} does not link back to the hub`);
 }
 ok(`${SERVICE_ROUTES.length} service routes present with unique title/description, exact canonical, valid Service + BreadcrumbList JSON-LD`);
+
+/* ── 1c. verification routes: the generated proof page ──
+   Same bar as the service documents, plus the two things that make this
+   page trustworthy: it must carry real generated evidence text (not an
+   empty shell), and its machine-verified list must actually render rows. */
+for (const route of VERIFICATION_ROUTES) {
+  const file = join(OUT, ...route.split('/').filter(Boolean), 'index.html');
+  if (!existsSync(file)) {
+    fail(`missing static verification route ${route} — expected ${file.replace(ROOT, 'out')}`);
+    continue;
+  }
+  const html = readFileSync(file, 'utf8');
+  const text = visibleText(html);
+  if (!/<html[^>]*lang="en"/.test(html)) fail(`verification route ${route} does not declare lang=en`);
+  if (text.length < MIN_VISIBLE_CHARS) fail(`verification route ${route} ships only ${text.length} visible chars`);
+  const bengali = (text.match(/[\u0980-\u09FF]/g) || []).length;
+  if (bengali > 0) fail(`verification route ${route} ships ${bengali} Bengali char(s) in its default (English) render`);
+  const title = html.match(/<title>([^<]*)<\/title>/);
+  if (!title) fail(`verification route ${route} has no <title>`);
+  else {
+    if (!title[1].includes('Sobuj Miah')) fail(`verification route ${route} title does not name the author: "${title[1]}"`);
+    if (publicTitles.has(title[1])) fail(`duplicate <title> across public routes at ${route}: "${title[1]}"`);
+    publicTitles.add(title[1]);
+  }
+  const desc = html.match(/<meta name="description" content="([^"]*)"/);
+  if (!desc) fail(`verification route ${route} has no meta description`);
+  else {
+    if (publicDescriptions.has(desc[1])) fail(`duplicate meta description across public routes on ${route}`);
+    publicDescriptions.add(desc[1]);
+  }
+  const canonical = html.match(/<link rel="canonical" href="([^"]*)"/);
+  const want = new URL(route, ORIGIN).href;
+  if (!canonical) fail(`verification route ${route} has no canonical link`);
+  else if (canonical[1] !== want) fail(`verification route ${route} canonical is ${canonical[1]}, expected ${want}`);
+  for (const [hreflang, path] of [['en', route], ['bn', `/bn${route}`], ['x-default', route]]) {
+    const href = new URL(path, ORIGIN).href;
+    if (!html.includes(`rel="alternate" hrefLang="${hreflang}" href="${href}"`)) {
+      fail(`verification route ${route} is missing ${hreflang} alternate ${href}`);
+    }
+  }
+  if (!html.includes('property="og:image"')) fail(`verification route ${route} has no og:image`);
+  /* The page must show the generated evidence, not a placeholder: the
+     machine-verified heading and at least one evidence row have to ship. */
+  if (!/Machine-verified claims/.test(text)) fail(`verification route ${route} is missing its machine-verified section`);
+  if (!/Not automatically verified/.test(text)) fail(`verification route ${route} is missing its human-attested section`);
+  if (!/Evidence as of/.test(text)) fail(`verification route ${route} is missing its deterministic as-of timestamp`);
+  if (!/build\.status/.test(text)) fail(`verification route ${route} ships no evidence rows — public/verification.json may be empty`);
+  let ld;
+  try {
+    const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
+    ld = blocks.flatMap((b) => b['@graph'] ?? [b]);
+  } catch (e) {
+    fail(`verification route ${route} has invalid JSON-LD: ${e.message}`);
+  }
+  if (ld) {
+    if (!ld.some((n) => n['@type'] === 'BreadcrumbList')) fail(`verification route ${route} has no BreadcrumbList JSON-LD`);
+    if (!ld.some((n) => n['@type'] === 'WebPage')) fail(`verification route ${route} has no WebPage JSON-LD`);
+  }
+  /* The page must stay reachable from the site graph: its own chrome links
+     home, so a visitor arriving from a deep link is never stranded. The
+     reciprocal language pair is asserted by the hreflang block above. */
+  if (!html.includes('href="/"') && !html.includes('href="/bn/"')) {
+    fail(`verification route ${route} does not link back to the site root`);
+  }
+}
+ok(`${VERIFICATION_ROUTES.length} verification route(s) present with generated evidence, unique metadata, exact canonical, WebPage + BreadcrumbList JSON-LD`);
+
 /* Bangla is independently crawlable below /bn/. Verify the exported
    documents, locale declarations, paired metadata, and translated text. */
 const localizedRoutes = [
   ...SECTIONS.map((slug) => [slug === 'home' ? '/bn/' : `/bn/${slug}/`, slug]),
   ...SERVICE_ROUTES.map((route) => [`/bn${route}`, route]),
+  ...VERIFICATION_ROUTES.map((route) => [`/bn${route}`, route]),
 ];
 /* GitHub Pages serves these separate project sites on this same hostname;
    their paths intentionally do not live in this portfolio's export. */
@@ -373,7 +452,7 @@ if (existsSync(join(OUT, 'sitemap.xml'))) {
   if (!xml.includes('hreflang="bn"') || !xml.includes('hreflang="en"') || !xml.includes('hreflang="x-default"')) fail('sitemap.xml lacks language alternate links');
   const locs = (xml.match(/<loc>/g) || []).length;
   if (locs !== EXPECTED_CANONICAL_ROUTES) fail(`sitemap.xml lists ${locs} URLs, expected exactly ${EXPECTED_CANONICAL_ROUTES}`);
-  else ok(`sitemap.xml lists exactly ${EXPECTED_CANONICAL_ROUTES} primary URLs (${SECTIONS.length} sections + ${SERVICE_ROUTES.length} services in both languages)`);
+  else ok(`sitemap.xml lists exactly ${EXPECTED_CANONICAL_ROUTES} primary URLs (${SECTIONS.length} sections + ${SERVICE_ROUTES.length} services + ${VERIFICATION_ROUTES.length} verification page, in both languages)`);
 }
 
 if (existsSync(join(OUT, 'robots.txt'))) {
@@ -417,6 +496,7 @@ if (existsSync(chunksDir)) {
   const routeHtml = [
     ...SECTIONS.map((slug) => [routePath(slug), routeFile(slug)]),
     ...SERVICE_ROUTES.map((r) => [r, join(OUT, ...r.split('/').filter(Boolean), 'index.html')]),
+    ...VERIFICATION_ROUTES.map((r) => [r, join(OUT, ...r.split('/').filter(Boolean), 'index.html')]),
     ...localizedRoutes.map(([route]) => [route, join(OUT, ...route.split('/').filter(Boolean), 'index.html')]),
   ];
   let heaviest = ['', 0];

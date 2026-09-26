@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SKB Verification Claim Registry Entry",
+  "description": "One claim in the canonical claim registry. The registry declares WHICH claims exist, HOW they are classified, and WHAT deterministic evidence backs each one. It never carries the evidence itself -- evidence stays canonical in each repository's .repo/project.yaml and in SKB's projects/registry/. See verification/README.md and governance/VERIFICATION_AND_CLAIMS.md.",
+  "type": "object",
+  "required": ["id", "class", "text", "public", "verification_method", "evidence"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "minLength": 3,
+      "description": "Stable, human-readable claim identity. Never reused for a different statement; a replaced statement is a new id referenced by supersedes."
+    },
+    "class": {
+      "enum": ["evidence_backed", "positioning"],
+      "description": "evidence_backed = an objectively testable statement that automation may refresh. positioning = human-authored statement that automation must never rewrite or mark verified."
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Canonical English statement. The Portfolio renders its own localized copy from this id; this text is the reviewable authority for what the claim says."
+    },
+    "public": {
+      "type": "boolean",
+      "description": "true = may appear in the public Portfolio projection. false = internal only (e.g. evidence referencing a private repository)."
+    },
+    "verification_method": {
+      "type": "string",
+      "minLength": 1,
+      "description": "How the claim is checked: repository_state, github_api, human_attested, or none."
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "enum": ["repository_state", "public_repository", "github_pages", "none"]
+        },
+        "project_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+        "repository": {"type": "string", "pattern": "^[^/]+/[^/]+$"},
+        "field": {"enum": ["build.status", "test.status", "head.commit"]},
+        "expect": {"type": "string"},
+        "repositories": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^[^/]+/[^/]+$"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "freshness": {
+      "type": "object",
+      "properties": {
+        "max_age_days": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "supersedes": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "description": "Claim id this statement replaces. The superseded claim keeps its record and is reported as superseded, never deleted."
+    },
+    "note": {
+      "type": "string",
+      "description": "Human-authored justification, required in practice for positioning/human_attested claims."
+    }
+  },
+  "additionalProperties": false
+}

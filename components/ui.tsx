@@ -5,6 +5,8 @@ import { motion, useInView, useMotionValue, useReducedMotion, useSpring, useVelo
 import { useLang, localizeDigits } from '@/app/language';
 import { sectionHref } from '@/app/sections';
 import { serviceHref } from '@/app/services';
+import { verificationHref } from '@/app/verification-routes';
+import { formatVerifiedDate, lastVerifiedAt, machineClaimCount, verifiedCount } from '@/app/verification';
 import { BrandIcon } from './social-icons';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -618,7 +620,7 @@ export function Footer({ progress = 0 }: { progress?: number }) {
         <div className="footer-progress-fill" style={{ transform: `scaleX(${p})` }} />
       </div>
       <div
-        className="footer-bar border-t py-2.5"
+        className="footer-bar border-t py-2"
         style={{ borderColor: 'rgba(228,226,223,0.04)', background: 'rgba(6,6,8,0.6)', backdropFilter: 'blur(12px)' }}
       >
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-1 px-6 sm:flex-row">
@@ -626,15 +628,39 @@ export function Footer({ progress = 0 }: { progress?: number }) {
             © {localizeDigits(new Date().getFullYear(), lang)} {t.profile.nameFull}. {t.footer.built}
           </p>
           <a
-            href="https://github.com/soobujmiah/soobujmiah.github.io#claim-verification-log"
-            target="_blank"
-            rel="noreferrer"
+            href={verificationHref(lang)}
             data-magnetic
             className="font-mono text-[10px] transition-colors duration-300 hover:text-[#4ade80]"
             style={{ color: 'rgba(228,226,223,0.35)' }}
           >
             {t.footer.claims} <span aria-hidden>↗</span>
           </a>
+        </div>
+        {/* PROOF LINE — generated, not written. Every value here comes from
+            public/verification.json, which tools/verification regenerates from
+            each repository's own deterministic state. The wording is the only
+            human-authored part; the numbers and the date never are. */}
+        <div
+          className="mx-auto mt-1 flex max-w-5xl flex-wrap items-center justify-center gap-x-1.5 px-6 font-mono text-[10px]"
+          style={{ color: 'rgba(228,226,223,0.28)' }}
+        >
+          <span>{t.footer.proofLabel}</span>
+          {machineClaimCount > 0 && (
+            <>
+              <span aria-hidden>·</span>
+              <span>
+                {localizeDigits(`${verifiedCount}/${machineClaimCount}`, lang)} {t.footer.checksPassing}
+              </span>
+              {lastVerifiedAt && (
+                <>
+                  <span aria-hidden>·</span>
+                  <span>
+                    {t.footer.lastVerified} {formatVerifiedDate(lastVerifiedAt, lang)}
+                  </span>
+                </>
+              )}
+            </>
+          )}
         </div>
       </div>
     </footer>

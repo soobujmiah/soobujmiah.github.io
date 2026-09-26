@@ -50,7 +50,7 @@ deliberate change, not cleanup.
 | `check:purity` | Adversarial suite — injects `"এটি AI Work Section GitHub"` and `"This is বাংলা বিভাগ"` into copies of the real content and asserts the gate rejects each, with an unmodified control that must pass. |
 | `check:design` | `app/design-tokens.ts` = `DESIGN_SYSTEM.md` = `globals.css :root` = browser `themeColor`. Documentation drift fails the build. Also asserts the identity mark's engineering contract (§6) and palette family (§7), and guards retired hero motifs — including the character-substitution wordmark — against returning. |
 | `check:units` | Bengali grapheme segmentation (both the `Intl.Segmenter` path and the fallback), section routing, digit localisation, and the signature-name motion logic: determinism, exact landing, baseline derivation, particle budget, cluster ordering, colour ramp, and the motion-token budget adding up to 1. |
-| `check:build` | From the built `out/`: 32 primary routes (7 pager sections + 9 service pages in both languages), plus 4 canonicalized legacy section URLs; server-rendered text, locale metadata and alternates, sitemap, social assets, and JavaScript budget. |
+| `check:build` | From the built `out/`: 34 primary routes (7 pager sections + 9 service pages + 1 verification document, each in both languages), plus 4 canonicalized legacy section URLs; server-rendered text, locale metadata and alternates, sitemap, social assets, and JavaScript budget. |
 
 ### Deterministic repository state
 
@@ -63,6 +63,30 @@ deliberate change, not cleanup.
 acceptance test. Neither re-runs the actual GitHub Pages `deploy` step — that stays
 `deploy.yml`'s job. Read `.repo/project.yaml` for the current head commit and build/test status
 instead of assuming `main` is always green.
+
+### Public verification page
+
+The same deterministic state feeds **`/verification/`** (Bangla: `/bn/verification/`), a static
+document that resolves the site's claims against live repository state. It is generated, not
+hand-written:
+
+1. `.github/workflows/repo-knowledge-sync.yml` runs on every push, and the daily SKB registry
+   pull in `soobujmiah/skb` keeps participating repositories' state current.
+2. `python3 -m tools.verification build` (vendored at `tools/verification/`) reads
+   `verification/claims.json`, resolves each claim against its cited evidence, and emits two
+   artifacts: `public/verification.json` (the public projection) and
+   `app/verification-summary.json` (the 298-byte count-only summary the footer reads).
+3. The footer renders that summary, so the proof line under the fixed bar is a generated
+   number rather than a typed sentence. The full table lives on the verification page.
+
+Nothing here reads from the network at request time — the page is statically exported, and the
+resolver refuses to write an internal document into a `public/` path unless `--public-only`
+is passed. `npm run check:verification` re-proves the projection offline on every build:
+canonical-registry membership, public-safety, class and status agreement, and that every
+published claim has copy in both languages.
+
+Run it yourself with `python3 -m tools.verification verify` — the same command CI runs, with
+the same output.
 
 ## Content model
 
@@ -129,8 +153,15 @@ portfolio and future repository websites (same brand, different context).
 
 ## Claim-verification log
 
-The footer promises every claim is backed by CI or real-device evidence. Numbers
-below were last re-verified **2026-09-13** against live repository state:
+**The live, machine-resolved table is <https://soobujmiah.github.io/verification/>.** It is
+regenerated from repository state on every push and shows what currently holds, what is
+failing, and what is hand-attested — a claim that stops holding is shown as failing, never
+hidden. Re-verify by reading that page, not this one.
+
+What is below is the human-attested layer: the measurements behind the figures the live page
+cites, kept with their evidence and the head they were taken at. These numbers were last
+re-verified **2026-09-13** and are deliberately *not* machine-checked, because they come from
+recorded device runs and published releases rather than a CI status.
 
 | Claim (site) | Verification |
 |---|---|
@@ -143,6 +174,10 @@ below were last re-verified **2026-09-13** against live repository state:
 | ADT: end-to-end ARM64 APK pipeline | 3 published releases (v35.0.2/v36.0.0/v37.0.0) + device validation |
 | Selected repos (6 + GitHub route) | Curated subset of the 11 repos listed in content (12 site-eligible − faridpur-police-app, omitted by owner decision); applied-first ordering, featured work not repeated. Live API listing, 2026-09-16 |
 | Live-site links (ternux, iqra, arms) | `has_pages=true` via live GitHub API, 2026-09-13 |
+
+The live-site links and repository-build rows in the table above have since been promoted to
+machine-verified claims; they now appear on `/verification/` with their CI run and evidence
+URL attached, and the rows remain here for the historical measurement detail.
 
 Re-verify before reusing any figure professionally if significant time has passed.
 

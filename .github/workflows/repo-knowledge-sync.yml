@@ -72,6 +72,13 @@ jobs:
       - name: Run tools/repo_knowledge tests (guard the vendored copy)
         run: python3 -m unittest discover -s tools/repo_knowledge/tests -p 'test_*.py'
 
+      # Guard the vendored verification resolver the same way. 42 tests: schema,
+      # classification, failure preservation, idempotency, the public-safe
+      # projection filter, and the guardrail that refuses to write internal state
+      # into a public path.
+      - name: Run tools/verification tests (guard the vendored copy)
+        run: python3 -m unittest discover -s tools/verification/tests -p 'test_*.py'
+
       - name: Collect and sync deterministic state
         if: always()
         run: |
@@ -90,16 +97,51 @@ jobs:
         if: always()
         run: python3 -m tools.repo_knowledge verify
 
-      - name: Commit updated .repo/ state
+      # Regenerate the public-safe verification projection that the footer and
+      # /verification/ render. Evidence comes from this repository's own
+      # .repo/project.yaml plus the public .repo/project.yaml of every
+      # repository the canonical claim registry (verification/claims.json,
+      # vendored from soobujmiah/skb) points at, read through this job's own
+      # ambient same-repository GITHUB_TOKEN -- no new credential, no PAT, no
+      # GitHub App key in this repository, and no second scheduler: this is the
+      # same push-triggered workflow that already syncs .repo/.
+      #
+      # --public-only is mandatory: it writes only the projection, never the
+      # internal state (the CLI refuses a public path otherwise).
+      # --merge carries a claim's previous evidence forward when it cannot be
+      # resolved in this run, so a transient API failure never erases the last
+      # known good verification.
+      - name: Resolve verification claims into public/verification.json
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 -m tools.verification build --source portfolio \
+            --project-id portfolio \
+            --out public/verification.json \
+            --public-only --merge
+
+      # Report-only schema/registry check, mirroring `repo-knowledge verify`.
+      - name: Verify the verification registry and generated projection
+        if: always()
+        run: python3 -m tools.verification verify --projection public/verification.json
+
+      # Offline gate: canonical registry membership, bilingual copy coverage,
+      # status/evidence agreement, no private repository, no secret-shaped field.
+      - name: Gate the generated verification data
+        if: always()
+        run: node scripts/check-verification.mjs
+
+      - name: Commit updated .repo/ and verification state
         if: always() && github.event_name == 'push'
         run: |
           set -euo pipefail
-          if git diff --quiet -- .repo; then
-            echo "no .repo/ change to commit"
+          if git diff --quiet -- .repo public/verification.json; then
+            echo "no .repo/ or verification change to commit"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .repo
+          git add .repo public/verification.json
           git commit -m "chore(repo-knowledge): sync deterministic state for ${{ github.sha }}"
           git push origin HEAD:${{ github.ref_name }}

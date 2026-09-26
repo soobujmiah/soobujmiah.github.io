@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { SECTION_IDS, sectionUrl } from './sections';
 import { SERVICE_ROUTES } from './services';
+import { VERIFICATION_ROUTES } from './verification-routes';
 import { SITE_ORIGIN } from './sections';
 
 export const dynamic = 'force-static';
@@ -17,6 +18,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       return [
         { url: en, lastModified, changeFrequency: 'monthly' as const, priority, alternates: { languages: { en, bn, 'x-default': en } } },
         { url: bn, lastModified, changeFrequency: 'monthly' as const, priority, alternates: { languages: { en, bn, 'x-default': en } } },
+      ];
+    }),
+    /* The public verification page, outside the pager. */
+    ...VERIFICATION_ROUTES.flatMap((href) => {
+      const en = new URL(href, SITE_ORIGIN).href;
+      const bn = new URL(`/bn${href}`, SITE_ORIGIN).href;
+      return [
+        { url: en, lastModified, changeFrequency: 'daily' as const, priority: 0.5, alternates: { languages: { en, bn, 'x-default': en } } },
+        { url: bn, lastModified, changeFrequency: 'daily' as const, priority: 0.5, alternates: { languages: { en, bn, 'x-default': en } } },
       ];
     }),
     /* The service-intent layer: hub + eight pages, outside the pager. */

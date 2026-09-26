@@ -88,6 +88,13 @@ const IDENTIFIER_PATHS = new Set([
   'services.pages[].slug',
   'services.pages[].evidence[].name',
   'services.pages[].evidence[].url',
+  /* the public verification page (/verification/). `claimLabels[].id` is the
+     machine claim identity that joins a rendered row to its evidence record in
+     the generated public/verification.json -- it is an identifier, not prose,
+     so it stays verbatim ASCII in both trees exactly like a repository slug.
+     Everything else under `verification.` is translated prose and stays under
+     the purity rule. */
+  'verification.claimLabels[].id',
 ]);
 
 /* Self-test: if either predicate ever stops catching its own

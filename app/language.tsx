@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { content, type Content, type Lang } from './content';
 import { indexFromPathname } from './sections';
 import { localizedPath } from './locales';
+import { isVerificationPathname } from './verification-routes';
 
 /** Service routes own their document metadata (components/services);
     the pager's title swap must leave them alone — and must not pull the
@@ -39,9 +40,10 @@ export function LanguageProvider({ children, initialLang = 'en' }: { children: R
       document.documentElement.lang = lang === 'bn' ? 'bn' : 'en';
       document.body.classList.toggle('lang-bn', lang === 'bn');
       const pathname = window.location.pathname;
-      /* The service-intent layer lives outside the pager and re-titles
-         itself (ServicesShell); never re-title a service page as Home. */
-      if (isServicePathname(pathname)) return;
+      /* The service-intent layer and the verification page both live
+         outside the pager and re-title themselves (ServicesShell /
+         VerificationShell); never re-title one of those as Home. */
+      if (isServicePathname(pathname) || isVerificationPathname(pathname)) return;
       let i = 0;
       try {
         i = indexFromPathname(pathname);

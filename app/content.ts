@@ -226,7 +226,18 @@ export interface Content {
   };
   nav: { scene: number; label: string }[];
   header: { homeLabel: string; githubLabel: string; langLabel: string; langAria: string; githubAria: string; cvLabel: string; cvAria: string; servicesLabel: string };
-  footer: { built: string; claims: string };
+  footer: {
+    built: string;
+    claims: string;
+    /** Label for the deterministic proof line generated from repository/CI state. */
+    proofLabel: string;
+    /** "... N of M checks passing" — counts come from public/verification.json. */
+    checksPassing: string;
+    /** "... last verified <date>" — the date is the newest recorded evidence timestamp. */
+    lastVerified: string;
+    /** Screen-reader / tooltip wording for the link into /verification/. */
+    proofLink: string;
+  };
   ui: {
     carouselPrev: string;
     carouselNext: string;
@@ -657,6 +668,10 @@ const en: Content = {
   footer: {
     built: 'Built from a phone.',
     claims: 'Every claim backed by CI or real-device evidence.',
+    proofLabel: 'Proof & Verification',
+    checksPassing: 'checks passing',
+    lastVerified: 'last verified',
+    proofLink: 'Open the public verification page',
   },
   preloader: { status: 'Initializing' },
   seo: {
@@ -1116,6 +1131,10 @@ const bn: Content = {
   footer: {
     built: 'ফোন থেকে তৈরি।',
     claims: 'প্রতিটি দাবি সিআই বা বাস্তব-ডিভাইস প্রমাণে সমর্থিত।',
+    proofLabel: 'প্রমাণ ও যাচাই',
+    checksPassing: 'টি যাচাই পাস',
+    lastVerified: 'সর্বশেষ যাচাই',
+    proofLink: 'সর্বজনীন প্রমাণ-পৃষ্ঠা খুলুন',
   },
   preloader: { status: 'চালু হচ্ছে' },
   seo: {

@@ -1,0 +1,332 @@
+{
+  "schema": "skb.verification-claims/v1",
+  "authority": "soobujmiah/skb",
+  "canonical_location": "verification/claims.json in soobujmiah/skb",
+  "curated_at": "2026-09-27T00:00:00Z",
+  "curated_by": "owner-directed audit (Phase 0-4 of the portfolio verification integration)",
+  "contract": "verification/README.md + governance/VERIFICATION_AND_CLAIMS.md",
+  "status_enum": [
+    "verified",
+    "unverified",
+    "stale",
+    "superseded",
+    "failed",
+    "human_attested"
+  ],
+  "class_enum": [
+    "evidence_backed",
+    "positioning"
+  ],
+  "evidence_type_enum": [
+    "repository_state",
+    "public_repository",
+    "github_pages",
+    "none"
+  ],
+  "claims": [
+    {
+      "id": "portfolio.source.public",
+      "class": "evidence_backed",
+      "text": "The portfolio source repository is publicly accessible.",
+      "public": true,
+      "verification_method": "github_api",
+      "evidence": {
+        "type": "public_repository",
+        "repository": "soobujmiah/soobujmiah.github.io"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "portfolio.build.passing",
+      "class": "evidence_backed",
+      "text": "The portfolio site builds successfully (lint, type-check, content/design/purity gates and static export).",
+      "public": true,
+      "verification_method": "repository_state",
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "portfolio",
+        "repository": "soobujmiah/soobujmiah.github.io",
+        "field": "build.status",
+        "expect": "passed"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "portfolio.export.passing",
+      "class": "evidence_backed",
+      "text": "The portfolio's static export passes its post-build acceptance validation.",
+      "public": true,
+      "verification_method": "repository_state",
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "portfolio",
+        "repository": "soobujmiah/soobujmiah.github.io",
+        "field": "test.status",
+        "expect": "passed"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "repo.lai.build.passing",
+      "class": "evidence_backed",
+      "text": "LAI's continuous integration reports a passing build.",
+      "public": true,
+      "verification_method": "repository_state",
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "lai",
+        "repository": "soobujmiah/lai",
+        "field": "build.status",
+        "expect": "passed"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "repo.adt.build.passing",
+      "class": "evidence_backed",
+      "text": "ADT's continuous integration reports a passing build.",
+      "public": true,
+      "verification_method": "repository_state",
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "adt",
+        "repository": "soobujmiah/adt",
+        "field": "build.status",
+        "expect": "passed"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "repo.ternux.build.passing",
+      "class": "evidence_backed",
+      "text": "Ternux's continuous integration reports a passing build.",
+      "public": true,
+      "verification_method": "repository_state",
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "ternux",
+        "repository": "soobujmiah/ternux",
+        "field": "build.status",
+        "expect": "passed"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "repo.ggen.build.passing",
+      "class": "evidence_backed",
+      "text": "GGEN's continuous integration reports a passing build.",
+      "public": true,
+      "verification_method": "repository_state",
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "ggen",
+        "repository": "soobujmiah/ggen",
+        "field": "build.status",
+        "expect": "passed"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "repo.songjog.build.passing",
+      "class": "evidence_backed",
+      "text": "Songjog's continuous integration reports a passing build.",
+      "public": true,
+      "verification_method": "repository_state",
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "songjog",
+        "repository": "soobujmiah/songjog",
+        "field": "build.status",
+        "expect": "passed"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "repo.docdr.build.passing",
+      "class": "evidence_backed",
+      "text": "DocDr's continuous integration reports a passing build.",
+      "public": true,
+      "verification_method": "repository_state",
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "docdr",
+        "repository": "soobujmiah/docdr",
+        "field": "build.status",
+        "expect": "passed"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "repo.apiloop.build.passing",
+      "class": "evidence_backed",
+      "text": "Apiloop's continuous integration reports a passing build.",
+      "public": true,
+      "verification_method": "repository_state",
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "apiloop",
+        "repository": "soobujmiah/apiloop",
+        "field": "build.status",
+        "expect": "passed"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "repo.arms.build.passing",
+      "class": "evidence_backed",
+      "text": "ARMS's continuous integration reports a passing build.",
+      "public": true,
+      "verification_method": "repository_state",
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "arms",
+        "repository": "soobujmiah/arms",
+        "field": "build.status",
+        "expect": "passed"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "repo.iqra-online-mart.build.passing",
+      "class": "evidence_backed",
+      "text": "Iqra Online Mart's continuous integration reports a passing build.",
+      "public": true,
+      "verification_method": "repository_state",
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "iqra-online-mart",
+        "repository": "soobujmiah/iqra-online-mart",
+        "field": "build.status",
+        "expect": "passed"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "repo.datakhoj-android.build.passing",
+      "class": "evidence_backed",
+      "text": "DataKhoj Android's continuous integration reports a passing build.",
+      "public": true,
+      "verification_method": "repository_state",
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "datakhoj-android",
+        "repository": "soobujmiah/datakhoj-android",
+        "field": "build.status",
+        "expect": "passed"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "repo.sobkichu.build.passing",
+      "class": "evidence_backed",
+      "text": "Sobkichu's continuous integration reports a passing build.",
+      "public": true,
+      "verification_method": "repository_state",
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "sobkichu",
+        "repository": "soobujmiah/sobkichu",
+        "field": "build.status",
+        "expect": "passed"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "showcase.live_sites.published",
+      "class": "evidence_backed",
+      "text": "The repositories behind the portfolio's live-site links publish GitHub Pages sites.",
+      "public": true,
+      "verification_method": "github_api",
+      "evidence": {
+        "type": "github_pages",
+        "repositories": [
+          "soobujmiah/ternux",
+          "soobujmiah/arms",
+          "soobujmiah/iqra-online-mart"
+        ]
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "positioning.software_practice",
+      "class": "positioning",
+      "text": "I build practical software.",
+      "public": true,
+      "verification_method": "none",
+      "evidence": { "type": "none" },
+      "note": "Owner-authored positioning statement. Human-controlled by contract; never machine-verified, never rewritten by automation."
+    },
+    {
+      "id": "attested.ggen.unit_tests",
+      "class": "positioning",
+      "text": "GGEN carries 143 pure-Dart unit tests.",
+      "public": true,
+      "verification_method": "human_attested",
+      "evidence": { "type": "none" },
+      "note": "Counted by the owner at a live head and recorded in the portfolio README claim-verification log. Not derivable from .repo/ state; re-count at the live head before professional reuse."
+    },
+    {
+      "id": "attested.ggen.widget_tests",
+      "class": "positioning",
+      "text": "GGEN carries 353 widget/controller tests.",
+      "public": true,
+      "verification_method": "human_attested",
+      "evidence": { "type": "none" },
+      "note": "237 test( plus 116 testWidgets( counted by the owner at a live head. Not derivable from .repo/ state."
+    },
+    {
+      "id": "attested.lai.decode_throughput",
+      "class": "positioning",
+      "text": "LAI decodes at 12-20 tok/s on the reference device.",
+      "public": true,
+      "verification_method": "human_attested",
+      "evidence": { "type": "none" },
+      "note": "Recorded device-run range (not a peak) documented in soobujmiah/lai. Device evidence, not CI evidence."
+    },
+    {
+      "id": "attested.ternux.glmark2",
+      "class": "positioning",
+      "text": "Ternux scores 140 on glmark2 (OpenGL 4.6).",
+      "public": true,
+      "verification_method": "human_attested",
+      "evidence": { "type": "none" },
+      "note": "Documented in docs/BENCHMARKS.md at a live head of soobujmiah/ternux."
+    },
+    {
+      "id": "attested.ternux.blender",
+      "class": "positioning",
+      "text": "Ternux runs Blender 4.3.2 on Zink/Adreno/Turnip.",
+      "public": true,
+      "verification_method": "human_attested",
+      "evidence": { "type": "none" },
+      "note": "Documented in docs/BENCHMARKS.md and docs/USAGE.md at a live head of soobujmiah/ternux."
+    },
+    {
+      "id": "attested.songjog.test_count",
+      "class": "positioning",
+      "text": "Songjog carries 94 tests.",
+      "public": true,
+      "verification_method": "human_attested",
+      "evidence": { "type": "none" },
+      "note": "Owner-recorded count. The machine-verifiable half of this statement is the separate claim repo.songjog.build.passing."
+    },
+    {
+      "id": "attested.adt.apk_pipeline",
+      "class": "positioning",
+      "text": "ADT produces a signed, installable ARM64 APK end to end.",
+      "public": true,
+      "verification_method": "human_attested",
+      "evidence": { "type": "none" },
+      "note": "Three published releases plus on-device validation recorded by the owner. Release existence is not part of the .repo/ contract."
+    },
+    {
+      "id": "attested.device_validation",
+      "class": "positioning",
+      "text": "Selected projects were validated on a physical Redmi Turbo 4 Pro running Termux and PRoot Debian.",
+      "public": true,
+      "verification_method": "human_attested",
+      "evidence": { "type": "none" },
+      "note": "Device evidence recorded by the owner; no machine-readable device log is part of the .repo/ contract."
+    }
+  ]
+}
