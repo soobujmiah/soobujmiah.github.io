@@ -488,12 +488,11 @@ def main():
 
     # Use pypdf to verify text extraction
     try:
-        sys.path.insert(0, "/home/sbj/soobujmiah.github.io/.venv-cv/lib/python3.13/site-packages")
         import pypdf
         reader = pypdf.PdfReader(OUT)
         page = reader.pages[0]
         extracted = page.extract_text()
-        
+
         # Check for Devanagari in extracted text
         dev_in_pdf = DEVANAGARI_RE.findall(extracted)
         # Filter out Bengali punctuation (U+0964 danda, U+0965 double danda)
@@ -502,27 +501,28 @@ def main():
         if dev_only:
             print(f"PDF VALIDATION FAIL: Devanagari found in extracted PDF text: {set(dev_only)}")
             sys.exit(1)
-        
+
         # Check for Arabic in extracted text
         arab_in_pdf = ARABIC_RE.findall(extracted)
         if arab_in_pdf:
             print(f"PDF VALIDATION FAIL: Arabic found in extracted PDF text: {set(arab_in_pdf)}")
             sys.exit(1)
-        
-        # Check that Bengali IS present
+
+        # Check that Bengali IS present (positive check)
         bn_in_pdf = BENGALI_RE.findall(extracted)
         if len(bn_in_pdf) < 50:
             print(f"PDF VALIDATION WARN: Only {len(bn_in_pdf)} Bengali chars in extracted text")
-        
+
         # Check links exist
-        links = page.annotations
-        if links:
-            link_list = []
-            for annot in links.values():
-                if isinstance(annot, dict):
-                    link_list.append(annot.get('/A', {}).get('/URI', ''))
-            print(f"Extracted {len(link_list)} links from PDF")
-        
+        links_found = 0
+        annots = page.get('/Annots', [])
+        if annots:
+            for annot_ref in annots:
+                annot = annot_ref.get_object()
+                if annot.get('/Subtype') == '/Link':
+                    links_found += 1
+        print(f"Extracted {links_found} links from PDF")
+
         print("PDF text extraction: OK")
         print(f"Extracted text sample (first 300 chars):\n{extracted[:300]}")
     except ImportError:
