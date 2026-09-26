@@ -626,7 +626,7 @@ export function Footer({ progress = 0 }: { progress?: number }) {
             © {localizeDigits(new Date().getFullYear(), lang)} {t.profile.nameFull}. {t.footer.built}
           </p>
           <a
-            href="https://github.com/soobujmiah/soobujmiah.github.io#claim-verification-log"
+            href="/verification/"
             target="_blank"
             rel="noreferrer"
             data-magnetic
