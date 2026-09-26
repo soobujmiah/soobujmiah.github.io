@@ -59,7 +59,11 @@ jobs:
       # Fails the build if either PDF is missing, contains forbidden scripts,
       # or lacks required clickable links.
       - name: Install Bengali font (GitHub Actions ubuntu-latest)
-        run: sudo apt-get install -y fonts-noto-bengali
+        run: |
+          sudo mkdir -p /usr/share/fonts/truetype/noto
+          sudo curl -fsSL "https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSansBengali/NotoSansBengali-Regular.ttf" \
+            -o /usr/share/fonts/truetype/noto/NotoSansBengali-Regular.ttf
+          fc-cache -fv
       - name: Set up Python virtualenv for PDF tools
         run: python3 -m venv .venv-cv && .venv-cv/bin/pip install reportlab pypdf
       - name: Generate and validate bilingual CVs
