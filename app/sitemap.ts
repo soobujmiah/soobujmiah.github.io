@@ -20,6 +20,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ];
     }),
     /* The service-intent layer: hub + eight pages, outside the pager. */
+    { url: new URL('/verification/', SITE_ORIGIN).href, lastModified, changeFrequency: 'monthly' as const, priority: 0.5, alternates: { languages: { en: new URL('/verification/', SITE_ORIGIN).href, bn: new URL('/bn/verification/', SITE_ORIGIN).href, 'x-default': new URL('/verification/', SITE_ORIGIN).href } } },
+    { url: new URL('/bn/verification/', SITE_ORIGIN).href, lastModified, changeFrequency: 'monthly' as const, priority: 0.5, alternates: { languages: { en: new URL('/verification/', SITE_ORIGIN).href, bn: new URL('/bn/verification/', SITE_ORIGIN).href, 'x-default': new URL('/verification/', SITE_ORIGIN).href } } },
+    /* The service-intent layer: hub + eight pages, outside the pager. */
     ...SERVICE_ROUTES.flatMap((href, i) => {
       const en = new URL(href, SITE_ORIGIN).href;
       const bn = new URL(`/bn${href}`, SITE_ORIGIN).href;
