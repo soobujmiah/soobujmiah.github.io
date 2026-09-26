@@ -263,8 +263,8 @@ const en: Content = {
   profile: {
     name: 'Sobuj',
     nameFull: 'Sobuj Miah',
-    title: 'Independent Software & AI Systems Builder',
-    tagline: 'Software · On-Device AI · Android · Computing · Automation',
+    title: 'Independent Software & AI Systems Engineer',
+    tagline: 'On-Device AI · Android · ARM64 Linux · Native Tooling · Software Systems',
     location: 'Dhaka, Bangladesh',
     github: 'https://github.com/soobujmiah',
     email: 'soobujmiah@gmail.com',
@@ -274,11 +274,11 @@ const en: Content = {
   meta: {
     title: 'Sobuj Miah — Software, AI & Practical Technology',
     description:
-      'Software, on-device AI, Android, computing and automation. I learn by experimenting, building and solving practical problems, with project evidence from real hardware and CI.',
+      'I build software and AI systems across on-device AI, Android, ARM64 Linux, native tooling and automation, with evidence from real hardware and CI. I also provide practical technology help for websites, software, computer/Android support and digital workflows.',
   },
   hero: {
     intro:
-      'A long-running, hands-on journey with technology: learning, experimenting, building and solving practical problems. Today I work across software, on-device AI, Android, computing, automation and digital tools.',
+      'I build software and AI systems across on-device AI, Android, ARM64 Linux, native tooling and automation. Alongside engineering work, I help individuals, small businesses and institutions with practical technology: websites, software, computer/Android support and digital workflows.',
     availability: 'Open to remote',
     ctaWork: 'Explore my work',
     ctaGithub: 'View GitHub ↗',
@@ -497,7 +497,7 @@ const en: Content = {
   },
   experience: {
     eyebrow: '07 — Experience',
-    heading: 'A hands-on journey with technology, alongside professional work.',
+    heading: 'A hands-on engineering journey with technology, alongside professional work.',
     intro: 'My interest in computers and technology predates my listed professional roles. It has grown through exploration, troubleshooting, building and learning from practical problems. Professional work is one part of that story; the projects show what I continue to explore and build today.',
     professionalLabel: 'Professional experience',
     services: {
@@ -511,7 +511,7 @@ const en: Content = {
     entries: [
       {
         period: 'Apr 2026 – Present',
-        role: 'Independent Software & AI Systems Builder',
+        role: 'Independent Software & AI Systems Engineer',
         company: 'Pro-Jukti Info Tech',
         location: 'Self-employed',
         desc: 'Independent systems work — on-device AI, ARM64 Android tooling and Linux systems, delivered through Pro-Jukti Info Tech.',
@@ -675,9 +675,9 @@ const en: Content = {
           'Sobuj Miah works across on-device AI, Android systems, ARM64 Linux, GPU graphics, mobile and web software, with native tooling and device-verified releases.',
       },
       {
-        title: 'About — Independent Systems Builder in Dhaka',
+        title: 'About — Independent Software & AI Systems Engineer in Dhaka',
         description:
-          'About Sobuj Miah: a self-taught software and technology builder in Dhaka, Bangladesh, learning through practical projects, real devices and problem-solving.',
+          'About Sobuj Miah: an independent software and AI systems engineer in Dhaka, Bangladesh, learning through practical projects, real devices and evidence-backed problem-solving.',
       },
       {
         title: 'Work & Repositories — Ternux, ADT, LAI & GGEN',
@@ -692,7 +692,7 @@ const en: Content = {
       {
         title: 'Experience — Operations, Administration & Engineering',
         description:
-          'A long-running technology journey of learning, experimenting, building and solving practical problems, alongside professional experience in operations and administration. View the dated roles and projects.',
+          'A long-running engineering journey of learning, experimenting, building and solving practical problems, alongside professional experience in operations and administration. View the dated roles and projects.',
       },
       {
         title: 'Contact — Freelance, Remote & Collaboration',
@@ -713,8 +713,8 @@ const bn: Content = {
   profile: {
     name: 'সবুজ',
     nameFull: 'সবুজ মিয়া',
-    title: 'স্বাধীন সফটওয়্যার ও এআই সিস্টেম নির্মাতা',
-    tagline: 'সফটওয়্যার · অন-ডিভাইস এআই · অ্যান্ড্রয়েড · কম্পিউটিং · অটোমেশন',
+    title: 'স্বাধীন সফটওয়্যার ও এআই সিস্টেম ইঞ্জিনিয়ার',
+    tagline: 'অন-ডিভাইস এআই · অ্যান্ড্রয়েড · এআরএম ৬৪ লিনাক্স · নেটিভ টুলিং · সফটওয়্যার সিস্টেম',
     location: 'ঢাকা, বাংলাদেশ',
     github: 'https://github.com/soobujmiah',
     email: 'soobujmiah@gmail.com',
@@ -724,11 +724,11 @@ const bn: Content = {
   meta: {
     title: 'সবুজ মিয়া — সফটওয়্যার, এআই ও ব্যবহারিক প্রযুক্তি',
     description:
-      'সফটওয়্যার, অন-ডিভাইস এআই, অ্যান্ড্রয়েড, কম্পিউটিং ও অটোমেশন। হাতে-কলমে শেখা ও নির্মাণের দীর্ঘ যাত্রা, বাস্তব ডিভাইস ও সিআই-ভিত্তিক প্রকল্প প্রমাণসহ।',
+      'অন-ডিভাইস এআই, অ্যান্ড্রয়েড, এআরএম ৬৪ লিনাক্স, নেটিভ টুলিং ও অটোমেশন নিয়ে সফটওয়্যার ও এআই সিস্টেম তৈরি করি; বাস্তব ডিভাইস ও সিআই-ভিত্তিক প্রমাণসহ। পাশাপাশি ওয়েবসাইট, সফটওয়্যার, কম্পিউটার বা অ্যান্ড্রয়েড সহায়তা এবং ডিজিটাল কর্মপ্রবাহে ব্যবহারিক প্রযুক্তি সহায়তা দিই।',
   },
   hero: {
     intro:
-      'প্রযুক্তি নিয়ে দীর্ঘদিনের হাতে-কলমে শেখা, পরীক্ষা, নির্মাণ ও বাস্তব সমস্যা সমাধানের অভিজ্ঞতা। এখন সফটওয়্যার, অন-ডিভাইস এআই, অ্যান্ড্রয়েড, কম্পিউটিং, অটোমেশন ও ডিজিটাল টুল নিয়ে কাজ করি।',
+      'অন-ডিভাইস এআই, অ্যান্ড্রয়েড, এআরএম ৬৪ লিনাক্স, নেটিভ টুলিং ও অটোমেশন নিয়ে সফটওয়্যার ও এআই সিস্টেম তৈরি করি। ইঞ্জিনিয়ারিং কাজের পাশাপাশি ব্যক্তি, ছোট ব্যবসা ও প্রতিষ্ঠানের জন্য ওয়েবসাইট, সফটওয়্যার, কম্পিউটার/অ্যান্ড্রয়েড সহায়তা এবং ডিজিটাল কর্মপ্রবাহে ব্যবহারিক প্রযুক্তি সহায়তা দিই।',
     availability: 'রিমোট কাজের জন্য উন্মুক্ত',
     ctaWork: 'আমার কাজ দেখুন',
     ctaGithub: 'গিটহাব দেখুন ↗',
@@ -1123,7 +1123,7 @@ const bn: Content = {
       {
     title: 'সবুজ মিয়া — সফটওয়্যার, এআই ও ব্যবহারিক প্রযুক্তি',
         description:
-          'সফটওয়্যার, অন-ডিভাইস এআই, অ্যান্ড্রয়েড, কম্পিউটিং ও অটোমেশন। হাতে-কলমে শেখা ও নির্মাণের দীর্ঘ যাত্রা, বাস্তব ডিভাইস ও সিআই-ভিত্তিক প্রকল্প প্রমাণসহ।',
+          'অন-ডিভাইস এআই, অ্যান্ড্রয়েড, এআরএম ৬৪ লিনাক্স, নেটিভ টুলিং ও অটোমেশন নিয়ে সফটওয়্যার ও এআই সিস্টেম তৈরি করি; বাস্তব ডিভাইস ও সিআই-ভিত্তিক প্রমাণসহ। পাশাপাশি ওয়েবসাইট, সফটওয়্যার, কম্পিউটার বা অ্যান্ড্রয়েড সহায়তা এবং ডিজিটাল কর্মপ্রবাহে ব্যবহারিক প্রযুক্তি সহায়তা দিই।',
       },
       {
         title: 'ফোকাস ও টুলিং — সফটওয়্যার, এআই, অ্যান্ড্রয়েড ও এআরএম ৬৪',
@@ -1131,9 +1131,9 @@ const bn: Content = {
           'সবুজ মিয়ার প্রযুক্তিগত কাজ: অন-ডিভাইস এআই, অ্যান্ড্রয়েড সিস্টেম, এআরএম ৬৪ লিনাক্স, জিপিইউ গ্রাফিক্স, মোবাইল ও ওয়েব সফটওয়্যার; সঙ্গে নেটিভ টুলিং ও ডিভাইসে যাচাইকৃত রিলিজ।',
       },
       {
-        title: 'পরিচিতি — ঢাকার স্বাধীন সিস্টেম নির্মাতা',
+        title: 'পরিচিতি — ঢাকার স্বাধীন সফটওয়্যার ও এআই সিস্টেম ইঞ্জিনিয়ার',
         description:
-          'সবুজ মিয়া সম্পর্কে: ঢাকার স্ব-শিক্ষিত সফটওয়্যার ও প্রযুক্তি নির্মাতা, যিনি ব্যবহারিক প্রকল্প, বাস্তব ডিভাইস ও সমস্যা সমাধানের মধ্য দিয়ে শেখেন।',
+          'সবুজ মিয়া সম্পর্কে: ঢাকার স্বাধীন সফটওয়্যার ও এআই সিস্টেম ইঞ্জিনিয়ার, যিনি ব্যবহারিক প্রকল্প, বাস্তব ডিভাইস ও প্রমাণভিত্তিক সমস্যা সমাধানের মধ্য দিয়ে শেখেন।',
       },
       {
         title: 'কাজ ও রিপোজিটরি — টারনাক্স, এডিটি, লাই ও জিজেন',
@@ -1146,7 +1146,7 @@ const bn: Content = {
           'প্রমাণ-স্তরবিন্যস্ত গবেষণা: অন-ডিভাইস এলএলএম ইনফারেন্স, হেক্সাগন এনপিইউ যোগ্যতা-পরীক্ষা, অ্যাড্রেনো ভলকান/টার্নিপ/জিংক, সম্মতি-নিয়ন্ত্রিত স্বয়ংক্রিয়তা, অ্যান্ড্রয়েডে লিনাক্স ও নেটিভ এআরএম ৬৪ টুলিং।',
       },
       {
-        title: 'অভিজ্ঞতা — অপারেশন, প্রশাসন ও ইঞ্জিনিয়ারিং',
+        title: 'অভিজ্ঞতা — ইঞ্জিনিয়ারিং, অপারেশন ও প্রশাসন',
         description:
           'প্রযুক্তি নিয়ে দীর্ঘদিনের শেখা, পরীক্ষা, নির্মাণ ও বাস্তব সমস্যা সমাধানের পথ; পাশাপাশি অপারেশন ও প্রশাসনে পেশাগত অভিজ্ঞতা। তারিখসহ কাজের তালিকা ও প্রকল্প দেখুন।',
       },
