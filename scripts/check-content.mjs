@@ -309,7 +309,7 @@ try {
      The owner set this wording explicitly; a silent rewording here would
      drift every surface that inherits it, so it is asserted rather than
      trusted. Retired positioning is asserted *absent*, not merely unused. */
-  const CANONICAL_TITLE = 'Independent Software & AI Systems Builder';
+  const CANONICAL_TITLE = 'Independent Software & AI Systems Engineer';
   const RETIRED_POSITIONING = ['Self-Taught Technology Builder'];
   if (content.en.profile.title !== CANONICAL_TITLE) {
     fail(`en.profile.title is "${content.en.profile.title}", expected the canonical "${CANONICAL_TITLE}"`);
