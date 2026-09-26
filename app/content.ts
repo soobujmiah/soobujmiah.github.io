@@ -313,7 +313,7 @@ const en: Content = {
     ],
     facts: [
       { label: 'Based in', value: 'Dhaka, Bangladesh (GMT+6)' },
-      { label: 'Languages', value: 'Bangla, English, Hindi/Urdu, Arabic' },
+      { label: 'Languages', value: 'Bangla (native), English (professional working), Hindi/Urdu (conversational, non-writing), Arabic (basic comprehension)' },
       { label: 'Reference device', value: 'Redmi Turbo 4 Pro — SD 8s Gen 4' },
       { label: 'Build pipeline', value: 'GitHub Actions CI/CD' },
     ],

@@ -61,11 +61,21 @@ RX = M + LEFT_W + GUT  # right column x
 RW = W - M - RX        # right column width
 
 
+def shape(c, text, font):
+    """Apply HarfBuzz shaping via ReportLab's shapeStr for correct Bengali rendering."""
+    from reportlab.pdfbase import ttfonts
+    if hasattr(ttfonts, "shapeStr"):
+        # Prefer shaped string when HarfBuzz is available
+        return ttfonts.shapeStr(text, font, 1)
+    return text
+
+
 def wrap(c, text, font, size, max_w):
-    """Greedy word-wrap using real font metrics."""
+    """Greedy word-wrap using real font metrics (with shaping applied)."""
+    shaped = shape(c, text, font)
     c.setFont(font, size)
     out, cur = [], ""
-    for word in text.split():
+    for word in shaped.split():
         trial = (cur + " " + word).strip()
         if c.stringWidth(trial, font, size) <= max_w:
             cur = trial
@@ -87,8 +97,8 @@ def section(c, cur, title, x, width, font=F_BN_BOLD, size=8.4):
     cur.y -= 16
     c.setFillColor(ACCENT)
     c.setFont(font, size)
-    c.drawString(x, cur.y, title.upper())
-    tw = c.stringWidth(title.upper(), font, size)
+    c.drawString(x, cur.y, shape(c, title.upper(), font))
+    tw = c.stringWidth(shape(c, title.upper(), font), font, size)
     c.setStrokeColor(LINE)
     c.setLineWidth(0.7)
     c.line(x + tw + 8, cur.y + 2.6, x + width, cur.y + 2.6)
@@ -96,6 +106,7 @@ def section(c, cur, title, x, width, font=F_BN_BOLD, size=8.4):
 
 
 def body(c, cur, text, x, width, size=8.6, color=DIM, leading=11.4, font=F_BN):
+    """Render Bengali paragraph with HarfBuzz shaping applied."""
     c.setFillColor(color)
     for line in wrap(c, text, font, size, width):
         c.setFont(font, size)
@@ -198,7 +209,13 @@ def main():
         ("টেলিগ্রাম", "@soobujmiah", "https://t.me/soobujmiah"),
     ]
 
-    languages = ["বাংলা — মাতৃভাষা", "ইংরেজি — fluent"]
+    languages = [
+        "বাংলা — মাতৃভাষা",
+        "ইংরেজি — পেশাদারভাবে ব্যবহারযোগ্য",
+        "হিন্দি — কথোপকথন স্বচ্ছন্দ; লেখা জানি না",
+        "উর্দু — কথোপকথন স্বচ্ছন্দ; লেখা জানি না",
+        "আরবি — প্রাথমিক বোধ; লেখা জানি না",
+    ]
 
     core_focus = [
         "অন-ডিভাইস এলএলএম ইনফারেন্স",
@@ -355,15 +372,15 @@ def main():
     hy = H - 52
     c.setFillColor(TEXT)
     c.setFont(F_BN_BOLD, 25)
-    c.drawString(M, hy, header_title)
+    c.drawString(M, hy, shape(c, header_title, F_BN_BOLD))
     link_annot(c, M, hy - 3, 200, 25, "https://github.com/soobujmiah")
 
     c.setFillColor(ACCENT_B)
     c.setFont(F_BN, 10.4)
-    c.drawString(M, hy - 17, header_role)
+    c.drawString(M, hy - 17, shape(c, header_role, F_BN))
     c.setFillColor(MUTED)
     c.setFont(F_BN, 8.2)
-    c.drawString(M, hy - 30, header_tagline)
+    c.drawString(M, hy - 30, shape(c, header_tagline, F_BN))
     c.setStrokeColor(ACCENT)
     c.setLineWidth(1.1)
     c.line(M, hy - 40, W - M, hy - 40)
@@ -404,7 +421,7 @@ def main():
     for label, value, href in contact_items:
         c.setFillColor(MUTED)
         c.setFont(F_BN_BOLD, 7.4)
-        c.drawString(lx, cur.y, label.upper())
+        c.drawString(lx, cur.y, shape(c, label.upper(), F_BN_BOLD))
         c.setFillColor(DIM)
         c.setFont(F_BN, 8.2)
         c.drawString(lx, cur.y - 9.5, value)
@@ -420,7 +437,7 @@ def main():
         c.circle(lx + 1.6, cur.y + 2.4, 1.3, fill=1, stroke=0)
         c.setFillColor(DIM)
         c.setFont(F_BN, 8.4)
-        c.drawString(lx + 7, cur.y, lang)
+        c.drawString(lx + 7, cur.y, shape(c, lang, F_BN))
         cur.y -= 13
 
     # Core Focus
@@ -430,7 +447,7 @@ def main():
         c.circle(lx + 1.6, cur.y + 2.4, 1.3, fill=1, stroke=0)
         c.setFillColor(DIM)
         c.setFont(F_BN, 8.4)
-        c.drawString(lx + 7, cur.y, item)
+        c.drawString(lx + 7, cur.y, shape(c, item, F_BN))
         cur.y -= 13
 
     # Services
@@ -440,7 +457,7 @@ def main():
         c.circle(lx + 1.6, cur.y + 2.4, 1.3, fill=1, stroke=0)
         c.setFillColor(DIM)
         c.setFont(F_BN, 8.4)
-        c.drawString(lx + 7, cur.y, item)
+        c.drawString(lx + 7, cur.y, shape(c, item, F_BN))
         cur.y -= 13
 
     # ── Right column ───────────────────────────────────────────
@@ -462,7 +479,7 @@ def main():
     for years, role in earlier:
         c.setFont(F_BN_BOLD, 7.8)
         c.setFillColor(ACCENT_B)
-        c.drawString(rx, rcur.y, years)
+        c.drawString(rx, rcur.y, shape(c, years, F_BN_BOLD))
         body(c, rcur, role, rx + 50, rw - 50, size=7.9, color=MUTED, leading=9.8, font=F_BN)
         rcur.y -= 2.5
 
@@ -470,11 +487,11 @@ def main():
     for head, tail in skills:
         c.setFillColor(TEXT)
         c.setFont(F_BN_BOLD, 8.4)
-        c.drawString(rx, rcur.y, head)
+        c.drawString(rx, rcur.y, shape(c, head, F_BN_BOLD))
         hw = c.stringWidth(head, F_BN_BOLD, 8.4)
         c.setFillColor(MUTED)
         c.setFont(F_BN, 8.3)
-        c.drawString(rx + hw + 8, rcur.y, tail)
+        c.drawString(rx + hw + 8, rcur.y, shape(c, tail, F_BN))
         rcur.y -= 12.5
 
     section(c, rcur, "শিক্ষা ও শিক্ষন", rx, rw, font=F_BN_BOLD)
