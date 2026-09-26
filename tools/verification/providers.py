@@ -54,7 +54,7 @@ class RegistryProvider:
         if repository in self._public_cache:
             return self._public_cache[repository]
         info = self._api_get(f"{API_ROOT}/repos/{repository}")
-        result = None if info is None else (not info.get("private"))
+        result = None if info is None else (info.get("private") is False)
         self._public_cache[repository] = result
         return result
 
@@ -116,7 +116,7 @@ class RegistryProvider:
                 "commit": (entry.get("head") or {}).get("commit"),
                 "run_id": block.get("run_id"),
                 "public": self._is_public(repository),
-                "url": _repo_yaml_url(repository),
+                "url": _repo_yaml_url(repository, (entry.get("head") or {}).get("branch") or "main"),
             }
         if evidence_type == "public_repository":
             info = self._api_get(f"{API_ROOT}/repos/{spec.get('repository')}")
@@ -125,8 +125,8 @@ class RegistryProvider:
             return {
                 "type": "public_repository",
                 "repository": spec.get("repository"),
-                "value": "private" if info.get("private") else "public",
-                "public": not info.get("private"),
+                "value": "public" if info.get("private") is False else "private" if info.get("private") is True else "unknown",
+                "public": info.get("private") is False,
                 "at": _now_z(info.get("pushed_at")),
                 "url": info.get("html_url"),
             }
@@ -137,7 +137,8 @@ class RegistryProvider:
                 info = self._api_get(f"{API_ROOT}/repos/{repository}")
                 if info is None:
                     return None
-                results.append({"repository": repository, "has_pages": bool(info.get("has_pages"))})
+                results.append({"repository": repository, "has_pages": bool(info.get("has_pages")),
+                                "public": info.get("private") is False})
                 stamps.append(info.get("pushed_at"))
             if not results:
                 return None
@@ -146,17 +147,18 @@ class RegistryProvider:
                 "type": "github_pages",
                 "repositories": results,
                 "value": "published" if published else "not_published",
-                "public": True,
+                "public": all(r["public"] for r in results),
                 "at": max((s for s in stamps if s), default=None),
-                "url": f"https://github.com/{repositories[0]}/settings/pages",
+                "url": f"https://api.github.com/repos/{repositories[0]}",
             }
         return None
 
 
-def _repo_yaml_url(repository: str | None) -> str | None:
+def _repo_yaml_url(repository: str | None, branch: str = "main") -> str | None:
     if not repository:
         return None
-    return f"https://github.com/{repository}/blob/main/.repo/project.yaml"
+    from urllib.parse import quote
+    return f"https://github.com/{repository}/blob/{quote(branch, safe='')}/.repo/project.yaml"
 
 
 class PortfolioProvider:
@@ -227,7 +229,7 @@ class PortfolioProvider:
         repository = spec.get("repository")
         project_id = spec.get("project_id")
         if project_id == self.project_id and (self.root / ".repo" / "project.yaml").exists():
-            return self._local_state(), None
+            return self._local_state(), self._repo_info(repository) if repository else None
         if not repository:
             return None, None
         info = self._repo_info(repository)
@@ -266,8 +268,8 @@ class PortfolioProvider:
                 "at": block.get("at"),
                 "commit": (state.get("head") or {}).get("commit"),
                 "run_id": block.get("run_id"),
-                "public": True if info is None else (not info.get("private")),
-                "url": _repo_yaml_url(repository),
+                "public": None if info is None else (info.get("private") is False),
+                "url": _repo_yaml_url(repository, (state.get("head") or {}).get("branch") or "main"),
             }
         if evidence_type == "public_repository":
             info = self._repo_info(spec.get("repository", ""))
@@ -276,8 +278,8 @@ class PortfolioProvider:
             return {
                 "type": "public_repository",
                 "repository": spec.get("repository"),
-                "value": "private" if info.get("private") else "public",
-                "public": not info.get("private"),
+                "value": "public" if info.get("private") is False else "private" if info.get("private") is True else "unknown",
+                "public": info.get("private") is False,
                 "at": _now_z(info.get("pushed_at")),
                 "url": info.get("html_url"),
             }
@@ -288,7 +290,8 @@ class PortfolioProvider:
                 info = self._repo_info(repository)
                 if info is None:
                     return None
-                results.append({"repository": repository, "has_pages": bool(info.get("has_pages"))})
+                results.append({"repository": repository, "has_pages": bool(info.get("has_pages")),
+                                "public": info.get("private") is False})
                 stamps.append(info.get("pushed_at"))
             if not results:
                 return None
@@ -297,8 +300,8 @@ class PortfolioProvider:
                 "type": "github_pages",
                 "repositories": results,
                 "value": "published" if published else "not_published",
-                "public": True,
+                "public": all(r["public"] for r in results),
                 "at": max((s for s in stamps if s), default=None),
-                "url": f"https://github.com/{repositories[0]}/settings/pages",
+                "url": f"https://api.github.com/repos/{repositories[0]}",
             }
         return None

@@ -185,7 +185,7 @@ def classify(
     expect = (claim.get("evidence") or {}).get("expect")
     value = evidence.get("value")
 
-    if value == "unknown":
+    if expect is None or value is None or value == "unknown" or parse_iso(evidence.get("at")) is None:
         # The canonical source exists but honestly reports no result (e.g. a docs-only
         # repository with no test suite). That is "cannot verify", not "known broken".
         status = STATUS_UNVERIFIED
@@ -277,15 +277,25 @@ def is_public_safe(record: dict[str, Any]) -> bool:
     carries no positive public marker, keeps a claim internal."""
     if not record.get("public"):
         return False
+    # Retain unavailable evidence internally, but do not republish old visibility
+    # assertions when the source cannot currently be resolved.
+    if record.get("carried_forward"):
+        return False
     evidence = record.get("evidence")
     if evidence is None:
         # `human_attested` / `unverified` positioning claims carry no evidence and are
         # publishable text; anything else without evidence is an internal gap.
         return record.get("status") == STATUS_HUMAN
-    if evidence.get("public") is False:
+    # Positive public eligibility is required for all evidence, including groups.
+    # Unknown visibility is never equivalent to public. Never ship real private
+    # inventory lists in the consumer as a substitute for this boundary.
+    if evidence.get("public") is not True:
         return False
-    repository = evidence.get("repository")
-    if repository is not None and evidence.get("public") is not True:
+    nested = evidence.get("repositories", [])
+    if not isinstance(nested, list):
+        return False
+    if any(not isinstance(item, dict) or item.get("public") is not True
+           or not item.get("repository") for item in nested):
         return False
     return True
 

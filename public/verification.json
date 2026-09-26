@@ -1,7 +1,7 @@
 {
   "schema": "skb.verification-projection/v1",
   "schema_version": 1,
-  "as_of": "2026-09-26T20:11:25Z",
+  "as_of": "2026-09-26T20:11:33Z",
   "summary": {
     "verified": 13,
     "failed": 2,
@@ -15,14 +15,14 @@
       "id": "portfolio.source.public",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-26T20:10:01Z",
+      "verified_at": "2026-09-26T20:11:33Z",
       "public": true,
       "evidence": {
         "type": "public_repository",
         "repository": "soobujmiah/soobujmiah.github.io",
         "value": "public",
         "public": true,
-        "at": "2026-09-26T20:10:01Z",
+        "at": "2026-09-26T20:11:33Z",
         "url": "https://github.com/soobujmiah/soobujmiah.github.io"
       }
     },
@@ -232,7 +232,7 @@
         "commit": "8e30ea5f25dd3be85255948209ad9288e3f0f948",
         "run_id": "36218435694",
         "public": true,
-        "url": "https://github.com/soobujmiah/iqra-online-mart/blob/main/.repo/project.yaml"
+        "url": "https://github.com/soobujmiah/iqra-online-mart/blob/master/.repo/project.yaml"
       }
     },
     {
@@ -284,21 +284,24 @@
         "repositories": [
           {
             "repository": "soobujmiah/ternux",
-            "has_pages": true
+            "has_pages": true,
+            "public": true
           },
           {
             "repository": "soobujmiah/arms",
-            "has_pages": true
+            "has_pages": true,
+            "public": true
           },
           {
             "repository": "soobujmiah/iqra-online-mart",
-            "has_pages": true
+            "has_pages": true,
+            "public": true
           }
         ],
         "value": "published",
         "public": true,
         "at": "2026-09-26T08:02:17Z",
-        "url": "https://github.com/soobujmiah/ternux/settings/pages"
+        "url": "https://api.github.com/repos/soobujmiah/ternux"
       }
     },
     {

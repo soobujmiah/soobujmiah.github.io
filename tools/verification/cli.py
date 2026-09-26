@@ -69,6 +69,8 @@ def _claims_findings(claims_doc: dict, schema: dict) -> list[str]:
                 findings.append(f"{where} ({claim_id}): positioning claim must use human_attested or none")
         if claim.get("class") == core.CLASS_EVIDENCE:
             spec = claim.get("evidence") or {}
+            if not isinstance(spec.get("expect"), str) or not spec["expect"]:
+                findings.append(f"{where} ({claim_id}): machine claim requires evidence.expect")
             if spec.get("type") == "none":
                 findings.append(f"{where} ({claim_id}): evidence_backed claim cannot declare evidence.type 'none'")
     for claim in claims_doc.get("claims", []):
@@ -188,33 +190,33 @@ def cmd_build(args: argparse.Namespace) -> int:
     # whose evidence points at a private repository. It must never be written into a
     # site's public document root, where it would be published verbatim. A public
     # build must ask for the projection explicitly.
-    if _is_public_path(args.out) and not (args.public_only or args.projection):
+    if _is_public_path(args.out) and not args.public_only:
         raise SystemExit(
             f"refusing to write the internal verification state to {args.out}: that path is public. "
             "Pass --public-only (or --projection <path>) so only the public-safe projection is written."
         )
 
-    previous = _load_previous(Path(args.out)) if args.merge else {"claims": []}
+    previous = _load_previous(_resolve(root, args.out, root)) if args.merge else {"claims": []}
     now = datetime.now(timezone.utc) if not args.frozen_now else datetime.fromisoformat(args.frozen_now)
 
     state = core.build_state(claims_doc, provider, previous=previous, now=now)
 
-    out_path = Path(args.out)
+    out_path = _resolve(root, args.out, root)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    core_dump(out_path, state)
+    core_dump(out_path, core.build_projection(state) if args.public_only else state)
 
     wrote = [str(out_path)]
     projection = None
     if args.public_only or args.projection:
         projection = core.build_projection(state)
-        proj_path = Path(args.projection) if args.projection else out_path
+        proj_path = _resolve(root, args.projection, out_path)
         core_dump(proj_path, projection)
         wrote.append(str(proj_path))
     if args.summary:
         # A minimal count-only document for site chrome, so shared UI never has to
         # import the full projection just to render "N of M checks passing".
         source = projection if projection is not None else state
-        summary_path = Path(args.summary)
+        summary_path = _resolve(root, args.summary, root)
         summary_path.parent.mkdir(parents=True, exist_ok=True)
         core_dump(summary_path, core.build_summary(source))
         wrote.append(str(summary_path))
@@ -231,9 +233,22 @@ def cmd_build(args: argparse.Namespace) -> int:
 
 
 def core_dump(path: Path, data: dict) -> None:
-    with path.open("w", encoding="utf-8") as fh:
-        json.dump(data, fh, indent=2, ensure_ascii=False, sort_keys=False)
-        fh.write("\n")
+    import os
+    import tempfile
+    payload = json.dumps(data, indent=2, ensure_ascii=False, sort_keys=False) + "\n"
+    if path.exists() and path.read_text(encoding="utf-8") == payload:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, name = tempfile.mkstemp(prefix=".verification-", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(payload)
+            fh.flush()
+            os.fsync(fh.fileno())
+        os.replace(name, path)
+    finally:
+        if os.path.exists(name):
+            os.unlink(name)
 
 
 def cmd_verify(args: argparse.Namespace) -> int:
