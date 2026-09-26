@@ -1,13 +1,13 @@
 schema_version: 1
 project_id: portfolio
 repository: soobujmiah/soobujmiah.github.io
-generated_at: '2026-09-26T20:52:26Z'
+generated_at: '2026-09-26T21:14:49Z'
 generated_by: tools/repo_knowledge collect
-version: b3298bd
+version: 31448fb
 head:
-  commit: b3298bd3380e6b1b760ac07daad7c84f26230774
+  commit: 31448fb73e5e3ecbd29de468a234da610df9be17
   branch: main
-  committed_at: '2026-09-26T20:51:03Z'
+  committed_at: '2026-09-26T21:13:13Z'
 phases:
   source: not_configured
   completed: []
@@ -15,19 +15,25 @@ phases:
   next: null
 build:
   status: passed
-  run_id: '36270935304'
-  at: '2026-09-26T20:52:26Z'
+  run_id: '36272176507'
+  commit: 31448fb73e5e3ecbd29de468a234da610df9be17
+  run_attempt: '1'
+  at: '2026-09-26T21:14:49Z'
+  timestamp_source: ci
 test:
   status: passed
-  run_id: null
-  at: '2026-09-26T20:52:26Z'
-  summary: check:build (static export validation)
+  run_id: '36272176507'
+  commit: 31448fb73e5e3ecbd29de468a234da610df9be17
+  run_attempt: '1'
+  at: '2026-09-26T21:14:30Z'
+  timestamp_source: ci
+  summary: 'Build and Deploy: Validate static export, deep links and budget'
 last_successful_build:
-  commit: b3298bd3380e6b1b760ac07daad7c84f26230774
-  at: '2026-09-26T20:52:26Z'
-  run_id: '36270935304'
+  commit: 31448fb73e5e3ecbd29de468a234da610df9be17
+  at: '2026-09-26T21:14:49Z'
+  run_id: '36272176507'
 last_failed_build: null
 sync:
   status: ok
-  last_synced_at: '2026-09-26T20:52:26Z'
+  last_synced_at: '2026-09-26T21:14:49Z'
   source: ci
