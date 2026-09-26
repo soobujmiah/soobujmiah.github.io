@@ -32,6 +32,7 @@
       "verification_method": "github_api",
       "evidence": {
         "type": "public_repository",
+        "expect": "public",
         "repository": "soobujmiah/soobujmiah.github.io"
       },
       "freshness": { "max_age_days": 30 }
@@ -239,6 +240,7 @@
       "verification_method": "github_api",
       "evidence": {
         "type": "github_pages",
+        "expect": "published",
         "repositories": [
           "soobujmiah/ternux",
           "soobujmiah/arms",

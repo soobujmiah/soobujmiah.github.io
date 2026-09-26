@@ -303,18 +303,18 @@ class TestSynchronization(unittest.TestCase):
 class TestPublicProjection(unittest.TestCase):
     def test_private_repo_evidence_never_reaches_the_projection(self):
         provider = FakeProvider(
-            {("repository_state", "vault"): passing_evidence(repository="soobujmiah/vault", public=False)}
+            {("repository_state", "private-fixture"): passing_evidence(repository="example/private-fixture", public=False)}
         )
         private_claim = claim(
-            id="repo.vault.build.passing",
+            id="repo.private-fixture.build.passing",
             public=True,
-            evidence={"type": "repository_state", "project_id": "vault",
-                      "repository": "soobujmiah/vault", "field": "build.status", "expect": "passed"},
+            evidence={"type": "repository_state", "project_id": "private-fixture",
+                      "repository": "example/private-fixture", "field": "build.status", "expect": "passed"},
         )
         state = core.build_state(claims_doc(private_claim), provider, now=NOW)
         projection = core.build_projection(state)
         self.assertEqual(projection["claims"], [])
-        self.assertNotIn("soobujmiah/vault", json.dumps(projection))
+        self.assertNotIn("example/private-fixture", json.dumps(projection))
 
     def test_public_false_claim_stays_internal(self):
         provider = FakeProvider({("repository_state", "adt"): passing_evidence()})
@@ -395,26 +395,12 @@ class TestCanonicalRegistry(unittest.TestCase):
                 self.assertTrue(c.get("note"), c["id"])
                 self.assertIn(c["verification_method"], ("human_attested", "none"), c["id"])
 
-    def test_no_claim_targets_a_private_repository_while_marked_public(self):
-        """Private repositories in this account (skb, vault, rgen, roadmap, narapool, ...)
-        must never be referenced by a claim the Portfolio is allowed to publish."""
-        private_repos = {
-            "soobujmiah/skb", "soobujmiah/vault", "soobujmiah/rgen", "soobujmiah/roadmap",
-            "soobujmiah/narapool", "soobujmiah/datakhoj", "soobujmiah/hermesbgrunner",
-            "soobujmiah/faridpur-police-app", "soobujmiah/faridpur-police-platform",
-            "soobujmiah/mobile-home-server", "soobujmiah/adb-qualification-test-ref",
-            "soobujmiah/ggen-protected-assets", "soobujmiah/selfai",
-        }
+    def test_public_machine_claims_have_explicit_predicates(self):
+        # Actual publicness is a live API property, tested with synthetic fixtures
+        # in test_audit_privacy.py. Never publish a real private-repository denylist.
         for c in self.doc["claims"]:
-            if not c.get("public"):
-                continue
-            repos = []
-            spec = c.get("evidence") or {}
-            if spec.get("repository"):
-                repos.append(spec["repository"])
-            repos.extend(spec.get("repositories") or [])
-            for repo in repos:
-                self.assertNotIn(repo, private_repos, f"{c['id']} is public but cites {repo}")
+            if c.get("public") and c.get("class") == "evidence_backed":
+                self.assertTrue(c["evidence"].get("expect"), c["id"])
 
     def test_registry_status_enum_matches_the_resolver(self):
         self.assertEqual(
@@ -559,7 +545,7 @@ class TestPublicOnlyVerify(unittest.TestCase):
             "claims": [
                 claim(
                     id="repo.adt.build.passing",
-                    evidence={"type": "repository_state", "project_id": "adt"},
+                    evidence={"type": "repository_state", "project_id": "adt", "expect": "passed"},
                     # no `status` here: the registry never stores one, the
                     # resolver derives it. The schema rejects it if you add one.
                 )
@@ -588,7 +574,7 @@ class TestPublicOnlyVerify(unittest.TestCase):
     def test_unpublished_registry_claim_is_a_finding(self):
         claims_doc = self._claims_doc()
         claims_doc["claims"].append(
-            claim(id="repo.ggen.build.passing", evidence={"type": "repository_state", "project_id": "ggen"})
+            claim(id="repo.ggen.build.passing", evidence={"type": "repository_state", "project_id": "ggen", "expect": "passed"})
         )
         provider = FakeProvider({("repository_state", "adt"): passing_evidence()})
         state = core.build_state(claims_doc, provider, now=NOW)

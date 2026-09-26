@@ -9,7 +9,7 @@
      2. every published claim really is in the canonical registry
         (verification/claims.json, vendored from soobujmiah/skb) and
         is flagged public there — no invented claim can ship
-     3. no private repository slug appears anywhere in the file
+     3. all referenced repositories have positive public visibility
      4. no secret-shaped field appears anywhere in the file
      5. status and evidence agree (a claim cannot claim `verified`
         without evidence, or `failed` without a resolved result)
@@ -35,26 +35,8 @@ const STATUSES = ['verified', 'failed', 'stale', 'unverified', 'superseded', 'hu
 const CLASSES = ['evidence_backed', 'positioning'];
 const EVIDENCE_TYPES = ['repository_state', 'public_repository', 'github_pages', 'none'];
 
-/* Defense in depth. The resolver already refuses to project a claim whose
-   evidence resolved against a private repository; this asserts the outcome
-   independently, so a future resolver bug cannot quietly publish one. The
-   list is this account's private repositories as of the integration date. */
-const PRIVATE_REPOS = [
-  'soobujmiah/skb',
-  'soobujmiah/vault',
-  'soobujmiah/rgen',
-  'soobujmiah/roadmap',
-  'soobujmiah/narapool',
-  'soobujmiah/datakhoj',
-  'soobujmiah/hermesbgrunner',
-  'soobujmiah/faridpur-police-app',
-  'soobujmiah/faridpur-police-platform',
-  'soobujmiah/mobile-home-server',
-  'soobujmiah/adb-qualification-test-ref',
-  'soobujmiah/ggen-protected-assets',
-  'soobujmiah/selfai',
-];
-
+/* Visibility is positively attested by the live provider and checked below.
+   Never include real private repository names in a public test/validation file. */
 const SECRET_SHAPED = [
   'ghp_', 'github_pat_', 'BEGIN RSA PRIVATE KEY', 'BEGIN PRIVATE KEY',
   'BEGIN OPENSSH PRIVATE KEY', 'app_private_key', 'private_key', 'skb_pull_token',
@@ -139,19 +121,15 @@ for (const claim of projection.claims ?? []) {
 }
 
 /* ── 5. private data and secrets cannot be present ─────────── */
-/* Exact repository matches only. A substring test would flag the public
-   soobujmiah/datakhoj-android as the private soobujmiah/datakhoj. */
-const referencedRepos = new Set();
 for (const claim of projection.claims ?? []) {
   const e = claim.evidence;
   if (!e) continue;
-  if (typeof e.repository === 'string') referencedRepos.add(e.repository);
+  if (e.public !== true) fail(`${claim.id}: evidence lacks positive public visibility`);
   for (const r of e.repositories ?? []) {
-    if (typeof r?.repository === 'string') referencedRepos.add(r.repository);
+    if (!r || typeof r.repository !== 'string' || r.public !== true) {
+      fail(`${claim.id}: nested evidence lacks positive public visibility`);
+    }
   }
-}
-for (const repo of referencedRepos) {
-  if (PRIVATE_REPOS.includes(repo)) fail(`private repository ${repo} appears in the public projection`);
 }
 const blob = JSON.stringify(projection);
 for (const shape of SECRET_SHAPED) {
