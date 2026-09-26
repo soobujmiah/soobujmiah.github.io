@@ -250,33 +250,33 @@ def main():
     section(c, rcur, "Profile", rx, rw)
     profile_text = (
         "Self-taught systems engineer working at the intersection of on-device AI, "
-        "Android systems and ARM64 Linux. I develop, build and validate software "
-        "primarily from an Android phone running Termux and PRoot Debian — every "
-        "build runs on CI and every claim is checked against real hardware. "
-        "I combine this with 8+ years of operations, administration and industrial-site "
-        "experience across Bangladesh and Saudi Arabia."
+        "Android systems and ARM64 Linux. Built entirely from an Android phone running "
+        "Termux and PRoot Debian — every build runs on CI and every hardware claim is "
+        "validated on a physical Snapdragon 8s Gen 4 reference device. I combine this "
+        "with 8+ years of operations, administration and industrial-site experience "
+        "across Bangladesh and Saudi Arabia."
     )
     body(c, rcur, profile_text, rx, rw, size=8.7, color=DIM, leading=11.6)
 
     section(c, rcur, "Engineering Experience — Selected Work", rx, rw)
     bullets = [
-        ("LAI — on-device AI runtime",
-         "Bangla-first local LLM inference and consent-driven Android automation. "
-         "arm64 llama.cpp CPU inference device-validated at 12–20 tok/s; Adreno "
-         "Vulkan crash root-caused into a fail-closed CPU-default design."),
-        ("ADT — ARM64 Android toolchain",
-         "Builds Android SDK build-tools and platform-tools from AOSP source for "
-         "Linux ARM64/glibc; SHA-256-verified offline artifacts; full APK pipeline "
-         "validated end-to-end on device."),
-        ("Ternux — Linux desktop on Android",
-         "No-root Debian/Xfce4 desktop over PRoot with a measured Zink/Turnip GPU "
-         "route (glmark2 140, OpenGL 4.6)."),
+        ("LAI — on-device AI runtime (v0.9.7)",
+         "Bangla-first local LLM inference and consent-gated Android automation. "
+         "arm64 llama.cpp CPU inference device-validated at 12–20 tok/s with KV-prefix "
+         "reuse on Snapdragon 8s Gen 4; Adreno Vulkan crash root-caused to fail-closed CPU default."),
+        ("ADT — ARM64 Android toolchain (v37.0.0)",
+         "AOSP-source native aarch64 build-tools/platform-tools for Linux ARM64/glibc "
+         "(API 36 verified); SHA-256 offline release artifacts; full APK pipeline "
+         "(source → APK → sign → install → JNI) device-validated."),
+        ("Ternux — Linux desktop on Android (v1.4.0)",
+         "No-root Debian/Xfce4 desktop over PRoot with Termux:X11 display and PulseAudio; "
+         "verified Zink/Turnip GPU acceleration on Adreno 825 (glmark2 score 140, OpenGL 4.6)."),
         ("GGEN — creative & document studio",
-         "Flutter/Dart vector, raster, document and PDF foundation; 143 pure-Dart "
-         "unit tests, 353 widget tests."),
-        ("Songjog — Bengali business ledger",
-         "Bengali-first operations app (Owner Edition); 94 tests green on CI; export "
-         "and diagnostics device-validated on Redmi Turbo 4 Pro."),
+         "Flutter/Dart studio foundation with pure-Dart core (143 unit tests) and Flutter "
+         "shell (353 widget/controller tests); deterministic text-layout engine and SHA-256 state integrity."),
+        ("Songjog — Bengali business ledger (Owner Edition)",
+         "Bengali-first operations app; fast daily entry, local SQLite records, "
+         "auditable corrections; 94 CI tests green; export and diagnostics device-validated on Redmi Turbo 4 Pro."),
     ]
     for head, tail in bullets:
         bullet(c, rcur, head, tail)
