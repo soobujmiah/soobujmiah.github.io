@@ -261,12 +261,12 @@ def main():
     bullet(c, rcur, "Ternux — Linux desktop on Android",
            "No-root Debian/Xfce4 desktop over PRoot with a measured Zink/Turnip GPU route (glmark2 140, OpenGL 4.6).")
     bullet(c, rcur, "GGEN — creative & document studio",
-           "Flutter/Dart vector, raster, document and PDF foundation; 143 pure-Dart unit tests, 353 widget tests.")
-    bullet(c, rcur, "Songjog — Bengali business ledger",
-           "Bengali-first operations app (Owner Edition); 94 tests green on CI; export and diagnostics device-validated.")
+           "Flutter/Dart creative and document studio; 143 pure-Dart unit tests and 353 widget/controller tests.")
+    bullet(c, rcur, "Songjog — Bangla-first business operations app",
+           "Bangla-first operations app (Owner Edition); 94 tests green on CI; export and diagnostics device-validated.")
 
     section(c, rcur, "Operations & Administration", rx, rw)
-    bullet(c, rcur, "Independent Systems Builder & Engineer — Pro-Jukti Info Tech (2026–present)",
+    bullet(c, rcur, "Independent Software & AI Systems Engineer — Pro-Jukti Info Tech (2026–present)",
            "On-device AI, ARM64 Android tooling and Linux systems, delivered independently.")
     bullet(c, rcur, "Office Administrator — Rabeya Education Family, Savar, Dhaka (2025–present)",
            "Daily operations, social media and SEO, student registration, records and promotional media.")
@@ -305,7 +305,7 @@ def main():
         c.drawString(rx + hw + 8, rcur.y, tail)
         rcur.y -= 12.5
 
-    section(c, rcur, "Education & Learning", rx, rw)
+    section(c, rcur, "Education & Continuous Learning", rx, rw)
     body(c, rcur,
          "Self-taught through independent research and practical application — continuous study across algorithms, "
          "systems, statistics and networking. Working principle: living till learning.",
