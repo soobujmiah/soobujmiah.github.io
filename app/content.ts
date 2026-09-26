@@ -634,7 +634,7 @@ const en: Content = {
     { scene: 4, label: 'Research' },
     { scene: 6, label: 'Contact' },
   ],
-  header: { homeLabel: 'Back to home', githubLabel: 'GitHub', langLabel: 'Bangla', langAria: 'Switch to Bangla', githubAria: 'GitHub profile', cvLabel: 'CV', cvAria: 'Download CV (PDF)', servicesLabel: 'Services' },
+  header: { homeLabel: 'Back to home', githubLabel: 'GitHub', langLabel: 'Bangla', langAria: 'Switch to Bangla', githubAria: 'GitHub profile', cvLabel: 'CV', cvAria: 'Download CV (PDF)', servicesLabel: 'How I Can Help' },
   ui: {
     carouselPrev: 'Previous',
     carouselNext: 'Next',
@@ -1092,7 +1092,7 @@ const bn: Content = {
     githubAria: 'গিটহাব প্রোফাইল',
     cvLabel: 'সিভি',
     cvAria: 'সিভি ডাউনলোড করুন',
-    servicesLabel: 'সার্ভিস',
+    servicesLabel: 'আমি যেভাবে সহযোগিতা করতে পারি',
   },
   ui: {
     carouselPrev: 'আগের',
