@@ -1,0 +1,7 @@
+event_id: commit-7842e5c-20260926130702Z
+repository: soobujmiah/soobujmiah.github.io
+commit: 7842e5c3a222aa68766331d3515e45163f17c91d
+kind: commit
+occurred_at: '2026-09-26T13:07:02Z'
+status: completed
+summary: 'fix(cv): filter Bengali danda from Devanagari check in PDF validation'
