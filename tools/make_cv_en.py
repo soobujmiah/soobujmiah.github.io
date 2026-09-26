@@ -16,6 +16,10 @@ import json
 # Prefer project virtual environment packages if present
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+
+# Project evidence/status source of truth.
+with open(os.path.join(ROOT, "data", "verification.json"), encoding="utf-8") as _f:
+    VERIFICATION = json.load(_f)["projects"]
 VENV_PKGS = os.path.join(ROOT, ".venv-cv", "lib", f"python{sys.version_info.major}.{sys.version_info.minor}", "site-packages")
 if os.path.isdir(VENV_PKGS) and VENV_PKGS not in sys.path:
     sys.path.insert(0, VENV_PKGS)
