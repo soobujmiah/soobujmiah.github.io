@@ -16,8 +16,14 @@ import sys
 
 sys.path.insert(0, "/home/sbj/soobujmiah.github.io/.venv-cv/lib/python3.13/site-packages")
 
-EN_CV = "/home/sbj/soobujmiah.github.io/public/cv/Sobuj_Miah_CV_EN.pdf"
-BN_CV = "/home/sbj/soobujmiah.github.io/public/cv/Sobuj_Miah_CV_BN.pdf"
+import os
+import re
+import sys
+
+# Use relative paths for cross-platform compatibility
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+EN_CV = os.path.join(ROOT, "public", "cv", "Sobuj_Miah_CV_EN.pdf")
+BN_CV = os.path.join(ROOT, "public", "cv", "Sobuj_Miah_CV_BN.pdf")
 
 # Unicode ranges
 DEVANAGARI = re.compile(r'[\u0900-\u097F]')
