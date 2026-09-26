@@ -6,7 +6,9 @@ preservation, idempotency, and the public-safe projection filter.
 """
 from __future__ import annotations
 
+import argparse
 import json
+import shutil
 import sys
 import tempfile
 import unittest
@@ -15,11 +17,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from tools.verification import core  # noqa: E402
+from tools.verification import cli, core  # noqa: E402
 from tools.verification.validate import load_schema, validate  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SCHEMA = load_schema(REPO_ROOT / "verification" / "claims.schema.json")
+SCHEMA_PATH = REPO_ROOT / "verification" / "claims.schema.json"
+SCHEMA = load_schema(SCHEMA_PATH)
 NOW = datetime(2026, 9, 27, 12, 0, 0, tzinfo=timezone.utc)
 
 
@@ -524,3 +527,95 @@ class TestSummaryDocument(unittest.TestCase):
         self.assertEqual(summary["machine_total"], 1)
         self.assertEqual(summary["human_total"], 1)
         self.assertEqual(summary["human_attested"], 1)
+
+
+class TestPublicOnlyVerify(unittest.TestCase):
+    """A public-only repository never writes the internal state document, so
+    `verify --projection <path>` must still be able to prove the projection
+    against the canonical claim registry rather than demanding a file that
+    must not exist."""
+
+    def _verify(self, tmp, projection_name="projection.json"):
+        args = argparse.Namespace(
+            root=Path(tmp),
+            claims=None,
+            schema=None,
+            state=None,
+            projection=projection_name,
+        )
+        return cli.cmd_verify(args)
+
+    def _write_claims(self, tmp, claims_doc):
+        """cmd_verify resolves the registry under --root, so the temp
+        repository needs its own claims.json for the run to be self-contained."""
+        d = Path(tmp) / "verification"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "claims.json").write_text(json.dumps(claims_doc), encoding="utf-8")
+        shutil.copyfile(SCHEMA_PATH, d / "claims.schema.json")
+
+    def _claims_doc(self):
+        return {
+            "schema_version": 1,
+            "claims": [
+                claim(
+                    id="repo.adt.build.passing",
+                    evidence={"type": "repository_state", "project_id": "adt"},
+                    # no `status` here: the registry never stores one, the
+                    # resolver derives it. The schema rejects it if you add one.
+                )
+            ],
+        }
+
+    def test_public_only_projection_verifies_without_state(self):
+        claims_doc = self._claims_doc()
+        provider = FakeProvider({("repository_state", "adt"): passing_evidence()})
+        state = core.build_state(claims_doc, provider, now=NOW)
+        projection = core.build_projection(state)
+        with tempfile.TemporaryDirectory() as tmp:
+            self._write_claims(tmp, claims_doc)
+            (Path(tmp) / "projection.json").write_text(json.dumps(projection), encoding="utf-8")
+            self.assertEqual(self._verify(tmp), 0)
+
+    def test_missing_state_still_fails_when_no_projection_named(self):
+        claims_doc = self._claims_doc()
+        with tempfile.TemporaryDirectory() as tmp:
+            self._write_claims(tmp, claims_doc)
+            args = argparse.Namespace(
+                root=Path(tmp), claims=None, schema=None, state=None, projection=None
+            )
+            self.assertEqual(cli.cmd_verify(args), 1)
+
+    def test_unpublished_registry_claim_is_a_finding(self):
+        claims_doc = self._claims_doc()
+        claims_doc["claims"].append(
+            claim(id="repo.ggen.build.passing", evidence={"type": "repository_state", "project_id": "ggen"})
+        )
+        provider = FakeProvider({("repository_state", "adt"): passing_evidence()})
+        state = core.build_state(claims_doc, provider, now=NOW)
+        projection = core.build_projection(state)
+        with tempfile.TemporaryDirectory() as tmp:
+            self._write_claims(tmp, claims_doc)
+            (Path(tmp) / "projection.json").write_text(json.dumps(projection), encoding="utf-8")
+            self.assertEqual(self._verify(tmp), 1)
+
+    def test_private_claim_published_is_a_finding(self):
+        claims_doc = self._claims_doc()
+        provider = FakeProvider({("repository_state", "adt"): passing_evidence()})
+        state = core.build_state(claims_doc, provider, now=NOW)
+        projection = core.build_projection(state)
+        projection["claims"][0]["public"] = False
+        with tempfile.TemporaryDirectory() as tmp:
+            self._write_claims(tmp, claims_doc)
+            (Path(tmp) / "projection.json").write_text(json.dumps(projection), encoding="utf-8")
+            self.assertEqual(self._verify(tmp), 1)
+
+    def test_summary_disagreeing_with_claims_is_a_finding(self):
+        claims_doc = self._claims_doc()
+        provider = FakeProvider({("repository_state", "adt"): passing_evidence()})
+        state = core.build_state(claims_doc, provider, now=NOW)
+        projection = core.build_projection(state)
+        projection["summary"]["verified"] = 99
+        with tempfile.TemporaryDirectory() as tmp:
+            self._write_claims(tmp, claims_doc)
+            (Path(tmp) / "projection.json").write_text(json.dumps(projection), encoding="utf-8")
+            self.assertEqual(self._verify(tmp), 1)

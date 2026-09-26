@@ -119,9 +119,13 @@ jobs:
           python3 -m tools.verification build --source portfolio \
             --project-id portfolio \
             --out public/verification.json \
-            --public-only --merge
+            --public-only --merge \
+            --summary app/verification-summary.json
 
-      # Report-only schema/registry check, mirroring `repo-knowledge verify`.
+      # Registry-vs-schema, then projection-vs-canonical-registry. This
+      # repository runs public-only, so no verification/state.json exists
+      # and none is written; the CLI verifies the published projection on
+      # its own in that configuration instead of demanding one.
       - name: Verify the verification registry and generated projection
         if: always()
         run: python3 -m tools.verification verify --projection public/verification.json
@@ -136,12 +140,12 @@ jobs:
         if: always() && github.event_name == 'push'
         run: |
           set -euo pipefail
-          if git diff --quiet -- .repo public/verification.json; then
+          if git diff --quiet -- .repo public/verification.json app/verification-summary.json; then
             echo "no .repo/ or verification change to commit"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .repo public/verification.json
+          git add .repo public/verification.json app/verification-summary.json
           git commit -m "chore(repo-knowledge): sync deterministic state for ${{ github.sha }}"
           git push origin HEAD:${{ github.ref_name }}

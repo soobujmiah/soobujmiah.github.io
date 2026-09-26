@@ -33,6 +33,21 @@ def _default_schema(root: Path) -> Path:
     return root / "verification" / "claims.schema.json"
 
 
+def _resolve(root: Path, given: str | None, default: Path) -> Path:
+    """Resolve a CLI path against --root, not the process cwd.
+
+    `--root` names the repository; every other path argument is a path inside
+    it. Resolving against the cwd instead silently made `verify --projection
+    public/verification.json` depend on where the process happened to be
+    started, which is exactly the kind of hidden assumption this tool exists
+    to remove.
+    """
+    if not given:
+        return default
+    path = Path(given)
+    return path if path.is_absolute() else (root / path)
+
+
 def _claims_findings(claims_doc: dict, schema: dict) -> list[str]:
     findings: list[str] = []
     seen: set[str] = set()
@@ -79,6 +94,61 @@ def _state_findings(state: dict, projection: dict | None) -> list[str]:
         for record in projection.get("claims", []):
             if not core.is_public_safe(record):
                 findings.append(f"projection: {record.get('id')} is not public-safe but was published")
+    return findings
+
+
+def _projection_findings(claims_doc: dict, projection: dict) -> list[str]:
+    """Check a published projection on its own, with no internal state document.
+
+    A repository may run in public-only mode -- it writes the public-safe
+    projection and deliberately never materialises the internal
+    `skb.verification-state/v1` document, because that document carries private
+    repository slugs. Demanding the state file there would make the honest
+    configuration unverifiable, so the projection is checked against the
+    canonical claim registry instead.
+    """
+    findings: list[str] = []
+    registry = {c.get("id"): c for c in claims_doc.get("claims", []) if isinstance(c, dict)}
+    published = [c.get("id") for c in projection.get("claims", [])]
+    if len(published) != len(set(published)):
+        findings.append("projection: duplicate claim records")
+
+    for record in projection.get("claims", []):
+        claim_id = record.get("id")
+        if claim_id not in registry:
+            findings.append(f"projection: {claim_id} is not in the canonical claim registry")
+            continue
+        claim = registry[claim_id]
+        if not claim.get("public", False):
+            findings.append(f"projection: {claim_id} is not marked public in the registry but was published")
+        if record.get("status") not in core.STATUS_ORDER:
+            findings.append(f"projection: {claim_id} has invalid status {record.get('status')!r}")
+        if record.get("status") == core.STATUS_VERIFIED and not record.get("verified_at"):
+            findings.append(f"projection: {claim_id} is verified with no verified_at")
+        if not core.is_public_safe(record):
+            findings.append(f"projection: {claim_id} is not public-safe but was published")
+
+    summary = projection.get("summary")
+    if isinstance(summary, dict):
+        for status, key in (
+            (core.STATUS_VERIFIED, "verified"),
+            (core.STATUS_FAILED, "failed"),
+            (core.STATUS_STALE, "stale"),
+            (core.STATUS_UNVERIFIED, "unverified"),
+            (core.STATUS_SUPERSEDED, "superseded"),
+            (core.STATUS_HUMAN, "human_attested"),
+        ):
+            counted = sum(1 for r in projection.get("claims", []) if r.get("status") == status)
+            if summary.get(key) != counted:
+                findings.append(
+                    f"projection: summary.{key}={summary.get(key)!r} disagrees with {counted} published claim(s)"
+                )
+    else:
+        findings.append("projection: no summary block")
+
+    unpublished = sorted(set(registry) - set(published))
+    if unpublished:
+        findings.append(f"projection: {len(unpublished)} registry claim(s) not published: {', '.join(unpublished)}")
     return findings
 
 
@@ -170,8 +240,8 @@ def cmd_verify(args: argparse.Namespace) -> int:
     root = Path(args.root).resolve()
     claims_path = Path(args.claims) if args.claims else _default_claims(root)
     schema_path = Path(args.schema) if args.schema else _default_schema(root)
-    state_path = Path(args.state) if args.state else root / "verification" / "state.json"
-    projection_path = Path(args.projection) if args.projection else root / "verification" / "projection.json"
+    state_path = _resolve(root, args.state, root / "verification" / "state.json")
+    projection_path = _resolve(root, args.projection, root / "verification" / "projection.json")
 
     findings: list[str] = []
     if not claims_path.exists():
@@ -186,7 +256,13 @@ def cmd_verify(args: argparse.Namespace) -> int:
     state = core.load_json(state_path)
     projection = core.load_json(projection_path) if projection_path.exists() else None
     if state is None:
-        findings.append(f"verification state not found: {state_path} (run `verification build` first)")
+        if args.projection and projection is not None:
+            # Public-only configuration: the internal state document is never
+            # materialised, so verify the published projection against the
+            # canonical registry instead of demanding a file that must not exist.
+            findings += _projection_findings(claims_doc, projection)
+        else:
+            findings.append(f"verification state not found: {state_path} (run `verification build` first)")
     else:
         findings += _state_findings(state, projection)
 
@@ -201,7 +277,7 @@ def cmd_verify(args: argparse.Namespace) -> int:
 
 def cmd_status(args: argparse.Namespace) -> int:
     root = Path(args.root).resolve()
-    state_path = Path(args.state) if args.state else root / "verification" / "state.json"
+    state_path = _resolve(root, args.state, root / "verification" / "state.json")
     state = core.load_json(state_path)
     if state is None:
         print(f"no verification state at {state_path} -- run `verification build` first")
@@ -232,7 +308,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_verify = sub.add_parser("verify", help="validate the registry and generated state; report-only")
     p_verify.add_argument("--state", default=None)
-    p_verify.add_argument("--projection", default=None)
+    p_verify.add_argument(
+        "--projection",
+        default=None,
+        help="path to the public projection; naming it also enables verifying a "
+        "public-only repository that never writes the internal state document",
+    )
     p_verify.set_defaults(func=cmd_verify)
 
     p_status = sub.add_parser("status", help="print a human summary of the verification state")
