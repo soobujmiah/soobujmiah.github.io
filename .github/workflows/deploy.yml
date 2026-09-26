@@ -42,6 +42,20 @@ jobs:
       - name: Type-check
         run: npm run typecheck
 
+      # Generate and validate bilingual CVs (EN + BN) before `npm run build`
+      # so the freshly generated PDFs are copied into `out/cv/` by Next.js.
+      # Installs reportlab, pypdf, uharfbuzz, and fonttools for OpenType shaping.
+      - name: Set up Python virtualenv for PDF tools
+        run: |
+          python3 -m venv .venv-cv
+          .venv-cv/bin/pip install reportlab pypdf uharfbuzz fonttools
+
+      - name: Generate and validate bilingual CVs
+        run: |
+          .venv-cv/bin/python3 tools/make_cv_en.py
+          .venv-cv/bin/python3 tools/make_cv_bn.py
+          .venv-cv/bin/python3 tools/validate_cvs.py
+
       # `npm run build` runs `prebuild` first, which is `npm run check`:
       # bilingual parity + two-way language purity + adversarial purity
       # suite + design-token/document drift. A failing gate fails the
@@ -54,23 +68,6 @@ jobs:
       # robots/sitemap/og.png presence, and the JavaScript budget.
       - name: Validate static export, deep links and budget
         run: npm run check:build
-
-      # Generate and validate bilingual CVs (EN + BN) from source scripts.
-      # Fails the build if either PDF is missing, contains forbidden scripts,
-      # or lacks required clickable links.
-      - name: Install Bengali font (GitHub Actions ubuntu-latest)
-        run: |
-          sudo mkdir -p /usr/share/fonts/truetype/noto
-          sudo curl -fsSL "https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSansBengali/NotoSansBengali-Regular.ttf" \
-            -o /usr/share/fonts/truetype/noto/NotoSansBengali-Regular.ttf
-          fc-cache -fv
-      - name: Set up Python virtualenv for PDF tools
-        run: python3 -m venv .venv-cv && .venv-cv/bin/pip install reportlab pypdf
-      - name: Generate and validate bilingual CVs
-        run: |
-          .venv-cv/bin/python3 tools/make_cv_en.py
-          .venv-cv/bin/python3 tools/make_cv_bn.py
-          .venv-cv/bin/python3 tools/validate_cvs.py
 
       - name: Upload artifact
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

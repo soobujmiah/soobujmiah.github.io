@@ -11,22 +11,21 @@ Run:     python3 tools/make_cv_en.py
 """
 import os
 import sys
-import subprocess
 
-# Ensure the venv is available
-sys.path.insert(0, "/home/sbj/soobujmiah.github.io/.venv-cv/lib/python3.13/site-packages")
+# Prefer project virtual environment packages if present
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+VENV_PKGS = os.path.join(ROOT, ".venv-cv", "lib", f"python{sys.version_info.major}.{sys.version_info.minor}", "site-packages")
+if os.path.isdir(VENV_PKGS) and VENV_PKGS not in sys.path:
+    sys.path.insert(0, VENV_PKGS)
 
 import reportlab.rl_config as _rl_config
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
+_rl_config.invariant = 1  # byte-deterministic PDF output
+
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.colors import HexColor, Color
 
-_rl_config.invariant = 1  # byte-deterministic PDF output
-
-HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)
 PORTRAIT = os.path.join(HERE, "cv", "portrait.jpg")
 OUT = os.path.join(ROOT, "public", "cv", "Sobuj_Miah_CV_EN.pdf")
 
@@ -45,9 +44,6 @@ DIM = Color(228 / 255, 226 / 255, 223 / 255, 0.62)
 
 F_BODY = "Helvetica"
 F_BOLD = "Helvetica-Bold"
-
-# Register Noto Sans Bengali for Bangla-only; English CV stays Helvetica
-FONT_BN = None
 
 M = 30.0            # outer margin
 LEFT_W = 186.0      # left panel width
@@ -114,14 +110,10 @@ def bullet(c, cur, head, tail, x=RX, width=RW):
 
 def link_annot(c, x, y, w, h, url):
     """Add a clickable link annotation bounding the given rectangle."""
-    c.linkURL(url, (x, y, x + w, y + h), border=None)
+    c.linkURL(url, (x, y, x + w, y + h), thickness=0)
 
 
 def main():
-    # Verify portrait exists
-    if not os.path.exists(PORTRAIT):
-        print(f"WARNING: portrait not found at {PORTRAIT}, skipping image", file=sys.stderr)
-
     c = canvas.Canvas(OUT, pagesize=A4)
     c.setTitle("Sobuj Miah — Curriculum Vitae (English)")
     c.setAuthor("Sobuj Miah")
@@ -136,7 +128,6 @@ def main():
     c.setFillColor(TEXT)
     c.setFont(F_BOLD, 25)
     c.drawString(M, hy, "SOBUJ MIAH")
-    # Clickable link around name → GitHub profile
     link_annot(c, M, hy - 3, 180, 25, "https://github.com/soobujmiah")
 
     c.setFillColor(ACCENT_B)
@@ -202,9 +193,15 @@ def main():
             link_annot(c, lx, cur.y - 17, max(vx, 10), 10, href)
         cur.y -= 24
 
-    # Languages — ONLY Bangla and English (per requirement #10)
+    # Language Proficiency — Accurate representation matching Section 9 & 10
     section(c, cur, "Languages", lx, lw)
-    for lang in ["Bangla — native", "English — fluent"]:
+    languages = [
+        "Bangla — native",
+        "English — professional working",
+        "Hindi / Urdu — conversational (non-writing)",
+        "Arabic — basic comprehension",
+    ]
+    for lang in languages:
         c.setFillColor(ACCENT_B)
         c.circle(lx + 1.6, cur.y + 2.4, 1.3, fill=1, stroke=0)
         c.setFillColor(DIM)
@@ -255,7 +252,9 @@ def main():
         "Self-taught systems engineer working at the intersection of on-device AI, "
         "Android systems and ARM64 Linux. I develop, build and validate software "
         "primarily from an Android phone running Termux and PRoot Debian — every "
-        "build runs on CI and every claim is checked against real hardware."
+        "build runs on CI and every claim is checked against real hardware. "
+        "I combine this with 8+ years of operations, administration and industrial-site "
+        "experience across Bangladesh and Saudi Arabia."
     )
     body(c, rcur, profile_text, rx, rw, size=8.7, color=DIM, leading=11.6)
 
@@ -333,9 +332,6 @@ def main():
          "study across algorithms, systems, statistics and networking. Working principle: "
          "living till learning.",
          rx, rw, size=8.5, color=DIM, leading=11.2)
-
-    # Link annotations for project repo URLs visible in bullets
-    # (already clickable via text positioning above)
 
     c.showPage()
     c.save()
