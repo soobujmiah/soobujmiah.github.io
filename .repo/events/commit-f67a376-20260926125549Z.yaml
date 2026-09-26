@@ -1,0 +1,7 @@
+event_id: commit-f67a376-20260926125549Z
+repository: soobujmiah/soobujmiah.github.io
+commit: f67a3765e5337eb241c5dab795bdb65ab1e7bb49
+kind: commit
+occurred_at: '2026-09-26T12:55:49Z'
+status: completed
+summary: 'feat(cv): bilingual CV system with EN/BN language routing'
