@@ -81,6 +81,47 @@ its evidence resolves against a **public** repository. `tools/verification/` fil
 so no private-repository metadata, private run id, or internal field can reach the public
 Portfolio. See `governance/VERIFICATION_AND_CLAIMS.md` § Security.
 
+## Repository configurations
+
+The resolver serves two repository shapes, and the shape is chosen by the caller, not
+guessed.
+
+**Full state** (SKB itself). Writes the internal `skb.verification-state/v1` document and
+the public projection alongside it:
+
+```
+python3 -m tools.verification build --source registry --out verification/state.json \
+  --projection verification/projection.json --merge
+```
+
+`verify` with no arguments checks that state document.
+
+**Public-only** (the Portfolio, and any other repository that publishes a site). Writes
+*only* the public projection. The internal state document is never materialised, because
+it carries repository slugs that are not public:
+
+```
+python3 -m tools.verification build --source portfolio --project-id portfolio \
+  --out public/verification.json --public-only --merge \
+  --summary app/verification-summary.json
+```
+
+`verify` accepts the same shape. Naming `--projection` with no state document present
+verifies the published projection against this registry on its own — registry membership,
+`public` flag, status vocabulary, `verified_at` presence, public-safety, summary/count
+agreement, and coverage of every claim here. The CLI refuses to write an internal document
+into any path containing a `public/` component unless `--public-only` or `--projection` is
+passed, so the public-only shape cannot be reached by accident.
+
+### The summary document
+
+`--summary` additionally writes `skb.verification-summary/v1`: the counts, `as_of`,
+`last_verified`, and nothing else — no claim text, no repository slug, no URL, no run id.
+Site chrome that appears on every route imports that instead of the full projection, so
+the public evidence detail stays on the page that actually shows it rather than shipping in
+every route's JavaScript. Every value is derived from the projection, never from the clock,
+so it is byte-identical across runs.
+
 ## Adding a claim
 
 1. Add the entry to this file, with a stable `id` that has never been used before.
