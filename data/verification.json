@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "generatedBy": "portfolio-verification-registry",
+  "projects": {
+    "ternux": {
+      "name": "Ternux",
+      "repo": "https://github.com/soobujmiah/ternux",
+      "website": "https://soobujmiah.github.io/ternux/",
+      "status": {
+        "en": "Stable on tested hardware",
+        "bn": "পরীক্ষিত হার্ডওয়্যারে স্থিতিশীল"
+      },
+      "evidence": {
+        "en": "Zink/Turnip renderer confirmed on Adreno 825: glmark2 score 140 (OpenGL 4.6), with a documented compatibility fallback route. Blender 4.3.2 launched, but its own report still named device type SOFTWARE — only the viewport OpenGL path through Zink/Turnip is proven, not Cycles GPU rendering.",
+        "bn": "অ্যাড্রেনো ৮২৫-এ জিংক/টার্নিপ রেন্ডারার নিশ্চিত: গ্লমার্ক২ স্কোর ১৪০ (ওপেনজিএল ৪.৬), সঙ্গে নথিভুক্ত সামঞ্জস্য-ফলব্যাক রুট। ব্লেন্ডার ৪.৩.২ চালু হয়েছে, তবে তার নিজের রিপোর্টে ডিভাইস টাইপ সফটওয়্যার ছিল — কেবল জিংক/টার্নিপ দিয়ে ভিউপোর্ট ওপেনজিএল পথটিই প্রমাণিত, সাইকেলস জিপিইউ রেন্ডারিং নয়।"
+      },
+      "evidenceCommit": "db68380b422c325aaa9b27acf8bbc87870286f01",
+      "liveHead": "e1c03a8c26bf393fa02d0439e19ae147fa071d61",
+      "sourcePath": "README.md"
+    },
+    "adt": {
+      "name": "ADT",
+      "repo": "https://github.com/soobujmiah/adt",
+      "website": "https://soobujmiah.github.io/adt/",
+      "status": {
+        "en": "Stable on tested hardware",
+        "bn": "পরীক্ষিত হার্ডওয়্যারে স্থিতিশীল"
+      },
+      "evidence": {
+        "en": "Full ARM64 native APK pipeline validated end-to-end on Snapdragon 8s Gen 4: source → APK → sign → install → JNI load → run.",
+        "bn": "স্ন্যাপড্রাগন ৮এস জেন ৪-এ সম্পূর্ণ এআরএম ৬৪ নেটিভ এপিকে পাইপলাইন শুরু থেকে শেষ পর্যন্ত যাচাইকৃত: সোর্স → এপিকে → সাইন → ইনস্টল → জেএনআই লোড → রান।"
+      },
+      "evidenceCommit": "2f9631c35e53adbbf336e0615c019d1e6f3b61bc",
+      "liveHead": "dcafeb1c1d9206900e5899d4a7993553ea8c0faa",
+      "sourcePath": "docs/REAL_DEVICE_BUILD_VALIDATION.md"
+    },
+    "lai": {
+      "name": "LAI",
+      "repo": "https://github.com/soobujmiah/lai",
+      "website": null,
+      "status": {
+        "en": "In development and research",
+        "bn": "উন্নয়ন ও গবেষণাধীন"
+      },
+      "evidence": {
+        "en": "Real arm64 llama.cpp CPU inference, 12–20 tok/s decode, KV-prefix reuse. Root-cause diagnosis of an Adreno Vulkan driver crash that shaped a fail-closed CPU-default architecture.",
+        "bn": "বাস্তব এআরএম ৬৪ লামা.সিপিপি সিপিইউ ইনফারেন্স, ডিকোডে সেকেন্ডে ১২–২০ টোকেন, কেভি-প্রিফিক্স পুনর্ব্যবহার। অ্যাড্রেনো ভলকান ড্রাইভার ক্র্যাশের মূল কারণ নির্ণয় — যা গড়ে দিয়েছে ফেইল-ক্লোজড সিপিইউ-ডিফল্ট আর্কিটেকচার।"
+      },
+      "evidenceCommit": "6cedb420aaae0634b9b65cb8ee57bea693b84034",
+      "liveHead": "5726e4c92dcd36a57a4ee9f4ab72bc9ca07bd925",
+      "sourcePath": "README.md"
+    },
+    "ggen": {
+      "name": "GGEN",
+      "repo": "https://github.com/soobujmiah/ggen",
+      "website": null,
+      "status": {
+        "en": "In development and research",
+        "bn": "উন্নয়ন ও গবেষণাধীন"
+      },
+      "evidence": {
+        "en": "143 pure-Dart unit tests, 353 widget/controller tests. Validated on a physical device round after round.",
+        "bn": "১৪৩টি পিওর-ডার্ট ইউনিট টেস্ট, ৩৫৩টি উইজেট/কন্ট্রোলার টেস্ট। বারবার বাস্তব ডিভাইসে যাচাইকৃত।"
+      },
+      "evidenceCommit": "392b205fb196b7c626e6ed3179d66b59a5904edf",
+      "liveHead": "befeb682bdff354b99891a048dcdf2d4d79da578",
+      "sourcePath": "README.md"
+    },
+    "songjog": {
+      "name": "Songjog",
+      "repo": "https://github.com/soobujmiah/songjog",
+      "website": null,
+      "status": {
+        "en": "P0 release track",
+        "bn": "পি০ রিলিজ ট্র্যাক"
+      },
+      "evidence": {
+        "en": "94 tests green on CI; export and diagnostics device-validated on the Redmi Turbo 4 Pro.",
+        "bn": "সিআই-তে ৯৪টি টেস্ট সবুজ; রেডমি টার্বো ৪ প্রো-তে এক্সপোর্ট ও ডায়াগনস্টিক ডিভাইস-যাচাইকৃত।"
+      },
+      "evidenceCommit": "d703adc823d0afe05b19194f5f73df08732a01be",
+      "liveHead": "85db776d421eff9799c1c46db9d01826872c740b",
+      "sourcePath": "README.md"
+    }
+  }
+}
