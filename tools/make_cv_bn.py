@@ -12,6 +12,7 @@ Run:     python3 tools/make_cv_bn.py
 """
 import os
 import sys
+import json
 
 # Prefer project virtual environment packages if present
 HERE = os.path.dirname(os.path.abspath(__file__))
