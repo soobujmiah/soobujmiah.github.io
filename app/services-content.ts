@@ -70,7 +70,7 @@ export interface ServicesContent {
 
 
 const en: ServicesContent = {
-  eyebrow: 'Services',
+  eyebrow: 'How I Can Help',
   heading: 'Software, AI, and practical digital technology.',
   intro:
     'For individuals, small businesses and institutions: software and websites, computer and Android support, and digital or office work. Each service page explains its scope, limits and examples.',
@@ -83,7 +83,7 @@ const en: ServicesContent = {
   hubSeoDescription:
     'Services by Sobuj Miah: websites and custom software, computer and Android support, plus design, administration and data work. Based in Savar, Dhaka; remote worldwide.',
   labels: {
-    hub: 'Services',
+    hub: 'How I Can Help',
     forWho: 'Who it is for',
     problems: 'Problems it addresses',
     included: 'What is included',
@@ -419,7 +419,7 @@ const en: ServicesContent = {
 };
 
 const bn: ServicesContent = {
-  eyebrow: 'সেবাসমূহ',
+  eyebrow: 'আমি যেভাবে সহযোগিতা করতে পারি',
   heading: 'সফটওয়্যার, এআই ও ব্যবহারিক ডিজিটাল প্রযুক্তি।',
   intro:
     'ব্যক্তি, ছোট ব্যবসা ও প্রতিষ্ঠানের জন্য সফটওয়্যার ও ওয়েবসাইট, কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, এবং ডিজিটাল বা অফিসের কাজ। প্রতিটি সেবার পাতায় কাজের পরিধি, সীমা ও উদাহরণ আছে।',
@@ -432,7 +432,7 @@ const bn: ServicesContent = {
   hubSeoDescription:
     'সবুজ মিয়ার সেবা: ওয়েবসাইট ও কাস্টম সফটওয়্যার, কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, ডিজাইন, প্রশাসন ও ডেটার কাজ। সাভার, ঢাকা; বিশ্বব্যাপী রিমোট।',
   labels: {
-    hub: 'সেবাসমূহ',
+    hub: 'আমি যেভাবে সহযোগিতা করতে পারি',
     forWho: 'কাদের জন্য',
     problems: 'যেসব সমস্যার সমাধান',
     included: 'যা অন্তর্ভুক্ত',
