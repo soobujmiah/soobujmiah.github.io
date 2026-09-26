@@ -55,6 +55,19 @@ jobs:
       - name: Validate static export, deep links and budget
         run: npm run check:build
 
+      # Generate and validate bilingual CVs (EN + BN) from source scripts.
+      # Fails the build if either PDF is missing, contains forbidden scripts,
+      # or lacks required clickable links.
+      - name: Install Bengali font (GitHub Actions ubuntu-latest)
+        run: sudo apt-get install -y fonts-noto-bengali
+      - name: Set up Python virtualenv for PDF tools
+        run: python3 -m venv .venv-cv && .venv-cv/bin/pip install reportlab pypdf
+      - name: Generate and validate bilingual CVs
+        run: |
+          .venv-cv/bin/python3 tools/make_cv_en.py
+          .venv-cv/bin/python3 tools/make_cv_bn.py
+          .venv-cv/bin/python3 tools/validate_cvs.py
+
       - name: Upload artifact
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v5

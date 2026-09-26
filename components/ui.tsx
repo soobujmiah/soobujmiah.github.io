@@ -512,8 +512,8 @@ export function Header() {
         <div className="flex items-center gap-1 sm:gap-2">
           {/* CV — quiet but always present, desktop and mobile */}
           <a
-            href="/cv/Sobuj_Miah_CV.pdf"
-            download="Sobuj_Miah_CV.pdf"
+            href={lang === 'bn' ? '/cv/Sobuj_Miah_CV_BN.pdf' : '/cv/Sobuj_Miah_CV_EN.pdf'}
+            download={lang === 'bn' ? 'Sobuj_Miah_CV_BN.pdf' : 'Sobuj_Miah_CV_EN.pdf'}
             aria-label={t.header.cvAria}
             data-magnetic
             className="inline-flex items-center gap-1.5 rounded-full px-2.5 sm:px-3.5 py-1.5 font-mono text-[11px] font-medium transition-colors duration-300"

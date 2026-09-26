@@ -62,8 +62,8 @@ function Chrome({ children, slug }: { children: React.ReactNode; slug?: string }
             {/* CV stays reachable inside Services — same pill as the
                 portfolio header, same destination */}
             <a
-              href="/cv/Sobuj_Miah_CV.pdf"
-              download="Sobuj_Miah_CV.pdf"
+              href={lang === 'bn' ? '/cv/Sobuj_Miah_CV_BN.pdf' : '/cv/Sobuj_Miah_CV_EN.pdf'}
+              download={lang === 'bn' ? 'Sobuj_Miah_CV_BN.pdf' : 'Sobuj_Miah_CV_EN.pdf'}
               aria-label={t.header.cvAria}
               className="inline-flex items-center gap-1.5 rounded-full px-2.5 sm:px-3.5 py-1.5 font-mono text-[11px] font-medium transition-colors duration-300"
               style={{ border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80' }}
