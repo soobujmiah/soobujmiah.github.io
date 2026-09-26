@@ -64,10 +64,13 @@ RW = W - M - RX        # right column width
 def shape(c, text, font):
     """Apply HarfBuzz shaping via ReportLab's shapeStr for correct Bengali rendering."""
     from reportlab.pdfbase import ttfonts
-    if hasattr(ttfonts, "shapeStr"):
-        # Prefer shaped string when HarfBuzz is available
+    if not hasattr(ttfonts, "shapeStr"):
+        return text
+    try:
         return ttfonts.shapeStr(text, font, 1)
-    return text
+    except TypeError:
+        # Some ReportLab versions have different shapeStr signatures; fall back gracefully
+        return text
 
 
 def wrap(c, text, font, size, max_w):
