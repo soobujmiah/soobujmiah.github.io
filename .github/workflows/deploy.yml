@@ -60,6 +60,9 @@ jobs:
       # bilingual parity + two-way language purity + adversarial purity
       # suite + design-token/document drift. A failing gate fails the
       # build, so nothing unverified can reach Pages.
+      - name: Verify GitHub → portfolio → CV evidence consistency
+        run: npm run check:verification
+
       - name: Build (runs the content, purity and design gates)
         run: npm run build
 

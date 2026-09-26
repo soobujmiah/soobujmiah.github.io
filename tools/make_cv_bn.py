@@ -12,10 +12,15 @@ Run:     python3 tools/make_cv_bn.py
 """
 import os
 import sys
+import json
 
 # Prefer project virtual environment packages if present
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+
+# Project evidence/status source of truth.
+with open(os.path.join(ROOT, "data", "verification.json"), encoding="utf-8") as _f:
+    VERIFICATION = json.load(_f)["projects"]
 VENV_PKGS = os.path.join(ROOT, ".venv-cv", "lib", f"python{sys.version_info.major}.{sys.version_info.minor}", "site-packages")
 if os.path.isdir(VENV_PKGS) and VENV_PKGS not in sys.path:
     sys.path.insert(0, VENV_PKGS)
@@ -444,24 +449,11 @@ def main():
 
     section(c, rcur, "ইঞ্জিনিয়ারিং অভিজ্ঞতা — নির্বাচিত কাজ", rx, rw)
     bullets = [
-        ("LAI — অন-ডিভাইস এআই রানটাইম (v0.9.7)",
-         "বাংলা-ফার্স্ট লোকাল এলএলএম ইনফারেন্স ও সম্মতি-চালিত অ্যান্ড্রয়েড স্বয়ংক্রিয়তা। "
-         "এআরএম৬৪ llama.cpp সিপিইউ ইনফারেন্স ডিভাইসে যাচাইকৃত ১২–২০ টোকেন/সেকেন্ড ও কেভি-প্রিফিক্স "
-         "রিউজ (স্ন্যাপড্রাগন ৮এস জেন ৪); ফেইল-ক্লোজড সিপিইউ-ডিফল্ট আর্কিটেকচার গড়ে তোলা হয়েছে।"),
-        ("ADT — এআরএম৬৪ অ্যান্ড্রয়েড টুলচেন (v37.0.0)",
-         "এওএসপি সোর্স থেকে লিনাক্স এআরএম৬৪/glibc-এর জন্য অ্যান্ড্রয়েড এসডিকে টুলস "
-         "(এপিআই ৩৬ যাচাইকৃত); SHA-256 অফলাইন রিলিজ; সম্পূর্ণ নেটিভ এপিকে পাইপলাইন "
-         "(বিল্ড, সাইন, ইনস্টল ও জেএনআই লোড) ডিভাইসে যাচাইকৃত।"),
-        ("Ternux — অ্যান্ড্রয়েডে লিনাক্স ডেস্কটপ (v1.4.0)",
-         "নো-রুট ডেবিয়ান/Xfce4 ডেস্কটপ, Termux:X11 ডিসপ্লে ও পালস-অডিও ব্রিজ; "
-         "পরিমাপকৃত Zink/Turnip জিপিইউ পথ (glmark2 স্কোর ১৪০, OpenGL ৪.৬) এবং ডক্টর ও বেঞ্চমার্ক টুলিং।"),
-        ("GGEN — ক্রিয়েটিভ ও ডকুমেন্ট স্টুডিও",
-         "ফ্লাটার/ডার্ট স্টুডিও ফাউন্ডেশন: ১৪৩টি পিওর-ডার্ট ইউনিট টেস্ট ও ৩৫৩টি উইজেট/কন্ট্রোলার টেস্ট; "
-         "ডিটারমিনিস্টিক টেক্সট-লেআউট ইঞ্জিন এবং ট্রানজ্যাকশনাল SHA-256 স্টেট ইন্টিগ্রিটি।"),
-        ("Songjog — বাংলা ব্যবসায়িক খাতা (ওনার এডিশন)",
-         "বাংলা-ফার্স্ট ব্যবসায়িক কার্যক্রম অ্যাপ; দ্রুত দৈনিক হিসাব, স্থানীয় SQLite রেকর্ড "
-         "ও অডিটযোগ্য সমন্বয়; সিআই-তে ৯৪টি টেস্ট সফল; রেডমি টার্বো ৪ প্রো ডিভাইসে এক্সপোর্ট ও ডায়াগনস্টিকস যাচাইকৃত।"),
+        (f"{VERIFICATION[k]['name']} — {VERIFICATION[k]['status']['bn']}",
+         VERIFICATION[k]['evidence']['bn'])
+        for k in ("lai", "adt", "ternux", "ggen", "songjog")
     ]
+
     for head, tail in bullets:
         bullet(c, rcur, head, tail)
 

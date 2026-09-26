@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "check": "node scripts/check-content.mjs && node scripts/check-design.mjs && node scripts/check-purity-adversarial.mjs && node scripts/check-units.mjs",
+    "check": "node scripts/check-content.mjs && node scripts/check-design.mjs && node scripts/check-purity-adversarial.mjs && node scripts/check-units.mjs && node scripts/check-verification.mjs",
     "prebuild": "npm run check",
     "build": "next build",
     "start": "next start",
@@ -14,7 +14,8 @@
     "check:purity": "node scripts/check-purity-adversarial.mjs",
     "check:build": "node scripts/check-build.mjs",
     "typecheck": "tsc --noEmit",
-    "check:units": "node scripts/check-units.mjs"
+    "check:units": "node scripts/check-units.mjs",
+    "check:verification": "node scripts/check-verification.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.11.9",

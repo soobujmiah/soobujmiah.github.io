@@ -11,10 +11,15 @@ Run:     python3 tools/make_cv_en.py
 """
 import os
 import sys
+import json
 
 # Prefer project virtual environment packages if present
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+
+# Project evidence/status source of truth.
+with open(os.path.join(ROOT, "data", "verification.json"), encoding="utf-8") as _f:
+    VERIFICATION = json.load(_f)["projects"]
 VENV_PKGS = os.path.join(ROOT, ".venv-cv", "lib", f"python{sys.version_info.major}.{sys.version_info.minor}", "site-packages")
 if os.path.isdir(VENV_PKGS) and VENV_PKGS not in sys.path:
     sys.path.insert(0, VENV_PKGS)
@@ -260,24 +265,11 @@ def main():
 
     section(c, rcur, "Engineering Experience — Selected Work", rx, rw)
     bullets = [
-        ("LAI — on-device AI runtime (v0.9.7)",
-         "Bangla-first local LLM inference and consent-gated Android automation. "
-         "arm64 llama.cpp CPU inference device-validated at 12–20 tok/s with KV-prefix "
-         "reuse on Snapdragon 8s Gen 4; Adreno Vulkan crash root-caused to fail-closed CPU default."),
-        ("ADT — ARM64 Android toolchain (v37.0.0)",
-         "AOSP-source native aarch64 build-tools/platform-tools for Linux ARM64/glibc "
-         "(API 36 verified); SHA-256 offline release artifacts; full APK pipeline "
-         "(source → APK → sign → install → JNI) device-validated."),
-        ("Ternux — Linux desktop on Android (v1.4.0)",
-         "No-root Debian/Xfce4 desktop over PRoot with Termux:X11 display and PulseAudio; "
-         "verified Zink/Turnip GPU acceleration on Adreno 825 (glmark2 score 140, OpenGL 4.6)."),
-        ("GGEN — creative & document studio",
-         "Flutter/Dart studio foundation with pure-Dart core (143 unit tests) and Flutter "
-         "shell (353 widget/controller tests); deterministic text-layout engine and SHA-256 state integrity."),
-        ("Songjog — Bengali business ledger (Owner Edition)",
-         "Bengali-first operations app; fast daily entry, local SQLite records, "
-         "auditable corrections; 94 CI tests green; export and diagnostics device-validated on Redmi Turbo 4 Pro."),
+        (f"{VERIFICATION[k]['name']} — {VERIFICATION[k]['status']['en']}",
+         VERIFICATION[k]['evidence']['en'])
+        for k in ("lai", "adt", "ternux", "ggen", "songjog")
     ]
+
     for head, tail in bullets:
         bullet(c, rcur, head, tail)
 
