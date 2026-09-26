@@ -10,9 +10,7 @@ on:
     - cron: '47 4 * * *'
 
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read
 
 # Pull requests cancel their superseded runs. Pushes to main do not —
 # a half-deployed Pages artifact is worse than a queued one. Each ref
@@ -23,6 +21,8 @@ concurrency:
 
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -101,6 +101,10 @@ jobs:
           git push origin HEAD:main
 
   deploy:
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
