@@ -6,9 +6,11 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '47 4 * * *'
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -35,6 +37,16 @@ jobs:
       # transitive versions than the lockfile records.
       - name: Install dependencies
         run: npm ci
+
+      - name: Resolve public evidence before building the artifact
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 -m pip install --quiet pyyaml
+          python3 -m tools.verification build --source portfolio --project-id portfolio \
+            --out public/verification.json --public-only --merge --summary app/verification-summary.json
+          python3 -m tools.verification verify --projection public/verification.json
+          node scripts/check-verification.mjs
 
       - name: Lint
         run: npm run lint
@@ -70,13 +82,26 @@ jobs:
         run: npm run check:build
 
       - name: Upload artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v5
         with:
           path: ./out
 
+      - name: Commit the exact evidence snapshot included in the artifact
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          python3 -m tools.verification verify --projection public/verification.json
+          node scripts/check-verification.mjs
+          git add public/verification.json app/verification-summary.json
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore(repo-knowledge): publish accepted public evidence snapshot'
+          git push origin HEAD:main
+
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:

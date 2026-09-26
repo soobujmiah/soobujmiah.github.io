@@ -113,10 +113,10 @@ class RegistryProvider:
                 "field": spec.get("field"),
                 "value": block.get("status"),
                 "at": block.get("at"),
-                "commit": (entry.get("head") or {}).get("commit"),
+                "commit": block.get("commit"),
                 "run_id": block.get("run_id"),
                 "public": self._is_public(repository),
-                "url": _repo_yaml_url(repository, (entry.get("head") or {}).get("branch") or "main"),
+                "url": _repo_yaml_url(repository, (entry.get("provenance") or {}).get("source_commit") or (entry.get("head") or {}).get("branch") or "main"),
             }
         if evidence_type == "public_repository":
             info = self._api_get(f"{API_ROOT}/repos/{spec.get('repository')}")
@@ -253,6 +253,7 @@ class PortfolioProvider:
                 block = {
                     "status": "present" if head.get("commit") else "unknown",
                     "at": head.get("committed_at"),
+                    "commit": head.get("commit"),
                 }
             else:
                 return None
@@ -266,7 +267,7 @@ class PortfolioProvider:
                 "field": field,
                 "value": block.get("status"),
                 "at": block.get("at"),
-                "commit": (state.get("head") or {}).get("commit"),
+                "commit": block.get("commit"),
                 "run_id": block.get("run_id"),
                 "public": None if info is None else (info.get("private") is False),
                 "url": _repo_yaml_url(repository, (state.get("head") or {}).get("branch") or "main"),
