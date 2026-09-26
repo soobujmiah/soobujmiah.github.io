@@ -106,7 +106,7 @@ def main():
     
     # Bengali punctuation that shares Devanagari Unicode block
     bengali_punct = {'\u0964', '\u0965'}  # danda, double danda
-    
+
     # Extract and validate English CV
     info("\n--- English CV ---")
     en_texts, en_reader = extract_text(EN_CV)
@@ -166,7 +166,7 @@ def main():
         bn_dev = DEVANAGARI.findall(bn_text)
         bn_arab = ARABIC.findall(bn_text)
         bn_bn = BENGALI.findall(bn_text)
-        
+
         # Filter out Bengali punctuation (U+0964, U+0965) from Devanagari count
         devanagari_only = [c for c in bn_dev if c not in bengali_punct]
         if devanagari_only:
