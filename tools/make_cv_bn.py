@@ -496,8 +496,11 @@ def main():
         
         # Check for Devanagari in extracted text
         dev_in_pdf = DEVANAGARI_RE.findall(extracted)
-        if dev_in_pdf:
-            print(f"PDF VALIDATION FAIL: Devanagari found in extracted PDF text: {set(dev_in_pdf)}")
+        # Filter out Bengali punctuation (U+0964 danda, U+0965 double danda)
+        bengali_punct = {'\u0964', '\u0965'}
+        dev_only = [c for c in dev_in_pdf if c not in bengali_punct]
+        if dev_only:
+            print(f"PDF VALIDATION FAIL: Devanagari found in extracted PDF text: {set(dev_only)}")
             sys.exit(1)
         
         # Check for Arabic in extracted text
