@@ -1,0 +1,7 @@
+event_id: commit-b3298bd-20260926205226Z
+repository: soobujmiah/soobujmiah.github.io
+commit: b3298bd3380e6b1b760ac07daad7c84f26230774
+kind: commit
+occurred_at: '2026-09-26T20:52:26Z'
+status: completed
+summary: 'fix: enforce truthful public verification and synthetic privacy fixtures'
