@@ -1,0 +1,8 @@
+event_id: commit-0bdd2c232717-d32dece3542460c5
+repository: soobujmiah/soobujmiah.github.io
+commit: 0bdd2c2327178f2c24065e94f9478720a5ed82da
+kind: commit
+occurred_at: '2026-09-29T17:17:16Z'
+status: completed
+summary: 'feat(repo-knowledge): upgrade vendored tooling, schemas, and final-run sync
+  contract'
