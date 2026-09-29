@@ -79,7 +79,7 @@ def main(argv=None):
     if not token:raise SystemExit('same-repository Actions-read token required')
     run=api(f'/repos/{repository}/actions/runs/{a.run_id}',token)
     head_repo=(run.get('head_repository') or {}).get('full_name') or (run.get('repository') or {}).get('full_name')
-    if (run.get('status')!='completed' or run.get('event') not in ('push','schedule','workflow_dispatch') or
+    if (run.get('status')!='completed' or run.get('event') not in ('push','schedule','workflow_dispatch','repository_dispatch') or
         run.get('head_branch')!=a.branch or head_repo!=repository or
         run.get('path','').split('@')[0]!='.github/workflows/'+a.workflow):
         raise SystemExit('run is not a completed trusted default-branch run of the configured workflow')

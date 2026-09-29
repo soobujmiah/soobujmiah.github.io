@@ -202,7 +202,7 @@ def _run_block(
         ("actor", actor),
         ("run_url", run_url),
     ):
-        if v is not None:
+        if v not in (None, ""):
             extra[k] = v
     if existing and all(existing.get(k) == v for k, v in {**identity, **extra}.items()):
         if observed_at is not None and existing.get("at") != observed_at:
@@ -403,7 +403,7 @@ def make_event(
         ("state_version", state_version),
         ("jobs", jobs),
     ):
-        if v is not None:
+        if v not in (None, "", []):
             event[k] = v
     return event
 
