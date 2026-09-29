@@ -2,15 +2,15 @@
 # portfolio -- deterministic status
 
 - Repository: `soobujmiah/soobujmiah.github.io`
-- Generated at: 2026-09-29T11:02:13Z (by `tools/repo_knowledge collect`)
-- Version: `31448fb`
-- Head: `31448fb73e5e3ecbd29de468a234da610df9be17` on `main` (2026-09-26T21:13:13Z)
+- Generated at: 2026-09-29T16:28:26Z (by `tools/repo_knowledge collect`)
+- Version: `0f863b6`
+- Head: `0f863b667ad87e8f063b6f317719504f82d101b2` on `main` (2026-09-29T16:26:50Z)
 
 ## Build / test
 
-- Build: **passed** (run `36558515032`)
-- Test: **passed** -- Validate static export, deep links and budget (success)
-- Last successful build: `31448fb73e5e3ecbd29de468a234da610df9be17` at 2026-09-29T11:02:13Z
+- Build: **passed** (run `36597781272`)
+- Test: **passed** -- Build and Deploy: Validate static export, deep links and budget
+- Last successful build: `0f863b667ad87e8f063b6f317719504f82d101b2` at 2026-09-29T16:28:26Z
 
 ## Phases
 - Not configured (no `.repo/phases.yaml`).
@@ -19,4 +19,4 @@
 
 - Status: ok
 - Source: ci
-- Last synced at: 2026-09-29T11:02:13Z
+- Last synced at: 2026-09-29T16:28:26Z

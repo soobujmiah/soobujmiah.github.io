@@ -1,13 +1,13 @@
 schema_version: 1
 project_id: portfolio
 repository: soobujmiah/soobujmiah.github.io
-generated_at: '2026-09-29T11:02:13Z'
+generated_at: '2026-09-29T16:28:26Z'
 generated_by: tools/repo_knowledge collect
-version: 31448fb
+version: 0f863b6
 head:
-  commit: 31448fb73e5e3ecbd29de468a234da610df9be17
+  commit: 0f863b667ad87e8f063b6f317719504f82d101b2
   branch: main
-  committed_at: '2026-09-26T21:13:13Z'
+  committed_at: '2026-09-29T16:26:50Z'
 phases:
   source: not_configured
   completed: []
@@ -15,33 +15,41 @@ phases:
   next: null
 build:
   status: passed
-  run_id: '36558515032'
-  commit: 31448fb73e5e3ecbd29de468a234da610df9be17
+  run_id: '36597781272'
+  commit: 0f863b667ad87e8f063b6f317719504f82d101b2
   run_attempt: '1'
-  at: '2026-09-29T11:02:13Z'
+  at: '2026-09-29T16:28:26Z'
   timestamp_source: ci
   conclusion: success
   workflow_name: Build and Deploy
-  event_type: schedule
-  run_url: https://github.com/soobujmiah/soobujmiah.github.io/actions/runs/36558515032
+  workflow_id: '353897823'
+  event_type: push
+  started_at: '2026-09-29T16:26:55Z'
+  completed_at: '2026-09-29T16:28:26Z'
+  actor: soobujmiah
+  run_url: https://github.com/soobujmiah/soobujmiah.github.io/actions/runs/36597781272
 test:
   status: passed
-  run_id: '36558515032'
-  commit: 31448fb73e5e3ecbd29de468a234da610df9be17
+  run_id: '36597781272'
+  commit: 0f863b667ad87e8f063b6f317719504f82d101b2
   run_attempt: '1'
-  at: '2026-09-29T11:02:13Z'
+  at: '2026-09-29T16:28:04Z'
   timestamp_source: ci
   conclusion: success
   workflow_name: Build and Deploy
-  event_type: schedule
-  run_url: https://github.com/soobujmiah/soobujmiah.github.io/actions/runs/36558515032
-  summary: Validate static export, deep links and budget (success)
+  workflow_id: '353897823'
+  event_type: push
+  started_at: '2026-09-29T16:26:55Z'
+  completed_at: '2026-09-29T16:28:26Z'
+  actor: soobujmiah
+  run_url: https://github.com/soobujmiah/soobujmiah.github.io/actions/runs/36597781272
+  summary: 'Build and Deploy: Validate static export, deep links and budget'
 last_successful_build:
-  commit: 31448fb73e5e3ecbd29de468a234da610df9be17
-  at: '2026-09-29T11:02:13Z'
-  run_id: '36558515032'
+  commit: 0f863b667ad87e8f063b6f317719504f82d101b2
+  at: '2026-09-29T16:28:26Z'
+  run_id: '36597781272'
 last_failed_build: null
 sync:
   status: ok
-  last_synced_at: '2026-09-29T11:02:13Z'
+  last_synced_at: '2026-09-29T16:28:26Z'
   source: ci
