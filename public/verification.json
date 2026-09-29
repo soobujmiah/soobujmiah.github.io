@@ -1,9 +1,9 @@
 {
   "schema": "skb.verification-projection/v1",
   "schema_version": 1,
-  "as_of": "2026-09-28T11:15:57Z",
+  "as_of": "2026-09-29T13:02:58Z",
   "summary": {
-    "verified": 14,
+    "verified": 16,
     "failed": 1,
     "stale": 0,
     "unverified": 0,
@@ -15,14 +15,14 @@
       "id": "portfolio.source.public",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-28T11:15:57Z",
+      "verified_at": "2026-09-29T10:56:33Z",
       "public": true,
       "evidence": {
         "type": "public_repository",
         "repository": "soobujmiah/soobujmiah.github.io",
         "value": "public",
         "public": true,
-        "at": "2026-09-28T11:15:57Z",
+        "at": "2026-09-29T10:56:33Z",
         "url": "https://github.com/soobujmiah/soobujmiah.github.io"
       }
     },
@@ -30,7 +30,7 @@
       "id": "portfolio.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-26T21:14:49Z",
+      "verified_at": "2026-09-29T11:02:13Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -38,18 +38,18 @@
         "repository": "soobujmiah/soobujmiah.github.io",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-09-26T21:14:49Z",
+        "at": "2026-09-29T11:02:13Z",
         "commit": "31448fb73e5e3ecbd29de468a234da610df9be17",
-        "run_id": "36272176507",
+        "run_id": "36558515032",
         "public": true,
-        "url": "https://github.com/soobujmiah/soobujmiah.github.io/blob/main/.repo/project.yaml"
+        "url": "https://github.com/soobujmiah/soobujmiah.github.io/blob/c7d9ce228a617130726a47001bb7db4fc4e19996/.repo/project.yaml"
       }
     },
     {
       "id": "portfolio.export.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-26T21:14:30Z",
+      "verified_at": "2026-09-29T11:02:13Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -57,11 +57,11 @@
         "repository": "soobujmiah/soobujmiah.github.io",
         "field": "test.status",
         "value": "passed",
-        "at": "2026-09-26T21:14:30Z",
+        "at": "2026-09-29T11:02:13Z",
         "commit": "31448fb73e5e3ecbd29de468a234da610df9be17",
-        "run_id": "36272176507",
+        "run_id": "36558515032",
         "public": true,
-        "url": "https://github.com/soobujmiah/soobujmiah.github.io/blob/main/.repo/project.yaml"
+        "url": "https://github.com/soobujmiah/soobujmiah.github.io/blob/c7d9ce228a617130726a47001bb7db4fc4e19996/.repo/project.yaml"
       }
     },
     {
@@ -80,7 +80,7 @@
         "commit": "48af7d9d524a9f16cc1c2cf80e335d293d288e1b",
         "run_id": "36273975880",
         "public": true,
-        "url": "https://github.com/soobujmiah/lai/blob/main/.repo/project.yaml"
+        "url": "https://github.com/soobujmiah/lai/blob/a1c5589c1dbab5b3831444ca331c8ae0560a5450/.repo/project.yaml"
       }
     },
     {
@@ -99,7 +99,7 @@
         "commit": "1780b21b8441602f06dd27198686117f5b62da4e",
         "run_id": "36274641456",
         "public": true,
-        "url": "https://github.com/soobujmiah/adt/blob/main/.repo/project.yaml"
+        "url": "https://github.com/soobujmiah/adt/blob/3f71989202aa3daea31c8f47bd246e36677dc02d/.repo/project.yaml"
       }
     },
     {
@@ -118,7 +118,7 @@
         "commit": "5263bec1c65d41ae3e9f77c8125e79bcc5967f6b",
         "run_id": "36274245923",
         "public": true,
-        "url": "https://github.com/soobujmiah/ternux/blob/main/.repo/project.yaml"
+        "url": "https://github.com/soobujmiah/ternux/blob/9de69d4afb6dcfaeb2a09e62c81043e87b181a62/.repo/project.yaml"
       }
     },
     {
@@ -137,7 +137,7 @@
         "commit": "d1bdcc9800381ec39417afd9ad4ada92a5368fad",
         "run_id": "36274644482",
         "public": true,
-        "url": "https://github.com/soobujmiah/ggen/blob/main/.repo/project.yaml"
+        "url": "https://github.com/soobujmiah/ggen/blob/a1d9025d194d8bd078c186547889a2494a8bf023/.repo/project.yaml"
       }
     },
     {
@@ -156,7 +156,7 @@
         "commit": "9580c001a00ad03a3cba9912c41e5aa4c55acc58",
         "run_id": "36274646708",
         "public": true,
-        "url": "https://github.com/soobujmiah/songjog/blob/main/.repo/project.yaml"
+        "url": "https://github.com/soobujmiah/songjog/blob/a8b508026ba2b22be07c4512408c31bb7e3c41c6/.repo/project.yaml"
       }
     },
     {
@@ -175,7 +175,7 @@
         "commit": "abc9cab528c7a057e725bd510eedee3ca8da0e2a",
         "run_id": "36274331167",
         "public": true,
-        "url": "https://github.com/soobujmiah/docdr/blob/main/.repo/project.yaml"
+        "url": "https://github.com/soobujmiah/docdr/blob/a8b10b409b30f3979c5e4f9b301427c1eae2636d/.repo/project.yaml"
       }
     },
     {
@@ -194,7 +194,7 @@
         "commit": "4a74b74a549eb929442ab22b553937f7ff0af8f6",
         "run_id": "36274133331",
         "public": true,
-        "url": "https://github.com/soobujmiah/apiloop/blob/main/.repo/project.yaml"
+        "url": "https://github.com/soobujmiah/apiloop/blob/2be74965ad50601be868f16a28dbaf59608028c6/.repo/project.yaml"
       }
     },
     {
@@ -213,7 +213,7 @@
         "commit": "28e280738f7ac65af52fe810acd4783496196f3d",
         "run_id": "36274136022",
         "public": true,
-        "url": "https://github.com/soobujmiah/arms/blob/main/.repo/project.yaml"
+        "url": "https://github.com/soobujmiah/arms/blob/32914c1f8e94c4a41aa9c426206b0f87b61c3c1a/.repo/project.yaml"
       }
     },
     {
@@ -232,7 +232,7 @@
         "commit": "4068bf9b47fb72c459135d389396e92673e30adf",
         "run_id": "36274149343",
         "public": true,
-        "url": "https://github.com/soobujmiah/iqra-online-mart/blob/master/.repo/project.yaml"
+        "url": "https://github.com/soobujmiah/iqra-online-mart/blob/96d5c53a68f0881ac5c60716a27ecbf87a5e4732/.repo/project.yaml"
       }
     },
     {
@@ -251,7 +251,7 @@
         "commit": "bd697dade61ad8261817d10e51efc36ee5a595c1",
         "run_id": "36273972299",
         "public": true,
-        "url": "https://github.com/soobujmiah/datakhoj-android/blob/main/.repo/project.yaml"
+        "url": "https://github.com/soobujmiah/datakhoj-android/blob/760206c894d3d1b2937a5dc8bdebe0d35f45308d/.repo/project.yaml"
       }
     },
     {
@@ -270,7 +270,45 @@
         "commit": "dfc7b9c00026473539f653a1eab52c007ec06e4f",
         "run_id": "36274241805",
         "public": true,
-        "url": "https://github.com/soobujmiah/sobkichu/blob/main/.repo/project.yaml"
+        "url": "https://github.com/soobujmiah/sobkichu/blob/66f662594060dbae95d73e510ba89924579613aa/.repo/project.yaml"
+      }
+    },
+    {
+      "id": "repo.onskillit-platform.build.passing",
+      "class": "evidence_backed",
+      "status": "verified",
+      "verified_at": "2026-09-29T13:02:58Z",
+      "public": true,
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "onskillit-platform",
+        "repository": "soobujmiah/onskillit-platform",
+        "field": "build.status",
+        "value": "passed",
+        "at": "2026-09-29T13:02:58Z",
+        "commit": "356f576ed3965a64aa7c97bc114259a5acf972ef",
+        "run_id": "36572213250",
+        "public": true,
+        "url": "https://github.com/soobujmiah/onskillit-platform/blob/0cbc135037289c2d1bfe9b89d33c7a9f00b21c86/.repo/project.yaml"
+      }
+    },
+    {
+      "id": "repo.onskillit-platform.phases.phase-04",
+      "class": "evidence_backed",
+      "status": "verified",
+      "verified_at": "2026-09-29T13:02:58Z",
+      "public": true,
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "onskillit-platform",
+        "repository": "soobujmiah/onskillit-platform",
+        "field": "phases.completed",
+        "value": "PHASE-00, PHASE-01, PHASE-02, PHASE-03, PHASE-04",
+        "at": "2026-09-29T13:02:58Z",
+        "commit": "356f576ed3965a64aa7c97bc114259a5acf972ef",
+        "run_id": "36572213250",
+        "public": true,
+        "url": "https://github.com/soobujmiah/onskillit-platform/blob/0cbc135037289c2d1bfe9b89d33c7a9f00b21c86/.repo/project.yaml"
       }
     },
     {

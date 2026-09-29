@@ -37,6 +37,50 @@ def _now_z(value: Any) -> str | None:
     return None
 
 
+def _extract_state_field(state: dict[str, Any], field: str) -> dict[str, Any] | None:
+    if field == "build.status":
+        return state.get("build") or {}
+    if field == "test.status":
+        return state.get("test") or {}
+    if field == "head.commit":
+        head = state.get("head") or {}
+        return {
+            "status": "present" if head.get("commit") else "unknown",
+            "at": head.get("committed_at"),
+            "commit": head.get("commit"),
+        }
+    if field == "sync.status":
+        sync = state.get("sync") or {}
+        head = state.get("head") or {}
+        return {
+            "status": sync.get("status") or "unknown",
+            "at": sync.get("last_synced_at") or sync.get("attempted_at") or head.get("committed_at"),
+            "commit": head.get("commit"),
+        }
+    if field in ("phases.source", "phases.active", "phases.next", "phases.completed"):
+        phases = state.get("phases") or {}
+        build = state.get("build") or {}
+        sync = state.get("sync") or {}
+        head = state.get("head") or {}
+        at = build.get("at") or sync.get("last_synced_at") or sync.get("attempted_at") or head.get("committed_at")
+        commit = build.get("commit") or head.get("commit")
+        run_id = build.get("run_id")
+        source = phases.get("source") or "not_configured"
+        if field == "phases.source":
+            val = source
+        elif source == "not_configured":
+            val = "unknown"
+        elif field == "phases.active":
+            val = phases.get("active") or "none"
+        elif field == "phases.next":
+            val = phases.get("next") or "none"
+        else:
+            completed = phases.get("completed") or []
+            val = ", ".join(completed) if completed else "none"
+        return {"status": val, "at": at, "commit": commit, "run_id": run_id}
+    return None
+
+
 class RegistryProvider:
     """Resolve evidence from SKB's ``projects/registry/<project_id>.json`` aggregate."""
 
@@ -70,27 +114,17 @@ class RegistryProvider:
             return None
 
     def _state_block(self, entry: dict[str, Any], field: str) -> dict[str, Any] | None:
-        if field == "build.status":
-            return entry.get("build") or {}
-        if field == "test.status":
-            return entry.get("test") or {}
-        if field == "head.commit":
-            head = entry.get("head") or {}
-            return {"status": "present" if head.get("commit") else "unknown", "at": head.get("committed_at"), "commit": head.get("commit")}
-        return None
+        return _extract_state_field(entry, field)
 
     # -- API --------------------------------------------------------------
     def _api_get(self, url: str) -> dict[str, Any] | None:
-        if not self.token:
-            return None
-        req = urllib.request.Request(
-            url,
-            headers={
-                "Accept": "application/vnd.github+json",
-                "Authorization": f"Bearer {self.token}",
-                "X-GitHub-Api-Version": API_VERSION,
-            },
-        )
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": API_VERSION,
+        }
+        if self.token:
+            headers["Authorization"] = f"Bearer {self.token}"
+        req = urllib.request.Request(url, headers=headers)
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
                 return json.loads(resp.read().decode("utf-8"))
@@ -189,14 +223,13 @@ class PortfolioProvider:
 
     # -- API --------------------------------------------------------------
     def _api_get(self, url: str) -> dict[str, Any] | None:
-        req = urllib.request.Request(
-            url,
-            headers={
-                "Accept": "application/vnd.github+json",
-                "Authorization": f"Bearer {self.token}" if self.token else "",
-                "X-GitHub-Api-Version": API_VERSION,
-            },
-        )
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": API_VERSION,
+        }
+        if self.token:
+            headers["Authorization"] = f"Bearer {self.token}"
+        req = urllib.request.Request(url, headers=headers)
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
                 return json.loads(resp.read().decode("utf-8"))
@@ -244,18 +277,8 @@ class PortfolioProvider:
             if state is None:
                 return None
             field = spec.get("field", "")
-            if field == "build.status":
-                block = state.get("build") or {}
-            elif field == "test.status":
-                block = state.get("test") or {}
-            elif field == "head.commit":
-                head = state.get("head") or {}
-                block = {
-                    "status": "present" if head.get("commit") else "unknown",
-                    "at": head.get("committed_at"),
-                    "commit": head.get("commit"),
-                }
-            else:
+            block = _extract_state_field(state, field)
+            if block is None:
                 return None
             repository = spec.get("repository")
             if info is not None:

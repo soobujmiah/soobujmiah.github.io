@@ -233,6 +233,36 @@
       "freshness": { "max_age_days": 30 }
     },
     {
+      "id": "repo.onskillit-platform.build.passing",
+      "class": "evidence_backed",
+      "text": "OnSkillIT Platform's continuous integration reports a passing build.",
+      "public": true,
+      "verification_method": "repository_state",
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "onskillit-platform",
+        "repository": "soobujmiah/onskillit-platform",
+        "field": "build.status",
+        "expect": "passed"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
+      "id": "repo.onskillit-platform.phases.phase-04",
+      "class": "evidence_backed",
+      "text": "OnSkillIT Platform's phase registry records PHASE-04 (publishing core) as completed.",
+      "public": true,
+      "verification_method": "repository_state",
+      "evidence": {
+        "type": "repository_state",
+        "project_id": "onskillit-platform",
+        "repository": "soobujmiah/onskillit-platform",
+        "field": "phases.completed",
+        "expect": "PHASE-04"
+      },
+      "freshness": { "max_age_days": 30 }
+    },
+    {
       "id": "showcase.live_sites.published",
       "class": "evidence_backed",
       "text": "The repositories behind the portfolio's live-site links publish GitHub Pages sites.",

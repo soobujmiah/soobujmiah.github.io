@@ -387,7 +387,20 @@ class TestCanonicalRegistry(unittest.TestCase):
             if spec["type"] == "repository_state":
                 self.assertTrue(spec.get("project_id"), c["id"])
                 self.assertTrue(spec.get("repository"), c["id"])
-                self.assertIn(spec.get("field"), ("build.status", "test.status", "head.commit"), c["id"])
+                self.assertIn(
+                    spec.get("field"),
+                    (
+                        "build.status",
+                        "test.status",
+                        "head.commit",
+                        "sync.status",
+                        "phases.source",
+                        "phases.active",
+                        "phases.next",
+                        "phases.completed",
+                    ),
+                    c["id"],
+                )
 
     def test_every_positioning_claim_is_justified(self):
         for c in self.doc["claims"]:
@@ -605,3 +618,45 @@ class TestPublicOnlyVerify(unittest.TestCase):
             self._write_claims(tmp, claims_doc)
             (Path(tmp) / "projection.json").write_text(json.dumps(projection), encoding="utf-8")
             self.assertEqual(self._verify(tmp), 1)
+
+    def test_phases_completed_claim_resolution(self):
+        from tools.verification.providers import _extract_state_field
+        entry = {
+            "head": {"commit": "a" * 40, "committed_at": "2026-09-29T13:02:32Z"},
+            "build": {"status": "passed", "at": "2026-09-29T13:02:58Z", "commit": "a" * 40, "run_id": "100"},
+            "phases": {
+                "source": ".repo/phases.yaml",
+                "completed": ["PHASE-00", "PHASE-01", "PHASE-02", "PHASE-03", "PHASE-04"],
+                "active": "PHASE-05",
+                "next": "PHASE-06",
+            },
+            "sync": {"status": "ok", "attempted_at": "2026-09-29T13:02:58Z"},
+        }
+        extracted = _extract_state_field(entry, "phases.completed")
+        self.assertEqual(extracted["status"], "PHASE-00, PHASE-01, PHASE-02, PHASE-03, PHASE-04")
+        c_pass = claim(
+            id="repo.onskillit-platform.phases.phase-04",
+            evidence={"type": "repository_state", "project_id": "onskillit-platform", "field": "phases.completed", "expect": "PHASE-04"},
+        )
+        c_fail = claim(
+            id="repo.onskillit-platform.phases.phase-05",
+            evidence={"type": "repository_state", "project_id": "onskillit-platform", "field": "phases.completed", "expect": "PHASE-05"},
+        )
+        ev = {
+            "type": "repository_state",
+            "project_id": "onskillit-platform",
+            "repository": "soobujmiah/onskillit-platform",
+            "field": "phases.completed",
+            "value": extracted["status"],
+            "at": extracted["at"],
+            "commit": extracted["commit"],
+            "run_id": extracted["run_id"],
+            "public": True,
+        }
+        status_pass, _, _ = core.classify(c_pass, ev, None, NOW)
+        status_fail, _, _ = core.classify(c_fail, ev, None, NOW)
+        self.assertEqual(status_pass, core.STATUS_VERIFIED)
+        self.assertEqual(status_fail, core.STATUS_FAILED)
+        unconfigured = _extract_state_field({"phases": {"source": "not_configured"}}, "phases.completed")
+        self.assertEqual(unconfigured["status"], "unknown")
+

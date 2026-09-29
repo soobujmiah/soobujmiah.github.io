@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+  repository_dispatch:
+    types: [skb-verification-updated, repo-state-updated]
   schedule:
     - cron: '47 4 * * *'
 

@@ -38,7 +38,18 @@
         },
         "project_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
         "repository": {"type": "string", "pattern": "^[^/]+/[^/]+$"},
-        "field": {"enum": ["build.status", "test.status", "head.commit"]},
+        "field": {
+          "enum": [
+            "build.status",
+            "test.status",
+            "head.commit",
+            "sync.status",
+            "phases.source",
+            "phases.active",
+            "phases.next",
+            "phases.completed"
+          ]
+        },
         "expect": {"type": "string"},
         "repositories": {
           "type": "array",

@@ -183,12 +183,16 @@ def classify(
         return STATUS_UNVERIFIED, None, None
 
     expect = (claim.get("evidence") or {}).get("expect")
+    field = (claim.get("evidence") or {}).get("field")
     value = evidence.get("value")
 
     if expect is None or value is None or value == "unknown" or parse_iso(evidence.get("at")) is None:
         # The canonical source exists but honestly reports no result (e.g. a docs-only
         # repository with no test suite). That is "cannot verify", not "known broken".
         status = STATUS_UNVERIFIED
+    elif field == "phases.completed" and isinstance(value, str):
+        completed_set = {p.strip() for p in value.split(",") if p.strip() and p.strip() != "none"}
+        status = STATUS_VERIFIED if (expect in completed_set or value == expect) else STATUS_FAILED
     elif expect is not None and value != expect:
         status = STATUS_FAILED
     else:

@@ -109,7 +109,15 @@ for (const claim of projection.claims ?? []) {
   if (claim.status === 'failed' && claim.evidence?.value === 'passed') {
     fail(`${claim.id}: reported failed while its evidence says passed`);
   }
-  if (claim.status === 'verified' && claim.evidence && claim.evidence.value !== 'passed' && claim.evidence.value !== 'public' && claim.evidence.value !== 'published' && claim.evidence.value !== 'present') {
+  const validVerifiedValue = (e) => {
+    if (!e) return true;
+    if (['passed', 'public', 'published', 'present', 'ok'].includes(e.value)) return true;
+    if (typeof e.field === 'string' && e.field.startsWith('phases.') && typeof e.value === 'string' && e.value.length > 0 && e.value !== 'unknown' && e.value !== 'none') {
+      return true;
+    }
+    return false;
+  };
+  if (claim.status === 'verified' && claim.evidence && !validVerifiedValue(claim.evidence)) {
     fail(`${claim.id}: verified with evidence value ${JSON.stringify(claim.evidence.value)}`);
   }
   if (claim.class === 'positioning' && claim.status !== 'human_attested') {
