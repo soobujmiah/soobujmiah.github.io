@@ -1,7 +1,7 @@
 {
   "schema": "skb.verification-summary/v1",
   "schema_version": 1,
-  "as_of": "2026-09-28T04:32:47Z",
+  "as_of": "2026-09-28T11:15:57Z",
   "verified": 14,
   "failed": 1,
   "stale": 0,
@@ -10,5 +10,5 @@
   "human_attested": 9,
   "machine_total": 15,
   "human_total": 9,
-  "last_verified": "2026-09-28T04:32:47Z"
+  "last_verified": "2026-09-28T11:15:57Z"
 }
