@@ -1,13 +1,13 @@
 schema_version: 1
 project_id: portfolio
 repository: soobujmiah/soobujmiah.github.io
-generated_at: '2026-09-29T16:28:26Z'
+generated_at: '2026-09-29T16:33:03Z'
 generated_by: tools/repo_knowledge collect
-version: 0f863b6
+version: 5ccbac5
 head:
-  commit: 0f863b667ad87e8f063b6f317719504f82d101b2
+  commit: 5ccbac5486756927cc54de385e2faa558f458d84
   branch: main
-  committed_at: '2026-09-29T16:26:50Z'
+  committed_at: '2026-09-29T16:28:51Z'
 phases:
   source: not_configured
   completed: []
@@ -15,41 +15,41 @@ phases:
   next: null
 build:
   status: passed
-  run_id: '36597781272'
-  commit: 0f863b667ad87e8f063b6f317719504f82d101b2
+  run_id: '36598287597'
+  commit: 5ccbac5486756927cc54de385e2faa558f458d84
   run_attempt: '1'
-  at: '2026-09-29T16:28:26Z'
+  at: '2026-09-29T16:33:03Z'
   timestamp_source: ci
   conclusion: success
   workflow_name: Build and Deploy
   workflow_id: '353897823'
-  event_type: push
-  started_at: '2026-09-29T16:26:55Z'
-  completed_at: '2026-09-29T16:28:26Z'
+  event_type: workflow_dispatch
+  started_at: '2026-09-29T16:31:02Z'
+  completed_at: '2026-09-29T16:33:03Z'
   actor: soobujmiah
-  run_url: https://github.com/soobujmiah/soobujmiah.github.io/actions/runs/36597781272
+  run_url: https://github.com/soobujmiah/soobujmiah.github.io/actions/runs/36598287597
 test:
   status: passed
-  run_id: '36597781272'
-  commit: 0f863b667ad87e8f063b6f317719504f82d101b2
+  run_id: '36598287597'
+  commit: 5ccbac5486756927cc54de385e2faa558f458d84
   run_attempt: '1'
-  at: '2026-09-29T16:28:04Z'
+  at: '2026-09-29T16:32:27Z'
   timestamp_source: ci
   conclusion: success
   workflow_name: Build and Deploy
   workflow_id: '353897823'
-  event_type: push
-  started_at: '2026-09-29T16:26:55Z'
-  completed_at: '2026-09-29T16:28:26Z'
+  event_type: workflow_dispatch
+  started_at: '2026-09-29T16:31:02Z'
+  completed_at: '2026-09-29T16:33:03Z'
   actor: soobujmiah
-  run_url: https://github.com/soobujmiah/soobujmiah.github.io/actions/runs/36597781272
+  run_url: https://github.com/soobujmiah/soobujmiah.github.io/actions/runs/36598287597
   summary: 'Build and Deploy: Validate static export, deep links and budget'
 last_successful_build:
-  commit: 0f863b667ad87e8f063b6f317719504f82d101b2
-  at: '2026-09-29T16:28:26Z'
-  run_id: '36597781272'
+  commit: 5ccbac5486756927cc54de385e2faa558f458d84
+  at: '2026-09-29T16:33:03Z'
+  run_id: '36598287597'
 last_failed_build: null
 sync:
   status: ok
-  last_synced_at: '2026-09-29T16:28:26Z'
+  last_synced_at: '2026-09-29T16:33:03Z'
   source: ci
