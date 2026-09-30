@@ -1,7 +1,7 @@
 {
   "schema": "skb.verification-projection/v1",
   "schema_version": 1,
-  "as_of": "2026-09-29T22:42:16Z",
+  "as_of": "2026-09-29T22:54:18Z",
   "summary": {
     "verified": 16,
     "failed": 1,
@@ -15,14 +15,14 @@
       "id": "portfolio.source.public",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T22:37:16Z",
+      "verified_at": "2026-09-29T22:45:44Z",
       "public": true,
       "evidence": {
         "type": "public_repository",
         "repository": "soobujmiah/soobujmiah.github.io",
         "value": "public",
         "public": true,
-        "at": "2026-09-29T22:37:16Z",
+        "at": "2026-09-29T22:45:44Z",
         "url": "https://github.com/soobujmiah/soobujmiah.github.io"
       }
     },
@@ -30,7 +30,7 @@
       "id": "portfolio.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T17:41:44Z",
+      "verified_at": "2026-09-29T22:44:40Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -38,9 +38,9 @@
         "repository": "soobujmiah/soobujmiah.github.io",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-09-29T17:41:44Z",
-        "commit": "6e159e6afb48447255fa79c0576800aa47596bd7",
-        "run_id": "36606534281",
+        "at": "2026-09-29T22:44:40Z",
+        "commit": "c16af10abec9244ae3a1417d57a69802828ea8f4",
+        "run_id": "36640650767",
         "public": true,
         "url": "https://github.com/soobujmiah/soobujmiah.github.io/blob/main/.repo/project.yaml"
       }
@@ -49,7 +49,7 @@
       "id": "portfolio.export.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T17:41:21Z",
+      "verified_at": "2026-09-29T22:43:34Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -57,9 +57,9 @@
         "repository": "soobujmiah/soobujmiah.github.io",
         "field": "test.status",
         "value": "passed",
-        "at": "2026-09-29T17:41:21Z",
-        "commit": "6e159e6afb48447255fa79c0576800aa47596bd7",
-        "run_id": "36606534281",
+        "at": "2026-09-29T22:43:34Z",
+        "commit": "c16af10abec9244ae3a1417d57a69802828ea8f4",
+        "run_id": "36640650767",
         "public": true,
         "url": "https://github.com/soobujmiah/soobujmiah.github.io/blob/main/.repo/project.yaml"
       }
@@ -68,7 +68,7 @@
       "id": "repo.lai.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T17:29:13Z",
+      "verified_at": "2026-09-29T22:49:32Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -76,9 +76,9 @@
         "repository": "soobujmiah/lai",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-09-29T17:29:13Z",
-        "commit": "15c9f61410bb4f7345e10c341eb3640640f54f6b",
-        "run_id": "36603854183",
+        "at": "2026-09-29T22:49:32Z",
+        "commit": "adc46960655a60515e9b49c5e63b495694e65ebe",
+        "run_id": "36640630797",
         "public": true,
         "url": "https://github.com/soobujmiah/lai/blob/main/.repo/project.yaml"
       }
@@ -87,7 +87,7 @@
       "id": "repo.adt.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T17:26:29Z",
+      "verified_at": "2026-09-29T22:54:18Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -95,9 +95,9 @@
         "repository": "soobujmiah/adt",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-09-29T17:26:29Z",
-        "commit": "81a449ae6ad92b11b0826e5dc9cdb9c122ca65b5",
-        "run_id": "36603817704",
+        "at": "2026-09-29T22:54:18Z",
+        "commit": "8545c3490a09574cb371e13f87b7db16b369fc17",
+        "run_id": "36640858971",
         "public": true,
         "url": "https://github.com/soobujmiah/adt/blob/main/.repo/project.yaml"
       }
@@ -106,7 +106,7 @@
       "id": "repo.ternux.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T17:20:33Z",
+      "verified_at": "2026-09-29T22:45:41Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -114,9 +114,9 @@
         "repository": "soobujmiah/ternux",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-09-29T17:20:33Z",
-        "commit": "ced2cec7f3ecee09a0069406335807176d9b3b73",
-        "run_id": "36603893057",
+        "at": "2026-09-29T22:45:41Z",
+        "commit": "a1df382acce74fa9d5df42d8f1874e7e0b58fd33",
+        "run_id": "36640683349",
         "public": true,
         "url": "https://github.com/soobujmiah/ternux/blob/main/.repo/project.yaml"
       }
@@ -125,7 +125,7 @@
       "id": "repo.ggen.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T17:20:54Z",
+      "verified_at": "2026-09-29T22:46:52Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -133,9 +133,9 @@
         "repository": "soobujmiah/ggen",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-09-29T17:20:54Z",
-        "commit": "fbbbdb20a8cbb455740387638743c9e4d6816520",
-        "run_id": "36603837350",
+        "at": "2026-09-29T22:46:52Z",
+        "commit": "fd8404f6d3c3e4b234f818b920083514eeb5fdc2",
+        "run_id": "36640611615",
         "public": true,
         "url": "https://github.com/soobujmiah/ggen/blob/main/.repo/project.yaml"
       }
@@ -144,7 +144,7 @@
       "id": "repo.songjog.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T17:21:47Z",
+      "verified_at": "2026-09-29T22:45:49Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -152,9 +152,9 @@
         "repository": "soobujmiah/songjog",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-09-29T17:21:47Z",
-        "commit": "6a821f09619133566f0ff7db1852dd293cd9c167",
-        "run_id": "36603887142",
+        "at": "2026-09-29T22:45:49Z",
+        "commit": "5a31b4e1942dc67227292b6e6037814a5e1ce64a",
+        "run_id": "36640679289",
         "public": true,
         "url": "https://github.com/soobujmiah/songjog/blob/main/.repo/project.yaml"
       }
@@ -163,7 +163,7 @@
       "id": "repo.docdr.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T17:25:07Z",
+      "verified_at": "2026-09-29T22:50:40Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -171,9 +171,9 @@
         "repository": "soobujmiah/docdr",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-09-29T17:25:07Z",
-        "commit": "2945d2b568204b45a94eaa39b7dbf6c29a410a51",
-        "run_id": "36603937236",
+        "at": "2026-09-29T22:50:40Z",
+        "commit": "4db55ced733def7f3e6225b9f39011db23382c41",
+        "run_id": "36640585214",
         "public": true,
         "url": "https://github.com/soobujmiah/docdr/blob/main/.repo/project.yaml"
       }
@@ -220,7 +220,7 @@
       "id": "repo.iqra-online-mart.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T17:22:29Z",
+      "verified_at": "2026-09-29T22:46:08Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -228,9 +228,9 @@
         "repository": "soobujmiah/iqra-online-mart",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-09-29T17:22:29Z",
-        "commit": "53ea8ed9970300138c03b5970a6762f7dafffed4",
-        "run_id": "36603947170",
+        "at": "2026-09-29T22:46:08Z",
+        "commit": "752b2adc4345c99ad240ce9ce7f95b41599fe4ba",
+        "run_id": "36640748897",
         "public": true,
         "url": "https://github.com/soobujmiah/iqra-online-mart/blob/master/.repo/project.yaml"
       }
@@ -239,7 +239,7 @@
       "id": "repo.datakhoj-android.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T17:17:40Z",
+      "verified_at": "2026-09-29T22:44:23Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -247,9 +247,9 @@
         "repository": "soobujmiah/datakhoj-android",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-09-29T17:17:40Z",
-        "commit": "96b81478cc82815919d4b2c728048583e5b4e07a",
-        "run_id": "36603818706",
+        "at": "2026-09-29T22:44:23Z",
+        "commit": "13e52ac22105f387068fba06422537e924851581",
+        "run_id": "36640573441",
         "public": true,
         "url": "https://github.com/soobujmiah/datakhoj-android/blob/main/.repo/project.yaml"
       }
@@ -277,7 +277,7 @@
       "id": "repo.onskillit-platform.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T22:16:57Z",
+      "verified_at": "2026-09-29T22:43:19Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -285,9 +285,9 @@
         "repository": "soobujmiah/onskillit-platform",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-09-29T22:16:57Z",
-        "commit": "2e53d65dd0bfb51185ac9eb3125a97128eab1c5f",
-        "run_id": "36638573688",
+        "at": "2026-09-29T22:43:19Z",
+        "commit": "bef8eb26d60c94058925c0a6ceea7fd237caebef",
+        "run_id": "36640643808",
         "public": true,
         "url": "https://github.com/soobujmiah/onskillit-platform/blob/main/.repo/project.yaml"
       }
@@ -296,7 +296,7 @@
       "id": "repo.onskillit-platform.phases.phase-04",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T22:16:57Z",
+      "verified_at": "2026-09-29T22:43:19Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -304,9 +304,9 @@
         "repository": "soobujmiah/onskillit-platform",
         "field": "phases.completed",
         "value": "PHASE-00, PHASE-01, PHASE-02, PHASE-03, PHASE-04",
-        "at": "2026-09-29T22:16:57Z",
-        "commit": "2e53d65dd0bfb51185ac9eb3125a97128eab1c5f",
-        "run_id": "36638573688",
+        "at": "2026-09-29T22:43:19Z",
+        "commit": "bef8eb26d60c94058925c0a6ceea7fd237caebef",
+        "run_id": "36640643808",
         "public": true,
         "url": "https://github.com/soobujmiah/onskillit-platform/blob/main/.repo/project.yaml"
       }
@@ -315,7 +315,7 @@
       "id": "showcase.live_sites.published",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T22:38:18Z",
+      "verified_at": "2026-09-29T22:46:09Z",
       "public": true,
       "evidence": {
         "type": "github_pages",
@@ -338,7 +338,7 @@
         ],
         "value": "published",
         "public": true,
-        "at": "2026-09-29T22:38:18Z",
+        "at": "2026-09-29T22:46:09Z",
         "url": "https://api.github.com/repos/soobujmiah/ternux"
       }
     },
