@@ -1,7 +1,7 @@
 {
   "schema": "skb.verification-projection/v1",
   "schema_version": 1,
-  "as_of": "2026-09-30T10:47:29Z",
+  "as_of": "2026-10-01T13:07:43Z",
   "summary": {
     "verified": 16,
     "failed": 1,
@@ -15,14 +15,14 @@
       "id": "portfolio.source.public",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-30T10:47:29Z",
+      "verified_at": "2026-10-01T11:13:34Z",
       "public": true,
       "evidence": {
         "type": "public_repository",
         "repository": "soobujmiah/soobujmiah.github.io",
         "value": "public",
         "public": true,
-        "at": "2026-09-30T10:47:29Z",
+        "at": "2026-10-01T11:13:34Z",
         "url": "https://github.com/soobujmiah/soobujmiah.github.io"
       }
     },
@@ -30,7 +30,7 @@
       "id": "portfolio.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-30T10:47:05Z",
+      "verified_at": "2026-10-01T11:13:15Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -38,9 +38,9 @@
         "repository": "soobujmiah/soobujmiah.github.io",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-09-30T10:47:05Z",
-        "commit": "efb12846226bef63538d81c0d8e44f48d0c0510c",
-        "run_id": "36704337180",
+        "at": "2026-10-01T11:13:15Z",
+        "commit": "f1e41958c9e2f8f66d670510ddbee3b91032e5f4",
+        "run_id": "36853816576",
         "public": true,
         "url": "https://github.com/soobujmiah/soobujmiah.github.io/blob/main/.repo/project.yaml"
       }
@@ -49,7 +49,7 @@
       "id": "portfolio.export.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-30T10:46:39Z",
+      "verified_at": "2026-10-01T11:12:56Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -57,9 +57,9 @@
         "repository": "soobujmiah/soobujmiah.github.io",
         "field": "test.status",
         "value": "passed",
-        "at": "2026-09-30T10:46:39Z",
-        "commit": "efb12846226bef63538d81c0d8e44f48d0c0510c",
-        "run_id": "36704337180",
+        "at": "2026-10-01T11:12:56Z",
+        "commit": "f1e41958c9e2f8f66d670510ddbee3b91032e5f4",
+        "run_id": "36853816576",
         "public": true,
         "url": "https://github.com/soobujmiah/soobujmiah.github.io/blob/main/.repo/project.yaml"
       }
@@ -277,7 +277,7 @@
       "id": "repo.onskillit-platform.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T22:43:19Z",
+      "verified_at": "2026-10-01T13:07:43Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -285,9 +285,9 @@
         "repository": "soobujmiah/onskillit-platform",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-09-29T22:43:19Z",
-        "commit": "bef8eb26d60c94058925c0a6ceea7fd237caebef",
-        "run_id": "36640643808",
+        "at": "2026-10-01T13:07:43Z",
+        "commit": "e23bebe8702e1f858fcc4bad35b821131928cdd6",
+        "run_id": "36866384218",
         "public": true,
         "url": "https://github.com/soobujmiah/onskillit-platform/blob/main/.repo/project.yaml"
       }
@@ -296,7 +296,7 @@
       "id": "repo.onskillit-platform.phases.phase-04",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-09-29T22:43:19Z",
+      "verified_at": "2026-10-01T13:07:43Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -304,9 +304,9 @@
         "repository": "soobujmiah/onskillit-platform",
         "field": "phases.completed",
         "value": "PHASE-00, PHASE-01, PHASE-02, PHASE-03, PHASE-04",
-        "at": "2026-09-29T22:43:19Z",
-        "commit": "bef8eb26d60c94058925c0a6ceea7fd237caebef",
-        "run_id": "36640643808",
+        "at": "2026-10-01T13:07:43Z",
+        "commit": "e23bebe8702e1f858fcc4bad35b821131928cdd6",
+        "run_id": "36866384218",
         "public": true,
         "url": "https://github.com/soobujmiah/onskillit-platform/blob/main/.repo/project.yaml"
       }
