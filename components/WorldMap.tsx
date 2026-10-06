@@ -59,7 +59,7 @@
    animation), so the focus never exists only visually.
    ═══════════════════════════════════════════════════════════════ */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useMotionValue, useSpring } from 'framer-motion';
 import { MOTION } from '@/app/design-tokens';
@@ -156,7 +156,7 @@ export function WorldMap({
 
   const driftRef = useRef({ x: 0, y: 0 });
 
-  const applyCam = (base: Camera) => {
+  const applyCam = useCallback((base: Camera) => {
     const k = reducedMotion ? 0 : MOTION.cameraDrift.maxOffsetHw * base.hw;
     const cam = { ...base, x: base.x + driftRef.current.x * k, y: base.y + driftRef.current.y * k };
     const svg = svgRef.current;
@@ -184,7 +184,7 @@ export function WorldMap({
       p.x > 8 && p.y > 8 && p.x < size.width - 8 && p.y < size.height - 8;
     label.style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0)`;
     label.dataset.on = inside ? 'true' : 'false';
-  };
+  }, [reducedMotion]);
 
   /* Fly the camera when the page changes, and hand the map over to the
      new section as it arrives. One effect owns both, so nothing else can
@@ -235,7 +235,7 @@ export function WorldMap({
       window.clearTimeout(timer);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [sectionIndex, reducedMotion]);
+  }, [sectionIndex, reducedMotion, applyCam]);
 
   /* Cache the host size outside the camera loop. Reading clientWidth after
      changing the SVG viewBox on every frame can force synchronous layout. */
@@ -250,7 +250,7 @@ export function WorldMap({
     const observer = new ResizeObserver(onResize);
     observer.observe(host);
     return () => observer.disconnect();
-  }, []);
+  }, [applyCam]);
 
   /* The origin ring is the only CSS-animated thing here (opacity
      only). Stop it when the tab is hidden — one attribute flip per
@@ -330,10 +330,7 @@ export function WorldMap({
       offY();
       if (raf) cancelAnimationFrame(raf);
     };
-    // applyCam and the motion values are ref-backed / stable across
-    // renders; only reducedMotion gates the listeners.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reducedMotion]);
+  }, [reducedMotion, applyCam, driftX, driftY, targetX, targetY]);
 
   const { x, y } = ORIGIN_POINT;
 
