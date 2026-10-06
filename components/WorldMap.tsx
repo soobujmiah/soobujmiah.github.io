@@ -59,8 +59,10 @@
    animation), so the focus never exists only visually.
    ═══════════════════════════════════════════════════════════════ */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
+import { useMotionValue, useSpring } from 'framer-motion';
+import { MOTION } from '@/app/design-tokens';
 import { BANGLADESH_OUTLINE, WORLD_LAND } from './world-map-path';
 import { COUNTRY_PATHS } from './world-map-countries';
 import {
@@ -152,7 +154,11 @@ export function WorldMap({
     return lang === 'bn' ? g.placeBn : g.place;
   };
 
-  const applyCam = (cam: Camera) => {
+  const driftRef = useRef({ x: 0, y: 0 });
+
+  const applyCam = useCallback((base: Camera) => {
+    const k = reducedMotion ? 0 : MOTION.cameraDrift.maxOffsetHw * base.hw;
+    const cam = { ...base, x: base.x + driftRef.current.x * k, y: base.y + driftRef.current.y * k };
     const svg = svgRef.current;
     if (svg) svg.setAttribute('viewBox', viewBoxOf(cam));
     const glow = glowRef.current;
@@ -178,7 +184,7 @@ export function WorldMap({
       p.x > 8 && p.y > 8 && p.x < size.width - 8 && p.y < size.height - 8;
     label.style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0)`;
     label.dataset.on = inside ? 'true' : 'false';
-  };
+  }, [reducedMotion]);
 
   /* Fly the camera when the page changes, and hand the map over to the
      new section as it arrives. One effect owns both, so nothing else can
@@ -229,7 +235,7 @@ export function WorldMap({
       window.clearTimeout(timer);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [sectionIndex, reducedMotion]);
+  }, [sectionIndex, reducedMotion, applyCam]);
 
   /* Cache the host size outside the camera loop. Reading clientWidth after
      changing the SVG viewBox on every frame can force synchronous layout. */
@@ -244,7 +250,7 @@ export function WorldMap({
     const observer = new ResizeObserver(onResize);
     observer.observe(host);
     return () => observer.disconnect();
-  }, []);
+  }, [applyCam]);
 
   /* The origin ring is the only CSS-animated thing here (opacity
      only). Stop it when the tab is hidden — one attribute flip per
@@ -260,6 +266,71 @@ export function WorldMap({
     document.addEventListener('visibilitychange', onVis);
     return () => document.removeEventListener('visibilitychange', onVis);
   }, [reducedMotion]);
+
+  /* Ambient camera drift — pointer parallax on the map's own camera.
+     The host is a background layer (pointer-events: none, behind the
+     pages), so the source is the window pointer, normalized against
+     the viewport; the host fills it. The drift rides ON TOP of the
+     flight camera (camRef.current + offset) and is written through the
+     same applyCam, so the viewBox stays the single camera source of
+     truth. The springs are event-driven (no idle rAF loop — the
+     target magnitude is cameraDrift.maxOffsetHw × hw ≈ ±2% of the
+     half-width, keeping the arrival label inside its on-frame margin)
+     and rAF-deduped; they settle to 0 when the pointer leaves, so a
+     static pointer is a static camera. Reduced motion: the effect
+     never attaches, the springs stay at 0. */
+  const targetX = useMotionValue(0);
+  const targetY = useMotionValue(0);
+  const driftSpring = MOTION.cameraDrift.followSpring;
+  const driftX = useSpring(targetX, driftSpring);
+  const driftY = useSpring(targetY, driftSpring);
+
+  useEffect(() => {
+    if (reducedMotion || typeof window === 'undefined') return;
+    let raf = 0;
+    const scheduleApply = () => {
+      if (raf || document.hidden) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const cam = camRef.current;
+        driftRef.current = { x: driftX.get(), y: driftY.get() };
+        applyCam(cam);
+      });
+    };
+    const offX = driftX.on('change', scheduleApply);
+    const offY = driftY.on('change', scheduleApply);
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const onMove = (e: PointerEvent) => {
+      if (!fine.matches || e.pointerType === 'touch') return;
+      const w = window.innerWidth || 1;
+      const h = window.innerHeight || 1;
+      targetX.set(Math.max(-1, Math.min(1, (e.clientX / w) * 2 - 1)));
+      targetY.set(Math.max(-1, Math.min(1, (e.clientY / h) * 2 - 1)));
+    };
+    const relax = () => {
+      targetX.set(0);
+      targetY.set(0);
+    };
+    fine.addEventListener('change', relax);
+    window.addEventListener('blur', relax);
+    window.addEventListener('pointermove', onMove, { passive: true });
+    document.documentElement.addEventListener('mouseleave', relax);
+    return () => {
+      fine.removeEventListener('change', relax);
+      window.removeEventListener('blur', relax);
+      driftRef.current = { x: 0, y: 0 };
+      targetX.jump(0);
+      targetY.jump(0);
+      driftX.jump(0);
+      driftY.jump(0);
+      applyCam(camRef.current);
+      window.removeEventListener('pointermove', onMove);
+      document.documentElement.removeEventListener('mouseleave', relax);
+      offX();
+      offY();
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [reducedMotion, applyCam, driftX, driftY, targetX, targetY]);
 
   const { x, y } = ORIGIN_POINT;
 

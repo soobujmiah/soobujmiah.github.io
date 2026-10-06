@@ -72,8 +72,13 @@ const MIN_VISIBLE_CHARS = 220;
 const MAX_TOTAL_JS_GZIP = 380 * 1024;
 /** Per-route payload ceiling: the gzipped sum of every script a single
     HTML page references. The home page measured ~250 KB before the
-    service layer; this holds every route — pager and services — there. */
-const MAX_ROUTE_JS_GZIP = 265 * 1024;
+    service layer; this holds every route — pager and services — there.
+    270 KB since the CSS-3D motion layer: the shared chunk gained
+    TiltCard, the Reveal depth variant, the count-up primitive and the
+    world-map camera drift (~5 KB gz), moving every pager route from
+    263 KB to 268 KB. No new dependency and no new per-route chunk —
+    the site-wide total stays under its own 380 KB ceiling. */
+const MAX_ROUTE_JS_GZIP = 270 * 1024;
 /** Per-route ceiling on the largest single gzipped chunk group. */
 const MAX_PAGE_JS_GZIP = 190 * 1024;
 

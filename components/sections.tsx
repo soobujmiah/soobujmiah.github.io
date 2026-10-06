@@ -3,6 +3,7 @@
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { Magnetic, Reveal, SnapCarousel, useNav } from './ui';
+import { TiltCard } from './TiltCard';
 import { BrandIcon, type BrandIconId } from './social-icons';
 import { SignatureName } from './SignatureName';
 import { IdentityClock } from './IdentityClock';
@@ -198,18 +199,20 @@ export function StatsScene() {
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 w-full">
           {t.presence.items.map((p, i) => (
             <Reveal key={p.label} delay={i * 0.08}>
-              <div
-                className="rounded-xl p-3.5 sm:p-5 text-center backdrop-blur-md h-full"
-                style={{ border: '1px solid rgba(228,226,223,0.09)', background: CARD_BG }}
-              >
-                <p className="text-sm sm:text-lg font-semibold" style={{ color: '#e4e2df' }}>{p.label}</p>
-                <p className="mt-1.5 font-mono text-[10px] leading-relaxed" style={{ color: 'rgba(228,226,223,0.55)' }}>
-                  {p.detail}
-                </p>
-                <p className="mt-2 text-[10px] leading-relaxed" style={{ color: 'rgba(228,226,223,0.42)' }}>
-                  {p.tools}
-                </p>
-              </div>
+              <TiltCard>
+                <div
+                  className="rounded-xl p-3.5 sm:p-5 text-center backdrop-blur-md h-full"
+                  style={{ border: '1px solid rgba(228,226,223,0.09)', background: CARD_BG }}
+                >
+                  <p className="text-sm sm:text-lg font-semibold" style={{ color: '#e4e2df' }}>{p.label}</p>
+                  <p className="mt-1.5 font-mono text-[10px] leading-relaxed" style={{ color: 'rgba(228,226,223,0.55)' }}>
+                    {p.detail}
+                  </p>
+                  <p className="mt-2 text-[10px] leading-relaxed" style={{ color: 'rgba(228,226,223,0.42)' }}>
+                    {p.tools}
+                  </p>
+                </div>
+              </TiltCard>
             </Reveal>
           ))}
         </div>
@@ -255,7 +258,7 @@ export function AboutScene() {
           <div>
             <div className="space-y-3 mb-5">
               {t.about.paragraphs.map((p, i) => (
-                <Reveal key={i} delay={0.1 + i * 0.06}>
+                <Reveal key={i} delay={0.1 + i * 0.06} depth>
                   <p className="about-p text-[13px] sm:text-sm leading-[1.75]" style={{ color: 'rgba(228,226,223,0.65)' }}>{p}</p>
                 </Reveal>
               ))}
@@ -949,7 +952,7 @@ export function ExperienceScene() {
             <div className="relative hidden md:block">
               <div className="absolute left-[5px] top-0 bottom-0 w-px" style={{ background: 'rgba(228,226,223,0.07)' }} aria-hidden />
               {t.experience.entries.map((w, i) => (
-                <Reveal key={`${w.company}-${i}`} delay={0.04 + i * 0.04}>
+                <Reveal key={`${w.company}-${i}`} delay={0.04 + i * 0.04} depth>
                   <div className="relative pl-8 pb-4 last:pb-0">
                     <div className="absolute left-0 top-1 h-3 w-3 rounded-full border-2" style={{ borderColor: '#22c55e', background: '#060608' }} aria-hidden />
                     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-0.5">

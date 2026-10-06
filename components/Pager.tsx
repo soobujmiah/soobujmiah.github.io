@@ -75,14 +75,16 @@ const pageVariants = {
     y: dir >= 0 ? `${PT.yPercent}%` : `-${PT.yPercent}%`,
     rotateX: dir >= 0 ? PT.rotateX : -PT.rotateX,
     scale: PT.scale,
+    z: MOTION.depth.zRise,
     opacity: 0,
     transformPerspective: PT.perspective,
   }),
-  center: { y: '0%', rotateX: 0, scale: 1, opacity: 1, transformPerspective: PT.perspective },
+  center: { y: '0%', rotateX: 0, scale: 1, z: 0, opacity: 1, transformPerspective: PT.perspective },
   exit: (dir: number) => ({
     y: dir >= 0 ? `-${PT.yPercent}%` : `${PT.yPercent}%`,
     rotateX: dir >= 0 ? -PT.rotateX : PT.rotateX,
     scale: PT.scale,
+    z: -MOTION.depth.zRecede,
     opacity: 0,
     transformPerspective: PT.perspective,
   }),
@@ -302,6 +304,12 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
     };
     try {
       el.style.setProperty('--page-scroll', '0px');
+      /* Shipped multiplier comes from the depth token; the CSS fallback
+         (no-JS) is the same value. */
+      el.style.setProperty(
+        '--pager-numeral-parallax',
+        String(-MOTION.depth.numeralParallax),
+      );
     } catch {
       /* ignore */
     }
@@ -362,6 +370,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
                     y: { type: 'spring', ...PT.spring },
                     rotateX: { type: 'spring', ...PT.spring },
                     scale: { type: 'spring', ...PT.spring },
+                    z: { type: 'spring', ...PT.spring },
                     opacity: { duration: PT.opacitySeconds, ease: 'easeOut' },
                   }
             }
