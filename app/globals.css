@@ -595,8 +595,13 @@ body.lang-bn .worldmap-pin {
   -webkit-text-stroke: 1.5px rgba(228, 226, 223, 0.08);
   user-select: none;
   pointer-events: none;
-  /* scroll-linked parallax; --page-scroll is published by components/Pager.tsx */
-  transform: translate3d(0, calc(var(--page-scroll, 0px) * -0.05), 0);
+  /* scroll-linked parallax; --page-scroll and the token-fed
+     --pager-numeral-parallax multiplier are published by components/Pager.tsx */
+  transform: translate3d(
+    0,
+    calc(var(--page-scroll, 0px) * var(--pager-numeral-parallax, -0.07)),
+    0
+  );
   will-change: transform;
 }
 
