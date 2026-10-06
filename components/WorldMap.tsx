@@ -61,6 +61,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
+import { useMotionValue, useSpring } from 'framer-motion';
+import { MOTION } from '@/app/design-tokens';
 import { BANGLADESH_OUTLINE, WORLD_LAND } from './world-map-path';
 import { COUNTRY_PATHS } from './world-map-countries';
 import {
@@ -259,6 +261,66 @@ export function WorldMap({
     onVis();
     document.addEventListener('visibilitychange', onVis);
     return () => document.removeEventListener('visibilitychange', onVis);
+  }, [reducedMotion]);
+
+  /* Ambient camera drift — pointer parallax on the map's own camera.
+     The host is a background layer (pointer-events: none, behind the
+     pages), so the source is the window pointer, normalized against
+     the viewport; the host fills it. The drift rides ON TOP of the
+     flight camera (camRef.current + offset) and is written through the
+     same applyCam, so the viewBox stays the single camera source of
+     truth. The springs are event-driven (no idle rAF loop — the
+     target magnitude is cameraDrift.maxOffsetHw × hw ≈ ±2% of the
+     half-width, keeping the arrival label inside its on-frame margin)
+     and rAF-deduped; they settle to 0 when the pointer leaves, so a
+     static pointer is a static camera. Reduced motion: the effect
+     never attaches, the springs stay at 0. */
+  const targetX = useMotionValue(0);
+  const targetY = useMotionValue(0);
+  const driftSpring = MOTION.cameraDrift.followSpring;
+  const driftX = useSpring(targetX, driftSpring);
+  const driftY = useSpring(targetY, driftSpring);
+
+  useEffect(() => {
+    if (reducedMotion || typeof window === 'undefined') return;
+    let raf = 0;
+    const scheduleApply = () => {
+      if (raf || document.hidden) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const cam = camRef.current;
+        const k = MOTION.cameraDrift.maxOffsetHw * cam.hw;
+        applyCam({
+          x: cam.x + driftX.get() * k,
+          y: cam.y + driftY.get() * k,
+          hw: cam.hw,
+        });
+      });
+    };
+    const offX = driftX.on('change', scheduleApply);
+    const offY = driftY.on('change', scheduleApply);
+    const onMove = (e: PointerEvent) => {
+      const w = window.innerWidth || 1;
+      const h = window.innerHeight || 1;
+      targetX.set(Math.max(-1, Math.min(1, (e.clientX / w) * 2 - 1)));
+      targetY.set(Math.max(-1, Math.min(1, (e.clientY / h) * 2 - 1)));
+    };
+    const relax = () => {
+      targetX.set(0);
+      targetY.set(0);
+    };
+    window.addEventListener('pointermove', onMove, { passive: true });
+    document.documentElement.addEventListener('mouseleave', relax);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      document.documentElement.removeEventListener('mouseleave', relax);
+      offX();
+      offY();
+      if (raf) cancelAnimationFrame(raf);
+    };
+    // applyCam and the motion values are ref-backed / stable across
+    // renders; only reducedMotion gates the listeners.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reducedMotion]);
 
   const { x, y } = ORIGIN_POINT;
