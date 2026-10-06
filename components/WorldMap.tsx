@@ -154,7 +154,11 @@ export function WorldMap({
     return lang === 'bn' ? g.placeBn : g.place;
   };
 
-  const applyCam = (cam: Camera) => {
+  const driftRef = useRef({ x: 0, y: 0 });
+
+  const applyCam = (base: Camera) => {
+    const k = reducedMotion ? 0 : MOTION.cameraDrift.maxOffsetHw * base.hw;
+    const cam = { ...base, x: base.x + driftRef.current.x * k, y: base.y + driftRef.current.y * k };
     const svg = svgRef.current;
     if (svg) svg.setAttribute('viewBox', viewBoxOf(cam));
     const glow = glowRef.current;
@@ -289,17 +293,15 @@ export function WorldMap({
       raf = requestAnimationFrame(() => {
         raf = 0;
         const cam = camRef.current;
-        const k = MOTION.cameraDrift.maxOffsetHw * cam.hw;
-        applyCam({
-          x: cam.x + driftX.get() * k,
-          y: cam.y + driftY.get() * k,
-          hw: cam.hw,
-        });
+        driftRef.current = { x: driftX.get(), y: driftY.get() };
+        applyCam(cam);
       });
     };
     const offX = driftX.on('change', scheduleApply);
     const offY = driftY.on('change', scheduleApply);
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
     const onMove = (e: PointerEvent) => {
+      if (!fine.matches || e.pointerType === 'touch') return;
       const w = window.innerWidth || 1;
       const h = window.innerHeight || 1;
       targetX.set(Math.max(-1, Math.min(1, (e.clientX / w) * 2 - 1)));
@@ -309,9 +311,19 @@ export function WorldMap({
       targetX.set(0);
       targetY.set(0);
     };
+    fine.addEventListener('change', relax);
+    window.addEventListener('blur', relax);
     window.addEventListener('pointermove', onMove, { passive: true });
     document.documentElement.addEventListener('mouseleave', relax);
     return () => {
+      fine.removeEventListener('change', relax);
+      window.removeEventListener('blur', relax);
+      driftRef.current = { x: 0, y: 0 };
+      targetX.jump(0);
+      targetY.jump(0);
+      driftX.jump(0);
+      driftY.jump(0);
+      applyCam(camRef.current);
       window.removeEventListener('pointermove', onMove);
       document.documentElement.removeEventListener('mouseleave', relax);
       offX();

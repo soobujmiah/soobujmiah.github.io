@@ -589,3 +589,24 @@ scripts/check-purity-adversarial.mjs  adversarial purity suite
 scripts/check-design.mjs         token/document/CSS drift gate
 scripts/check-build.mjs          routes, deep links, SEO assets, JS budget
 ```
+
+## CSS 3D motion
+
+Page turns use the shared depth tokens to bring the incoming page forward
+and recede the outgoing page. About copy and desktop experience entries
+use the depth reveal variant. Presence cards tilt at most five degrees on
+fine pointers; their content lifts fourteen pixels. Touch gestures retain
+native scrolling and cards remain flat. Pointer cancellation, reduced-motion
+changes, and pointer-capability changes reset the card immediately.
+
+The map combines section flight and pointer drift in one camera write, so
+changing sections while hovering cannot overwrite the drift. Drift responds
+only to fine pointers, relaxes on window blur or pointer exit, and resets
+under reduced motion. The verified footer count animates only the generated
+evidence value, preserves the final value in static HTML and its accessible
+label, and restores that value when an animation is interrupted. Reduced
+motion shows final counts and revealed content immediately.
+
+`depth.contentLagMs` is reserved; the current page body moves with its shell.
+No additional animation library, WebGL scene, or generated visual asset is
+required for this layer.

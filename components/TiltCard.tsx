@@ -53,13 +53,21 @@ export function TiltCard({
   const popZ = useSpring(useMotionValue(0), T.followSpring);
   const scale = useSpring(useMotionValue(1), T.followSpring);
 
+  useEffect(() => {
+    if (active) return;
+    rotateX.jump(0);
+    rotateY.jump(0);
+    popZ.jump(0);
+    scale.jump(1);
+  }, [active, rotateX, rotateY, popZ, scale]);
+
   const onMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!active || !ref.current) return;
     const r = ref.current.getBoundingClientRect();
     if (r.width === 0 || r.height === 0) return;
     // Normalized pointer offset from the card center, -0.5..0.5.
-    const px = (e.clientX - r.left) / r.width - 0.5;
-    const py = (e.clientY - r.top) / r.height - 0.5;
+    const px = Math.max(-0.5, Math.min(0.5, (e.clientX - r.left) / r.width - 0.5));
+    const py = Math.max(-0.5, Math.min(0.5, (e.clientY - r.top) / r.height - 0.5));
     rotateY.set(px * 2 * T.maxRotateDeg);
     rotateX.set(-py * 2 * T.maxRotateDeg);
   };
@@ -84,11 +92,11 @@ export function TiltCard({
         perspective: T.perspective,
         transformStyle: 'preserve-3d',
         // Keep the card interactive (links inside stay clickable).
-        touchAction: 'manipulation',
       }}
       onPointerMove={active ? onMove : undefined}
       onPointerEnter={active ? onEnter : undefined}
       onPointerLeave={active ? onLeave : undefined}
+      onPointerCancel={active ? onLeave : undefined}
     >
       <motion.div
         className="tilt-card h-full"

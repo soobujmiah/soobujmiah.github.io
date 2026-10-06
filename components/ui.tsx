@@ -232,6 +232,7 @@ export function Reveal({
 }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
+  const reduced = useReducedMotion() ?? false;
   const RV = MOTION.reveal;
   const DP = MOTION.depth;
   const enter = depth
@@ -244,10 +245,12 @@ export function Reveal({
     <motion.div
       ref={ref}
       className={className}
-      initial={enter}
-      animate={inView ? rest : {}}
+      initial={reduced ? false : enter}
+      animate={reduced || inView ? rest : {}}
       transition={
-        inView && depth
+        reduced
+          ? { duration: 0 }
+          : inView && depth
           ? {
               opacity: { duration: RV.seconds, delay, ease: REVEAL_EASE },
               y: { duration: RV.seconds, delay, ease: REVEAL_EASE },
@@ -285,9 +288,12 @@ export function CountUp({
   const final = localizeDigits(String(value), lang);
 
   useLayoutEffect(() => {
-    if (reduced || typeof document === 'undefined') return;
     const el = ref.current;
     if (!el) return;
+    if (reduced) {
+      el.textContent = localizeDigits(String(value), lang);
+      return;
+    }
     el.textContent = localizeDigits('0', lang);
     const controls = animate(0, value, {
       duration: MOTION.countUp.seconds,
@@ -296,7 +302,10 @@ export function CountUp({
         if (el) el.textContent = localizeDigits(String(Math.round(v)), lang);
       },
     });
-    return () => controls.stop();
+    return () => {
+      controls.stop();
+      el.textContent = localizeDigits(String(value), lang);
+    };
   }, [reduced, value, lang]);
 
   return (
