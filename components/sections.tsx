@@ -3,6 +3,7 @@
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { Magnetic, Reveal, SnapCarousel, useNav } from './ui';
+import { TiltCard } from './TiltCard';
 import { BrandIcon, type BrandIconId } from './social-icons';
 import { SignatureName } from './SignatureName';
 import { IdentityClock } from './IdentityClock';
@@ -198,18 +199,20 @@ export function StatsScene() {
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 w-full">
           {t.presence.items.map((p, i) => (
             <Reveal key={p.label} delay={i * 0.08}>
-              <div
-                className="rounded-xl p-3.5 sm:p-5 text-center backdrop-blur-md h-full"
-                style={{ border: '1px solid rgba(228,226,223,0.09)', background: CARD_BG }}
-              >
-                <p className="text-sm sm:text-lg font-semibold" style={{ color: '#e4e2df' }}>{p.label}</p>
-                <p className="mt-1.5 font-mono text-[10px] leading-relaxed" style={{ color: 'rgba(228,226,223,0.55)' }}>
-                  {p.detail}
-                </p>
-                <p className="mt-2 text-[10px] leading-relaxed" style={{ color: 'rgba(228,226,223,0.42)' }}>
-                  {p.tools}
-                </p>
-              </div>
+              <TiltCard>
+                <div
+                  className="rounded-xl p-3.5 sm:p-5 text-center backdrop-blur-md h-full"
+                  style={{ border: '1px solid rgba(228,226,223,0.09)', background: CARD_BG }}
+                >
+                  <p className="text-sm sm:text-lg font-semibold" style={{ color: '#e4e2df' }}>{p.label}</p>
+                  <p className="mt-1.5 font-mono text-[10px] leading-relaxed" style={{ color: 'rgba(228,226,223,0.55)' }}>
+                    {p.detail}
+                  </p>
+                  <p className="mt-2 text-[10px] leading-relaxed" style={{ color: 'rgba(228,226,223,0.42)' }}>
+                    {p.tools}
+                  </p>
+                </div>
+              </TiltCard>
             </Reveal>
           ))}
         </div>
