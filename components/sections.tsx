@@ -255,7 +255,7 @@ export function AboutScene() {
           <div>
             <div className="space-y-3 mb-5">
               {t.about.paragraphs.map((p, i) => (
-                <Reveal key={i} delay={0.1 + i * 0.06}>
+                <Reveal key={i} delay={0.1 + i * 0.06} depth>
                   <p className="about-p text-[13px] sm:text-sm leading-[1.75]" style={{ color: 'rgba(228,226,223,0.65)' }}>{p}</p>
                 </Reveal>
               ))}
@@ -949,7 +949,7 @@ export function ExperienceScene() {
             <div className="relative hidden md:block">
               <div className="absolute left-[5px] top-0 bottom-0 w-px" style={{ background: 'rgba(228,226,223,0.07)' }} aria-hidden />
               {t.experience.entries.map((w, i) => (
-                <Reveal key={`${w.company}-${i}`} delay={0.04 + i * 0.04}>
+                <Reveal key={`${w.company}-${i}`} delay={0.04 + i * 0.04} depth>
                   <div className="relative pl-8 pb-4 last:pb-0">
                     <div className="absolute left-0 top-1 h-3 w-3 rounded-full border-2" style={{ borderColor: '#22c55e', background: '#060608' }} aria-hidden />
                     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-0.5">
