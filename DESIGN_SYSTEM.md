@@ -68,6 +68,42 @@ below verbatim. Both stay correct — the gate guarantees it.
       "releaseSeconds": 0.5,
       "pressSeconds": 0.1
     },
+    "tilt": {
+      "maxRotateDeg": 5,
+      "perspective": 900,
+      "popZ": 14,
+      "cornerScale": 1.015,
+      "followSpring": {
+        "stiffness": 150,
+        "damping": 20,
+        "mass": 1
+      }
+    },
+    "depth": {
+      "zRecede": 40,
+      "zRise": 24,
+      "contentLagMs": 40,
+      "numeralParallax": 0.07,
+      "revealRotateX": 4,
+      "revealPerspective": 1200,
+      "revealSpring": {
+        "stiffness": 130,
+        "damping": 18,
+        "mass": 1
+      }
+    },
+    "countUp": {
+      "seconds": 1.1,
+      "ease": "cubic-bezier(0.16, 1, 0.3, 1)"
+    },
+    "cameraDrift": {
+      "maxOffsetHw": 0.02,
+      "followSpring": {
+        "stiffness": 60,
+        "damping": 18,
+        "mass": 1
+      }
+    },
     "nameAssemble": {
       "totalSeconds": 2.0,
       "outgoingSeconds": 0.22,

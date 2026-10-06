@@ -42,6 +42,45 @@ export const MOTION = {
   reveal: { seconds: 0.7, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' },
   /** Magnetic link pointer-follow / release. */
   magnetic: { followSeconds: 0.12, releaseSeconds: 0.5, pressSeconds: 0.1 },
+  /** Pointer-tracked 3D card tilt (fine-pointer only; touch stays flat). */
+  tilt: {
+    /** Absolute ceiling for rotateX / rotateY, degrees. */
+    maxRotateDeg: 5,
+    /** Card perspective, px — closer than the page turn so cards read as near. */
+    perspective: 900,
+    /** Inner content layer translateZ, px, on hover (the "pop toward you"). */
+    popZ: 14,
+    /** Subtle scale-lift that pairs with the tilt. */
+    cornerScale: 1.015,
+    /** Pointer-follow spring for the tilt axes. */
+    followSpring: { stiffness: 150, damping: 20, mass: 1 },
+  },
+  /** Layered depth in the page turn + scroll-linked parallax. */
+  depth: {
+    /** Outgoing page translateZ, px — it recedes as it leaves. */
+    zRecede: 40,
+    /** Incoming page translateZ, px — it rises toward the viewer. */
+    zRise: 24,
+    /** Inner-content spring lag vs the turning page shell, ms. */
+    contentLagMs: 40,
+    /** `--page-scroll` multiplier for the `.page-numeral` parallax. */
+    numeralParallax: 0.07,
+    /** `Reveal` depth-variant entry rotateX, degrees. */
+    revealRotateX: 4,
+    /** `Reveal` depth-variant perspective, px. */
+    revealPerspective: 1200,
+    /** Spring for the `Reveal` depth-variant rotateX / z axes. */
+    revealSpring: { stiffness: 130, damping: 18, mass: 1 },
+  },
+  /** Presence count-up numeral. */
+  countUp: { seconds: 1.1, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+  /** Pointer-driven camera drift on the world map (section-relative). */
+  cameraDrift: {
+    /** Max drift as a multiple of the camera half-width (≈ ±2%). */
+    maxOffsetHw: 0.02,
+    /** Drift follow spring. */
+    followSpring: { stiffness: 60, damping: 18, mass: 1 },
+  },
   /** Signature identity — the wordmark is *constructed* from its own
       rendered ink, then becomes a continuous particle storytelling
       canvas (life/work cycle → back to name). Deterministic and seeded
