@@ -31,11 +31,12 @@ export const MOTION = {
   /** Paper-turn page transition (portfolio pager). */
   pageTurn: {
     spring: { stiffness: 140, damping: 22, mass: 1.0 },
-    yPercent: 6,
-    rotateX: 3.5,
-    scale: 0.99,
-    perspective: 1800,
-    opacitySeconds: 0.4,
+    yPercent: 10,
+    rotateX: 6,
+    rotateY: 7,
+    scale: 0.955,
+    perspective: 1300,
+    opacitySeconds: 0.58,
     flipLockMs: 1000,
   },
   /** Scroll/entry reveal. */
@@ -58,9 +59,9 @@ export const MOTION = {
   /** Layered depth in the page turn + scroll-linked parallax. */
   depth: {
     /** Outgoing page translateZ, px — it recedes as it leaves. */
-    zRecede: 40,
+    zRecede: 90,
     /** Incoming page translateZ, px — it rises toward the viewer. */
-    zRise: 24,
+    zRise: 80,
     /** Inner-content spring lag vs the turning page shell, ms. */
     contentLagMs: 40,
     /** `--page-scroll` multiplier for the `.page-numeral` parallax. */
