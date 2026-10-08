@@ -219,7 +219,7 @@ export function Reveal({
   delay = 0,
   className = '',
   y = 30,
-  depth = false,
+  depth = true,
 }: {
   children: ReactNode;
   delay?: number;

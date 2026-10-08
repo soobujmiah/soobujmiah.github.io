@@ -29,6 +29,7 @@ import {
 } from '@/components/ui';
 import { NavOverlay } from '@/components/NavOverlay';
 import { PullToRefresh } from '@/components/PullToRefresh';
+import { DocumentMotion } from '@/components/DocumentMotion';
 import {
   HeroScene,
   StatsScene,
@@ -358,12 +359,8 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
         <WorldMap sectionIndex={index} reducedMotion={reducedMotion} />
         {!splashActive && !reducedMotion && <CinematicStage sectionIndex={index} reducedMotion={reducedMotion} />}
         <div className="pager-vignette" aria-hidden />
-        <div className="cinematic-frame" aria-hidden="true">
-          <span className="cinematic-frame-corner cinematic-frame-corner--tl" />
-          <span className="cinematic-frame-corner cinematic-frame-corner--tr" />
-          <span className="cinematic-frame-corner cinematic-frame-corner--bl" />
-          <span className="cinematic-frame-corner cinematic-frame-corner--br" />
-          <span className="cinematic-frame-caption" key={index}>
+        <div className="cinematic-chapter" aria-hidden="true">
+          <span className="cinematic-chapter-label" key={index}>
             {localizeDigits(String(index + 1).padStart(2, '0'), lang)} / {localizeDigits(String(PAGE_COUNT).padStart(2, '0'), lang)}
             <span>{t.ui.pageLabels[index]}</span>
           </span>
@@ -402,6 +399,10 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
               className="page-scroll"
             >
               <PageBody index={index} reducedMotion={reducedMotion} armed={!splashActive} />
+              <DocumentMotion
+                scopeSelector={`.page-scroll[data-section="${SECTION_IDS[index]}"]`}
+                beatSelector=".page-content .rounded-xl h3, .page-content .rounded-xl p, .page-content .rounded-xl li, .page-content .rounded-full:not(a):not(button)"
+              />
             </div>
           </motion.div>
         </AnimatePresence>

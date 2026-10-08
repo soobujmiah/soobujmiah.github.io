@@ -420,29 +420,15 @@ body.lang-bn .worldmap-pin {
   to { opacity: var(--cinema-opacity); }
 }
 
-/* Viewfinder language follows every chapter without covering its content. */
-.cinematic-frame {
+/* A quiet editorial chapter label replaces the former camera viewfinder. */
+.cinematic-chapter {
   position: absolute;
-  inset: 78px 18px 88px;
+  inset: 78px 24px auto;
   z-index: 3;
   pointer-events: none;
 }
 
-.cinematic-frame-corner {
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  opacity: 0.48;
-}
-.cinematic-frame-corner--tl { top: 0; left: 0; border-top: 1px solid var(--accent); border-left: 1px solid var(--accent); }
-.cinematic-frame-corner--tr { top: 0; right: 0; border-top: 1px solid var(--accent); border-right: 1px solid var(--accent); }
-.cinematic-frame-corner--bl { bottom: 0; left: 0; border-bottom: 1px solid var(--accent); border-left: 1px solid var(--accent); }
-.cinematic-frame-corner--br { bottom: 0; right: 0; border-bottom: 1px solid var(--accent); border-right: 1px solid var(--accent); }
-
-.cinematic-frame-caption {
-  position: absolute;
-  top: 24px;
-  left: 0;
+.cinematic-chapter-label {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -453,7 +439,7 @@ body.lang-bn .worldmap-pin {
   animation: cinematic-chapter-in 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.cinematic-frame-caption span {
+.cinematic-chapter-label span {
   color: rgba(228, 226, 223, 0.5);
   letter-spacing: 0.08em;
 }
@@ -464,18 +450,16 @@ body.lang-bn .worldmap-pin {
 }
 
 @media (min-width: 768px) {
-  .cinematic-frame { inset: 86px 32px 66px; }
-  .cinematic-frame-caption { top: 22px; }
+  .cinematic-chapter { inset: 86px 38px auto; }
 }
 
 @media (max-width: 767px) {
   .cinematic-stage { --cinema-opacity: 0.62; }
-  .cinematic-frame-caption { top: 19px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .cinematic-stage { display: none; }
-  .cinematic-frame-caption { animation: none; }
+  .cinematic-chapter-label { animation: none; }
 }
 
 /* one page layer; incoming paints above outgoing by DOM order */
@@ -1606,11 +1590,16 @@ body:has(> .services-doc) button {
 .services-doc::before {
   content: '';
   position: fixed;
-  inset: 72px 18px 18px;
+  inset: -30% -20%;
   z-index: 0;
   pointer-events: none;
-  border-left: 1px solid rgba(74, 222, 128, 0.1);
-  border-right: 1px solid rgba(74, 222, 128, 0.1);
+  background: radial-gradient(ellipse at 72% 26%, rgba(34, 197, 94, 0.09), transparent 38%);
+  animation: cinematic-document-light 18s ease-in-out infinite alternate;
+}
+
+@keyframes cinematic-document-light {
+  from { opacity: 0.5; transform: translate3d(-3%, 2%, 0) scale(1); }
+  to { opacity: 1; transform: translate3d(3%, -2%, 0) scale(1.08); }
 }
 
 .services-doc main {
@@ -1619,13 +1608,73 @@ body:has(> .services-doc) button {
   animation: cinematic-document-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.services-doc header,
+.services-doc footer {
+  animation: cinematic-chrome-in 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes cinematic-chrome-in {
+  from { opacity: 0; transform: translate3d(0, -12px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
 @keyframes cinematic-document-in {
   from { opacity: 0; transform: perspective(1200px) translate3d(0, 24px, -50px) rotateX(2deg); }
   to { opacity: 1; transform: perspective(1200px) translate3d(0, 0, 0) rotateX(0); }
 }
 
+/* Each document heading, line and card joins the story as it enters view. */
+.services-doc .cinema-enter {
+  animation: cinematic-beat-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) var(--cinema-delay, 0ms) backwards;
+}
+
+.page-content .cinema-enter {
+  --cinema-distance: 12px;
+  animation: cinematic-beat-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) var(--cinema-delay, 0ms) backwards;
+}
+
+@keyframes cinematic-beat-in {
+  from { opacity: 0; transform: perspective(1100px) translate3d(0, var(--cinema-distance, 22px), -24px) rotateX(2deg); }
+  to { opacity: 1; transform: perspective(1100px) translate3d(0, 0, 0) rotateX(0); }
+}
+
+.services-doc main a,
+.services-doc main button {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease, box-shadow 0.35s ease, color 0.35s ease;
+}
+
+.services-doc main a:hover,
+.services-doc main button:hover {
+  transform: translate3d(0, -3px, 0);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+}
+
+.services-doc main a:active,
+.services-doc main button:active { transform: translate3d(0, 0, 0) scale(0.98); }
+
+.page-content .rounded-full:not(a):not(button) {
+  transition: border-color 0.4s ease, background-color 0.4s ease, color 0.4s ease;
+}
+
+.page-content .rounded-full:not(a):not(button):hover {
+  border-color: rgba(74, 222, 128, 0.38) !important;
+  background-color: rgba(34, 197, 94, 0.1);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .services-doc main { animation: none; }
+  .services-doc main,
+  .services-doc header,
+  .services-doc footer,
+  .services-doc::before,
+  .services-doc .cinema-enter { animation: none; }
+  .page-content .cinema-enter { animation: none; }
+  .services-doc main a,
+  .services-doc main button,
+  .page-content .rounded-full:not(a):not(button) { transition: none; }
+  .services-doc main a:hover,
+  .services-doc main button:hover,
+  .services-doc main a:active,
+  .services-doc main button:active { transform: none; box-shadow: none; }
 }
 .services-doc .prose-list li + li {
   margin-top: 0.45rem;
