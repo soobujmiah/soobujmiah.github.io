@@ -68,8 +68,11 @@ const MIN_VISIBLE_CHARS = 220;
     shared chunk, because it reads a 298-byte generated summary instead of
     the full projection. The new page loads 134 kB on its own route — well
     under the per-route ceiling below — so the site-wide sum moved only
-    because a real route now exists that did not before. */
-const MAX_TOTAL_JS_GZIP = 380 * 1024;
+    because a real route now exists that did not before.
+    384 KB for the 2026-10 cinematic site: seven native-canvas 3D chapter
+    forms live in a separately loaded chunk. Initial per-route payload
+    remains under its existing 270 KB ceiling. */
+const MAX_TOTAL_JS_GZIP = 384 * 1024;
 /** Per-route payload ceiling: the gzipped sum of every script a single
     HTML page references. The home page measured ~250 KB before the
     service layer; this holds every route — pager and services — there.
@@ -77,7 +80,7 @@ const MAX_TOTAL_JS_GZIP = 380 * 1024;
     TiltCard, the Reveal depth variant, the count-up primitive and the
     world-map camera drift (~5 KB gz), moving every pager route from
     263 KB to 268 KB. No new dependency and no new per-route chunk —
-    the site-wide total stays under its own 380 KB ceiling. */
+    the site-wide total stayed under its 380 KB ceiling at the time. */
 const MAX_ROUTE_JS_GZIP = 270 * 1024;
 /** Per-route ceiling on the largest single gzipped chunk group. */
 const MAX_PAGE_JS_GZIP = 190 * 1024;

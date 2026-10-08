@@ -12,11 +12,16 @@ Discrete paper-turn pager (Next.js static export + framer-motion),
 fully bilingual **English / বাংলা**, green-on-black theme. The hero name is
 **constructed, not revealed**: its own rendered ink is sampled into a
 particle field that travels home and resolves into real typography.
+Every main chapter also has a distinct perspective-projected 3D form over the
+page-aware world map. The scene loads separately, runs at no more than 30 fps,
+pauses in hidden tabs, and is removed for reduced-motion visitors. The service
+and verification documents share the same cinematic frame and entrance language.
 
 ## Stack
 
 - Next.js 15.5.24 (static export), React 18, TypeScript, Tailwind CSS
 - framer-motion for spring paper-turn page transitions + inner page scroll
+- Native canvas 3D projection for chapter scenery; no paid service or new runtime dependency
 - GitHub Pages deploy via `.github/workflows/deploy.yml` (lint → build → upload `./out`)
 
 ## Develop

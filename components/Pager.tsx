@@ -13,11 +13,12 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { MOTION } from '@/app/design-tokens';
 import { PAGE_COUNT, SECTION_IDS, indexFromPathname, sectionHref } from '@/app/sections';
 import { WorldMap } from '@/components/WorldMap';
-import { LanguageProvider, useLang } from '@/app/language';
+import { LanguageProvider, localizeDigits, useLang } from '@/app/language';
 import {
   NavProvider,
   CustomCursor,
@@ -39,6 +40,7 @@ import {
 } from '@/components/sections';
 
 const WHEEL_THRESHOLD = 24;
+const CinematicStage = dynamic(() => import('@/components/CinematicStage').then((module) => module.CinematicStage), { ssr: false });
 const SWIPE_THRESHOLD = 60;
 const EDGE_SLACK = 2; // px tolerance for scroll-edge detection
 
@@ -74,15 +76,17 @@ const pageVariants = {
   enter: (dir: number) => ({
     y: dir >= 0 ? `${PT.yPercent}%` : `-${PT.yPercent}%`,
     rotateX: dir >= 0 ? PT.rotateX : -PT.rotateX,
+    rotateY: dir >= 0 ? PT.rotateY : -PT.rotateY,
     scale: PT.scale,
     z: MOTION.depth.zRise,
     opacity: 0,
     transformPerspective: PT.perspective,
   }),
-  center: { y: '0%', rotateX: 0, scale: 1, z: 0, opacity: 1, transformPerspective: PT.perspective },
+  center: { y: '0%', rotateX: 0, rotateY: 0, scale: 1, z: 0, opacity: 1, transformPerspective: PT.perspective },
   exit: (dir: number) => ({
     y: dir >= 0 ? `-${PT.yPercent}%` : `${PT.yPercent}%`,
     rotateX: dir >= 0 ? -PT.rotateX : PT.rotateX,
+    rotateY: dir >= 0 ? -PT.rotateY : PT.rotateY,
     scale: PT.scale,
     z: -MOTION.depth.zRecede,
     opacity: 0,
@@ -352,7 +356,18 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
         onTouchEnd={onTouchEnd}
       >
         <WorldMap sectionIndex={index} reducedMotion={reducedMotion} />
+        {!splashActive && !reducedMotion && <CinematicStage sectionIndex={index} reducedMotion={reducedMotion} />}
         <div className="pager-vignette" aria-hidden />
+        <div className="cinematic-frame" aria-hidden="true">
+          <span className="cinematic-frame-corner cinematic-frame-corner--tl" />
+          <span className="cinematic-frame-corner cinematic-frame-corner--tr" />
+          <span className="cinematic-frame-corner cinematic-frame-corner--bl" />
+          <span className="cinematic-frame-corner cinematic-frame-corner--br" />
+          <span className="cinematic-frame-caption" key={index}>
+            {localizeDigits(String(index + 1).padStart(2, '0'), lang)} / {localizeDigits(String(PAGE_COUNT).padStart(2, '0'), lang)}
+            <span>{t.ui.pageLabels[index]}</span>
+          </span>
+        </div>
 
         <AnimatePresence custom={dir} initial={false} mode="sync">
           <motion.div
@@ -369,6 +384,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
                 : {
                     y: { type: 'spring', ...PT.spring },
                     rotateX: { type: 'spring', ...PT.spring },
+                    rotateY: { type: 'spring', ...PT.spring },
                     scale: { type: 'spring', ...PT.spring },
                     z: { type: 'spring', ...PT.spring },
                     opacity: { duration: PT.opacitySeconds, ease: 'easeOut' },

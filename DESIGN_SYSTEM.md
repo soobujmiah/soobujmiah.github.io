@@ -52,11 +52,12 @@ below verbatim. Both stay correct — the gate guarantees it.
         "damping": 22,
         "mass": 1
       },
-      "yPercent": 6,
-      "rotateX": 3.5,
-      "scale": 0.99,
-      "perspective": 1800,
-      "opacitySeconds": 0.4,
+      "yPercent": 10,
+      "rotateX": 6,
+      "rotateY": 7,
+      "scale": 0.955,
+      "perspective": 1300,
+      "opacitySeconds": 0.58,
       "flipLockMs": 1000
     },
     "reveal": {
@@ -80,8 +81,8 @@ below verbatim. Both stay correct — the gate guarantees it.
       }
     },
     "depth": {
-      "zRecede": 40,
-      "zRise": 24,
+      "zRecede": 90,
+      "zRise": 80,
       "contentLagMs": 40,
       "numeralParallax": 0.07,
       "revealRotateX": 4,
@@ -579,6 +580,7 @@ components/PullToRefresh.tsx  real mobile pull-to-refresh gesture
 components/SignatureName.tsx  the signature identity mark (§5b)
 components/IdentityClock.tsx  the dot-matrix identity clock (§5c)
 components/WorldMap.tsx   dark-green page-aware map environment (§9)
+components/CinematicStage.tsx  lightweight chapter-specific 3D scenery
 components/world-map-path.ts  generated land contours (do not edit)
 components/world-map-countries.ts  generated per-country shapes (do not edit)
 tools/make-worldmap.py    regenerates the contours from Natural Earth
@@ -592,8 +594,17 @@ scripts/check-build.mjs          routes, deep links, SEO assets, JS budget
 
 ## CSS 3D motion
 
-Page turns use the shared depth tokens to bring the incoming page forward
-and recede the outgoing page. About copy and desktop experience entries
+Page turns use the shared depth tokens to bring the incoming page forward,
+rotate it on both axes, and recede the outgoing page. Each of the seven pager
+chapters has its own line-built 3D form, projected with a perspective camera
+onto a transparent canvas over the world map. The scenery crossfades when the
+chapter changes, follows fine pointers slightly, and renders at no more than
+30 fps. It is loaded separately from the main route script, pauses in hidden
+tabs, and is absent under reduced motion. Viewfinder corners and a localized
+chapter caption give the same framing to every scene. Service and verification
+documents use a quieter matching frame and one entrance animation.
+
+About copy and desktop experience entries
 use the depth reveal variant. Presence cards tilt at most five degrees on
 fine pointers; their content lifts fourteen pixels. Touch gestures retain
 native scrolling and cards remain flat. Pointer cancellation, reduced-motion
@@ -608,5 +619,5 @@ label, and restores that value when an animation is interrupted. Reduced
 motion shows final counts and revealed content immediately.
 
 `depth.contentLagMs` is reserved; the current page body moves with its shell.
-No additional animation library, WebGL scene, or generated visual asset is
-required for this layer.
+This layer requires no additional animation library, WebGL runtime, hosted
+asset, or paid service.
