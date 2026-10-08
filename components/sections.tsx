@@ -110,18 +110,18 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
         <div className="hero-copy">
           <motion.p
             className="hero-role text-[13px] font-medium sm:text-sm"
-            initial={{ opacity: 0, y: 14 }}
+            initial={reducedMotion ? false : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.6, duration: 0.7 }}
+            transition={reducedMotion ? { duration: 0 } : { delay: 1.6, duration: 0.7 }}
           >
             {t.profile.title}
           </motion.p>
 
           <motion.p
             className="hero-status font-mono text-[10px] uppercase tracking-[0.4em]"
-            initial={{ opacity: 0, y: 20 }}
+            initial={reducedMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.7 }}
+            transition={reducedMotion ? { duration: 0 } : { delay: 0.4, duration: 0.7 }}
           >
             <span className="hero-status-dot" aria-hidden />
             {t.profile.location} · {t.hero.availability}
@@ -130,9 +130,9 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
           <motion.p
             className="hero-tagline font-mono text-[10px] leading-relaxed tracking-[0.18em] sm:text-[11px]"
             style={{ color: '#4ade80' }}
-            initial={{ opacity: 0, y: 14 }}
+            initial={reducedMotion ? false : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.68, duration: 0.7 }}
+            transition={reducedMotion ? { duration: 0 } : { delay: 1.68, duration: 0.7 }}
           >
             {t.profile.tagline}
           </motion.p>
@@ -140,18 +140,18 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
           <motion.p
             className="hero-intro mx-auto max-w-lg text-sm leading-relaxed"
             style={{ color: 'rgba(228,226,223,0.62)' }}
-            initial={{ opacity: 0, y: 15 }}
+            initial={reducedMotion ? false : { opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.75, duration: 0.7 }}
+            transition={reducedMotion ? { duration: 0 } : { delay: 1.75, duration: 0.7 }}
           >
             {t.hero.intro}
           </motion.p>
 
           <motion.div
             className="hero-ctas flex flex-wrap items-center justify-center gap-3"
-            initial={{ opacity: 0, y: 15 }}
+            initial={reducedMotion ? false : { opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.0, duration: 0.7 }}
+            transition={reducedMotion ? { duration: 0 } : { delay: 2.0, duration: 0.7 }}
           >
             <Magnetic
               href={sectionHref(3, lang)}
@@ -299,6 +299,7 @@ export function AboutScene() {
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
   const { t, lang } = useLang();
+  const reducedMotion = useReducedMotion() ?? false;
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -315,13 +316,13 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       ref={ref}
       className="dense-card group relative h-full rounded-xl p-4 sm:p-5 backdrop-blur-md transition-all duration-500"
       style={{ border: '1px solid rgba(228,226,223,0.09)', background: CARD_BG }}
-      initial={{ opacity: 0, y: 50 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+      initial={reducedMotion ? false : { opacity: 0, y: 36, rotateX: 3, transformPerspective: 1200 }}
+      animate={reducedMotion || inView ? { opacity: 1, y: 0, rotateX: 0 } : {}}
+      transition={reducedMotion ? { duration: 0 } : { duration: 0.7, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onMouseMove={handleMouseMove}
-      whileHover={{ borderColor: 'rgba(228,226,223,0.16)', y: -4 }}
+      whileHover={reducedMotion ? undefined : { borderColor: 'rgba(228,226,223,0.16)', y: -4 }}
     >
       {isHovered && (
         <div

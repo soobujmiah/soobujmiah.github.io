@@ -600,12 +600,14 @@ chapters has its own line-built 3D form, projected with a perspective camera
 onto a transparent canvas over the world map. The scenery crossfades when the
 chapter changes, follows fine pointers slightly, and renders at no more than
 30 fps. It is loaded separately from the main route script, pauses in hidden
-tabs, and is absent under reduced motion. Viewfinder corners and a localized
-chapter caption give the same framing to every scene. Service and verification
-documents use a quieter matching frame and one entrance animation.
+tabs, and is absent under reduced motion. A localized editorial chapter label
+marks each scene without a camera viewfinder. Service and verification
+documents use a slow ambient light field and viewport-triggered entrances
+for headings, copy, list items, and cards. Card details in the pager reveal
+as they enter view. Content remains visible without JavaScript, and reduced
+motion removes those entrances.
 
-About copy and desktop experience entries
-use the depth reveal variant. Presence cards tilt at most five degrees on
+All shared section reveals now use the depth reveal variant. Presence cards tilt at most five degrees on
 fine pointers; their content lifts fourteen pixels. Touch gestures retain
 native scrolling and cards remain flat. Pointer cancellation, reduced-motion
 changes, and pointer-capability changes reset the card immediately.

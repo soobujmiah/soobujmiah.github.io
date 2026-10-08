@@ -80,8 +80,12 @@ const MAX_TOTAL_JS_GZIP = 384 * 1024;
     TiltCard, the Reveal depth variant, the count-up primitive and the
     world-map camera drift (~5 KB gz), moving every pager route from
     263 KB to 268 KB. No new dependency and no new per-route chunk —
-    the site-wide total stayed under its 380 KB ceiling at the time. */
-const MAX_ROUTE_JS_GZIP = 270 * 1024;
+    the site-wide total stayed under its 380 KB ceiling at the time.
+    271 KB for the 2026-10 cinematic journey: the shared viewport motion
+    observer adds entrances to card details across all pager chapters. The
+    measured home route is just above 270 KB; the site-wide 384 KB limit
+    and single-chunk ceiling still apply. */
+const MAX_ROUTE_JS_GZIP = 271 * 1024;
 /** Per-route ceiling on the largest single gzipped chunk group. */
 const MAX_PAGE_JS_GZIP = 190 * 1024;
 

@@ -7,6 +7,7 @@ import { servicesContent } from '@/app/services-content';
 import { serviceHref } from '@/app/services';
 import { sectionHref } from '@/app/sections';
 import { BrandIcon } from '@/components/social-icons';
+import { DocumentMotion } from '@/components/DocumentMotion';
 import type { Lang } from '@/app/content';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -99,6 +100,7 @@ function Chrome({ children, slug }: { children: React.ReactNode; slug?: string }
         </div>
       </header>
       <main id="main" lang={lang} className="mx-auto w-full max-w-4xl px-6 pb-24 pt-14">
+        <DocumentMotion />
         {children}
       </main>
       {/* Same footer system as the portfolio shell — identical rule,

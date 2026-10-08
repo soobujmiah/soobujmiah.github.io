@@ -14,8 +14,10 @@ fully bilingual **English / বাংলা**, green-on-black theme. The hero na
 particle field that travels home and resolves into real typography.
 Every main chapter also has a distinct perspective-projected 3D form over the
 page-aware world map. The scene loads separately, runs at no more than 30 fps,
-pauses in hidden tabs, and is removed for reduced-motion visitors. The service
-and verification documents share the same cinematic frame and entrance language.
+pauses in hidden tabs, and is removed for reduced-motion visitors. Chapter
+numbers remain as editorial labels, without camera-style corner marks. Service
+and verification documents share staged content motion and ambient light; their
+content remains readable without JavaScript and under reduced motion.
 
 ## Stack
 
