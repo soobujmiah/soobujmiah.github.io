@@ -404,6 +404,20 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
           </motion.div>
         </AnimatePresence>
 
+        <AnimatePresence initial={false}>
+          {!reducedMotion && (
+            <motion.div
+              key={`scene-cut-${index}`}
+              className="cinema-scene-cut"
+              aria-hidden="true"
+              initial={{ opacity: 0.92 }}
+              animate={{ opacity: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.9, ease: [0.22, 0.8, 0.2, 1] }}
+            />
+          )}
+        </AnimatePresence>
+
         <HudControl total={PAGE_COUNT} active={index} labels={t.ui.pageLabels} navOpen={navOpen} />
         <PullToRefresh enabled={index === 0} scrollerRef={activeScroller} onRefresh={onRefresh} />
       </div>

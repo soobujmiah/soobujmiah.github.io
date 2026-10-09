@@ -37,6 +37,24 @@ function PageNumeral({ index }: { index: number }) {
   );
 }
 
+function CinematicHeading({ children, className, style }: { children: string; className: string; style?: React.CSSProperties }) {
+  const reducedMotion = useReducedMotion();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return (
+    <h1 className={className} style={style}>
+      {children.split(/(\s+)/).map((part, index) => part.trim() ? (
+        <span key={index} className="cinema-word-mask">
+          <span
+            className={`cinema-word${mounted && !reducedMotion ? ' cinema-word--play' : ''}`}
+            style={{ animationDelay: `${0.12 + index * 0.038}s` }}
+          >{part}</span>
+        </span>
+      ) : <span key={index}>{part}</span>)}
+    </h1>
+  );
+}
+
 /* ── 00b · HOME VISUAL — the designed information panel ──────────
    Replaces the old opaque landscape band. The person artwork is a
    blended, edge-masked layer that dissolves into the page background
@@ -191,11 +209,10 @@ export function StatsScene() {
             {t.presence.eyebrow}
           </p>
         </Reveal>
-        <Reveal delay={0.06}>
-          <h1 className="ph-h text-[clamp(1.35rem,5.2vw,2.6rem)] font-semibold leading-[1.12] tracking-tight max-w-3xl mb-6 text-center" style={{ color: '#e4e2df' }}>
-            {t.presence.heading}
-          </h1>
-        </Reveal>
+        <CinematicHeading
+          className="ph-h text-[clamp(1.35rem,5.2vw,2.6rem)] font-semibold leading-[1.12] tracking-tight max-w-3xl mb-6 text-center"
+          style={{ color: '#e4e2df' }}
+        >{t.presence.heading}</CinematicHeading>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 w-full">
           {t.presence.items.map((p, i) => (
             <Reveal key={p.label} delay={i * 0.08}>
@@ -234,11 +251,10 @@ function PageHeading({ eyebrow, heading }: { eyebrow: string; heading: string })
           {eyebrow}
         </p>
       </Reveal>
-      <Reveal delay={0.06}>
-        <h1 className="ph-h text-[clamp(1.35rem,5.2vw,2.6rem)] font-semibold leading-[1.12] tracking-tight max-w-2xl mb-4 sm:mb-6" style={{ color: '#e4e2df' }}>
-          {heading}
-        </h1>
-      </Reveal>
+      <CinematicHeading
+        className="ph-h text-[clamp(1.35rem,5.2vw,2.6rem)] font-semibold leading-[1.12] tracking-tight max-w-2xl mb-4 sm:mb-6"
+        style={{ color: '#e4e2df' }}
+      >{heading}</CinematicHeading>
     </>
   );
 }

@@ -595,26 +595,29 @@ scripts/check-build.mjs          routes, deep links, SEO assets, JS budget
 
 ## Cinematic world
 
-Three local WebP plates define a continuous journey: exterior observatory
-(Home and Presence), interior causeway (About through Research), and archive
-(Experience and Contact). Each chapter has a camera pose within its location.
+Three local film shots define a journey: an aerial city approach (Home and
+Presence), a neon passage (About through Research), and a server close-up
+(Experience and Contact). Matching WebP frames render on the server and remain
+the fallback. Each chapter starts at a different point within its shot.
 The camera pans and pushes over 1.8s when the location remains the same;
 the next location dissolves over 1.1s. Services uses the causeway, and
 Verification uses the archive. The content layer keeps a much smaller depth
 move so the environment, rather than a rotating page, carries the scene.
-Each location has a live Canvas 2D atmosphere: rain and distant movement at
-the observatory, cascading energy and floor reflections in the causeway,
-and scanning light in the archive. The camera drifts continuously and responds
-to fine-pointer position. Section titles carry a quiet light pulse, cards
-breathe and catch pointer light, and their text enters in sequence. The canvas
-caps rendering near 30 fps and stops drawing in hidden tabs.
+The camera drifts continuously and responds to fine-pointer position. Section
+titles carry a quiet light pulse, cards breathe and catch pointer light, and
+their text enters in sequence. Only the active video plays. Hidden tabs pause
+it; small screens receive smaller encodes.
 The central image grade preserves text contrast; mobile receives a darker
-grade. The three plates are generated project assets, stored locally under
-`public/cinema/`, and total under 300 KB. There is no video stream, runtime
-image request, WebGL engine, or paid service. The real geographic map remains
-server-rendered behind the plates as a fallback. Under reduced
-motion, the scene changes instantly and the atmosphere and ambient light stop. The content
+grade. All assets are local under `public/cinema/`; there is no runtime
+third-party request, WebGL engine, or paid service. The real geographic map remains
+server-rendered behind the frames as a fallback. Under reduced motion and data
+saver, videos do not load. The content
 heading is the only page title, and text is present without JavaScript.
+
+The footage is from Pexels under its free license:
+[city approach](https://www.pexels.com/video/drone-shot-of-a-futuristic-city-at-night-mexico-city-mexico-12550512/) by Fernando Paleta,
+[neon passage](https://www.pexels.com/video/a-geometrical-tunnel-in-animation-2759482/), and
+[hardware close-up](https://www.pexels.com/video/close-up-of-a-cpu-7140928/) by MrColo.
 
 All shared section reveals now use the depth reveal variant. Presence cards tilt at most five degrees on
 fine pointers; their content lifts fourteen pixels. Touch gestures retain
