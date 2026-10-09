@@ -327,6 +327,13 @@ real product's layout is implied. Block labels are never drawn.
   JavaScript a CSS gradient (`.silicon-world`) remains. A scrim
   (`.silicon-grade`) keeps text legible.
 
+### Chapter compositions
+
+Focus & Tools `.stack-layer` (layered stack) · About `.about-lead` + `.fact-grid`
+· Work `.plate` (corner-ticked, square) · Research `.lab-notebook` with
+`.lab-legend` · Experience `.rail` year rail · Contact `.contact-title` and
+`.contact-primary`. No `backdrop-filter` surfaces in the pager chapters.
+
 ## 10. Accessibility
 
 - Full keyboard operation (paging + inner-scroll chunking + carousels +

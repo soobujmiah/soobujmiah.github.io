@@ -188,7 +188,7 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
 /* ── 02 · PRESENCE ───────────────────────────────────────────── */
 
 export function StatsScene() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   return (
     <div className="page-fill">
       <div className="page-content page-content-wide flex flex-col items-center">
@@ -201,26 +201,21 @@ export function StatsScene() {
           className="ph-h text-[clamp(1.35rem,5.2vw,2.6rem)] font-semibold leading-[1.12] tracking-tight max-w-3xl mb-6 text-center"
           style={{ color: '#e4e2df' }}
         >{t.presence.heading}</CinematicHeading>
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 w-full">
+        {/* a layered system diagram: each focus is a layer of the stack */}
+        <ol className="stack-layers w-full">
           {t.presence.items.map((p, i) => (
-            <Reveal key={p.label} delay={i * 0.08}>
-              <TiltCard>
-                <div
-                  className="rounded-xl p-3.5 sm:p-5 text-center backdrop-blur-md h-full"
-                  style={{ border: '1px solid rgba(228,226,223,0.09)', background: CARD_BG }}
-                >
-                  <p className="text-sm sm:text-lg font-semibold" style={{ color: '#e4e2df' }}>{p.label}</p>
-                  <p className="mt-1.5 font-mono text-[10px] leading-relaxed" style={{ color: 'rgba(228,226,223,0.55)' }}>
-                    {p.detail}
-                  </p>
-                  <p className="mt-2 text-[10px] leading-relaxed" style={{ color: 'rgba(228,226,223,0.42)' }}>
-                    {p.tools}
-                  </p>
-                </div>
-              </TiltCard>
+            <Reveal key={p.label} delay={i * 0.07}>
+              <li className="stack-layer">
+                <span className="stack-layer-index font-mono" aria-hidden>{localizeDigits(String(i + 1).padStart(2, '0'), lang)}</span>
+                <span className="stack-layer-main">
+                  <span className="stack-layer-label">{p.label}</span>
+                  <span className="stack-layer-detail font-mono">{p.detail}</span>
+                </span>
+                <span className="stack-layer-tools">{p.tools}</span>
+              </li>
             </Reveal>
           ))}
-        </div>
+        </ol>
       </div>
     </div>
   );
@@ -262,7 +257,11 @@ export function AboutScene() {
             <div className="space-y-3 mb-5">
               {t.about.paragraphs.map((p, i) => (
                 <Reveal key={i} delay={0.1 + i * 0.06} depth>
-                  <p className="about-p text-[13px] sm:text-sm leading-[1.75]" style={{ color: 'rgba(228,226,223,0.65)' }}>{p}</p>
+                  {i === 0 ? (
+                    <p className="about-lead">{p}</p>
+                  ) : (
+                    <p className="about-p text-[13px] sm:text-sm leading-[1.75]" style={{ color: 'rgba(228,226,223,0.65)' }}>{p}</p>
+                  )}
                 </Reveal>
               ))}
             </div>
@@ -282,9 +281,9 @@ export function AboutScene() {
               </div>
             </Reveal>
             <Reveal delay={0.15}>
-              <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl backdrop-blur-md" style={{ border: '1px solid rgba(228,226,223,0.08)', background: 'rgba(228,226,223,0.06)' }}>
+              <div className="fact-grid grid grid-cols-2">
                 {t.about.facts.map((f) => (
-                  <div key={f.label} className="p-3.5 sm:p-4" style={{ background: CARD_BG }}>
+                  <div key={f.label} className="fact-cell">
                     <p className="font-mono text-[9px] uppercase tracking-wider mb-1.5" style={{ color: 'rgba(228,226,223,0.4)' }}>{f.label}</p>
                     <p className="fact-v text-xs font-medium leading-snug" style={{ color: '#e4e2df' }}>{f.value}</p>
                   </div>
@@ -317,7 +316,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   return (
     <motion.article
       ref={ref}
-      className="dense-card group relative h-full rounded-xl p-4 sm:p-5 backdrop-blur-md transition-all duration-500"
+      className="dense-card group relative h-full plate p-4 sm:p-5 transition-all duration-500"
       style={{ border: '1px solid rgba(228,226,223,0.09)', background: CARD_BG }}
       initial={reducedMotion ? false : { opacity: 0, y: 36, rotateX: 3, transformPerspective: 1200 }}
       animate={reducedMotion || inView ? { opacity: 1, y: 0, rotateX: 0 } : {}}
@@ -329,7 +328,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
     >
       {isHovered && (
         <div
-          className="absolute inset-0 rounded-xl pointer-events-none transition-opacity duration-300"
+          className="absolute inset-0 pointer-events-none transition-opacity duration-300"
           style={{
             background: `radial-gradient(300px circle at ${mousePos.x}px ${mousePos.y}px, ${project.accent}08, transparent 60%)`,
           }}
@@ -418,7 +417,7 @@ function SongjogSlide() {
   return (
     <Magnetic
       href={nb.url}
-      className="flex h-full flex-col justify-between gap-4 rounded-xl p-5 sm:p-6 text-left backdrop-blur-md transition-all duration-500"
+      className="flex h-full flex-col justify-between gap-4 plate p-5 sm:p-6 text-left transition-all duration-500"
       style={{ border: '1px solid rgba(34,197,94,0.25)', background: 'rgba(34,197,94,0.07)' }}
       strength={0.05}
     >
@@ -480,7 +479,7 @@ function WorkSpotlight() {
               role="tab"
               aria-selected={isActive}
               onClick={() => setActive(i)}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-left backdrop-blur-md transition-all duration-300"
+              className="flex items-center gap-3 plate px-4 py-3 text-left transition-all duration-300"
               style={{
                 border: isActive ? '1px solid rgba(34,197,94,0.35)' : '1px solid rgba(228,226,223,0.08)',
                 background: isActive ? 'rgba(34,197,94,0.07)' : CARD_BG,
@@ -508,7 +507,7 @@ function WorkSpotlight() {
           role="tab"
           aria-selected={active === projects.length}
           onClick={() => setActive(projects.length)}
-          className="flex items-center gap-3 rounded-xl px-4 py-3 text-left backdrop-blur-md transition-all duration-300"
+          className="flex items-center gap-3 plate px-4 py-3 text-left transition-all duration-300"
           style={{
             border: active === projects.length ? '1px solid rgba(34,197,94,0.4)' : '1px solid rgba(34,197,94,0.2)',
             background: 'rgba(34,197,94,0.07)',
@@ -539,7 +538,7 @@ function WorkSpotlight() {
               <ProjectCard project={projects[active]} index={active} />
             ) : (
               <div
-                className="dense-card rounded-xl p-5 backdrop-blur-md h-full"
+                className="dense-card plate p-5 h-full"
                 style={{ border: '1px solid rgba(34,197,94,0.25)', background: 'rgba(34,197,94,0.07)' }}
               >
                 <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: '#4ade80' }}>
@@ -583,7 +582,7 @@ function RelationshipBlock() {
     <Reveal delay={0.16}>
       <section
         aria-labelledby="work-ecosystem"
-        className="mt-4 rounded-xl backdrop-blur-md"
+        className="mt-4 plate"
         style={{ border: '1px solid rgba(34,197,94,0.18)', background: CARD_BG }}
       >
         <div className="flex items-center gap-2.5 border-b px-4 py-2.5" style={edge}>
@@ -701,31 +700,28 @@ export function ResearchScene() {
     <div className="page-fill">
       <div className="page-content page-content-wide">
         <PageHeading eyebrow={t.research.eyebrow} heading={t.research.heading} />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {/* lab notebook: a status legend, then dated-style entries ruled like a page */}
+        <ul className="lab-legend font-mono" aria-hidden>
+          {Array.from(new Map(t.research.entries.map((r) => [r.status, r.statusLabel])).entries()).map(([status, label]) => (
+            <li key={status}><span className="lab-dot" data-status={status} />{label}</li>
+          ))}
+        </ul>
+        <ol className="lab-notebook">
           {t.research.entries.map((r, i) => (
-            <Reveal key={r.title} delay={0.08 + i * 0.06}>
-              <div
-                className="dense-card rounded-xl p-4 sm:p-5 backdrop-blur-md transition-all duration-500 h-full"
-                style={{ border: '1px solid rgba(228,226,223,0.09)', background: CARD_BG }}
-              >
-                <div className="flex items-center gap-2.5 mb-2.5">
-                  <span
-                    className="h-2 w-2 rounded-full"
-                    aria-hidden
-                    style={{
-                      background: r.status === 'validated' ? '#22c55e' : r.status === 'experimental' ? '#4ade80' : 'rgba(228,226,223,0.3)',
-                    }}
-                  />
-                  <span className="font-mono text-[9px] uppercase tracking-[0.15em]" style={{ color: 'rgba(228,226,223,0.45)' }}>
-                    {r.statusLabel}
-                  </span>
+            <Reveal key={r.title} delay={0.06 + i * 0.05}>
+              <li className="lab-entry">
+                <span className="lab-status font-mono">
+                  <span className="lab-dot" data-status={r.status} aria-hidden />
+                  {r.statusLabel}
+                </span>
+                <div>
+                  <h3 className="lab-title">{r.title}</h3>
+                  <p className="lab-desc">{r.description}</p>
                 </div>
-                <h3 className="text-sm sm:text-base font-semibold mb-1.5" style={{ color: '#e4e2df' }}>{r.title}</h3>
-                <p className="text-xs leading-[1.7]" style={{ color: 'rgba(228,226,223,0.6)' }}>{r.description}</p>
-              </div>
+              </li>
             </Reveal>
           ))}
-        </div>
+        </ol>
       </div>
     </div>
   );
@@ -737,7 +733,7 @@ function RepoCard({ repo, liveLabel, codeLabel }: { repo: Repo; liveLabel: strin
   const { t, lang } = useLang();
   return (
     <div
-      className="repo-card dense-card flex flex-col rounded-xl p-4 text-left backdrop-blur-md h-full"
+      className="repo-card dense-card flex flex-col plate p-4 text-left h-full"
       style={{ border: '1px solid rgba(228,226,223,0.08)', background: CARD_BG }}
     >
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1.5">
@@ -781,7 +777,7 @@ function GithubRouteCard() {
   return (
     <Magnetic
       href="https://github.com/soobujmiah"
-      className="repo-card flex h-full flex-col justify-between gap-3 rounded-xl p-4 text-left backdrop-blur-md"
+      className="repo-card flex h-full flex-col justify-between gap-3 plate p-4 text-left"
       style={{ border: '1px solid rgba(34,197,94,0.25)', background: 'rgba(34,197,94,0.07)' }}
       strength={0.08}
     >
@@ -850,7 +846,7 @@ function ExperienceAccordion() {
   const { t } = useLang();
   const [open, setOpen] = useState(0);
   return (
-    <div className="rounded-xl overflow-hidden backdrop-blur-md" style={{ border: '1px solid rgba(228,226,223,0.09)', background: CARD_BG }}>
+    <div className="plate overflow-hidden" style={{ border: '1px solid rgba(228,226,223,0.09)', background: CARD_BG }}>
       {t.experience.entries.map((w, i) => {
         const isOpen = open === i;
         return (
@@ -950,20 +946,19 @@ export function ExperienceScene() {
             </div>
 
             {/* tablet + desktop: full timeline */}
-            <div className="relative hidden md:block">
-              <div className="absolute left-[5px] top-0 bottom-0 w-px" style={{ background: 'rgba(228,226,223,0.07)' }} aria-hidden />
+            <div className="rail hidden md:block">
               {t.experience.entries.map((w, i) => (
                 <Reveal key={`${w.company}-${i}`} delay={0.04 + i * 0.04} depth>
-                  <div className="relative pl-8 pb-4 last:pb-0">
-                    <div className="absolute left-0 top-1 h-3 w-3 rounded-full border-2" style={{ borderColor: '#22c55e', background: '#060608' }} aria-hidden />
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-0.5">
-                      <span className="font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.45)' }}>{w.period}</span>
-                      <h3 className="text-sm font-semibold" style={{ color: '#e4e2df' }}>{w.role}</h3>
+                  <div className="rail-entry">
+                    <span className="rail-period font-mono">{w.period}</span>
+                    <span className="rail-node" aria-hidden />
+                    <div>
+                      <h3 className="rail-role">{w.role}</h3>
+                      <p className="text-xs" style={{ color: 'rgba(228,226,223,0.6)' }}>
+                        {w.company} · {w.location}
+                      </p>
+                      <p className="text-xs mt-0.5 leading-relaxed" style={{ color: 'rgba(228,226,223,0.5)' }}>{w.desc}</p>
                     </div>
-                    <p className="text-xs" style={{ color: 'rgba(228,226,223,0.6)' }}>
-                      {w.company} · {w.location}
-                    </p>
-                    <p className="text-xs mt-0.5 leading-relaxed" style={{ color: 'rgba(228,226,223,0.5)' }}>{w.desc}</p>
                   </div>
                 </Reveal>
               ))}
@@ -994,7 +989,7 @@ export function ContactScene() {
               </p>
             </Reveal>
             <Reveal delay={0.06}>
-              <h1 className="ph-h text-[clamp(1.7rem,7vw,3.2rem)] font-semibold leading-[1.1] tracking-tight mb-4" style={{ color: '#e4e2df' }}>
+              <h1 className="ph-h contact-title mb-4" style={{ color: '#e4e2df' }}>
                 {t.contact.headingA}
                 <br />
                 <span className="gradient-text">{t.contact.headingB}</span>
@@ -1021,8 +1016,7 @@ export function ContactScene() {
               <Magnetic
                 href={t.contact.telegram.href}
                 ariaLabel={`${t.contact.telegram.label}: ${t.contact.telegram.value}`}
-                className="group mx-auto mt-6 flex flex-col gap-1 rounded-xl p-4 backdrop-blur-md transition-all duration-500 sm:max-w-sm lg:mt-8"
-                style={{ border: '1px solid rgba(34,197,94,0.22)', background: 'rgba(8,14,10,0.6)' }}
+                className="contact-primary group mx-auto mt-6 flex flex-col gap-1 lg:mx-0 lg:mt-8"
                 strength={0.12}
               >
                 <span className="text-sm font-semibold transition-colors duration-300" style={{ color: '#e4e2df' }}>

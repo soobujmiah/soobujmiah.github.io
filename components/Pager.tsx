@@ -393,7 +393,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
                 scopeSelector={`.page-scroll[data-section="${SECTION_IDS[index]}"]`}
                 beatSelector={index === 0
                   ? '.page-content .rounded-full:not(a):not(button)'
-                  : '.page-content h2, .page-content h3, .page-content p, .page-content li, .page-content dt, .page-content dd, .page-content .rounded-xl, .page-content .rounded-2xl, .page-content .repo-card, .page-content .rounded-full:not(a):not(button)'}
+                  : '.page-content h2, .page-content h3, .page-content p, .page-content li, .page-content dt, .page-content dd, .page-content .plate, .page-content .stack-layer, .page-content .lab-entry, .page-content .rounded-2xl, .page-content .repo-card, .page-content .rounded-full:not(a):not(button)'}
               />
             </div>
           </motion.div>

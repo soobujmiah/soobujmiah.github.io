@@ -34,16 +34,25 @@ Gates were updated deliberately, with the reason recorded in each script:
 `check-build.mjs` (no stock media ships; every chapter server-renders the
 environment; the name is real text).
 
-## 3. Not done in this pass
+## 3. Per-chapter compositions
 
-- **Per-section compositions.** Chapters still use their existing card layouts
-  over the new environment. Giving each its own composition is the next step.
+Focus & Tools is a layered stack; About leads with an editorial serif
+paragraph and hairline facts; Research is a ruled lab notebook with a status
+legend; Experience is a year rail; Contact is a typographic closing scene with
+the primary channel as an underlined link; Work uses plates. All copy, links and
+evidence lines are unchanged. Blur surfaces are gone from the pager chapters.
+
+## 4. Not done in this pass
+
+- **Work chapter.** Its project cards became "plates" (square corners, corner
+  ticks, no blur) but keep the existing spotlight/carousel structure; a full
+  re-composition of Work was not attempted.
 - The unused `MOTION.nameAssemble`/`nameCycle` token groups remain in
   `app/design-tokens.ts` because the token block is documented and checked;
   retire them together with their docs in a follow-up.
 - The seam (finding 5) is not root-caused.
 
-## 4. Verification status
+## 5. Verification status
 
 | Check | Status |
 |---|---|
