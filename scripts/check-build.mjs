@@ -456,6 +456,20 @@ for (const name of ['observatory', 'causeway', 'archive']) {
 if (cinemaBytes > 400 * 1024) fail(`cinematic plates total ${Math.round(cinemaBytes / 1024)} KB, over 400 KB`);
 else ok(`three local cinematic plates total ${Math.round(cinemaBytes / 1024)} KB`);
 
+let filmBytes = 0;
+for (const name of ['city', 'city-mobile', 'passage', 'core', 'core-mobile']) {
+  const file = join(OUT, 'cinema', `${name}.mp4`);
+  if (!existsSync(file)) {
+    fail(`out/cinema/${name}.mp4 is missing`);
+    continue;
+  }
+  const bytes = readFileSync(file);
+  if (bytes.toString('ascii', 4, 8) !== 'ftyp') fail(`out/cinema/${name}.mp4 is not an MP4 file`);
+  filmBytes += bytes.length;
+}
+if (filmBytes > 18 * 1024 * 1024) fail(`cinematic footage totals ${Math.round(filmBytes / 1024 / 1024)} MB, over 18 MB`);
+else ok(`five local film encodes total ${(filmBytes / 1024 / 1024).toFixed(1)} MB`);
+
 const og = join(OUT, 'og.png');
 if (existsSync(og)) {
   const buf = readFileSync(og);
