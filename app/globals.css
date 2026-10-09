@@ -403,29 +403,70 @@ body.lang-bn .worldmap-pin {
   background: radial-gradient(120% 90% at 50% 42%, transparent 55%, rgba(0, 0, 0, 0.52) 100%);
 }
 
-.cinematic-stage {
+.cinema-world {
   position: absolute;
   inset: 0;
   z-index: 1;
-  width: 100%;
-  height: 100%;
+  overflow: hidden;
   pointer-events: none;
-  --cinema-opacity: 0.9;
-  opacity: var(--cinema-opacity);
-  animation: cinematic-stage-in 1s ease-out both;
+  background: #050708;
 }
 
-@keyframes cinematic-stage-in {
-  from { opacity: 0; }
-  to { opacity: var(--cinema-opacity); }
+.cinema-world-plate {
+  position: absolute;
+  inset: -4%;
+  overflow: hidden;
+  will-change: transform, opacity;
+}
+
+.cinema-world-image {
+  position: absolute;
+  inset: -5%;
+  background-size: cover;
+  background-position: center 46%;
+  filter: brightness(0.7) saturate(0.78);
+}
+
+.cinema-world-plate[data-active='true'] .cinema-world-image {
+  animation: cinema-camera-breathe 22s ease-in-out infinite alternate;
+}
+
+@keyframes cinema-camera-breathe {
+  from { transform: translate3d(-1.2%, 0.5%, 0) scale(1); }
+  to { transform: translate3d(1.2%, -0.5%, 0) scale(1.045); }
+}
+
+.cinema-world-grade,
+.cinema-world-air {
+  position: absolute;
+  inset: 0;
+}
+
+.cinema-world-grade {
+  background:
+    radial-gradient(ellipse 72% 56% at 50% 54%, rgba(3, 6, 8, 0.58), rgba(3, 6, 8, 0.08) 88%),
+    linear-gradient(0deg, rgba(3, 5, 7, 0.78), transparent 39%, rgba(3, 5, 7, 0.28));
+}
+
+.cinema-world-air {
+  opacity: 0.35;
+  background: radial-gradient(ellipse 55% 26% at 65% 22%, rgba(74, 222, 128, 0.18), transparent 85%);
+  animation: cinema-air-drift 16s ease-in-out infinite alternate;
+}
+
+@keyframes cinema-air-drift {
+  from { opacity: 0.18; transform: translate3d(-4%, 0, 0) scale(1); }
+  to { opacity: 0.42; transform: translate3d(4%, 2%, 0) scale(1.08); }
 }
 
 @media (max-width: 767px) {
-  .cinematic-stage { --cinema-opacity: 0.62; }
+  .cinema-world-image { filter: brightness(0.53) saturate(0.75); }
+  .cinema-world-grade { background: linear-gradient(0deg, rgba(3, 5, 7, 0.86), rgba(3, 5, 7, 0.48) 55%, rgba(3, 5, 7, 0.42)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cinematic-stage { display: none; }
+  .cinema-world-image { animation: none !important; }
+  .cinema-world-air { animation: none; }
 }
 
 /* one page layer; incoming paints above outgoing by DOM order */
@@ -1553,14 +1594,14 @@ body:has(> .services-doc) button {
     var(--bg);
 }
 
-.services-doc .cinematic-stage {
+.services-doc .cinema-world {
   position: fixed;
   z-index: 0;
-  --cinema-opacity: 0.5;
+  opacity: 0.48;
 }
 
 @media (max-width: 767px) {
-  .services-doc .cinematic-stage { --cinema-opacity: 0.36; }
+  .services-doc .cinema-world { opacity: 0.34; }
 }
 
 .services-doc::before {
