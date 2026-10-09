@@ -153,7 +153,7 @@ eq('Bengali digits', localizeDigits('2026', 'bn'), '২০২৬');
 
 console.log('\nSilicon Nocturne — the procedural environment');
 {
-  const { buildPlan, rng, POSES, poseFor, lerpPose, easeInOut, makeProjector, ZONES, DIE } = silicon;
+  const { buildPlan, rng, POSES, poseFor, lerpPose, flightPose, shortYaw, FOCUS, focusFor, inRects, easeInOut, makeProjector, ZONES, DIE } = silicon;
   const count = (p) => p.lines.map((l) => l.length / 6);
   eq('the PRNG is deterministic', [rng(7)(), rng(7)()], [rng(7)(), rng(7)()]);
   eq('the PRNG stays in [0,1)', (() => { const r = rng(3); for (let i = 0; i < 1000; i++) { const v = r(); if (v < 0 || v >= 1) return false; } return true; })(), true);
@@ -175,6 +175,15 @@ console.log('\nSilicon Nocturne — the procedural environment');
   eq('the flight eases through its endpoints', [easeInOut(0), easeInOut(1)], [0, 1]);
   eq('the flight eases monotonically', [0.1, 0.3, 0.5, 0.7, 0.9].every((t, i, a) => i === 0 || easeInOut(t) > easeInOut(a[i - 1])), true);
   eq('lerpPose hits both endpoints', [lerpPose(POSES[0], POSES[3], 0), lerpPose(POSES[0], POSES[3], 1)], [POSES[0], POSES[3]]);
+  eq('every chapter lights at least one region of the chip', FOCUS.length === POSES.length && FOCUS.every((rs) => rs.length > 0), true);
+  eq('every lit region lies on the die', FOCUS.every((rs) => rs.every((r) => r[0] >= -DIE.halfW && r[2] <= DIE.halfW && r[1] >= -DIE.halfD && r[3] <= DIE.halfD && r[0] < r[2] && r[1] < r[3])), true);
+  eq('Work lights the GPU, Research the NPU', [FOCUS[3][0] === ZONES.gpu, FOCUS[4][0] === ZONES.npu], [true, true]);
+  eq('focusFor falls back to the whole die', focusFor(99), FOCUS[0]);
+  eq('inRects is inclusive and exact', [inRects([[0, 0, 10, 10]], 10, 10), inRects([[0, 0, 10, 10]], 11, 5)], [true, false]);
+  eq('yaw takes the short way round', [shortYaw(170, -170), shortYaw(-90, 90) === -180 || shortYaw(-90, 90) === 180, shortYaw(10, 30)], [20, true, 20]);
+  eq('a flight starts and ends exactly on its poses', [flightPose(POSES[0], POSES[3], 0), flightPose(POSES[0], POSES[3], 1)], [POSES[0], POSES[3]]);
+  eq('a long flight rises mid-way (an arc, not a slide)', flightPose(POSES[0], POSES[6], 0.5).h > (POSES[0].h + POSES[6].h) / 2, true);
+  eq('a flight is finite for every pair of chapters', POSES.every((a) => POSES.every((b) => [0.1, 0.5, 0.9].every((t) => Object.values(flightPose(a, b, t)).every(Number.isFinite)))), true);
   const out = new Float64Array(5);
   /* a point straight ahead of the camera lands on the screen centre */
   const flat = { x: 0, z: 100, h: 50, yaw: 0, pitch: 0, fov: 60 };

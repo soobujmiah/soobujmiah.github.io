@@ -42,6 +42,13 @@ legend; Experience is a year rail; Contact is a typographic closing scene with
 the primary channel as an underlined link; Work uses plates. All copy, links and
 evidence lines are unchanged. Blur surfaces are gone from the pager chapters.
 
+## 3b. Environment polish (follow-up)
+
+Per-chapter focus regions (the chip lights what the chapter is about), arced
+camera flights, three-band depth haze, a horizon-first opening and a subtle
+idle sway on full-detail screens. Logic is unit-tested; the look is
+**unverified** in a browser.
+
 ## 4. Not done in this pass
 
 - **Work chapter.** Its project cards became "plates" (square corners, corner
