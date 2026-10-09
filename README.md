@@ -12,12 +12,13 @@ Discrete paper-turn pager (Next.js static export + framer-motion),
 fully bilingual **English / বাংলা**, green-on-black theme. The hero name is
 **constructed, not revealed**: its own rendered ink is sampled into a
 particle field that travels home and resolves into real typography.
-Every main chapter also has a distinct perspective-projected 3D form over the
-page-aware world map. The scene loads separately, runs at no more than 30 fps,
-pauses in hidden tabs, and is removed for reduced-motion visitors. Chapter
-numbers remain as editorial labels, without camera-style corner marks. Service
-and verification documents share staged content motion and ambient light; their
-content remains readable without JavaScript and under reduced motion.
+Every main chapter has a perspective-projected 3D form over the page-aware
+world map, now built from softly lit surfaces, spatial particles, and a
+crossfading camera move. Services and verification have their own scenes.
+The scene loads separately, draws at no more than 30 fps, pauses in hidden
+tabs, and is removed for reduced-motion visitors. Each page shows its title
+once in the content; no second chapter caption or camera-style corner marks.
+The text remains readable without JavaScript and under reduced motion.
 
 ## Stack
 

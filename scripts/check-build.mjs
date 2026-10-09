@@ -71,8 +71,12 @@ const MIN_VISIBLE_CHARS = 220;
     because a real route now exists that did not before.
     384 KB for the 2026-10 cinematic site: seven native-canvas 3D chapter
     forms live in a separately loaded chunk. Initial per-route payload
-    remains under its existing 270 KB ceiling. */
-const MAX_TOTAL_JS_GZIP = 384 * 1024;
+    remains under its existing 270 KB ceiling.
+    388 KB for the 2026-10 expanded cinematic journey: the renderer adds
+    shaded surfaces and two document-specific scenes, loaded only where
+    needed. The measured site-wide sum is 385 KB; the per-route 271 KB
+    ceiling below remains unchanged. */
+const MAX_TOTAL_JS_GZIP = 388 * 1024;
 /** Per-route payload ceiling: the gzipped sum of every script a single
     HTML page references. The home page measured ~250 KB before the
     service layer; this holds every route — pager and services — there.
@@ -83,7 +87,7 @@ const MAX_TOTAL_JS_GZIP = 384 * 1024;
     the site-wide total stayed under its 380 KB ceiling at the time.
     271 KB for the 2026-10 cinematic journey: the shared viewport motion
     observer adds entrances to card details across all pager chapters. The
-    measured home route is just above 270 KB; the site-wide 384 KB limit
+    measured home route is just above 270 KB; the site-wide 388 KB limit
     and single-chunk ceiling still apply. */
 const MAX_ROUTE_JS_GZIP = 271 * 1024;
 /** Per-route ceiling on the largest single gzipped chunk group. */
@@ -137,6 +141,8 @@ for (const slug of SECTIONS) {
   const text = visibleText(html);
   textByRoute[slug] = text;
   if (!/<html[^>]*lang="en"/.test(html)) fail(`route "${slug}" does not declare lang=en`);
+  if ((html.match(/<h1(?:\s|>)/g) || []).length !== 1) fail(`route "${slug}" must render exactly one h1`);
+  if (html.includes('cinematic-chapter')) fail(`route "${slug}" still renders a second chapter title`);
 
   if (text.length < MIN_VISIBLE_CHARS) {
     fail(`route "${slug}" ships only ${text.length} visible chars (min ${MIN_VISIBLE_CHARS}) — content is not server-rendered`);
@@ -177,6 +183,7 @@ for (const slug of SECTIONS) {
   if (!og) fail(`route "${slug}" has no og:image`);
 }
 ok(`${SECTIONS.length} section routes present with server-rendered HTML`);
+ok('pager routes contain no duplicate chapter caption');
 if (!/Delivery\s+Verification/.test(textByRoute.presence ?? '')) {
   fail('merged /presence/ route is missing the former technical-stack content');
 }
@@ -356,6 +363,8 @@ for (const [route] of localizedRoutes) {
   const html = readFileSync(file, 'utf8');
   const text = visibleText(html);
   if (text.length < MIN_VISIBLE_CHARS) fail(`Bengali route ${route} ships only ${text.length} visible chars`);
+  if ((html.match(/<h1(?:\s|>)/g) || []).length !== 1) fail(`Bengali route ${route} must render exactly one h1`);
+  if (html.includes('cinematic-chapter')) fail(`Bengali route ${route} still renders a second chapter title`);
   if (!/<html[^>]*lang="bn"/.test(html)) fail(`Bengali route ${route} does not declare lang=bn`);
   if (!/[\u0980-\u09FF]/.test(text)) fail(`Bengali route ${route} contains no Bengali visible text`);
   const title = html.match(/<title>([^<]*)<\/title>/)?.[1];

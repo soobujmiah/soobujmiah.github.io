@@ -420,46 +420,12 @@ body.lang-bn .worldmap-pin {
   to { opacity: var(--cinema-opacity); }
 }
 
-/* A quiet editorial chapter label replaces the former camera viewfinder. */
-.cinematic-chapter {
-  position: absolute;
-  inset: 78px 24px auto;
-  z-index: 3;
-  pointer-events: none;
-}
-
-.cinematic-chapter-label {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  color: var(--accent-bright);
-  animation: cinematic-chapter-in 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.cinematic-chapter-label span {
-  color: rgba(228, 226, 223, 0.5);
-  letter-spacing: 0.08em;
-}
-
-@keyframes cinematic-chapter-in {
-  from { opacity: 0; transform: translate3d(0, 14px, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
-}
-
-@media (min-width: 768px) {
-  .cinematic-chapter { inset: 86px 38px auto; }
-}
-
 @media (max-width: 767px) {
   .cinematic-stage { --cinema-opacity: 0.62; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .cinematic-stage { display: none; }
-  .cinematic-chapter-label { animation: none; }
 }
 
 /* one page layer; incoming paints above outgoing by DOM order */
@@ -1585,6 +1551,16 @@ body:has(> .services-doc) button {
     radial-gradient(90% 58% at 74% 13%, rgba(34, 197, 94, 0.11) 0%, transparent 69%),
     radial-gradient(64% 48% at 9% 72%, rgba(16, 185, 129, 0.045) 0%, transparent 78%),
     var(--bg);
+}
+
+.services-doc .cinematic-stage {
+  position: fixed;
+  z-index: 0;
+  --cinema-opacity: 0.5;
+}
+
+@media (max-width: 767px) {
+  .services-doc .cinematic-stage { --cinema-opacity: 0.36; }
 }
 
 .services-doc::before {
