@@ -596,16 +596,18 @@ scripts/check-build.mjs          routes, deep links, SEO assets, JS budget
 
 Page turns use the shared depth tokens to bring the incoming page forward,
 rotate it on both axes, and recede the outgoing page. Each of the seven pager
-chapters has its own line-built 3D form, projected with a perspective camera
-onto a transparent canvas over the world map. The scenery crossfades when the
-chapter changes, follows fine pointers slightly, and renders at no more than
-30 fps. It is loaded separately from the main route script, pauses in hidden
-tabs, and is absent under reduced motion. A localized editorial chapter label
-marks each scene without a camera viewfinder. Service and verification
-documents use a slow ambient light field and viewport-triggered entrances
-for headings, copy, list items, and cards. Card details in the pager reveal
-as they enter view. Content remains visible without JavaScript, and reduced
-motion removes those entrances.
+chapters has its own perspective-projected 3D form, with translucent surfaces,
+illuminated nodes, a restrained field of depth particles, and an atmospheric
+light volume over the world map. The scenery crossfades with a camera dolly
+when the chapter changes, follows fine pointers slightly, and renders at no
+more than 30 fps. It is loaded separately from the main route script, pauses
+in hidden tabs, and is absent under reduced motion. The content heading is
+the only page title; there is no separate chapter caption. Service and
+verification documents have distinct background scenes alongside their slow
+ambient light and viewport-triggered entrances for headings, copy, list
+items, and cards. Card details in the pager reveal as they enter view.
+Content remains visible without JavaScript, and reduced motion removes those
+entrances.
 
 All shared section reveals now use the depth reveal variant. Presence cards tilt at most five degrees on
 fine pointers; their content lifts fourteen pixels. Touch gestures retain

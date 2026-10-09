@@ -18,7 +18,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { MOTION } from '@/app/design-tokens';
 import { PAGE_COUNT, SECTION_IDS, indexFromPathname, sectionHref } from '@/app/sections';
 import { WorldMap } from '@/components/WorldMap';
-import { LanguageProvider, localizeDigits, useLang } from '@/app/language';
+import { LanguageProvider, useLang } from '@/app/language';
 import {
   NavProvider,
   CustomCursor,
@@ -359,13 +359,6 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
         <WorldMap sectionIndex={index} reducedMotion={reducedMotion} />
         {!splashActive && !reducedMotion && <CinematicStage sectionIndex={index} reducedMotion={reducedMotion} />}
         <div className="pager-vignette" aria-hidden />
-        <div className="cinematic-chapter" aria-hidden="true">
-          <span className="cinematic-chapter-label" key={index}>
-            {localizeDigits(String(index + 1).padStart(2, '0'), lang)} / {localizeDigits(String(PAGE_COUNT).padStart(2, '0'), lang)}
-            <span>{t.ui.pageLabels[index]}</span>
-          </span>
-        </div>
-
         <AnimatePresence custom={dir} initial={false} mode="sync">
           <motion.div
             key={index}

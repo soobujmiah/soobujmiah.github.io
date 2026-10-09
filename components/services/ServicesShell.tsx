@@ -8,6 +8,7 @@ import { serviceHref } from '@/app/services';
 import { sectionHref } from '@/app/sections';
 import { BrandIcon } from '@/components/social-icons';
 import { DocumentMotion } from '@/components/DocumentMotion';
+import { CinematicDocumentBackdrop } from '@/components/CinematicDocumentBackdrop';
 import type { Lang } from '@/app/content';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -126,6 +127,7 @@ export function ServicesShell({ children, slug, lang = 'en' }: { children: React
   return (
     <LanguageProvider initialLang={lang}>
       <div className="services-doc">
+        <CinematicDocumentBackdrop sceneIndex={7} />
         <Chrome slug={slug}>{children}</Chrome>
       </div>
     </LanguageProvider>
