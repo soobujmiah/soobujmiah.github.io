@@ -865,7 +865,7 @@ function ExperienceAccordion() {
                 ›
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-semibold" style={{ color: '#e4e2df' }}>{w.role}</span>
+                <span className="block break-words text-[13px] font-semibold leading-snug" style={{ color: '#e4e2df' }}>{w.role}</span>
                 <span className="block font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.45)' }}>{w.period}</span>
               </span>
             </button>
@@ -909,7 +909,7 @@ export function ExperienceScene() {
             </Reveal>
             {/* Practical professional layer — deliberately separate
                 from the engineering identity on the work pages. */}
-            <Reveal delay={0.1} className="text-center">
+            <Reveal delay={0.1} className="mt-6 text-center">
               <p className="font-mono text-[9px] uppercase tracking-wider mb-2" style={{ color: 'rgba(228,226,223,0.4)' }}>
                 {t.experience.services.label}
               </p>

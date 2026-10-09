@@ -195,9 +195,14 @@ a, button {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  /* Bottom padding clears the fixed footer + HUD control on all pages.
-     Hero gets an even larger reserved band via .page-fill--hero. */
-  padding: 80px 0 calc(108px + env(safe-area-inset-bottom, 0px));
+  /* Bottom padding clears the fixed footer + the floating section control
+     on every page and viewport. The footer publishes its measured height
+     (incl. the safe-area inset) as --site-footer-height; the control sits
+     12px above it and is 40px tall, plus 12px of breathing room = 64px.
+     Every .page-fill variant below uses this one value, so no breakpoint
+     can let content end underneath the chrome. */
+  --chrome-clearance: calc(var(--site-footer-height, 76px) + 64px);
+  padding: 80px 0 var(--chrome-clearance);
   background: transparent;
 }
 
@@ -205,7 +210,7 @@ a, button {
    visual focus; CTAs close the stack (no motto band). */
 .page-fill--hero {
   padding-top: clamp(64px, 10dvh, 88px);
-  padding-bottom: calc(118px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: var(--chrome-clearance);
   justify-content: flex-start;
 }
 
@@ -263,11 +268,11 @@ a, button {
 
 @media (min-width: 768px) {
   .page-fill {
-    padding: 92px 0 calc(88px + env(safe-area-inset-bottom, 0px));
+    padding: 92px 0 var(--chrome-clearance);
   }
   .page-fill--hero {
     padding-top: 88px;
-    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: var(--chrome-clearance);
   }
   .page-content {
     padding: 0 2rem;
@@ -282,12 +287,11 @@ a, button {
 /* short desktop windows: reclaim chrome space (footer is one line) */
 @media (min-width: 768px) and (max-height: 860px) {
   .page-fill {
-    padding: 78px 0 54px;
+    padding: 78px 0 var(--chrome-clearance);
   }
-  /* Hero still needs HUD clearance — do not inherit the short 54px bottom. */
   .page-fill--hero {
     padding-top: 72px;
-    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: var(--chrome-clearance);
   }
   .page-content .ph-h {
     font-size: 1.55rem;
@@ -304,12 +308,11 @@ a, button {
 /* short phones: compact everything, hide decoration */
 @media (max-width: 767px) and (max-height: 740px) {
   .page-fill {
-    padding: 70px 0 96px;
+    padding: 70px 0 var(--chrome-clearance);
   }
-  /* Hero bottom must stay above the HUD even when other pages compact. */
   .page-fill--hero {
     padding-top: 58px;
-    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: var(--chrome-clearance);
   }
   
   .page-content .ph-h {
@@ -344,7 +347,7 @@ a, button {
 /* tiny landscape windows: best-effort compaction */
 @media (max-height: 500px) {
   .page-fill {
-    padding: 64px 0 48px;
+    padding: 64px 0 var(--chrome-clearance);
   }
   
   .page-content .ph-h {
@@ -366,6 +369,16 @@ a, button {
 .services-doc main h1,
 .services-doc main h2 {
   position: relative;
+  /* Balanced line lengths: no single orphaned word ("it.") on a second
+     line at narrow widths. Ignored by browsers without support. */
+  text-wrap: balance;
+}
+
+/* Grid items default to min-width: auto, so one unbreakable child can make
+   an implicit single-column grid wider than its container (Experience at
+   360px was 345px inside 312px and clipped by the page scroller). */
+.page-content .grid > * {
+  min-width: 0;
 }
 
 .cinema-word-mask {
@@ -1494,7 +1507,7 @@ body:has(> .services-doc) button {
   
   .page-fill--hero {
     padding-top: clamp(52px, 8dvh, 64px);
-    padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: var(--chrome-clearance);
   }
 }
 
@@ -1566,7 +1579,7 @@ body:has(> .services-doc) button {
 @media (max-width: 767px) {
   .page-fill,
   .page-fill--hero {
-    padding-bottom: calc(var(--site-footer-height, 76px) + 64px);
+    padding-bottom: var(--chrome-clearance);
   }
 }
 
