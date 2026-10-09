@@ -283,6 +283,55 @@ export const easeInOut = (t: number) => {
   return c < 0.5 ? 4 * c * c * c : 1 - Math.pow(-2 * c + 2, 3) / 2;
 };
 
+/** What each chapter is about, as the die regions it lights. Index = chapter. */
+export const FOCUS: readonly (readonly Rect[])[] = [
+  [[-DIE.halfW, -DIE.halfD, DIE.halfW, DIE.halfD]], //  0 home: the whole die
+  [ZONES.cpu, ZONES.gpu, ZONES.npu], //  1 focus & tools: the compute blocks
+  [ZONES.mem], //  2 about: memory — what persists
+  [ZONES.gpu], //  3 work: the GPU, where things are rendered
+  [ZONES.npu], //  4 research: the NPU
+  [[-1100, 183, 1100, 227]], //  5 experience: the long interconnect bus
+  [
+    [-DIE.halfW, -DIE.halfD, DIE.halfW, -DIE.halfD + 110],
+    [-DIE.halfW, DIE.halfD - 110, DIE.halfW, DIE.halfD],
+    [-DIE.halfW, -DIE.halfD, -DIE.halfW + 110, DIE.halfD],
+    [DIE.halfW - 110, -DIE.halfD, DIE.halfW, DIE.halfD],
+  ], //  6 contact: the I/O ring, where signals leave the chip
+  [ZONES.media], //  7 services
+  [ZONES.dram], //  8 verification
+];
+
+export function focusFor(index: number): readonly Rect[] {
+  return FOCUS[index] ?? FOCUS[0];
+}
+
+/** True when a point on the die lies inside any of the rects. */
+export function inRects(rects: readonly Rect[], x: number, z: number): boolean {
+  return rects.some((r) => x >= r[0] && x <= r[2] && z >= r[1] && z <= r[3]);
+}
+
+/** Heading difference taking the short way round, degrees. */
+export function shortYaw(from: number, to: number): number {
+  return ((((to - from) % 360) + 540) % 360) - 180;
+}
+
+/** A flight between two poses: eased, shortest-way yaw, and a camera that rises
+ *  mid-flight (an arc) so a long move reads as travelling, not sliding. */
+export function flightPose(a: Pose, b: Pose, t: number): Pose {
+  if (t <= 0) return a;
+  if (t >= 1) return b;
+  const e = easeInOut(t);
+  const lift = Math.min(140, Math.hypot(b.x - a.x, b.z - a.z) * 0.14);
+  return {
+    x: a.x + (b.x - a.x) * e,
+    z: a.z + (b.z - a.z) * e,
+    h: a.h + (b.h - a.h) * e + lift * Math.sin(Math.PI * e),
+    yaw: a.yaw + shortYaw(a.yaw, b.yaw) * e,
+    pitch: a.pitch + (b.pitch - a.pitch) * e,
+    fov: a.fov + (b.fov - a.fov) * e,
+  };
+}
+
 export function lerpPose(a: Pose, b: Pose, t: number): Pose {
   const e = easeInOut(t);
   const m = (p: number, q: number) => p + (q - p) * e;

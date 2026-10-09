@@ -317,11 +317,22 @@ real product's layout is implied. Block labels are never drawn.
   horizon; Focus & Tools over the compute blocks; About over calm memory
   arrays; Work over the GPU; Research over the NPU; Experience tracking down
   a long bus; Contact pulled back to the I/O ring; Services and Verification
-  calm static shots. Chapter changes fly the camera over 1.5 s.
-- **Opening.** On a true entry to the home chapter the camera rises from the
-  die surface (1.8 s). Any pointer, key or wheel input skips it.
-- **Light.** A second canvas draws a few signal pulses along routes; the
-  scene canvas is redrawn only while the camera flies.
+  calm static shots. Chapter changes fly the camera over 1.5 s on an arc
+  (`flightPose`: eased, shortest-way heading, the camera rises mid-flight).
+- **Meaning.** Each chapter lights the region of the chip it is about
+  (`FOCUS`): Work the GPU, Research the NPU, About the memory arrays,
+  Experience the long bus, Contact the I/O ring where signals leave the chip.
+  The lit region fades in over 1.1 s with a slow breath, and signal pulses on
+  routes through it burn brighter. No labels are drawn.
+- **Opening.** On a true entry to the home chapter the horizon line exists
+  first, then the chip fades in as the camera rises (1.8 s). Any pointer, key
+  or wheel input skips it.
+- **Depth.** Lines are drawn in three depth bands (near/mid/far) so distance
+  dissolves into the dark; a haze gradient softens the horizon.
+- **Life.** On full-detail screens the still shot sways a few units (30 fps,
+  imperceptible in amplitude); phones and reduced motion hold still.
+- **Light.** A second canvas draws the focus glow and the signal pulses; the
+  scene canvas is redrawn only while the camera flies or sways.
 - **Safety.** Paused when the tab is hidden; mobile uses a lighter plan;
   reduced motion draws one static frame per chapter with no pulses; without
   JavaScript a CSS gradient (`.silicon-world`) remains. A scrim
