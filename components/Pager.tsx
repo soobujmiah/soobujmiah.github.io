@@ -16,7 +16,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { MOTION } from '@/app/design-tokens';
 import { PAGE_COUNT, SECTION_IDS, indexFromPathname, sectionHref } from '@/app/sections';
-import { WorldMap } from '@/components/WorldMap';
 import { LanguageProvider, useLang } from '@/app/language';
 import {
   NavProvider,
@@ -29,8 +28,7 @@ import {
 import { NavOverlay } from '@/components/NavOverlay';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { DocumentMotion } from '@/components/DocumentMotion';
-import { CinematicWorld } from '@/components/CinematicWorld';
-import { LivingInteractions } from '@/components/LivingInteractions';
+import { SiliconWorld } from '@/components/SiliconWorld';
 import {
   HeroScene,
   StatsScene,
@@ -339,7 +337,6 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
   return (
     <NavProvider value={{ goToScene, goToTop: () => goToScene(0), openNav }}>
       <CustomCursor />
-      <LivingInteractions />
       {/* boot splash — only on the true entry point; deep links land
           straight on their section instead of waiting for a splash */}
       <AnimatePresence>
@@ -357,9 +354,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {/* Geography remains the crawlable fallback beneath the film world. */}
-        <WorldMap sectionIndex={index} reducedMotion={reducedMotion} />
-        <CinematicWorld sceneIndex={index} reducedMotion={reducedMotion} />
+        <SiliconWorld sceneIndex={index} reducedMotion={reducedMotion} />
         <div className="pager-vignette" aria-hidden />
         <AnimatePresence custom={dir} initial={false} mode="sync">
           <motion.div
@@ -398,25 +393,12 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
                 scopeSelector={`.page-scroll[data-section="${SECTION_IDS[index]}"]`}
                 beatSelector={index === 0
                   ? '.page-content .rounded-full:not(a):not(button)'
-                  : '.page-content h2, .page-content h3, .page-content p, .page-content li, .page-content dt, .page-content dd, .page-content .rounded-xl, .page-content .rounded-2xl, .page-content .repo-card, .page-content .rounded-full:not(a):not(button)'}
+                  : '.page-content h2, .page-content h3, .page-content p, .page-content li, .page-content dt, .page-content dd, .page-content .plate, .page-content .stack-layer, .page-content .lab-entry, .page-content .rounded-2xl, .page-content .repo-card, .page-content .rounded-full:not(a):not(button)'}
               />
             </div>
           </motion.div>
         </AnimatePresence>
 
-        <AnimatePresence initial={false}>
-          {!reducedMotion && (
-            <motion.div
-              key={`scene-cut-${index}`}
-              className="cinema-scene-cut"
-              aria-hidden="true"
-              initial={{ opacity: 0.92 }}
-              animate={{ opacity: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.9, ease: [0.22, 0.8, 0.2, 1] }}
-            />
-          )}
-        </AnimatePresence>
 
         <HudControl total={PAGE_COUNT} active={index} labels={t.ui.pageLabels} navOpen={navOpen} />
         <PullToRefresh enabled={index === 0} scrollerRef={activeScroller} onRefresh={onRefresh} />

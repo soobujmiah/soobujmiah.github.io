@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Anek_Bangla, Chakra_Petch, Inter, JetBrains_Mono, Noto_Sans_Bengali, Space_Grotesk } from 'next/font/google';
+import { Inter, Instrument_Serif, JetBrains_Mono, Noto_Sans_Bengali, Noto_Serif_Bengali } from 'next/font/google';
 import { BRAND } from './design-tokens';
 import { content, type Lang } from './content';
 import './globals.css';
@@ -7,9 +7,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const jetbrains = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap' });
 const bengali = Noto_Sans_Bengali({ subsets: ['bengali'], variable: '--font-bengali', display: 'swap', weight: ['400', '500', '600', '700'] });
-const display = Space_Grotesk({ subsets: ['latin'], variable: '--font-display', display: 'swap' });
-const wordmark = Chakra_Petch({ subsets: ['latin'], weight: ['500', '700'], variable: '--font-wordmark', display: 'swap' });
-const wordmarkBn = Anek_Bangla({ subsets: ['bengali'], weight: ['600', '700'], variable: '--font-wordmark-bn', display: 'swap' });
+const serif = Instrument_Serif({ subsets: ['latin'], weight: '400', variable: '--font-serif', display: 'swap' });
+const serifBn = Noto_Serif_Bengali({ subsets: ['bengali'], weight: ['500', '600'], variable: '--font-serif-bn', display: 'swap' });
 
 const ORIGIN = 'https://soobujmiah.github.io';
 const HOME_URL: Record<Lang, string> = { en: `${ORIGIN}/`, bn: `${ORIGIN}/bn/` };
@@ -129,7 +128,7 @@ function structuredData(lang: Lang) {
 }
 
 export function SiteDocument({ lang, children }: { lang: Lang; children: React.ReactNode }) {
-  const fonts = [inter.variable, jetbrains.variable, bengali.variable, display.variable, wordmark.variable, wordmarkBn.variable].join(' ');
+  const fonts = [inter.variable, jetbrains.variable, bengali.variable, serif.variable, serifBn.variable].join(' ');
   return (
     <html lang={lang} suppressHydrationWarning>
       <head><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData(lang)) }} /></head>

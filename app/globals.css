@@ -143,258 +143,6 @@ a, button {
   background: #050507;
 }
 
-/* ── world map — the environment behind the identity ──
-   Cartographic contours only. No graticule, no tiling, no box pattern;
-   the old 60px square grid was deleted at the source, not hidden.
-
-   STABILITY CONTRACT — the reason the background stops flickering.
-   Nothing here animates geometry, and nothing animates the land at
-   all. The previous version scaled the land group while
-   `vector-effect: non-scaling-stroke` was set, scaled stroked hub
-   circles, and animated `stroke-dashoffset` on the arcs. Each of those
-   forces the renderer to re-tessellate a 29 KB vector path every
-   frame, which is exactly what shimmered. The map still obeys that
-   rule: no CSS geometry animation here. The camera flies by rewriting
-   the SVG viewBox attribute during page transitions (strokes stay
-   crisp via non-scaling-stroke), the origin halo pulses opacity only,
-   and a handful of data packets travel along the arcs via SMIL motion
-   paths — geometry attributes, never CSS transforms. Anything added
-   must obey the same rule; `check-design` enforces it by inspecting
-   every keyframe the map references. */
-.worldmap {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-  background: radial-gradient(145% 115% at 50% 6%, #06120d 0%, #04090a 46%, var(--bg) 100%);
-}
-
-/* deep-green atmosphere — a soft radial wash, never a panel */
-.worldmap-atmosphere {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(52% 44% at 50% 40%, rgba(16, 185, 129, 0.075), transparent 72%),
-    radial-gradient(32% 28% at 16% 80%, rgba(34, 197, 94, 0.045), transparent 70%),
-    radial-gradient(30% 26% at 86% 22%, rgba(16, 185, 129, 0.04), transparent 70%);
-}
-
-.worldmap-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.worldmap-land {
-  fill: rgba(16, 185, 129, 0.055);
-  stroke: rgba(52, 211, 153, 0.16);
-  stroke-width: 0.6;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
-}
-
-/* network — static. Signals read as geography, not as a pulse. */
-.worldmap-hub {
-  fill: rgba(74, 222, 128, 0.38);
-}
-
-.worldmap-link {
-  fill: none;
-  stroke: rgba(34, 197, 94, 0.1);
-  stroke-width: 0.7;
-  stroke-dasharray: 2 7;
-  vector-effect: non-scaling-stroke;
-}
-
-/* ── the origin: Bangladesh, then the pin ──
-   The country is brighter than any continent and carries a real
-   national outline; the pin is projected from Dhaka's coordinates by
-   app/geo.ts, never placed by hand. */
-.worldmap-bd {
-  fill: rgba(74, 222, 128, 0.2);
-  stroke: rgba(74, 222, 128, 0.6);
-  stroke-width: 0.9;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
-}
-
-.worldmap-origin-halo {
-  fill: none;
-  stroke: rgba(34, 197, 94, 0.5);
-  stroke-width: 0.8;
-  vector-effect: non-scaling-stroke;
-  /* opacity ONLY — the one animation in the environment */
-  animation: originPulse 6.5s ease-in-out infinite;
-}
-
-.worldmap-origin-ring {
-  fill: none;
-  stroke: rgba(74, 222, 128, 0.8);
-  stroke-width: 0.9;
-  vector-effect: non-scaling-stroke;
-}
-
-.worldmap-origin-core {
-  fill: var(--accent-bright);
-}
-
-@keyframes originPulse {
-  0%, 100% { opacity: 0.14; }
-  50%      { opacity: 0.44; }
-}
-
-/* suspension: the map is decoration, so it stops when unseen */
-.worldmap[data-paused='true'] .worldmap-origin-halo { animation-play-state: paused; }
-
-/* ── the page-aware camera system ──
-   L1b countries — every territory keeps its real 1:110m shape.
-   Inactive countries are subdued political geography; the active
-   country recolours via CSS variables (a class flip, never animated
-   geometry) set from COUNTRY_INKS in app/geo.ts. */
-.worldmap-countries {
-  pointer-events: none;
-}
-
-.worldmap-country {
-  fill: rgba(148, 163, 184, 0.03);
-  stroke: rgba(148, 163, 184, 0.09);
-  stroke-width: 0.5;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
-}
-
-.worldmap-country-active {
-  fill: var(--cf);
-  stroke: var(--cs);
-  stroke-width: 1.1;
-}
-
-/* city-state marker for focus countries with no 1:110m outline */
-.worldmap-micro {
-  fill: var(--cf);
-  stroke: var(--cs);
-  stroke-width: 0.8;
-  vector-effect: non-scaling-stroke;
-}
-
-/* the active route: origin → current section focus */
-.worldmap-active-route {
-  fill: none;
-  stroke: rgba(234, 179, 8, 0.16);
-  stroke-width: 0.8;
-  stroke-dasharray: 3 6;
-  vector-effect: non-scaling-stroke;
-}
-
-.worldmap-packet-active {
-  fill: rgba(234, 179, 8, 0.55);
-}
-
-/* L2 focus glow — a soft radial wash centred on the current page's
-   geographic focus; it is panned by the camera like everything else. */
-.worldmap-focus {
-  pointer-events: none;
-}
-
-/* L3 data flow — the geometry stays static; the packets travel.
-   SMIL animateMotion on tiny circles: no CSS animation, no filter,
-   and only ever four packets on screen. */
-.worldmap-flow {
-  pointer-events: none;
-}
-
-.worldmap-packet {
-  fill: rgba(74, 222, 128, 0.5);
-}
-
-/* ── the arrival label: the focus, named on screen ──
-   HTML in screen space, not SVG text — text inside the viewBox scales
-   with the camera and would be illegible on a phone-sized map. Its
-   position is computed by app/geo.ts → projectToScreen() and written by
-   the same rAF that moves the camera. Nothing here carries an animation
-   or a transition: the map's geometry stays painted once. The label is
-   decoration inside an aria-hidden layer; the same place is announced as
-   real text by the map's sr-only line, so it never exists only here. */
-.worldmap-pin {
-  position: absolute;
-  left: 0;
-  top: 0;
-  pointer-events: none;
-  opacity: 0;
-  color: rgba(228, 226, 223, 0.86);
-  /* keep the focus country's hue, at a weight that stays legible */
-  color: color-mix(in srgb, var(--pin-ink, #94a3b8) 70%, #e4e2df);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.6875rem;
-  letter-spacing: 0.04em;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-/* Bengali reads in the Bengali face, exactly like .font-mono does */
-body.lang-bn .worldmap-pin {
-  font-family: var(--font-bengali), var(--font-inter), system-ui, sans-serif;
-  letter-spacing: 0;
-}
-
-/* shown only once the screen point has been placed — never at 0,0 */
-.worldmap-pin[data-on='true'] { opacity: 1; }
-
-/* the exact projected point */
-.worldmap-pin-mark {
-  position: absolute;
-  left: -3.5px;
-  top: -3.5px;
-  width: 7px;
-  height: 7px;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-  background: rgba(5, 5, 7, 0.85);
-}
-
-.worldmap-pin-body {
-  position: absolute;
-  left: 0;
-  top: 0;
-  transform: translate(-50%, -162%);
-  padding: 0.3rem 0.6rem;
-  border: 1px solid rgba(228, 226, 223, 0.16);
-  border-color: color-mix(in srgb, var(--pin-ink, #94a3b8) 45%, transparent);
-  border-radius: 999px;
-  background: rgba(5, 5, 7, 0.78);
-}
-
-/* L4 technical vector motifs — screen-space, decorative, static.
-   Circuit traces, orbits, a waveform fragment, network nodes,
-   coordinate ticks: discovered, never shouted. */
-.maptech {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  pointer-events: none;
-}
-
-.maptech path,
-.maptech circle {
-  fill: none;
-  stroke: rgba(148, 163, 184, 0.07);
-  stroke-width: 1;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.maptech .maptech-orbit circle,
-.maptech .maptech-net circle,
-.maptech .maptech-circuit circle,
-.maptech .maptech-wave circle {
-  stroke: rgba(34, 197, 94, 0.09);
-}
-
 .pager-vignette {
   position: absolute;
   inset: 0;
@@ -403,104 +151,33 @@ body.lang-bn .worldmap-pin {
   background: radial-gradient(120% 90% at 50% 42%, transparent 55%, rgba(0, 0, 0, 0.52) 100%);
 }
 
-.cinema-world {
+.silicon-world {
   position: absolute;
   inset: 0;
   z-index: 1;
   overflow: hidden;
   pointer-events: none;
-  background: #050708;
-}
-
-.cinema-world-plate {
-  position: absolute;
-  inset: -4%;
-  overflow: hidden;
-  will-change: transform, opacity;
-}
-
-.cinema-world-look {
-  position: absolute;
-  inset: -3%;
-  transform: translate3d(var(--look-x, 0%), var(--look-y, 0%), 0);
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.cinema-world-image {
-  position: absolute;
-  inset: -5%;
-  background-size: cover;
-  background-position: center 46%;
-  filter: brightness(0.7) saturate(0.78);
-}
-
-.cinema-world-plate[data-active='true'] .cinema-world-image {
-  animation: cinema-camera-breathe 14s ease-in-out infinite alternate;
-}
-
-@keyframes cinema-camera-breathe {
-  from { transform: translate3d(-2%, 0.8%, 0) scale(1); }
-  to { transform: translate3d(2%, -0.8%, 0) scale(1.08); }
-}
-
-.cinema-world-grade,
-.cinema-world-air {
-  position: absolute;
-  inset: 0;
-}
-
-.cinema-world-film {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
-.cinema-world-video {
-  position: absolute;
-  inset: -4%;
-  width: 108%;
-  height: 108%;
-  object-fit: cover;
-  object-position: center 46%;
-  filter: brightness(0.83) saturate(0.82) hue-rotate(-7deg);
-  will-change: transform, opacity;
-}
-
-.cinema-scene-cut {
-  position: absolute;
-  inset: 0;
-  z-index: 12;
-  pointer-events: none;
-  background: #020506;
-}
-
-
-.cinema-world-grade {
   background:
-    radial-gradient(ellipse 72% 56% at 50% 54%, rgba(3, 6, 8, 0.43), rgba(3, 6, 8, 0.08) 88%),
-    linear-gradient(0deg, rgba(3, 5, 7, 0.78), transparent 39%, rgba(3, 5, 7, 0.28));
+    radial-gradient(ellipse 80% 40% at 50% 34%, rgba(34, 197, 94, 0.07), transparent 70%),
+    linear-gradient(180deg, #050507 0%, #050507 32%, #07110c 100%);
 }
 
-.cinema-world-air {
-  opacity: 0.35;
-  background: radial-gradient(ellipse 55% 26% at 65% 22%, rgba(74, 222, 128, 0.18), transparent 85%);
-  animation: cinema-air-drift 16s ease-in-out infinite alternate;
+.silicon-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-@keyframes cinema-air-drift {
-  from { opacity: 0.18; transform: translate3d(-4%, 0, 0) scale(1); }
-  to { opacity: 0.42; transform: translate3d(4%, 2%, 0) scale(1.08); }
-}
-
-@media (max-width: 767px) {
-  .cinema-world-image { filter: brightness(0.53) saturate(0.75); }
-  .cinema-world-grade { background: linear-gradient(0deg, rgba(3, 5, 7, 0.86), rgba(3, 5, 7, 0.48) 55%, rgba(3, 5, 7, 0.42)); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cinema-world-image { animation: none !important; }
-  .cinema-world-look { transition: none; }
-  .cinema-world-air { animation: none; }
+/* Text sits on a calm scrim: the chip stays visible at the edges and
+   floor, and goes quiet behind the reading column. */
+.silicon-grade {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 62% 58% at 50% 46%, rgba(5, 5, 7, 0.72), rgba(5, 5, 7, 0.28) 70%, transparent 100%),
+    linear-gradient(0deg, rgba(5, 5, 7, 0.55), transparent 30%);
 }
 
 /* one page layer; incoming paints above outgoing by DOM order */
@@ -634,9 +311,7 @@ body.lang-bn .worldmap-pin {
     padding-top: 58px;
     padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
   }
-  .page-numeral {
-    display: none;
-  }
+  
   .page-content .ph-h {
     font-size: 1.25rem;
     margin-bottom: 0.9rem;
@@ -671,9 +346,7 @@ body.lang-bn .worldmap-pin {
   .page-fill {
     padding: 64px 0 48px;
   }
-  .page-numeral {
-    display: none;
-  }
+  
   .page-content .ph-h {
     font-size: 1.2rem;
     margin-bottom: 0.75rem;
@@ -681,30 +354,6 @@ body.lang-bn .worldmap-pin {
 }
 
 /* giant outlined page numerals fill the negative space */
-.page-numeral {
-  position: absolute;
-  z-index: 0;
-  right: 0.5rem;
-  bottom: 4.5rem;
-  font-family: var(--font-inter), system-ui, sans-serif;
-  font-size: clamp(8rem, 22vw, 20rem);
-  font-weight: 700;
-  line-height: 0.8;
-  letter-spacing: -0.05em;
-  color: transparent;
-  -webkit-text-stroke: 1.5px rgba(74, 222, 128, 0.13);
-  user-select: none;
-  pointer-events: none;
-  /* scroll-linked parallax; --page-scroll and the token-fed
-     --pager-numeral-parallax multiplier are published by components/Pager.tsx */
-  transform: translate3d(
-    0,
-    calc(var(--page-scroll, 0px) * var(--pager-numeral-parallax, -0.07)),
-    0
-  );
-  will-change: transform;
-  animation: living-numeral-glow 10s ease-in-out infinite alternate;
-}
 
 @keyframes living-numeral-glow {
   from { -webkit-text-stroke-color: rgba(74, 222, 128, 0.08); }
@@ -733,8 +382,8 @@ body.lang-bn .worldmap-pin {
 }
 
 @keyframes cinema-word-arrive {
-  from { transform: translateY(110%); opacity: 0; filter: blur(10px); }
-  to { transform: translateY(0); opacity: 1; filter: blur(0); }
+  from { transform: translateY(105%); }
+  to { transform: translateY(0); }
 }
 
 .page-content .ph-h::after,
@@ -848,25 +497,12 @@ body.lang-bn .worldmap-pin {
 
 @media (prefers-reduced-motion: reduce) {
   .cinema-word--play { animation: none !important; }
-  .page-numeral,
+  
   .page-content .ph-h::after,
   .services-doc main h1::after,
   .services-doc main h2::after,
   .page-content :is(.rounded-xl, .rounded-2xl, .repo-card)::before,
   .services-doc main :is(.rounded-xl, .rounded-2xl)::before { animation: none !important; }
-}
-
-@supports not (-webkit-text-stroke: 1px black) {
-  .page-numeral {
-    color: rgba(228, 226, 223, 0.05);
-  }
-}
-
-@media (min-width: 768px) {
-  .page-numeral {
-    right: 2rem;
-    bottom: 3rem;
-  }
 }
 
 /* repo card hover lift */
@@ -1048,41 +684,14 @@ body.lang-bn .worldmap-pin {
 /* Neither wrapper may be a containing block: the construction layer is
    anchored to the stable .hero-name box (see its rule), so the field can
    disperse around the word and the layer never resizes with the text. */
-.sig-name {
-  display: inline-block;
-}
-
-.sig-stage {
-  display: inline-block;
-}
-
-.sig-glyphs {
-  position: relative;
-  display: inline-flex;
-  align-items: baseline;
-}
 
 /* One cell per grapheme cluster — never per code point, so a Bengali
    cluster (মি, বু, য়া) is one indivisible cell. --ink is that
    cluster's colour in the brand ramp. Static: nothing here is ever
    rewritten at runtime. */
-.sig-cell {
-  display: inline-block;
-  position: relative;
-  color: var(--ink, var(--fg));
-}
-
-.sig-space {
-  display: inline-block;
-  width: 0.28em;
-}
 
 /* two-layer halo: a tight rim that defines the glyph edge, and a wide
    bloom that carries the name — the identity mark reads first */
-.sig-cell,
-.sig-space {
-  text-shadow: 0 0 1px rgba(74, 222, 128, 0.3), 0 0 26px rgba(34, 197, 94, 0.34);
-}
 
 /* The construction canvas: exactly over the wordmark, never
    interactive, invisible unless a construction is running. */
@@ -1092,54 +701,18 @@ body.lang-bn .worldmap-pin {
    written by the component from MOTION.nameAssemble.disperseRadius, and
    defaults to zero so that without JavaScript the canvas simply covers the
    (already legible) text. */
-.sig-canvas {
-  /* fills the positioned page container (its containing block): a box
-     that never changes with the text, so the particle field can live on
-     it permanently — dispersing around the word without ever being
-     clipped by the wordmark's bounds, and without ever changing rect */
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  opacity: 0;
-}
 
 /* Phase states, driven by one attribute on the stage. The attribute
    being *absent* is the legible state — no JavaScript, or nothing to
    run, and the real text is simply there. */
-.sig-stage[data-asm='run'] .sig-canvas,
-.sig-stage[data-asm='out'] .sig-canvas {
-  opacity: 1;
-}
-
-.sig-stage[data-asm='run'] .sig-cell {
-  opacity: 0;
-}
 
 /* The handover: the particle field condenses into typography. The
    duration is written by the component from
    MOTION.nameAssemble.resolveSeconds, so the token stays the single
    source of truth and this rule cannot drift from it. */
-.sig-stage[data-asm='done'] .sig-cell {
-  opacity: 1;
-  transition: opacity var(--sig-resolve, 0.34s) cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.sig-stage[data-asm='done'] .sig-canvas {
-  opacity: 0;
-  transition: opacity var(--sig-resolve, 0.34s) cubic-bezier(0.16, 1, 0.3, 1);
-}
 
 /* reduced motion: a calm, fully designed multi-tone wordmark at rest.
    No canvas is drawn and no timer is ever set. */
-.sig-static .sig-cell {
-  opacity: 1;
-}
-
-.sig-static .sig-canvas {
-  display: none;
-}
 
 /* ── keyboard focus ── */
 :focus-visible {
@@ -1169,8 +742,7 @@ body.lang-bn {
   line-height: 1.85;
 }
 
-body.lang-bn .font-mono,
-body.lang-bn .page-numeral {
+body.lang-bn .font-mono{
   font-family: var(--font-bengali), var(--font-inter), system-ui, sans-serif;
 }
 
@@ -1185,21 +757,7 @@ body.lang-bn h3 {
   letter-spacing: 0 !important;
 }
 
-body.lang-bn .hero-name {
-  /* the Bengali name is a brand mark too — its own display face, not the
-     face the prose uses */
-  font-family: var(--font-wordmark-bn), var(--font-bengali), var(--font-inter), system-ui, sans-serif;
-  /* the Latin mark's stylistic set must not reach Bengali shaping */
-  font-feature-settings: normal;
-  /* Bangla needs the shoulder weight and none of the Latin tracking:
-     negative tracking breaks Indic shaping. */
-  font-weight: 700;
-  letter-spacing: 0 !important;
-}
-
 body.lang-bn .hero-status { letter-spacing: 0.12em !important; }
-
-body.lang-bn .sig-glyphs { line-height: 1.34; }
 
 body.lang-bn p,
 body.lang-bn li,
@@ -1207,18 +765,47 @@ body.lang-bn span {
   overflow-wrap: break-word;
 }
 
-/* ── the identity mark's own typography ──
-   The name is a brand mark, not UI text, so it gets its own display
-   face: Chakra Petch, a squared technical face. Both display faces are
-   Latin-only by design, so Bengali codepoints fall through to the
-   project's Bengali webfont further down the stack. Both scripts
-   therefore get a deliberate display treatment instead of a Latin
-   default stretched over Bengali. */
+/* ── editorial display type ──
+   Headings are set in an editorial serif (Instrument Serif; Noto Serif
+   Bengali for Bengali) for a film-title tone. Body stays Inter / Noto
+   Sans Bengali, technical labels JetBrains Mono. */
+.hero-name,
+.page-content h1,
+.page-content h2,
+.services-doc main h1,
+.services-doc main h2 {
+  font-family: var(--font-serif), 'Times New Roman', serif;
+  font-weight: 400;
+  letter-spacing: -0.012em;
+}
+
+body.lang-bn .hero-name,
+body.lang-bn .page-content h1,
+body.lang-bn .page-content h2,
+body.lang-bn .services-doc main h1,
+body.lang-bn .services-doc main h2 {
+  font-family: var(--font-serif-bn), var(--font-bengali), var(--font-inter), system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0 !important;
+}
+
 .hero-name {
-  font-family: var(--font-wordmark), var(--font-display), var(--font-wordmark-bn), var(--font-bengali), var(--font-inter), system-ui, sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.012em;
-  font-feature-settings: 'ss01' 1;
+  font-size: clamp(3.4rem, 11.5vw, 8.5rem);
+  line-height: 1.02;
+  margin: 0 0 1.1rem;
+  text-wrap: balance;
+  color: var(--fg);
+}
+
+body.lang-bn .hero-name {
+  font-size: clamp(2.9rem, 9.5vw, 7rem);
+  line-height: 1.25;
+}
+
+.hero-kicker {
+  margin: 0 0 1.2rem;
+  color: var(--accent);
+  opacity: 0.9;
 }
 
 /* phones: the identity mark borrows 8px of the page gutter per side
@@ -1698,7 +1285,6 @@ body.lang-bn span {
   text-decoration-color: rgba(34, 197, 94, 0.55);
 }
 
-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -1709,46 +1295,22 @@ body.lang-bn span {
 
   /* the environment is static: the origin ring stops too, and holds a
      calm mid opacity rather than freezing wherever it happened to be */
-  .worldmap-origin-halo,
   .hero-status-dot {
     animation: none !important;
   }
-  .worldmap-origin-halo { opacity: 0.3; }
 
   /* the clock is readable first, decorative second: no colon pulse,
      no digit roll — lit dots simply are */
-  .idc-colon i {
-    animation: none !important;
-    opacity: 1 !important;
-  }
-  .idc-live {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  .idc-ghost {
-    display: none !important;
-  }
-  .idc-ampm {
-    animation: none !important;
-    opacity: 1 !important;
-  }
-
-  /* the map does not travel: no camera flight, no packets */
-  .worldmap-packet {
-    display: none !important;
-  }
+  
+  
+  
+  
 
   /* the name stays fully legible and still. No construction runs — the
      static multi-tone wordmark keeps its colour, typography and
      accessibility, and the canvas never exists. */
-  .sig-cell {
-    opacity: 1 !important;
-    transition: none !important;
-  }
-  .sig-canvas {
-    display: none !important;
-  }
+  
+  
 }
 
 /* ── service-intent pages (/services/*) ──
@@ -1777,16 +1339,6 @@ body:has(> .services-doc) button {
     radial-gradient(90% 58% at 74% 13%, rgba(34, 197, 94, 0.11) 0%, transparent 69%),
     radial-gradient(64% 48% at 9% 72%, rgba(16, 185, 129, 0.045) 0%, transparent 78%),
     var(--bg);
-}
-
-.services-doc .cinema-world {
-  position: fixed;
-  z-index: 0;
-  opacity: 0.48;
-}
-
-@media (max-width: 767px) {
-  .services-doc .cinema-world { opacity: 0.34; }
 }
 
 .services-doc::before {
@@ -1890,86 +1442,14 @@ body:has(> .services-doc) button {
    part) closes the hero under the CTAs. Fixed-width digit slots, so
    the block never shifts; only changed digits replay the short dot
    settle. */
-.hero-clock-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  margin-top: 0;
-  /* Tight clock → display connection; desktop restores breathing room. */
-  margin-bottom: 0.45rem;
-  flex-shrink: 0;
-  animation: hero-clock-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
-}
 
 /* Fixed name ⇄ keyword morph slot.
    Height = two display lines at name scale (+ tiny particle air) — NOT a
    giant viewport band. Mobile stays compact; desktop keeps the approved
    cinematic proportions (see min-width: 768px). Zero CLS either way.
    Canvas is positioned on THIS box so two-line service glyphs paint fully. */
-.hero-story-stage {
-  position: relative;
-  width: 100%;
-  max-width: 40rem;
-  /* ~2 × clamp(3.25rem…) line boxes + glyph pad — no empty field. */
-  height: clamp(6.75rem, 2.05em + 2.1rem, 8.75rem);
-  min-height: 6.75rem;
-  margin: 0 auto 0.55rem;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 2;
-  contain: layout style;
-  /* Inherit display size so em-based height tracks the hero-name clamp. */
-  font-size: clamp(min(3.25rem, 13vw), 11vw, 6.6rem);
-  /* Never clip particle glyphs — the canvas fills this box. */
-  overflow: visible;
-}
-
-.hero-story-stage .hero-name {
-  pointer-events: auto;
-  /* Fill the reserved two-line slot so the absolute canvas matches it. */
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  margin: 0;
-  max-width: 100%;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  /* Tight two-line unit — lines belong together, not stacked with air. */
-  line-height: 1.02;
-  font-size: 1em;
-  overflow: visible;
-}
-
-.hero-story-stage .sig-name,
-.hero-story-stage .sig-stage {
-  /* Not containing blocks — canvas anchors to .hero-name (= full slot). */
-  position: static;
-  width: auto;
-  max-width: 100%;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  line-height: 1.02;
-  overflow: visible;
-}
 
 /* Particle field covers the full two-line slot via .hero-name (inset 0). */
-.hero-story-stage .sig-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-}
 
 /* Identity copy stack — denser rhythm under a stable morph slot. */
 .hero-copy {
@@ -2003,26 +1483,15 @@ body:has(> .services-doc) button {
 
 /* Short phones: still two lines, no giant empty band. */
 @media (max-width: 767px) and (max-height: 700px) {
-  .hero-story-stage {
-    height: clamp(6.25rem, 1.95em + 1.75rem, 8rem);
-    min-height: 6.25rem;
-    margin-bottom: 0.4rem;
-  }
-  .hero-clock-wrap {
-    margin-bottom: 0.3rem;
-    gap: 3px;
-  }
+  
+  
   .hero-copy .hero-intro {
     margin-bottom: 0.6rem;
   }
 }
 
 @media (max-width: 767px) and (max-height: 640px) {
-  .hero-story-stage {
-    height: clamp(5.85rem, 1.85em + 1.5rem, 7.35rem);
-    min-height: 5.85rem;
-    margin-bottom: 0.35rem;
-  }
+  
   .page-fill--hero {
     padding-top: clamp(52px, 8dvh, 64px);
     padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
@@ -2031,18 +1500,8 @@ body:has(> .services-doc) button {
 
 /* Desktop — preserve approved cinematic composition (do not inherit mobile compact). */
 @media (min-width: 768px) {
-  .hero-clock-wrap {
-    gap: 6px;
-    margin-bottom: clamp(10px, 1.6dvh, 16px);
-  }
-  .hero-story-stage {
-    font-size: clamp(3.5rem, 6.5vw, 6.6rem);
-    /* Max covers 2×glyph + pad at 6.6rem — not a viewport-tall band. */
-    height: clamp(9.5rem, 2.2em + 1.35rem, 15rem);
-    min-height: 9.5rem;
-    max-width: 50rem;
-    margin-bottom: 1.1rem;
-  }
+  
+  
   .hero-copy .hero-role {
     margin-bottom: 0.55rem;
   }
@@ -2051,188 +1510,29 @@ body:has(> .services-doc) button {
   }
 }
 
-@media (min-width: 1200px) {
-  .hero-story-stage {
-    height: clamp(10.5rem, 2.25em + 1.5rem, 16rem);
-    max-width: 54rem;
-  }
-}
-@keyframes hero-clock-in {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
 /* the probe: an invisible element whose computed font-family IS the
    identity face stack for the active language — JS reads it instead
    of hardcoding next/font's hashed family names (same pattern as
    SignatureName's stage) */
-.idc-probe {
-  position: absolute;
-  width: 0;
-  height: 0;
-  overflow: hidden;
-  visibility: hidden;
-  pointer-events: none;
-  font-family: var(--font-wordmark), var(--font-display), monospace;
-  font-weight: 700;
-}
-.idc-bn .idc-probe,
-.idc-probe.idc-bn {
-  font-family: var(--font-wordmark-bn), var(--font-bengali), sans-serif;
-}
-.hero-clock-date {
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(228, 226, 223, 0.45);
-}
+
 .idclock {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
 }
-.idc-time {
-  display: inline-flex;
-  align-items: center;
-  font-size: clamp(2rem, 8vw, 3.3rem);
-  line-height: 1;
-}
-.idc-slot {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  /* wide enough for the aspect-correct Latin grid (≤ 0.68 em) plus
-     breathing room on both sides — the slot stays fixed, so a digit
-     change never moves the clock */
-  width: 0.8em;
-  height: 1.02em;
-  /* the slot is a fixed viewport: the roll happens inside it and can
-     never escape into the neighbouring digit or below the clock */
-  overflow: hidden;
-}
-.idc-grid {
-  display: grid;
-  /* cells derive from the row count, so the denser 15-row matrix
-     still fills exactly the slot height and can never spill; a
-     Bengali grid also carries --cw, the aspect-preserving cell width
-     its sampler measured — Latin keeps square cells */
-  grid-template-columns: repeat(var(--cols, 7), var(--cw, calc(1.02em / var(--rows, 15))));
-  grid-template-rows: repeat(var(--rows, 15), calc(1.02em / var(--rows, 15)));
-}
-.idc-dot {
-  width: 0.05em;
-  height: 0.05em;
-  border-radius: 50%;
-  justify-self: center;
-  align-self: center;
-  background: transparent;
-}
-.idc-dot[data-on='true'] {
-  background: #4ade80;
-  box-shadow: 0 0 0.045em rgba(34, 197, 94, 0.55);
-}
+
 /* digit change = a vertical roll: the outgoing digit exits upward
    while the incoming one enters from below, both clipped to the
    slot. Only the changed digit remounts, so unchanged digits never
    move and the clock block never shifts. */
-.idc-live {
-  display: inline-flex;
-  animation: idc-roll-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.idc-ghost {
-  position: absolute;
-  inset: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  animation: idc-roll-out 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
-  pointer-events: none;
-}
-@keyframes idc-roll-in {
-  from {
-    transform: translateY(105%);
-    opacity: 0.15;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
-}
-@keyframes idc-roll-out {
-  from {
-    transform: none;
-    opacity: 1;
-  }
-  to {
-    transform: translateY(-105%);
-    opacity: 0.1;
-  }
-}
-.idc-colon {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.24em;
-  width: 0.2em;
-  height: 1.02em;
-}
-.idc-colon i {
-  width: 0.062em;
-  height: 0.062em;
-  border-radius: 50%;
-  background: #4ade80;
-  animation: idc-blink 2s ease-in-out infinite;
-}
-@keyframes idc-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.25; }
-}
-.idc-ampm {
-  margin-left: 0.42em;
-  margin-bottom: 0.18em;
-  align-self: flex-end;
-  font-family: var(--font-wordmark), var(--font-mono), monospace;
-  font-weight: 700;
-  font-size: 0.3em;
-  letter-spacing: 0.18em;
-  color: #4ade80;
-  animation: idc-fade 0.3s ease-out both;
-}
+
 /* Bengali digits are wide glyphs: their slots are wider, so every
    grid keeps real horizontal breathing room between neighbours while
    the roll still clips inside a fixed viewport (English untouched) */
-.idc-bn .idc-slot {
-  width: 1.05em;
-}
 
-.idc-bn .idc-ampm {
-  font-family: var(--font-wordmark-bn), var(--font-bengali), sans-serif;
-  letter-spacing: 0.06em;
-}
-@keyframes idc-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
 /* pre-sampling fallback: the identity face as plain text — never a
    generic system monospace */
-.idc-fallback {
-  font-family: var(--font-wordmark), var(--font-mono), monospace;
-  font-weight: 700;
-  font-size: 0.8em;
-  line-height: 1.25;
-  color: #4ade80;
-}
-.idc-bn .idc-fallback {
-  font-family: var(--font-wordmark-bn), var(--font-bengali), sans-serif;
-}
 
 /* ── Contact: compact icon row ─────────────────────────────────
    Icon-only, equal touch targets, currentColor — the portfolio's
@@ -2269,3 +1569,119 @@ body:has(> .services-doc) button {
     padding-bottom: calc(var(--site-footer-height, 76px) + 64px);
   }
 }
+
+/* ═══ Per-chapter compositions ═══════════════════════════════════
+   Each chapter has its own layout instead of one repeated card:
+   Focus & Tools = layered stack, About = editorial, Work = plates,
+   Research = lab notebook, Experience = year rail, Contact = a
+   typographic closing scene. No blur surfaces anywhere. */
+
+.plate {
+  position: relative;
+  border-radius: 2px;
+}
+.plate::before,
+.plate::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  border: 0 solid rgba(74, 222, 128, 0.55);
+}
+.plate::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+.plate::after { right: -1px; bottom: -1px; border-width: 0 1px 1px 0; }
+
+/* Focus & Tools — layered system diagram */
+.stack-layers { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(74, 222, 128, 0.28); }
+.stack-layer {
+  display: grid;
+  grid-template-columns: 2.4rem minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.25rem 1.25rem;
+  padding: 0.95rem 0.25rem;
+  border-bottom: 1px solid rgba(228, 226, 223, 0.09);
+  text-align: left;
+}
+.stack-layer-index { font-size: 10px; color: var(--accent); letter-spacing: 0.16em; }
+.stack-layer-label {
+  display: block;
+  font-family: var(--font-serif), serif;
+  font-size: clamp(1.2rem, 3vw, 1.75rem);
+  line-height: 1.15;
+  color: var(--fg);
+}
+body.lang-bn .stack-layer-label { font-family: var(--font-serif-bn), var(--font-bengali), sans-serif; font-weight: 500; line-height: 1.35; }
+.stack-layer-detail { display: block; margin-top: 0.3rem; font-size: 10px; line-height: 1.6; color: rgba(228, 226, 223, 0.55); }
+.stack-layer-tools { font-size: 12px; line-height: 1.65; color: rgba(228, 226, 223, 0.5); }
+@media (max-width: 767px) {
+  .stack-layer { grid-template-columns: 1.8rem minmax(0, 1fr); }
+  .stack-layer-tools { grid-column: 2; }
+}
+
+/* About — editorial lead and hairline facts */
+.about-lead {
+  font-family: var(--font-serif), serif;
+  font-size: clamp(1.2rem, 2.6vw, 1.65rem);
+  line-height: 1.38;
+  color: var(--fg);
+  text-align: left;
+}
+body.lang-bn .about-lead { font-family: var(--font-serif-bn), var(--font-bengali), sans-serif; line-height: 1.7; }
+.fact-grid { border-top: 1px solid rgba(74, 222, 128, 0.28); }
+.fact-cell { padding: 0.8rem 0.25rem; border-bottom: 1px solid rgba(228, 226, 223, 0.09); }
+
+/* Research — lab notebook */
+.lab-legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; margin: 0 0 1rem; padding: 0; list-style: none; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(228, 226, 223, 0.45); }
+.lab-legend li { display: inline-flex; align-items: center; gap: 0.45rem; }
+.lab-dot { display: inline-block; width: 7px; height: 7px; border-radius: 9999px; background: rgba(228, 226, 223, 0.3); }
+.lab-dot[data-status='validated'] { background: #22c55e; }
+.lab-dot[data-status='experimental'] { background: #4ade80; box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.2); }
+.lab-notebook { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(74, 222, 128, 0.28); }
+.lab-entry {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: 0.35rem 1.5rem;
+  padding: 0.9rem 0.25rem;
+  border-bottom: 1px solid rgba(228, 226, 223, 0.09);
+  text-align: left;
+}
+.lab-status { display: inline-flex; align-items: baseline; gap: 0.5rem; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(228, 226, 223, 0.5); }
+.lab-title { font-size: 1rem; font-weight: 600; color: var(--fg); margin-bottom: 0.25rem; }
+.lab-desc { font-size: 12px; line-height: 1.7; color: rgba(228, 226, 223, 0.6); }
+@media (max-width: 639px) { .lab-entry { grid-template-columns: minmax(0, 1fr); } }
+
+/* Experience — year rail */
+.rail { position: relative; }
+.rail-entry {
+  display: grid;
+  grid-template-columns: 7.5rem 1rem minmax(0, 1fr);
+  gap: 0 1rem;
+  padding-bottom: 1rem;
+  position: relative;
+}
+.rail-entry::before {
+  content: '';
+  position: absolute;
+  left: calc(7.5rem + 1rem + 3.5px);
+  top: 0.35rem;
+  bottom: -0.35rem;
+  width: 1px;
+  background: rgba(74, 222, 128, 0.25);
+}
+.rail-period { font-size: 10px; letter-spacing: 0.08em; color: var(--accent); text-align: right; padding-top: 0.2rem; }
+.rail-node { width: 8px; height: 8px; margin-top: 0.3rem; border-radius: 9999px; border: 1.5px solid var(--accent); background: var(--bg); position: relative; z-index: 1; }
+.rail-role { font-family: var(--font-serif), serif; font-weight: 400; font-size: 1.2rem; line-height: 1.2; color: var(--fg); margin-bottom: 0.15rem; }
+body.lang-bn .rail-role { font-family: var(--font-serif-bn), var(--font-bengali), sans-serif; font-weight: 500; line-height: 1.4; }
+
+/* Contact — typographic closing scene */
+.contact-title {
+  font-size: clamp(2.4rem, 8vw, 5.4rem);
+  line-height: 1.02;
+  color: var(--fg);
+}
+body.lang-bn .contact-title { line-height: 1.3; font-size: clamp(2rem, 6.5vw, 4.2rem); }
+.contact-primary { width: fit-content; padding-bottom: 0.35rem; border-bottom: 1px solid rgba(74, 222, 128, 0.5); transition: border-color 0.3s; }
+.contact-primary:hover { border-color: #4ade80; }
+.contact-primary span:first-child { font-family: var(--font-serif), serif; font-weight: 400; font-size: 1.6rem; }
+body.lang-bn .contact-primary span:first-child { font-family: var(--font-serif-bn), var(--font-bengali), sans-serif; font-weight: 500; }

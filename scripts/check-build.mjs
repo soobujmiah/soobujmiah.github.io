@@ -31,9 +31,6 @@ const ORIGIN = 'https://soobujmiah.github.io';
 const SECTIONS = [
   'home', 'presence', 'about', 'work', 'research', 'experience', 'contact',
 ];
-const CINEMA_LOCATIONS = [
-  'observatory', 'observatory', 'causeway', 'causeway', 'causeway', 'archive', 'archive',
-];
 const LEGACY_ROUTES = [['stack', 'presence'], ['open-source', 'work']];
 /* The service-intent layer (app/services.ts): hub + eight pages. Kept
    separate from SECTIONS on purpose — these are documents outside the
@@ -145,12 +142,8 @@ for (const [sceneIndex, slug] of SECTIONS.entries()) {
   if (!/<html[^>]*lang="en"/.test(html)) fail(`route "${slug}" does not declare lang=en`);
   if ((html.match(/<h1(?:\s|>)/g) || []).length !== 1) fail(`route "${slug}" must render exactly one h1`);
   if (html.includes('cinematic-chapter')) fail(`route "${slug}" still renders a second chapter title`);
-  if (!html.includes(`class="cinema-world" aria-hidden="true" data-shot="${sceneIndex}"`)) {
-    fail(`route "${slug}" has no server-rendered cinematic shot`);
-  }
-  const activePlate = html.match(/<div class="cinema-world-plate" data-active="true" style="[^"]*opacity:1[^"]*"><div class="cinema-world-look"><div class="cinema-world-image" style="background-image:url\(([^)]+)\)/);
-  if (activePlate?.[1] !== `/cinema/${CINEMA_LOCATIONS[sceneIndex]}.webp`) {
-    fail(`route "${slug}" does not server-render its opening film plate`);
+  if (!html.includes(`class="silicon-world" aria-hidden="true" data-shot="${sceneIndex}"`)) {
+    fail(`route "${slug}" has no server-rendered silicon environment`);
   }
 
   if (text.length < MIN_VISIBLE_CHARS) {
@@ -440,35 +433,11 @@ for (const f of ['og.png', 'robots.txt', 'sitemap.xml', 'icon.svg', '404.html'])
 }
 ok('og.png, robots.txt, sitemap.xml, icon.svg, 404.html all present');
 
-let cinemaBytes = 0;
-for (const name of ['observatory', 'causeway', 'archive']) {
-  const file = join(OUT, 'cinema', `${name}.webp`);
-  if (!existsSync(file)) {
-    fail(`out/cinema/${name}.webp is missing`);
-    continue;
-  }
-  const bytes = readFileSync(file);
-  if (bytes.toString('ascii', 0, 4) !== 'RIFF' || bytes.toString('ascii', 8, 12) !== 'WEBP') {
-    fail(`out/cinema/${name}.webp is not a WebP image`);
-  }
-  cinemaBytes += bytes.length;
-}
-if (cinemaBytes > 400 * 1024) fail(`cinematic plates total ${Math.round(cinemaBytes / 1024)} KB, over 400 KB`);
-else ok(`three local cinematic plates total ${Math.round(cinemaBytes / 1024)} KB`);
-
-let filmBytes = 0;
-for (const name of ['city', 'city-mobile', 'passage', 'core', 'core-mobile']) {
-  const file = join(OUT, 'cinema', `${name}.mp4`);
-  if (!existsSync(file)) {
-    fail(`out/cinema/${name}.mp4 is missing`);
-    continue;
-  }
-  const bytes = readFileSync(file);
-  if (bytes.toString('ascii', 4, 8) !== 'ftyp') fail(`out/cinema/${name}.mp4 is not an MP4 file`);
-  filmBytes += bytes.length;
-}
-if (filmBytes > 18 * 1024 * 1024) fail(`cinematic footage totals ${Math.round(filmBytes / 1024 / 1024)} MB, over 18 MB`);
-else ok(`five local film encodes total ${(filmBytes / 1024 / 1024).toFixed(1)} MB`);
+/* The environment is procedural: no stock raster or video may ship. */
+if (existsSync(join(OUT, 'cinema'))) fail('out/cinema/ still exists — the stock plates and footage were retired');
+else ok('no stock media under out/cinema/ (the environment is drawn, not shipped)');
+const heavy = walkFiles(OUT).filter((f) => /\.(mp4|webm|mov)$/i.test(f));
+if (heavy.length) fail(`video files ship in the export: ${heavy.map((f) => f.replace(OUT, 'out')).join(', ')}`);
 
 const og = join(OUT, 'og.png');
 if (existsSync(og)) {
@@ -579,103 +548,18 @@ if (existsSync(chunksDir)) {
    would otherwise slip through. */
 const homeHtml = textByRoute && existsSync(join(OUT, 'index.html')) ? readFileSync(join(OUT, 'index.html'), 'utf8') : '';
 if (homeHtml) {
-  if (!homeHtml.includes('worldmap-land')) {
-    fail('out/index.html has no world map — the hero environment must be server-rendered');
-  } else {
-    /* Hub markers. Both class shapes are accepted so a legitimate
-       rename cannot produce a false failure — the invariant is "the map
-       ships visible network signals", not a particular class name. */
-    const hubs = (homeHtml.match(/worldmap-hub(?:-core)?(?![\w-])/g) || []).length;
-    if (hubs < 6) fail(`out/index.html ships only ${hubs} map signals (expected >= 6)`);
-    else ok(`hero world map is server-rendered (contours + ${hubs} signals), no grid, no light layer`);
-
-    /* The origin must be present AND marked: Bangladesh is the point of
-       the map, so a refactor that silently drops it has to fail here. */
-    if (!homeHtml.includes('worldmap-bd')) {
-      fail('out/index.html has no Bangladesh outline — the map must show the origin country');
-    }
-    if (!homeHtml.includes('worldmap-origin-core')) {
-      fail('out/index.html has no origin pin over Bangladesh');
-    } else {
-      ok('Bangladesh origin is server-rendered (outline + projected pin)');
-    }
-
-    /* Real per-country geography: the country layer ships, and the route's
-       active country is highlighted server-side. */
-    if (!homeHtml.includes('worldmap-countries')) {
-      fail('out/index.html has no country layer — geography must be per-country, not dots');
-    }
-    if (!homeHtml.includes('worldmap-country-active')) {
-      fail('out/index.html has no active country — Home must activate Bangladesh');
-    }
-
-    /* The page-aware camera must be server-rendered: Home carries its own
-       viewBox + data-cam + data-section, so deep links and crawlers see
-       the geography that belongs to the route (Bangladesh, focused). */
-    if (!homeHtml.includes('data-cam')) {
-      fail('out/index.html has no camera state (data-cam) — the map must be page-aware');
-    }
-    if (!homeHtml.includes('data-section="home"')) {
-      fail('out/index.html does not declare its focus section');
-    }
-    if (!homeHtml.includes('worldmap-focus')) {
-      fail('out/index.html has no focus glow — the current page geography must be highlighted');
-    }
-    /* data flow: packets travel the arcs via SMIL in the default render */
-    if (!homeHtml.includes('worldmap-packet') || !homeHtml.includes('animateMotion')) {
-      fail('out/index.html has no data-flow packets — the map must show restrained travelling signals');
-    } else {
-      ok('page-aware camera + focus glow + data-flow packets are server-rendered');
-    }
-
-    /* every route pre-renders its own camera position */
-    const homeCam = (homeHtml.match(/data-cam="([^"]*)"/) || [])[1];
-    const cams = new Set([homeCam]);
-    const homeCountry = (homeHtml.match(/data-country="([^"]*)"/) || [])[1];
-    if (homeCountry !== 'BGD') fail(`home must activate Bangladesh (found data-country="${homeCountry}")`);
-    for (const slug of SECTIONS) {
-      const html = slug === 'home' ? homeHtml : existsSync(routeFile(slug)) ? readFileSync(routeFile(slug), 'utf8') : '';
-      const cam = (html.match(/data-cam="([^"]*)"/) || [])[1];
-      if (!cam) fail(`route "${slug}" ships no camera state — every page needs its own map position`);
-      else cams.add(cam);
-      const country = (html.match(/data-country="([^"]*)"/) || [])[1];
-      if (!country) fail(`route "${slug}" ships no active country (data-country)`);
-    }
-    if (cams.size < SECTIONS.length) {
-      fail(`only ${cams.size} distinct camera positions across ${SECTIONS.length} routes — each page must focus its own geography`);
-    } else {
-      ok(`${cams.size} distinct server-rendered camera positions, one per page`);
-    }
-
-    /* The identity must stay REAL TEXT. The construction is painted on a
-       canvas, which makes this check more load-bearing than before: it is
-       what stops the canvas from ever becoming the *only* representation
-       of the name. If the glyphs were swapped for pixels or an image, the
-       name would be unselectable and invisible to assistive tech — that is
-       the end of the site's premise. Three things must all hold. */
-    const ink = (homeHtml.match(/class="sig-cell"/g) || []).length;
-    if (ink < 6) {
-      fail(`out/index.html ships only ${ink} real glyph text nodes (expected >= 6)`);
-    } else {
-      ok(`${ink} real glyph text nodes server-rendered in the identity mark`);
-    }
-    /* the accessible name must not depend on the canvas either */
-    if (!/<span class="sr-only">Sobuj Miah<\/span>/.test(homeHtml)) {
-      fail('out/index.html has no screen-reader copy of the name — the accessible name cannot depend on JavaScript');
-    } else {
-      ok('the accessible name ships as real text, independent of the construction');
-    }
-    /* the canvas is scaffolding: it must ship empty, never as the name */
-    if (/<canvas[^>]*sig-canvas[^>]*>\s*[^<\s]/.test(homeHtml)) {
-      fail('the construction canvas ships content — the name must live in the DOM, not in the canvas');
-    }
-    /* and the legible state must be the one that needs no JavaScript:
-       no phase attribute may be baked into the server render */
-    if (/data-asm=/.test(homeHtml)) {
-      fail('out/index.html bakes in a construction phase — without JavaScript the name must simply be present');
-    }
-    else ok(`identity mark is real DOM text (${ink} glyphs), not a canvas or image`);
+  /* The name is real text and the only <h1>; the environment is scaffolding. */
+  if (!/<h1 class="hero-name">/.test(homeHtml)) fail('out/index.html: the hero name must be the h1.hero-name');
+  const words = (homeHtml.match(/class="cinema-word(?: cinema-word--play)?"/g) || []).length;
+  if (words < 2) fail(`out/index.html ships only ${words} name word(s) as real text`);
+  else ok(`hero name ships as real DOM text (${words} words), no canvas or image`);
+  if (/<canvas[^>]*>\s*[^<\s]/.test(homeHtml)) fail('a canvas ships content — the environment must ship empty');
+  for (const slug of SECTIONS) {
+    const html = existsSync(routeFile(slug)) ? readFileSync(routeFile(slug), 'utf8') : '';
+    if ((html.match(/<canvas/g) || []).length !== 2) fail(`route "${slug}" must ship exactly the two environment canvases`);
+    if (/cinema-world|worldmap|sig-cell/.test(html)) fail(`route "${slug}" still ships retired environment markup`);
   }
+  ok('every chapter ships the silicon environment (2 empty canvases + no-JS gradient) and no retired markup');
 }
 
 const cssDir = join(OUT, '_next', 'static', 'css');
