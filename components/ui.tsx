@@ -552,7 +552,7 @@ export function Header() {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-[9998] py-4 backdrop-blur-xl border-b"
+      className="site-header fixed top-0 left-0 right-0 z-[9998] py-4 backdrop-blur-xl border-b"
       style={{ background: 'rgba(6,6,8,0.6)', borderColor: 'rgba(228,226,223,0.05)' }}
       initial={{ y: -80 }}
       animate={{ y: 0 }}

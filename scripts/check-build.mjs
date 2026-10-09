@@ -74,7 +74,8 @@ const MIN_VISIBLE_CHARS = 220;
     because a real route now exists that did not before.
     388 KB for the 2026-10 cinematic journey. The current film plates are
     local WebP assets and the old canvas renderer is removed; the measured
-    site-wide JS sum is 379 KB, with the per-route ceiling still 271 KB. */
+    site-wide JS sum is 379 KB. The later living-motion pass loads its
+    atmosphere separately; site-wide JS measures 383 KB. */
 const MAX_TOTAL_JS_GZIP = 388 * 1024;
 /** Per-route payload ceiling: the gzipped sum of every script a single
     HTML page references. The home page measured ~250 KB before the
@@ -86,9 +87,11 @@ const MAX_TOTAL_JS_GZIP = 388 * 1024;
     the site-wide total stayed under its 380 KB ceiling at the time.
     271 KB for the 2026-10 cinematic journey: the shared viewport motion
     observer adds entrances to card details across all pager chapters. The
-    measured home route is just above 270 KB; the site-wide 388 KB limit
-    and single-chunk ceiling still apply. */
-const MAX_ROUTE_JS_GZIP = 271 * 1024;
+    measured home route is just above 270 KB. The 2026-10 living-motion pass
+    adds camera parallax and pointer response to the initial route; measured
+    route JS is 272 KB, so the ceiling is 274 KB with 2 KB of headroom.
+    The site-wide 388 KB limit and single-chunk ceiling still apply. */
+const MAX_ROUTE_JS_GZIP = 274 * 1024;
 /** Per-route ceiling on the largest single gzipped chunk group. */
 const MAX_PAGE_JS_GZIP = 190 * 1024;
 
@@ -145,7 +148,7 @@ for (const [sceneIndex, slug] of SECTIONS.entries()) {
   if (!html.includes(`class="cinema-world" aria-hidden="true" data-shot="${sceneIndex}"`)) {
     fail(`route "${slug}" has no server-rendered cinematic shot`);
   }
-  const activePlate = html.match(/<div class="cinema-world-plate" data-active="true" style="[^"]*opacity:1[^"]*"><div class="cinema-world-image" style="background-image:url\(([^)]+)\)/);
+  const activePlate = html.match(/<div class="cinema-world-plate" data-active="true" style="[^"]*opacity:1[^"]*"><div class="cinema-world-look"><div class="cinema-world-image" style="background-image:url\(([^)]+)\)/);
   if (activePlate?.[1] !== `/cinema/${CINEMA_LOCATIONS[sceneIndex]}.webp`) {
     fail(`route "${slug}" does not server-render its opening film plate`);
   }

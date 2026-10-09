@@ -419,6 +419,13 @@ body.lang-bn .worldmap-pin {
   will-change: transform, opacity;
 }
 
+.cinema-world-look {
+  position: absolute;
+  inset: -3%;
+  transform: translate3d(var(--look-x, 0%), var(--look-y, 0%), 0);
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .cinema-world-image {
   position: absolute;
   inset: -5%;
@@ -428,12 +435,12 @@ body.lang-bn .worldmap-pin {
 }
 
 .cinema-world-plate[data-active='true'] .cinema-world-image {
-  animation: cinema-camera-breathe 22s ease-in-out infinite alternate;
+  animation: cinema-camera-breathe 14s ease-in-out infinite alternate;
 }
 
 @keyframes cinema-camera-breathe {
-  from { transform: translate3d(-1.2%, 0.5%, 0) scale(1); }
-  to { transform: translate3d(1.2%, -0.5%, 0) scale(1.045); }
+  from { transform: translate3d(-2%, 0.8%, 0) scale(1); }
+  to { transform: translate3d(2%, -0.8%, 0) scale(1.08); }
 }
 
 .cinema-world-grade,
@@ -441,6 +448,15 @@ body.lang-bn .worldmap-pin {
   position: absolute;
   inset: 0;
 }
+
+.cinema-world-atmosphere {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+}
+
 
 .cinema-world-grade {
   background:
@@ -466,6 +482,7 @@ body.lang-bn .worldmap-pin {
 
 @media (prefers-reduced-motion: reduce) {
   .cinema-world-image { animation: none !important; }
+  .cinema-world-look { transition: none; }
   .cinema-world-air { animation: none; }
 }
 
@@ -669,6 +686,138 @@ body.lang-bn .worldmap-pin {
     0
   );
   will-change: transform;
+  animation: living-numeral-glow 10s ease-in-out infinite alternate;
+}
+
+@keyframes living-numeral-glow {
+  from { -webkit-text-stroke-color: rgba(74, 222, 128, 0.08); }
+  to { -webkit-text-stroke-color: rgba(74, 222, 128, 0.24); }
+}
+
+/* The content is an active layer of the world: section titles breathe,
+   controls catch light, and cards respond where the pointer actually is. */
+.page-content .ph-h,
+.services-doc main h1,
+.services-doc main h2 {
+  position: relative;
+}
+
+.page-content .ph-h::after,
+.services-doc main h1::after,
+.services-doc main h2::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -0.65rem;
+  width: min(7rem, 28%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(74, 222, 128, 0.75), transparent);
+  transform-origin: center;
+  animation: living-title-light 8s ease-in-out infinite;
+}
+
+@keyframes living-title-light {
+  0%, 65%, 100% { opacity: 0.18; transform: translateX(-50%) scaleX(0.55); }
+  78% { opacity: 0.85; transform: translateX(-50%) scaleX(1); }
+}
+
+.page-content :is(.rounded-xl, .rounded-2xl, .repo-card),
+.services-doc main :is(.rounded-xl, .rounded-2xl) {
+  position: relative;
+  isolation: isolate;
+}
+
+.page-content :is(.rounded-xl, .rounded-2xl, .repo-card)::before,
+.services-doc main :is(.rounded-xl, .rounded-2xl)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(circle at 70% 0%, rgba(74, 222, 128, 0.12), transparent 65%);
+  animation: living-card-light 9s ease-in-out infinite alternate;
+}
+
+.page-content :is(.rounded-xl, .rounded-2xl, .repo-card):nth-child(2n)::before,
+.services-doc main :is(.rounded-xl, .rounded-2xl):nth-child(2n)::before {
+  animation-delay: -4.5s;
+}
+
+@keyframes living-card-light {
+  from { opacity: 0.05; }
+  to { opacity: 0.52; }
+}
+
+.page-content [data-live-active='true'],
+.services-doc main [data-live-active='true'],
+.nav-overlay-panel [data-live-active='true'] {
+  outline: 1px solid rgba(74, 222, 128, 0.18);
+  outline-offset: 1px;
+}
+
+.page-content [data-live-active='true']::after,
+.services-doc main [data-live-active='true']::after,
+.nav-overlay-panel [data-live-active='true']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(13rem circle at var(--live-x, 50%) var(--live-y, 50%), rgba(74, 222, 128, 0.09), transparent 68%);
+}
+
+.page-content :is(a, button),
+.services-doc main :is(a, button),
+.nav-overlay-panel :is(a, button) {
+  transition: color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, filter 0.35s ease;
+}
+
+.page-content :is(a, button):hover,
+.services-doc main :is(a, button):hover,
+.nav-overlay-panel :is(a, button):hover {
+  filter: brightness(1.18);
+  box-shadow: 0 0 28px rgba(74, 222, 128, 0.12);
+}
+
+.site-header nav a {
+  position: relative;
+}
+
+.site-header nav a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.6rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #4ade80, transparent);
+  transform: scaleX(0);
+  opacity: 0;
+  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.42s ease;
+}
+
+.site-header nav a:hover::after,
+.site-header nav a:focus-visible::after {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+.site-header [data-magnetic]:hover,
+.site-footer a:hover,
+.pager-hud:hover {
+  filter: brightness(1.3);
+  text-shadow: 0 0 16px rgba(74, 222, 128, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-numeral,
+  .page-content .ph-h::after,
+  .services-doc main h1::after,
+  .services-doc main h2::after,
+  .page-content :is(.rounded-xl, .rounded-2xl, .repo-card)::before,
+  .services-doc main :is(.rounded-xl, .rounded-2xl)::before { animation: none !important; }
 }
 
 @supports not (-webkit-text-stroke: 1px black) {

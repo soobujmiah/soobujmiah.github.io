@@ -580,6 +580,8 @@ components/SignatureName.tsx  the signature identity mark (§5b)
 components/IdentityClock.tsx  the dot-matrix identity clock (§5c)
 components/WorldMap.tsx   dark-green page-aware map environment (§9)
 components/CinematicWorld.tsx  continuous three-location film environment
+components/LivingAtmosphere.tsx  location-specific live Canvas 2D weather and light
+components/LivingInteractions.tsx  delegated pointer light on cards and controls
 components/world-map-path.ts  generated land contours (do not edit)
 components/world-map-countries.ts  generated per-country shapes (do not edit)
 tools/make-worldmap.py    regenerates the contours from Natural Earth
@@ -600,12 +602,18 @@ The camera pans and pushes over 1.8s when the location remains the same;
 the next location dissolves over 1.1s. Services uses the causeway, and
 Verification uses the archive. The content layer keeps a much smaller depth
 move so the environment, rather than a rotating page, carries the scene.
+Each location has a live Canvas 2D atmosphere: rain and distant movement at
+the observatory, cascading energy and floor reflections in the causeway,
+and scanning light in the archive. The camera drifts continuously and responds
+to fine-pointer position. Section titles carry a quiet light pulse, cards
+breathe and catch pointer light, and their text enters in sequence. The canvas
+caps rendering near 30 fps and stops drawing in hidden tabs.
 The central image grade preserves text contrast; mobile receives a darker
 grade. The three plates are generated project assets, stored locally under
 `public/cinema/`, and total under 300 KB. There is no video stream, runtime
 image request, WebGL engine, or paid service. The real geographic map remains
 server-rendered behind the plates as a fallback. Under reduced
-motion, the scene changes instantly and the ambient light stops. The content
+motion, the scene changes instantly and the atmosphere and ambient light stop. The content
 heading is the only page title, and text is present without JavaScript.
 
 All shared section reveals now use the depth reveal variant. Presence cards tilt at most five degrees on
