@@ -212,8 +212,9 @@ English tree. Neither language borrows the other's script.
 - Reveals: `0.7s cubic-bezier(0.16, 1, 0.3, 1)` fade-up; pages remount, so
   reveals replay on each entry.
 - Micro: 0.1–0.5s; magnetic links ease-out 0.12s, release 0.5s expo.
-- Environment responds to paging: the film world moves to the next shot over
-  ~1.8s, or dissolves to the next location over ~1.1s; progress advances.
+- Environment responds to paging: the camera flies to the chapter's shot over
+  1.5s (velocity-continuous if paged again mid-flight) and the chapter light
+  crossfades over 1.1s; progress advances.
 - Animate **transform + opacity only** (compositor-friendly). The identity
   mark's continuous life is pure CSS; its pointer loop writes CSS variables
   and stops itself the moment nothing is moving.
@@ -318,25 +319,35 @@ real product's layout is implied. Block labels are never drawn.
   arrays; Work over the GPU; Research over the NPU; Experience tracking down
   a long bus; Contact pulled back to the I/O ring; Services and Verification
   calm static shots. Chapter changes fly the camera over 1.5 s on an arc
-  (`flightPose`: eased, shortest-way heading, the camera rises mid-flight).
+  (`flightAt`: C² eased, shortest-way heading, the camera rises mid-flight);
+  paging again mid-flight keeps the camera's position *and* velocity.
 - **Meaning.** Each chapter lights the region of the chip it is about
   (`FOCUS`): Work the GPU, Research the NPU, About the memory arrays,
   Experience the long bus, Contact the I/O ring where signals leave the chip.
-  The lit region fades in over 1.1 s with a slow breath, and signal pulses on
-  routes through it burn brighter. No labels are drawn.
+  The lit region crossfades over 1.1 s, and signal pulses on routes through it
+  burn brighter. Strength scales down for large regions (`chapterGain`) and
+  poses keep lit regions out of the text column. No labels are drawn.
 - **Opening.** On a true entry to the home chapter the horizon line exists
   first, then the chip fades in as the camera rises (1.8 s). Any pointer, key
   or wheel input skips it.
-- **Depth.** Lines are drawn in three depth bands (near/mid/far) so distance
-  dissolves into the dark; a haze gradient softens the horizon.
-- **Life.** On full-detail screens the still shot sways a few units (30 fps,
-  imperceptible in amplitude); phones and reduced motion hold still.
-- **Light.** A second canvas draws the focus glow and the signal pulses; the
-  scene canvas is redrawn only while the camera flies or sways.
-- **Safety.** Paused when the tab is hidden; mobile uses a lighter plan;
+- **Depth.** Continuous exponential fog, exact for the floor plane, folded
+  with the sky and horizon glow into one gradient. Nothing pops between depth
+  bands.
+- **Life & interaction.** On fine-pointer, full-detail screens the camera
+  orbits its subject: a damped pointer parallax (±2 %, over-damped spring),
+  a very slow ambient drift, and a small scroll dolly. Phones, touch and
+  reduced motion hold the camera still between chapters.
+- **Light.** A second canvas draws the signal pulses in lockstep with the
+  scene. The scene canvas, including the chapter light pool, redraws only
+  while something moves (and every 125 ms for the sub-pixel ambient drift).
+- **Safety.** Paused when the tab is hidden; frame gaps are clamped so
+  motion never jumps; a pixel budget and a one-way quality ratchet protect
+  slow devices; mobile uses a lighter plan;
   reduced motion draws one static frame per chapter with no pulses; without
   JavaScript a CSS gradient (`.silicon-world`) remains. A scrim
   (`.silicon-grade`) keeps text legible.
+
+All parameters and the math behind them: [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md).
 
 ### Chapter compositions
 

@@ -12,14 +12,12 @@ Discrete cinematic pager (Next.js static export + framer-motion),
 fully bilingual **English / বাংলা**, green-on-black theme. The hero name is
 **constructed, not revealed**: its own rendered ink is sampled into a
 particle field that travels home and resolves into real typography.
-The visual story moves through three connected futuristic locations: an
-observatory exterior, a passage into its core, and a final archive. Camera
-positions advance within each location and dissolve between locations. A
-live canvas adds location-specific weather, energy, light travel and depth;
-fine-pointer movement shifts the camera. Cards and controls catch a moving
-pointer light, while copy and details enter in sequence. The three local WebP
-plates total under 300 KB and need no hosted runtime service.
-The geographic map remains a crawlable fallback beneath them. Each
+The background is one continuous environment: an abstract, seeded
+system-on-chip floorplan drawn as emerald wireframe with Canvas 2D. Each
+chapter flies the camera to the region it is about and lights it; depth fog,
+signal pulses and, on fine pointers, a damped pointer parallax keep it alive
+without competing with the copy. Parameters and math: `docs/ENVIRONMENT.md`.
+Each
 page shows its title once; reduced-motion visitors see still shots and all
 text stays readable without JavaScript.
 
