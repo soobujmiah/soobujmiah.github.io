@@ -18,6 +18,8 @@ created to satisfy a checklist.
 
 ## What exists here
 
+- `CINEMATIC_AUDIT.md` — why the old cinematic layer looked low quality, and what replaced it
+- `ASSETS.md` — provenance of every shipped asset
 - `SEO.md/`
 - `SEO_STANDARD.md/`
 

@@ -66,11 +66,8 @@ writeFileSync(
         'app/graphemes.ts',
         'app/sections.ts',
         'app/language.tsx',
-        'app/geo.ts',
-        'app/name-motion.ts',
+        'app/silicon.ts',
         'app/design-tokens.ts',
-        'app/clock.ts',
-        'app/story-world.ts',
         'app/services.ts',
       ],
     },
@@ -91,11 +88,9 @@ const pick = (...cands) => cands.map((c) => join(tmp, c)).find((p) => existsSync
 const sigPath = pick('graphemes.js', 'app/graphemes.js');
 const sectionsPath = pick('app/sections.js', 'sections.js');
 const langPath = pick('app/language.js', 'language.js');
-const geoPath = pick('app/geo.js', 'geo.js');
-const motionPath = pick('app/name-motion.js', 'name-motion.js');
 const tokensPath = pick('app/design-tokens.js', 'design-tokens.js');
 
-if (!sigPath || !sectionsPath || !langPath || !geoPath || !motionPath || !tokensPath) {
+if (!sigPath || !sectionsPath || !langPath || !tokensPath) {
   console.error(`check-units FAIL: compiled output not found under ${tmp}`);
   console.log(existsSync(tmp) ? execSync(`find "${tmp}" -name '*.js'`, { encoding: 'utf8' }) : '');
   process.exit(1);
@@ -106,61 +101,12 @@ const { SECTION_IDS, sectionHref, indexForSlug, indexFromPathname, sectionUrl, S
   pathToFileURL(sectionsPath).href
 );
 const { localizeDigits } = await import(pathToFileURL(langPath).href);
-const clockPath = pick('app/clock.js', 'clock.js');
-if (!clockPath) {
-  console.error('check-units FAIL: compiled app/clock.ts not found');
+const siliconPath = pick('app/silicon.js', 'silicon.js');
+if (!siliconPath) {
+  console.error('check-units FAIL: compiled app/silicon.ts not found');
   process.exit(1);
 }
-const { hour12, twoDigit } = await import(pathToFileURL(clockPath).href);
-const { GEO_FOCUS, cameraFor, clampCamera, projectPoint, projectToScreen } = await import(
-  pathToFileURL(geoPath).href
-);
-const {
-  hashSeed,
-  mulberry32,
-  easeOutSettle,
-  baselineWithinBox,
-  sampleStepFor,
-  denseStepFor,
-  densityStepFor,
-  particleCountForInk,
-  sampleInkPoints,
-  sampleInkPointsMinDist,
-  particleRadiusFor,
-  minParticleDistance,
-  PARTICLE_WEIGHT,
-  pointsBounds,
-  centerPointsInSafeRect,
-  startOffset,
-  disperseOrigin,
-  rampPalette,
-  bucketFor,
-  particleBudget,
-  hexToRgb,
-  mixRgb,
-  rgbToCss,
-  spatialPairing,
-  flowPoint,
-  styledFlowPoint,
-  splitTwoLines,
-  morphParamsFromSeed,
-  staggerOrder,
-  MORPH_STYLES,
-  easeInOutQuint,
-  hasBengaliScript,
-} = await import(pathToFileURL(motionPath).href);
-const storyPath = pick('app/story-world.js', 'story-world.js');
-if (!storyPath) {
-  console.error('check-units FAIL: compiled app/story-world.ts not found');
-  process.exit(1);
-}
-const {
-  STORY_BEATS,
-  serviceKeywords,
-  NAME_HOLD_MS,
-  KEYWORD_HOLD_MS,
-} = await import(pathToFileURL(storyPath).href);
-const { MOTION } = await import(pathToFileURL(tokensPath).href);
+const silicon = await import(pathToFileURL(siliconPath).href);
 
 console.log('\nBengali grapheme segmentation (Intl.Segmenter path)');
 eq('সবুজ মিয়া → 6 clusters, not 9 code points', segmentGraphemes('সবুজ মিয়া'), ['স', 'বু', 'জ', ' ', 'মি', 'য়া']);
@@ -201,489 +147,56 @@ eq('Bengali home path has locale prefix', sectionHref(0, 'bn'), '/bn/');
 eq('Bengali section URL', sectionUrl(3, 'bn'), `${SITE_ORIGIN}/bn/work/`);
 eq('Bengali pathname maps to section', indexFromPathname('/bn/work/'), 3);
 
-/* ── the map's promise ──
-   Every route promises one thing visually: its own geography, framed.
-   The camera is derived in app/geo.ts and rendered by WorldMap, so the
-   promise is testable here rather than eyeballed in a browser we do not
-   have. "Framed" means the focus's real projected coordinates land on
-   the centre of the visible square — the same mapping the arrival label
-   uses for its screen position. */
-console.log('\nMap camera framing (the geography each route promises)');
-eq('one focus per section, in section order', GEO_FOCUS.map((g) => g.section), [...SECTION_IDS]);
-const VIEWPORTS = [
-  { width: 390, height: 844 }, // phone
-  { width: 1440, height: 900 }, // desktop
-];
-for (const [i, g] of GEO_FOCUS.entries()) {
-  const cam = cameraFor(i);
-  const point = projectPoint(g.lon, g.lat);
-  for (const vp of VIEWPORTS) {
-    const p = projectToScreen(cam, point, vp);
-    const offX = Math.abs(p.x - vp.width / 2);
-    const offY = Math.abs(p.y - vp.height / 2);
-    eq(
-      `${g.section}: focus on the frame centre @${vp.width}x${vp.height} (off by ${offX.toFixed(1)},${offY.toFixed(1)} px)`,
-      offX <= 1 && offY <= 1,
-      true
-    );
-  }
-}
-const cams = GEO_FOCUS.map((_, i) => cameraFor(i));
-eq('every section gets its own camera', new Set(cams.map((c) => `${c.x},${c.y},${c.hw}`)).size, GEO_FOCUS.length);
-eq('cameraFor is deterministic (same page, same frame, always)', cameraFor(4), cameraFor(4));
-eq('clamping an already-clamped camera changes nothing', clampCamera(cams[6].x, cams[6].y, cams[6].hw), cams[6]);
-eq(
-  'a zoom wider than the projected map still yields a finite camera',
-  Number.isFinite(clampCamera(500, -200, 400).y),
-  true
-);
-
 console.log('\nBengali digits');
 eq('English digits unchanged', localizeDigits('2026', 'en'), '2026');
 eq('Bengali digits', localizeDigits('2026', 'bn'), '২০২৬');
 
-console.log('\nClock arithmetic — one authoritative value (§13/§15 boundaries)');
-eq('00h reads 12 AM', hour12(0), 12);
-eq('01h reads 1', hour12(1), 1);
-eq('11h reads 11 (11:59 AM edge)', hour12(11), 11);
-eq('12h reads 12 (12:00 PM)', hour12(12), 12);
-eq('13h reads 1 (12:59 PM → 01 PM)', hour12(13), 1);
-eq('23h reads 11 (11:59 PM edge)', hour12(23), 11);
-eq('out-of-range wraps onto the dial', hour12(24), 12);
-eq('garbage hour falls back to 12', hour12(NaN), 12);
-eq('seconds pad below ten', twoDigit(5), '05');
-eq('the 55→56 step', twoDigit(56), '56');
-eq('59 stays 59 before the wrap', twoDigit(59), '59');
-eq('over-range clamps to 59', twoDigit(75), '59');
-eq('garbage part falls back to 00', twoDigit(NaN), '00');
-eq('Bengali seconds render ৫৮ for 58', localizeDigits(twoDigit(58), 'bn'), '৫৮');
-eq('padded counter', localizeDigits('03', 'bn'), '০৩');
-
-console.log('\nSignature name — determinism (the construction must be reproducible)');
-eq('the same name always seeds the same', hashSeed('Sobuj Miah'), hashSeed('Sobuj Miah'));
-eq('a different name seeds differently', hashSeed('Sobuj Miah') !== hashSeed('সবুজ মিয়া'), true);
-eq('the seed is a 32-bit unsigned integer', Number.isInteger(hashSeed('সবুজ মিয়া')) && hashSeed('সবুজ মিয়া') >= 0, true);
-const r1 = mulberry32(hashSeed('Sobuj Miah'));
-const r2 = mulberry32(hashSeed('Sobuj Miah'));
-const seq1 = [r1(), r1(), r1()];
-const seq2 = [r2(), r2(), r2()];
-eq('the same seed replays the same sequence', seq1, seq2);
-eq('every value is in [0, 1)', seq1.every((v) => v >= 0 && v < 1), true);
-eq('successive values differ (the generator is not stuck)', new Set(seq1).size, 3);
-
-console.log('\nSignature name — the settle curve must land exactly on target');
-eq('starts at 0', easeOutSettle(0, 0.7), 0);
-eq('lands at exactly 1 — a particle can never stop short of its glyph', easeOutSettle(1, 0.7), 1);
-eq('overshoots once, so the particle seats rather than stops', (() => {
-  let max = 0;
-  for (let i = 0; i <= 200; i += 1) max = Math.max(max, easeOutSettle(i / 200, 0.7));
-  return max > 1 && max < 1.12;
-})(), true);
-eq('back=0 is a plain ease-out with no overshoot', (() => {
-  let max = 0;
-  for (let i = 0; i <= 200; i += 1) max = Math.max(max, easeOutSettle(i / 200, 0));
-  return Math.abs(max - 1) < 1e-9;
-})(), true);
-eq('clamps below zero', easeOutSettle(-3, 0.7), 0);
-eq('clamps above one', easeOutSettle(7, 0.7), 1);
-eq('is monotonic enough to never travel backwards visually', (() => {
-  let prev = -1;
-  let regressions = 0;
-  for (let i = 0; i <= 100; i += 1) {
-    const v = easeOutSettle(i / 100, 0.7);
-    if (v < prev - 0.02) regressions += 1;
-    prev = v;
-  }
-  return regressions;
-})(), 0);
-
-console.log('\nSignature name — baseline derivation (particles must land on the glyphs)');
-eq('centres the em box in the line box: no leading', baselineWithinBox(0, 100, 80, 20), 80);
-eq('splits half-leading above the ascent', baselineWithinBox(0, 140, 80, 20), 100);
-eq('respects the box offset', baselineWithinBox(25, 140, 80, 20), 125);
-eq('degenerate metrics fall back instead of returning NaN', Number.isFinite(baselineWithinBox(0, 0, 0, 0)), true);
-eq('the fallback sits inside the box', baselineWithinBox(0, 0, 0, 0), 0);
-
-console.log('\nSignature name — the particle budget is a ceiling');
-eq('under budget keeps the crisp base step', sampleStepFor(400, 3, 1700), 3);
-eq('sparse fields densify below the base step', denseStepFor(400, 8, 1600) < 8, true);
-eq('densified count never exceeds the budget', 400 * (8 / denseStepFor(400, 8, 1600)) ** 2 <= 1600, true);
-eq('near-target fields keep the base step', denseStepFor(1500, 3, 1700), 3);
-eq('over target matches sampleStepFor', denseStepFor(6800, 2, 1700), sampleStepFor(6800, 2, 1700));
-eq('dense degenerate input returns the base step', denseStepFor(0, 3, 1700), 3);
-eq('the dense step never collapses below one pixel', denseStepFor(1, 8, 4000) >= 1, true);
-eq('over budget widens the step', sampleStepFor(6800, 2, 1700), 4);
-
-console.log('\\nSignature name — constant areal density (service weight = name weight)');
-eq('densityStepFor is finite and ≥1', densityStepFor(800, 3, 0.12, 1, 8) >= 1, true);
-eq('densityStepFor respects maxStep', densityStepFor(10, 8, 0.001, 1, 5) <= 5, true);
-eq('densityStepFor respects minStep', densityStepFor(9000, 2, 0.5, 3, 10) >= 3, true);
-eq('densityStepFor is deterministic', densityStepFor(500, 4, 0.1, 1, 6), densityStepFor(500, 4, 0.1, 1, 6));
-eq('particleCountForInk scales with area', particleCountForInk(400, 2, 0.15, 100, 5000) > particleCountForInk(100, 2, 0.15, 100, 5000), true);
-eq('particleCountForInk honours minimum', particleCountForInk(1, 8, 0.01, 220, 2000) >= 220, true);
-eq('particleCountForInk honours maximum', particleCountForInk(99999, 1, 1, 100, 900) <= 900, true);
-eq('particleCountForInk is deterministic', particleCountForInk(300, 3, 0.1, 50, 2000), particleCountForInk(300, 3, 0.1, 50, 2000));
-/* Synthetic 20×20 ink square in a 40×40 buffer — density must follow the square, not the bbox. */
-(() => {
-  const fw = 40;
-  const fh = 40;
-  const img = new Uint8ClampedArray(fw * fh * 4);
-  for (let y = 10; y < 30; y += 1) {
-    for (let x = 10; x < 30; x += 1) {
-      const i = (y * fw + x) * 4;
-      img[i] = 255; img[i + 1] = 255; img[i + 2] = 255; img[i + 3] = 255;
-    }
-  }
-  const pts = sampleInkPoints(img, fw, fh, 2, 100, 200, 42);
-  eq('sampleInkPoints only hits ink', pts.every((p) => {
-    const x = Math.min(fw - 1, Math.max(0, Math.floor(p.x)));
-    const y = Math.min(fh - 1, Math.max(0, Math.floor(p.y)));
-    return img[(y * fw + x) * 4 + 3] > 100;
-  }), true);
-  eq('sampleInkPoints is deterministic', sampleInkPoints(img, fw, fh, 2, 100, 200, 42).length, pts.length);
-  eq('sampleInkPoints stays under maxCount', pts.length <= 200, true);
-  eq('sampleInkPoints has real coverage', pts.length >= 40, true);
-  const b = pointsBounds(pts);
-  eq('pointsBounds width tracks the glyph, not the canvas', b.width <= 22 && b.width >= 14, true);
-  eq('pointsBounds height tracks the glyph, not the canvas', b.height <= 22 && b.height >= 14, true);
-  centerPointsInSafeRect(pts, 100, 80, { left: 90, top: 70, right: 110, bottom: 90 });
-  const b2 = pointsBounds(pts);
-  eq('centerPointsInSafeRect recentres the cloud', Math.abs(b2.cx - 100) < 2 && Math.abs(b2.cy - 80) < 2, true);
-  eq('centerPointsInSafeRect stays inside the safe rect', b2.minX >= 90 - 0.01 && b2.maxX <= 110 + 0.01 && b2.minY >= 70 - 0.01 && b2.maxY <= 90 + 0.01, true);
-  /* Oversized cloud must SCALE into the safe box, not crush against edges. */
-  const wide = [
-    { x: 0, y: 40 },
-    { x: 50, y: 40 },
-    { x: 100, y: 40 },
-    { x: 200, y: 40 },
-    { x: 100, y: 10 },
-    { x: 100, y: 70 },
-  ];
-  centerPointsInSafeRect(wide, 100, 40, { left: 80, top: 20, right: 120, bottom: 60 });
-  const bw = pointsBounds(wide);
-  eq('centerPointsInSafeRect scales oversized width into safe', bw.width <= 40 + 0.5, true);
-  eq('centerPointsInSafeRect scales oversized height into safe', bw.height <= 40 + 0.5, true);
-  eq('centerPointsInSafeRect keeps interior points (no edge crush)', (() => {
-    /* After uniform scale, the middle of the cloud must not collapse to a rim. */
-    const xs = wide.map((p) => p.x).sort((a, b) => a - b);
-    const unique = new Set(xs.map((v) => v.toFixed(2)));
-    return unique.size >= 3;
-  })(), true);
-})();
-
-console.log('\\nSignature name — min-distance visual weight (particulate, not solid)');
-eq('PARTICLE_WEIGHT density band is particulate', PARTICLE_WEIGHT.densityMax < 0.2 && PARTICLE_WEIGHT.densityMin > 0.04, true);
-eq('PARTICLE_WEIGHT density sits inside its band', PARTICLE_WEIGHT.density >= PARTICLE_WEIGHT.densityMin && PARTICLE_WEIGHT.density <= PARTICLE_WEIGHT.densityMax, true);
-eq('particleRadiusFor stays discrete', particleRadiusFor(390) <= PARTICLE_WEIGHT.radiusMax && particleRadiusFor(390) >= PARTICLE_WEIGHT.radiusMin, true);
-eq('minParticleDistance clears radius', minParticleDistance(1.5) >= 1.5 * PARTICLE_WEIGHT.minDistFactor - 0.01 || minParticleDistance(1.5) >= PARTICLE_WEIGHT.minDistFloor, true);
-(() => {
-  const fw = 48;
-  const fh = 48;
-  const img = new Uint8ClampedArray(fw * fh * 4);
-  for (let y = 8; y < 40; y += 1) {
-    for (let x = 8; x < 40; x += 1) {
-      const i = (y * fw + x) * 4;
-      img[i] = 255; img[i + 1] = 255; img[i + 2] = 255; img[i + 3] = 255;
-    }
-  }
-  const dense = sampleInkPoints(img, fw, fh, 2, 100, 800, 7);
-  const spaced = sampleInkPointsMinDist(img, fw, fh, 4, 100, 800, 7);
-  eq('min-dist sampling is sparser than grid fill', spaced.length < dense.length, true);
-  eq('min-dist sampling stays under maxCount', spaced.length <= 800, true);
-  eq('min-dist sampling has real coverage', spaced.length >= 20, true);
-  eq('min-dist sampling is deterministic', sampleInkPointsMinDist(img, fw, fh, 4, 100, 800, 7).length, spaced.length);
-  /* Neighbours should roughly respect minDist (allow thin-pass 0.78×). */
-  let violations = 0;
-  const floor2 = (4 * 0.75) * (4 * 0.75);
-  for (let i = 0; i < spaced.length; i += 1) {
-    for (let j = i + 1; j < spaced.length; j += 1) {
-      const dx = spaced[i].x - spaced[j].x;
-      const dy = spaced[i].y - spaced[j].y;
-      if (dx * dx + dy * dy < floor2 * 0.85) violations += 1;
-    }
-  }
-  eq('min-dist neighbours rarely collide', violations < spaced.length * 0.05, true);
-  eq('morphParamsFromSeed stagger stays short', morphParamsFromSeed(11, 'radial').stagger <= 0.14, true);
-  eq('morphParamsFromSeed overshoot stays gentle', morphParamsFromSeed(11, 'radial').overshoot <= 0.05, true);
-})();
-
-console.log('\\nSignature name — Bengali script detect + small-component mark rescue');
-eq('hasBengaliScript sees BN name', hasBengaliScript('সবুজ মিয়া'), true);
-eq('hasBengaliScript rejects Latin', hasBengaliScript('Sobuj Miah'), false);
-eq('hasBengaliScript rejects empty', hasBengaliScript(''), false);
-eq('hasBengaliScript sees mixed BN mark', hasBengaliScript('Office প্রশাসন'), true);
-(() => {
-  /* Body stroke + two tiny detached marks (কার / chandrabindu stand-ins).
-     Lattice min-dist alone can skip the flecks; component rescue must land
-     at least one sample on each so BN diacritics stay visible. */
-  const fw = 64;
-  const fh = 48;
-  const img = new Uint8ClampedArray(fw * fh * 4);
-  const paint = (x0, y0, x1, y1) => {
-    for (let y = y0; y <= y1; y += 1) {
-      for (let x = x0; x <= x1; x += 1) {
-        if (x < 0 || y < 0 || x >= fw || y >= fh) continue;
-        const i = (y * fw + x) * 4;
-        img[i] = 255;
-        img[i + 1] = 255;
-        img[i + 2] = 255;
-        img[i + 3] = 255;
+console.log('\nSilicon Nocturne — the procedural environment');
+{
+  const { buildPlan, rng, POSES, poseFor, lerpPose, easeInOut, makeProjector, ZONES, DIE } = silicon;
+  const count = (p) => p.lines.map((l) => l.length / 6);
+  eq('the PRNG is deterministic', [rng(7)(), rng(7)()], [rng(7)(), rng(7)()]);
+  eq('the PRNG stays in [0,1)', (() => { const r = rng(3); for (let i = 0; i < 1000; i++) { const v = r(); if (v < 0 || v >= 1) return false; } return true; })(), true);
+  eq('the same seed yields the same chip', count(buildPlan(11, 'full')), count(buildPlan(11, 'full')));
+  eq('the same seed yields identical geometry', buildPlan(11, 'lite').lines[1].slice(0, 60), buildPlan(11, 'lite').lines[1].slice(0, 60));
+  const full = buildPlan(20261009, 'full');
+  const lite = buildPlan(20261009, 'lite');
+  const total = (p) => count(p).reduce((a, b) => a + b, 0);
+  eq('the full chip is dense enough to read as a city of silicon', total(full) > 6000, true);
+  eq('the full chip stays inside the Canvas 2D draw budget', total(full) < 30000, true);
+  eq('mobile detail is genuinely lighter', total(lite) < total(full) * 0.6, true);
+  eq('every line array is whole segments', full.lines.every((l) => l.length % 6 === 0), true);
+  eq('every coordinate is finite', full.lines.every((l) => l.every(Number.isFinite)), true);
+  eq('signal routes are Manhattan polylines of whole points', full.routes.every((r) => r.length >= 4 && r.length % 2 === 0), true);
+  eq('zones sit inside the die', Object.values(ZONES).every((z) => z[0] >= -DIE.halfW && z[2] <= DIE.halfW && z[1] >= -DIE.halfD && z[3] <= DIE.halfD), true);
+  eq('one camera pose per chapter plus services and verification', POSES.length, 9);
+  eq('poseFor falls back to the establishing shot', poseFor(99), POSES[0]);
+  eq('no two chapters share a camera', new Set(POSES.map((p) => JSON.stringify(p))).size, 9);
+  eq('the flight eases through its endpoints', [easeInOut(0), easeInOut(1)], [0, 1]);
+  eq('the flight eases monotonically', [0.1, 0.3, 0.5, 0.7, 0.9].every((t, i, a) => i === 0 || easeInOut(t) > easeInOut(a[i - 1])), true);
+  eq('lerpPose hits both endpoints', [lerpPose(POSES[0], POSES[3], 0), lerpPose(POSES[0], POSES[3], 1)], [POSES[0], POSES[3]]);
+  const out = new Float64Array(5);
+  /* a point straight ahead of the camera lands on the screen centre */
+  const flat = { x: 0, z: 100, h: 50, yaw: 0, pitch: 0, fov: 60 };
+  const pr = makeProjector(flat, 800, 600);
+  eq('a point dead ahead projects to the screen centre', (() => { const o = new Float64Array(3); pr.project(0, 50, -300, o); return [Math.round(o[0]), Math.round(o[1])]; })(), [400, 300]);
+  eq('a point behind the camera is rejected', pr.project(0, 50, 500, new Float64Array(3)), false);
+  eq('the horizon of a level camera is mid-screen', Math.round(pr.horizon), 300);
+  eq('pitching down lifts the horizon off the top', makeProjector({ ...flat, pitch: 40 }, 800, 600).horizon < 0, true);
+  eq('a segment wholly behind the camera is culled', pr.segment(0, 0, 500, 10, 0, 600, out), false);
+  eq('a segment crossing the near plane is clipped, not dropped', (() => { const ok = pr.segment(0, 0, 90, 0, 0, -500, out); return ok && out.every(Number.isFinite); })(), true);
+  eq('a right-hand point lands right of centre', (() => { const o = new Float64Array(3); pr.project(80, 50, -200, o); return o[0] > 400; })(), true);
+  eq('every chapter\'s camera sees a substantial part of the chip', POSES.every((pose) => {
+    const proj = makeProjector(pose, 1440, 900);
+    let seen = 0;
+    for (const l of full.lines) {
+      for (let i = 0; i < l.length; i += 6) {
+        if (proj.segment(l[i], l[i + 1], l[i + 2], l[i + 3], l[i + 4], l[i + 5], out) && out[1] > -20 && out[1] < 920 && out[0] > -20 && out[0] < 1460) seen++;
       }
     }
-  };
-  paint(8, 18, 48, 30); /* main body */
-  paint(52, 6, 55, 10); /* upper mark (~16 px) */
-  paint(20, 36, 24, 39); /* lower mark (~20 px) */
-  const minD = 5;
-  const pts = sampleInkPointsMinDist(img, fw, fh, minD, 100, 200, 99);
-  const near = (cx, cy, r) => pts.some((p) => Math.hypot(p.x - cx, p.y - cy) <= r);
-  eq('component rescue covers upper detached mark', near(53.5, 8, 4.5), true);
-  eq('component rescue covers lower detached mark', near(22, 37.5, 4.5), true);
-  eq('component rescue still samples the body', near(28, 24, 8), true);
-  eq('component rescue stays under budget (no density inflate)', pts.length <= 200, true);
-  eq(
-    'component rescue is deterministic',
-    sampleInkPointsMinDist(img, fw, fh, minD, 100, 200, 99).length,
-    pts.length
-  );
-  /* Solid body alone must not explode count vs plain lattice — rescue is
-     only for zero-hit components, not a global density bump. */
-  const bodyOnly = new Uint8ClampedArray(fw * fh * 4);
-  for (let y = 18; y <= 30; y += 1) {
-    for (let x = 8; x <= 48; x += 1) {
-      const i = (y * fw + x) * 4;
-      bodyOnly[i] = 255;
-      bodyOnly[i + 1] = 255;
-      bodyOnly[i + 2] = 255;
-      bodyOnly[i + 3] = 255;
-    }
-  }
-  const bodyPts = sampleInkPointsMinDist(bodyOnly, fw, fh, minD, 100, 200, 99);
-  eq(
-    'rescue does not inflate solid-body density beyond thin-pass band',
-    pts.length <= bodyPts.length + 8,
-    true
-  );
-})();
-eq('the widened step actually brings the count under the ceiling', (() => {
-  const step = sampleStepFor(6800, 2, 1700);
-  return Math.round(6800 * (2 * 2) / (step * step)) <= 1700;
-})(), true);
-eq('never goes below the base step', sampleStepFor(999999, 5, 10) >= 5, true);
-eq('degenerate input returns the base step', sampleStepFor(0, 3, 1700), 3);
-eq('a phone gets a smaller field than the cap', particleBudget(390, 8, 1700) < 1700, true);
-eq('a desktop keeps the full cap', particleBudget(1440, 8, 1700), 1700);
-eq('few cores trim the budget further', particleBudget(390, 4, 1700) < particleBudget(390, 8, 1700), true);
-eq('an unknown core count is treated as a hint, not a veto', particleBudget(1440, 0, 1700), 1700);
-eq('the budget never collapses to nothing', particleBudget(200, 2, 1700) >= 180, true);
-
-console.log('\nSignature name — cluster-ordered assembly');
-const offs = [0, 1, 2, 3, 4, 5].map((i) => startOffset(i, 6, mulberry32(7), 0.3, 0.15));
-eq('every start is inside the stagger budget', offs.every((o) => o >= 0 && o <= 0.45 + 1e-9), true);
-eq('the last cluster starts no earlier than the first', offs[5] >= offs[0] - 0.15, true);
-eq('a single cluster still yields a valid start', Number.isFinite(startOffset(0, 1, mulberry32(3), 0.3, 0.15)), true);
-eq('the same seed gives the same schedule', startOffset(2, 6, mulberry32(11), 0.3, 0.15), startOffset(2, 6, mulberry32(11), 0.3, 0.15));
-eq('dispersed origins are finite', (() => {
-  const o = disperseOrigin(50, 20, 300, 90, mulberry32(5), 1.35);
-  return Number.isFinite(o.x) && Number.isFinite(o.y);
-})(), true);
-eq('dispersal actually moves the particle off its target', (() => {
-  const o = disperseOrigin(50, 20, 300, 90, mulberry32(5), 1.35);
-  return Math.hypot(o.x - 50, o.y - 20) > 1;
-})(), true);
-eq('an edge particle disperses further than a central one', (() => {
-  const edge = disperseOrigin(299, 20, 300, 90, mulberry32(5), 1.35);
-  const mid = disperseOrigin(150, 20, 300, 90, mulberry32(5), 1.35);
-  return Math.hypot(edge.x - 299, edge.y - 20) >= Math.hypot(mid.x - 150, mid.y - 20);
-})(), true);
-
-console.log('\nSignature name — the colour ramp');
-const ramp = rampPalette('#22c55e', '#4ade80', '#4ade80', 8, 0.5);
-eq('the ramp has one entry per bucket', ramp.length, 8);
-eq('it starts on the assembly green', ramp[0], 'rgba(34,197,94,1)');
-eq('it ends on the resolved green', ramp[7], 'rgba(74,222,128,1)');
-eq('every stop is a valid rgba()', ramp.every((c) => /^rgba\(\d+,\d+,\d+,1\)$/.test(c)), true);
-eq('a two-bucket ramp stays green-family', rampPalette('#22c55e', '#4ade80', '#4ade80', 2, 0.5), ['rgba(34,197,94,1)', 'rgba(74,222,128,1)']);
-eq('bucketFor clamps low', bucketFor(-1, 8), 0);
-eq('bucketFor clamps high', bucketFor(4, 8), 7);
-eq('bucketFor maps arrival to the last bucket', bucketFor(1, 8), 7);
-eq('hexToRgb parses brand green', hexToRgb('#22c55e'), { r: 34, g: 197, b: 94 });
-eq('hexToRgb rejects junk instead of throwing', hexToRgb('not-a-colour'), { r: 0, g: 0, b: 0 });
-eq('mixRgb at the ends returns the endpoints', [mixRgb({r:0,g:0,b:0},{r:10,g:20,b:30},0), mixRgb({r:0,g:0,b:0},{r:10,g:20,b:30},1)], [{r:0,g:0,b:0},{r:10,g:20,b:30}]);
-eq('rgbToCss rounds and keeps alpha readable', rgbToCss({ r: 74.4, g: 222.1, b: 128.9 }, 0.5), 'rgba(74,222,129,0.5)');
-
-console.log('\nSignature name — the motion token budget must add up');
-const NA = MOTION.nameAssemble;
-eq('the last particle arrives exactly at the end of the assembly',
-  Number((NA.clusterShare + NA.jitterShare + NA.travelShare).toFixed(10)), 1);
-eq('the construction is short enough to read and long enough to stage',
-  NA.totalSeconds >= 1.0 && NA.totalSeconds <= 2.6, true);
-eq('the outgoing name leaves before the new one is built', NA.outgoingSeconds > 0 && NA.outgoingSeconds < NA.totalSeconds, true);
-eq('the guides are gone before the name resolves', NA.guideShare > 0 && NA.guideShare < 1, true);
-eq('the particle ceiling is a real ceiling', NA.maxParticles >= 400 && NA.maxParticles <= 4000, true);
-eq('the device-pixel ratio is capped for mobile fill rate', NA.maxDpr <= 2, true);
-eq('the settle overshoot stays subtle', NA.settleBack > 0 && NA.settleBack <= 1.2, true);
-eq('name-hold micro-drift stays subtle enough to keep the name readable', NA.microPx <= 0.35, true);
-eq('name-hold breath stays minimal', NA.breathPx <= 1.5, true);
-
-console.log('\nStory world — compact keyword morph cycle');
-eq('easeInOutQuint starts and ends at the endpoints', [easeInOutQuint(0), easeInOutQuint(1)], [0, 1]);
-eq('flowPoint starts at A and ends at B', (() => {
-  const a = flowPoint(0, 0, 10, 0, 0, 4);
-  const b = flowPoint(0, 0, 10, 0, 1, 4);
-  return Math.hypot(a.x, a.y) < 1e-9 && Math.hypot(b.x - 10, b.y) < 1e-9;
-})(), true);
-const STYLES = ['radial', 'horizontal', 'vertical', 'orbital', 'wave', 'edge', 'grid', 'dispersion', 'crossflow', 'focal'];
-eq(
-  'styledFlowPoint lands on endpoints for every morph style',
-  STYLES.every((style) => {
-    const a = styledFlowPoint(0, 0, 40, 20, 0, 6, style, 20, 10);
-    const b = styledFlowPoint(0, 0, 40, 20, 1, 6, style, 20, 10);
-    return Math.hypot(a.x, a.y) < 1e-6 && Math.hypot(b.x - 40, b.y - 20) < 1e-6;
-  }),
-  true,
-);
-eq(
-  'styledFlowPoint midpoints differ by style (controlled variation)',
-  (() => {
-    const mids = STYLES.map((s) => styledFlowPoint(0, 0, 40, 0, 0.5, 8, s, 20, 10));
-    const keys = new Set(mids.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`));
-    return keys.size >= 6;
-  })(),
-  true,
-);
-eq(
-  'morphParamsFromSeed is deterministic',
-  morphParamsFromSeed(42, 'radial'),
-  morphParamsFromSeed(42, 'radial'),
-);
-eq(
-  'morphParamsFromSeed varies by seed',
-  morphParamsFromSeed(1, 'wave').turb !== morphParamsFromSeed(99, 'wave').turb ||
-    morphParamsFromSeed(1, 'wave').prop !== morphParamsFromSeed(99, 'wave').prop,
-  true,
-);
-eq(
-  'staggerOrder respects flip',
-  staggerOrder(0.2, 0.5, 0, false) < staggerOrder(0.8, 0.5, 0, false) &&
-    staggerOrder(0.2, 0.5, 0, true) > staggerOrder(0.8, 0.5, 0, true),
-  true,
-);
-eq('MORPH_STYLES enumerates every family', MORPH_STYLES.length >= 8, true);
-eq(
-  'splitTwoLines keeps short labels on one line',
-  splitTwoLines('Graphics Design', (s) => s.length * 8, 400),
-  ['Graphics Design'],
-);
-eq(
-  'splitTwoLines wraps long titles to at most two lines',
-  splitTwoLines('Office Administration & Operations Support', (s) => s.length * 10, 180).length,
-  2,
-);
-eq(
-  'splitTwoLines never invents a third line',
-  splitTwoLines('Android & Phone Software Support', (s) => s.length * 12, 100).length <= 2,
-  true,
-);
-eq(
-  'splitTwoLines soft-breaks hyphen compounds (Small-Business)',
-  splitTwoLines('Small-Business Technology Support', (s) => s.length * 12, 160).length,
-  2,
-);
-eq(
-  'splitTwoLines keeps hyphen on the first half',
-  splitTwoLines('Small-Business Technology Support', (s) => s.length * 14, 140).some((l) =>
-    l.includes('Small-'),
-  ),
-  true,
-);
-eq(
-  'splitTwoLines Office Administration stays ≤2',
-  splitTwoLines('Office Administration & Operations Support', (s) => s.length * 11, 120).length <= 2,
-  true,
-);
-eq(
-  'splitTwoLines Computer Setup stays ≤2',
-  splitTwoLines('Computer Setup & Troubleshooting', (s) => s.length * 11, 120).length <= 2,
-  true,
-);
-eq('spatialPairing is structure-preserving (sorted left-to-right)', (() => {
-  const from = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 20, y: 0 }];
-  const to = [{ x: 0, y: 5 }, { x: 10, y: 5 }, { x: 20, y: 5 }];
-  const map = spatialPairing(from, to);
-  return map[0] === 0 && map[1] === 1 && map[2] === 2;
-})(), true);
-eq('spatialPairing handles unequal populations without throwing', (() => {
-  const from = [{ x: 0, y: 0 }, { x: 5, y: 0 }, { x: 10, y: 0 }, { x: 15, y: 0 }];
-  const to = [{ x: 0, y: 1 }, { x: 20, y: 1 }];
-  const map = spatialPairing(from, to);
-  return map.length === 4 && [...map].every((i) => i === 0 || i === 1);
-})(), true);
-eq('one beat per service slug', STORY_BEATS.length, 8);
-eq(
-  'beats are deterministic keyword holds with dual morph styles',
-  Array.isArray(STORY_BEATS) &&
-    STORY_BEATS.every(
-      (b) =>
-        typeof b.serviceIndex === 'number' &&
-        typeof b.slug === 'string' &&
-        b.holdMs > 0 &&
-        b.morphMs > 0 &&
-        STYLES.includes(b.styleOut) &&
-        STYLES.includes(b.styleBack) &&
-        b.styleOut !== b.styleBack,
-    ),
-  true,
-);
-eq(
-  'at least five distinct outbound morph styles across the cycle',
-  new Set(STORY_BEATS.map((b) => b.styleOut)).size >= 5,
-  true,
-);
-eq(
-  'no two consecutive transitions share the same style',
-  (() => {
-    const seq = [];
-    for (const b of STORY_BEATS) {
-      seq.push(b.styleOut, b.styleBack);
-    }
-    for (let i = 1; i < seq.length; i += 1) {
-      if (seq[i] === seq[i - 1]) return false;
-    }
-    return true;
-  })(),
-  true,
-);
-eq('first beat is web-development', STORY_BEATS[0].slug, 'web-development');
-eq('last beat is data-entry', STORY_BEATS[STORY_BEATS.length - 1].slug, 'data-entry');
-const slugs = STORY_BEATS.map((b) => b.slug);
-eq(
-  'canonical service order is preserved',
-  slugs,
-  [
-    'web-development',
-    'software-development',
-    'computer-support',
-    'android-support',
-    'business-technology',
-    'graphics-design',
-    'office-administration',
-    'data-entry',
-  ],
-);
-eq('service indices are sequential', STORY_BEATS.map((b) => b.serviceIndex), [0, 1, 2, 3, 4, 5, 6, 7]);
-eq('keyword hold is long enough to read', STORY_BEATS[0].holdMs >= 2000, true);
-eq('name hold is long enough to read', NAME_HOLD_MS >= 2000, true);
-eq('default keyword hold matches beat hold', KEYWORD_HOLD_MS, STORY_BEATS[0].holdMs);
-const enKw = serviceKeywords('en');
-const bnKw = serviceKeywords('bn');
-eq('EN keywords cover every service', enKw.length, 8);
-eq('BN keywords cover every service', bnKw.length, 8);
-eq('first EN keyword is Website Development', enKw[0], 'Website Development');
-eq('EN keywords stay Latin-script titles', enKw.every((k) => /[A-Za-z]/.test(k)), true);
-eq('BN keywords carry Bengali script', bnKw.every((k) => /[\u0980-\u09FF]/.test(k)), true);
-eq('no bedroom / life-cycle leftovers on beats', !JSON.stringify(STORY_BEATS).includes('bed_sleep'), true);
-eq('name-hold micro-drift stays subtle enough to keep the name readable', NA.microPx <= 0.35, true);
+    return seen > 600;
+  }), true);
+}
 
 
 rmSync(cfgPath, { force: true });

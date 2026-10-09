@@ -167,9 +167,10 @@ recognizable but never flood the interface — no neon cyberpunk.
 - Latin/UI: Inter (`--font-inter`). Bangla: **Noto Sans Bengali**
   (`--font-bengali`), loaded as a real webfont through `next/font/google`.
 - Mono/labels/eyebrows/counters: JetBrains Mono (`--font-mono`).
-- Identity wordmark: **Chakra Petch** (`--font-wordmark`, 500/700, Latin
-  subset) — a squared technical face, self-hosted woff2 via `next/font`, no
-  runtime third-party request. Bengali falls through to `--font-bengali`.
+- Display (hero name, page `h1`/`h2`): **Instrument Serif** (`--font-serif`,
+  400, Latin) for an editorial, film-title tone. Bengali headings use
+  **Noto Serif Bengali** (`--font-serif-bn`, 500/600), never negative
+  tracking. Retired: Space Grotesk, Chakra Petch, Anek Bangla.
 - Eyebrow: 10px mono, uppercase, `tracking-[0.3em]`, accent color.
 - Headings: tight (`tracking-tight`, leading 1.1–1.12), fluid `clamp()`.
 - Body: 13–14px, relaxed leading (1.7–1.75), 55–65% white.
@@ -221,160 +222,14 @@ English tree. Neither language borrows the other's script.
   becomes a calm static wordmark. Reduced motion removes animation, never
   functionality.
 
-## 5b. Signature identity mark (`components/SignatureName.tsx`)
+## 5b. Hero name
 
-The hero name is the portfolio's centrepiece, and it is **constructed
-rather than revealed**. The wordmark's own rendered ink is sampled into a
-particle field, the field is dispersed, and every particle travels home to
-the exact pixel it was sampled from — so the viewer watches the name being
-computed into existence, then reads it as typography.
-
-Stages, all inside one `MOTION.nameAssemble.totalSeconds` (1.6 s):
-
-1. **Guides** — a hairline rule on the baseline with one tick per grapheme
-   cluster: the construction frame the word is about to be built inside.
-   Fades out over `guideShare` (0.62) of the assembly.
-2. **Dispersed field** — every particle sits at its origin, faint and cool.
-   Displacement grows with distance from the word's centre, so the outer
-   letters travel furthest and the assembly sweeps inward.
-3. **Convergence** — particles travel on `easeOutSettle` with a single
-   controlled overshoot (`settleBack` 0.7) and land *exactly* on target.
-   Clusters start left to right (`clusterShare` 0.3) with a deterministic
-   spread inside each cluster (`jitterShare` 0.15); each travels for
-   `travelShare` (0.55). The three shares sum to 1, so the last particle
-   arrives precisely at the end.
-4. **Seating** — one warm highlight at `WARM_AT` (0.72) of each particle's
-   arrival, as material locks into place.
-
-**The living mark.** The particle letterform is the *permanent* visual
-state — there is no solid-text resting phase and therefore no loop point:
-after the construction seats, every particle keeps a micro-drift
-(`microPx`) and a staggered periodic breath wave (`breathSeconds`,
-`breathWindow`, `breathPx`) that loosens it a few px along its own outward
-direction and returns it on a sine-pulse envelope of one continuous clock.
-Each breath ends exactly where it began, so the viewer can never identify
-a restart frame. A language change dissolves the old particle glyphs
-(`dissolveSeconds`) and samples the new ones — particles to particles,
-never particles to text. One particle array, one canvas, one rAF chain for
-the life of the component; teardown cancels frames, timers and listeners
-and releases the backing store. `prefers-reduced-motion` never enters this
-state: the static designed wordmark is rendered instead, and the DOM cells
-remain the no-JS and accessible representation throughout.
-5. **Resolve** — the canvas fades out over `resolveSeconds` (0.34) and the
-   real DOM text fades in through the same duration, then the canvas
-   releases its backing store. **The last frame is typography, not pixels.**
-
-### Why the resting state is DOM text
-
-The final name is real, selectable, crawlable text in the brand wordmark
-faces. The canvas is scaffolding that exists only during construction. The
-most important frame is the last one, and the cost of painting it as canvas
-would be permanent: no selection, no crisp subpixel rendering, no text at
-all for a crawler that does not run JavaScript.
-
-### Why Bengali shaping cannot break
-
-Nothing in this system addresses a character. The renderer draws whole
-grapheme clusters (`app/graphemes.ts` → `Intl.Segmenter`, with a
-combining-mark-aware fallback) and samples the pixels the browser produced,
-so কার, মাত্রা, হসন্ত and যুক্তাক্ষর are correct by construction — there is no
-code path that could detach a matra, because no code path ever refers to
-one. The cluster strings drawn into the sample canvas are the same strings
-the DOM renders, at positions measured from the DOM, so particle targets and
-resolved glyphs coincide. `সবুজ মিয়া` is six clusters (`স` `বু` `জ` ` ` `মি`
-`য়া`), never nine code points, and always resolves to exactly that text.
-
-### Engineering contract (asserted by `scripts/check-design.mjs`)
-
-- **Deterministic.** The seed derives from the name (FNV-1a) and every
-  random value comes from `mulberry32`. No `Math.random`: a re-run after a
-  language switch rebuilds the same wordmark, and server and client markup
-  stay identical.
-- **One-shot.** The loop ends. No `setInterval`, no idle cycle, no residual
-  `requestAnimationFrame`; the canvas backing store is released on resolve.
-- **Reflow-free.** The loop writes only to the canvas and to one `data-asm`
-  attribute on the stage. It never touches text content and never writes a
-  layout property, and the DOM cells are static from first paint — so there
-  is no layout shift and no cumulative-shift risk from the identity.
-- **Batched.** Particles are quantised into an eight-step colour ramp, so a
-  frame is at most a dozen draw calls whatever the particle count, and the
-  ramp doubles as the arrival signal.
-- **Budgeted.** `particleBudget()` derives the field size from viewport
-  width and `hardwareConcurrency` under the hard `maxParticles` ceiling
-  (1700), and `sampleStepFor()` adapts the sampling step to meet it. A phone
-  gets a smaller field, not a slower one. `maxDpr` caps the canvas at 2×.
-- **Paused, not skipped.** A hidden tab stops the loop *and* the clock, so
-  returning resumes the construction instead of jumping to the end.
-- **Progressive.** `data-asm` absent is the legible state: with no
-  JavaScript, or if the 2D context is unavailable, the real text is simply
-  there.
-- **Reduced motion.** No canvas is drawn and no timer is set; the wordmark
-  is present with the same faces, inks and halo.
-- **Never behind the splash.** The pager passes `armed`, false while the
-  boot splash covers the page, so the construction is not spent unseen.
-
-### Typography
-
-Two deliberate display faces, both self-hosted woff2 through `next/font`
-(no runtime third-party request), both **SIL Open Font License 1.1**:
-
-| Face | Variable | Scripts | Weights | Role |
-|---|---|---|---|---|
-| [Chakra Petch](https://fonts.google.com/specimen/Chakra+Petch) | `--font-wordmark` | Latin | 500, 700 | squared technical face for `Sobuj Miah` |
-| [Anek Bangla](https://fonts.google.com/specimen/Anek+Bangla) | `--font-wordmark-bn` | Bengali | 600, 700 | contemporary geometric face for `সবুজ মিয়া` |
-
-Anek Bangla is deliberately *not* the body face (Noto Sans Bengali,
-`--font-bengali`), so both scripts carry the same "this is the name" weight
-rather than the English name being a brand mark and the Bengali name being
-body copy. 600/700 are real instances: synthetic bold is what smears Indic
-shaping. `body.lang-bn .hero-name` also resets `font-feature-settings` and
-`letter-spacing`, because the Latin mark's stylistic set and negative
-tracking both break Bengali shaping.
-
-### Palette
-
-| Role | Tokens | Band |
-|---|---|---|
-| Resolved name | `INKS` — 8 greens, one per cluster | hue 75–190, green-dominant |
-| Material in motion | `ASSEMBLE_INKS` — 4 cool tones | hue 180–265, lightness 0.55–0.95 |
-| Seating highlight | `LOCK_INK` — one amber | hue 20–70 |
-| Condensation target | `RESOLVED_INK` | green family |
-| Waiting material | `WAITING_INK` | cool band, alpha ≤ 0.35 |
-
-No near-white ink, no rainbow, and no platform or effect colour outside
-these bands. The construction canvas is `pointer-events: none` and paints no
-surface of its own — the identity sits on the world-map environment, never
-on a panel, and no `filter` is stacked on it.
-
-## 5c. Identity clock (`components/IdentityClock.tsx`)
-
-The homepage clock is the name's smaller sibling, in the same typographic
-language: each digit's ink is sampled from the wordmark face (Chakra Petch;
-Anek Bangla for Bengali digits) into an 11-row dot matrix — the resolved
-particle state — and rendered as lit green dots. Sampling is capped at
-7 columns so a matrix can never be wider than its fixed slot: digits
-compress a hair instead of ever touching their neighbours. It is never a
-generic system monospace; if sampling is unavailable it falls back to the
-same wordmark face as plain text.
-
-- **Order:** header → breathing space → clock → date/time metadata →
-  name/identity → role → status → tagline → description → CTAs. The clock
-  leads the home page content directly below the header (`part="time"`)
-  with the bilingual date · timezone line (`part="date"`) attached
-  directly beneath it as one block — the date is clock metadata, never a
-  separate hero beat — and the name stays the dominant mark below.
-- **Format:** `HH:MM:SS` 12-hour with a localized meridiem from the content
-  tree (`AM`/`PM`, `এএম`/`পিএম`) and `localizeDigits` Bengali numerals — the
-  Bengali clock contains no Latin characters. Timezone is `Asia/Dhaka`
-  regardless of the visitor's clock.
-- **Stability:** each digit slot is a fixed viewport (`overflow: hidden`,
-  fixed width/height/baseline); a changed digit rolls vertically — the old
-  face exits upward while the new one enters from below, clipped to the
-  slot — and unchanged digits keep their DOM and never animate. The clock
-  block itself cannot shift or drift. One timer per part, cleaned up on
-  unmount/language change. Client-only first paint, so SSR output is
-  unchanged.
-- **Reduced motion:** no colon pulse, no digit roll — lit dots simply are.
+The name is real DOM text in the page's only `h1` (`.hero-name`). It enters
+with a masked word-by-word rise (`NameReveal` in `components/sections.tsx`,
+`cinema-word-*` in `globals.css`): transform only, no blur, no canvas. Without
+JavaScript, or under reduced motion, it is simply present. The retired
+particle construction, service-keyword morph and dot-matrix clock are gone
+(see `docs/CINEMATIC_AUDIT.md`). The accessible name never depends on motion.
 
 ## 6. Interaction states
 
@@ -446,71 +301,31 @@ no model change needed.
   pull, and performs a real `location.reload()`. On every other section a
   downward pull keeps its original meaning — turn back one page.
 
-## 9. Background & atmosphere
+## 9. Background & atmosphere — Silicon Nocturne
 
-A **dark, deep-green global map** (`components/WorldMap.tsx`): Natural Earth
-1:110m land contours in a Miller projection, cropped to the inhabited
-latitudes and simplified by `tools/make-worldmap.py`. It remains the
-server-rendered geographic fallback beneath the cinematic plates.
+One environment for the whole site: `components/SiliconWorld.tsx`, drawn by
+`app/silicon.ts`. It is an **abstract, invented** floorplan of a phone
+system-on-chip (CPU clusters, GPU shader array, NPU MAC array, memory
+arrays, media blocks, DRAM interface, interconnect, I/O pad ring) seen by a
+low camera with perspective. It is not a photograph or a real die, and no
+real product's layout is implied. Block labels are never drawn.
 
-**Page-aware camera.** Each of the seven sections owns one deterministic
-geographic focus (`app/geo.ts` → `GEO_FOCUS`, aligned with `SECTION_IDS` by
-index; Home is Bangladesh). The map supports a flight to the new focus by
-interpolating the SVG **viewBox attribute** (~1.25s, ease-in-out, rAF) — never
-a CSS transform on map geometry. The current portfolio passes its still mode
-beneath the visible film world, which owns the scene movement. Deep links and
-crawlers still get the route's own map focus server-rendered.
-
-Layers, back to front (content always wins):
-
-1. **Land + countries** — real geography, not a dot abstraction. Natural
-   Earth 1:110m land beneath a per-country layer where every territory
-   keeps its recognisable shape (`components/world-map-countries.ts`,
-   generated by `tools/make-worldmap.py`). Inactive countries are subdued
-   political hairlines; crisp at every zoom via
-   `vector-effect: non-scaling-stroke`.
-2. **Active country** — each focus carries its own restrained ink
-   (`COUNTRY_INKS` in `app/geo.ts`: origin green, amber, blue, teal,
-   indigo, rose, lime, cyan — all low-alpha technical tones, never bright).
-   Activation is a class flip (fill/stroke recolour via CSS variables),
-   never an animated geometry change. City-states with no 1:110m outline
-   (Singapore) get a projected marker, never a faked shape.
-3. **Focus glow** — a soft radial wash centred on the current page's
-   geographic focus; panned by the camera like everything else.
-4. **Data flow** — origin→hub arcs (static geometry, faint dashes) with a
-   handful of travelling packets (SMIL `animateMotion`, ≤5 on screen,
-   staggered cadence), plus one warm **active route** from the origin to
-   the current section's focus, remounting per flight. Elegant technical,
-   never radar, never a trading floor. Hidden entirely under reduced motion.
-5. **Technical vector motifs** — circuit traces, orbital arcs, a waveform
-   fragment, network nodes, coordinate ticks. Screen-space, decorative,
-   static, very low ink: discovered, never shouted.
-6. **Atmosphere** — the deep-green radial wash behind the land.
-
-The active geography is also announced as real screen-reader text
-(`ui.mapFocus`), so the focus never exists only visually.
-
-Rules, so this never drifts back:
-
-- **No grid.** There is no graticule, no tiling, no box or square motif and no
-  repeating geometric overlay anywhere behind the hero. The previous 60px
-  square grid (`.grid-bg` / `.pager-grid`) was deleted at the source.
-- **No light layer.** Nothing behind the name may flash, panel, or bloom. The
-  previous near-white sweep band (`.sig-sweep`) and the `#86efac` page-change
-  flash were removed with their keyframes, not hidden.
-- **Stability contract** — the map flickered before because geometry
-  re-rasterised every frame (scaled land with `non-scaling-stroke`, scaled
-  stroked circles, animated `stroke-dashoffset`). So: no CSS animation or
-  transform on map geometry, ever. The origin halo pulses opacity only; the
-  camera rewrites the viewBox attribute; packets follow SMIL motion paths.
-- **Signals, not noise** — nine projected network hubs and four faint links.
-  No pointer repulsion, no ripples, no scanline: the background must never
-  compete with the name for attention.
-- **Cost** — one inline map SVG plus one inline motif SVG, zero canvas, zero
-  WebGL. The only rAF is the ~1.25s camera flight during page changes
-  (self-stopping, snaps to destination if the tab hides mid-flight).
-  Motion pauses via `data-paused` when the tab is hidden and the camera +
-  packets are disabled entirely under reduced motion.
+- **Resolution-independent.** Vector lines drawn with Canvas 2D at native
+  device pixels (DPR capped at 2). There is no raster or video asset.
+- **Deterministic.** A seeded PRNG: the same seed always yields the same chip.
+- **Camera per chapter** (`POSES`): Home wide establishing shot with a low
+  horizon; Focus & Tools over the compute blocks; About over calm memory
+  arrays; Work over the GPU; Research over the NPU; Experience tracking down
+  a long bus; Contact pulled back to the I/O ring; Services and Verification
+  calm static shots. Chapter changes fly the camera over 1.5 s.
+- **Opening.** On a true entry to the home chapter the camera rises from the
+  die surface (1.8 s). Any pointer, key or wheel input skips it.
+- **Light.** A second canvas draws a few signal pulses along routes; the
+  scene canvas is redrawn only while the camera flies.
+- **Safety.** Paused when the tab is hidden; mobile uses a lighter plan;
+  reduced motion draws one static frame per chapter with no pulses; without
+  JavaScript a CSS gradient (`.silicon-world`) remains. A scrim
+  (`.silicon-grade`) keeps text legible.
 
 ## 10. Accessibility
 
@@ -576,15 +391,9 @@ app/globals.css          tokens (§1), pager, overlay, name, carousels, a11y
 components/Pager.tsx     discrete pager, gestures, paper-turn, route sync
 components/NavOverlay.tsx  the section index HUD, emerging from the bottom bar
 components/PullToRefresh.tsx  real mobile pull-to-refresh gesture
-components/SignatureName.tsx  the signature identity mark (§5b)
-components/IdentityClock.tsx  the dot-matrix identity clock (§5c)
-components/WorldMap.tsx   dark-green page-aware map environment (§9)
-components/CinematicWorld.tsx  continuous three-location film environment
-components/LivingAtmosphere.tsx  location-specific live Canvas 2D weather and light
-components/LivingInteractions.tsx  delegated pointer light on cards and controls
-components/world-map-path.ts  generated land contours (do not edit)
-components/world-map-countries.ts  generated per-country shapes (do not edit)
-tools/make-worldmap.py    regenerates the contours from Natural Earth
+components/SiliconWorld.tsx  the Canvas 2D environment (§9)
+app/silicon.ts           seeded chip generator, camera poses, projector (pure)
+components/SiliconDocumentBackdrop.tsx  the same scene behind document routes
 components/sections.tsx  the seven curated pages
 components/ui.tsx        cursor, magnetic, reveals, dots, carousel, chrome
 scripts/check-content.mjs        bilingual parity + two-way purity gate
@@ -593,39 +402,12 @@ scripts/check-design.mjs         token/document/CSS drift gate
 scripts/check-build.mjs          routes, deep links, SEO assets, JS budget
 ```
 
-## Cinematic world
-
-Three local film shots define a journey: an aerial city approach (Home and
-Presence), a neon passage (About through Research), and a server close-up
-(Experience and Contact). Matching WebP frames render on the server and remain
-the fallback. Each chapter starts at a different point within its shot.
-The camera pans and pushes over 1.8s when the location remains the same;
-the next location dissolves over 1.1s. Services uses the causeway, and
-Verification uses the archive. The content layer keeps a much smaller depth
-move so the environment, rather than a rotating page, carries the scene.
-The camera drifts continuously and responds to fine-pointer position. Section
-titles carry a quiet light pulse, cards breathe and catch pointer light, and
-their text enters in sequence. Only the active video plays. Hidden tabs pause
-it; small screens receive smaller encodes.
-The central image grade preserves text contrast; mobile receives a darker
-grade. All assets are local under `public/cinema/`; there is no runtime
-third-party request, WebGL engine, or paid service. The real geographic map remains
-server-rendered behind the frames as a fallback. Under reduced motion and data
-saver, videos do not load. The content
-heading is the only page title, and text is present without JavaScript.
-
-The footage is from Pexels under its free license:
-[city approach](https://www.pexels.com/video/drone-shot-of-a-futuristic-city-at-night-mexico-city-mexico-12550512/) by Fernando Paleta,
-[neon passage](https://www.pexels.com/video/a-geometrical-tunnel-in-animation-2759482/), and
-[hardware close-up](https://www.pexels.com/video/close-up-of-a-cpu-7140928/) by MrColo.
-
 All shared section reveals now use the depth reveal variant. Presence cards tilt at most five degrees on
 fine pointers; their content lifts fourteen pixels. Touch gestures retain
 native scrolling and cards remain flat. Pointer cancellation, reduced-motion
 changes, and pointer-capability changes reset the card immediately.
 
-The map retains its section-flight and pointer-drift implementation for
-fallback or reuse beneath the film plates. The verified
+The verified
 footer count animates only the generated
 evidence value, preserves the final value in static HTML and its accessible
 label, and restores that value when an animation is interrupted. Reduced

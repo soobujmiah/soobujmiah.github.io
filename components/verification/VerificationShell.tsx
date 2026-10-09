@@ -8,7 +8,7 @@ import { sectionHref } from '@/app/sections';
 import { serviceHref } from '@/app/services';
 import { BrandIcon } from '@/components/social-icons';
 import { DocumentMotion } from '@/components/DocumentMotion';
-import { CinematicDocumentBackdrop } from '@/components/CinematicDocumentBackdrop';
+import { SiliconDocumentBackdrop } from '@/components/SiliconDocumentBackdrop';
 import type { Lang } from '@/app/content';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -125,7 +125,7 @@ export function VerificationShell({ children, lang = 'en' }: { children: ReactNo
   return (
     <LanguageProvider initialLang={lang}>
       <div className="services-doc">
-        <CinematicDocumentBackdrop sceneIndex={8} />
+        <SiliconDocumentBackdrop sceneIndex={8} />
         <Chrome>{children}</Chrome>
       </div>
     </LanguageProvider>

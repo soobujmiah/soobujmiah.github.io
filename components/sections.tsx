@@ -5,8 +5,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Magnetic, Reveal, SnapCarousel, useNav } from './ui';
 import { TiltCard } from './TiltCard';
 import { BrandIcon, type BrandIconId } from './social-icons';
-import { SignatureName } from './SignatureName';
-import { IdentityClock } from './IdentityClock';
 import { sectionHref } from '@/app/sections';
 import { serviceHref } from '@/app/services';
 import { useLang, localizeDigits } from '@/app/language';
@@ -23,17 +21,19 @@ import type { Project, Repo } from '@/app/content';
 
 const CARD_BG = 'rgba(6,7,6,0.66)';
 
-const NUMERALS = {
-  en: ['01', '02', '03', '04', '05', '06', '07'],
-  bn: ['০১', '০২', '০৩', '০৪', '০৫', '০৬', '০৭'],
-} as const;
-
-function PageNumeral({ index }: { index: number }) {
-  const { lang } = useLang();
+/** Masked line reveal of the name: a clean rise, one word at a time. Visible without JS. */
+function NameReveal({ text, reducedMotion, armed }: { text: string; reducedMotion: boolean; armed: boolean }) {
   return (
-    <div aria-hidden className="page-numeral">
-      {NUMERALS[lang][index]}
-    </div>
+    <>
+      {text.split(/(\s+)/).map((part, index) => part.trim() ? (
+        <span key={index} className="cinema-word-mask">
+          <span
+            className={`cinema-word${armed && !reducedMotion ? ' cinema-word--play' : ''}`}
+            style={{ animationDelay: `${0.5 + index * 0.12}s` }}
+          >{part}</span>
+        </span>
+      ) : <span key={index}>{part}</span>)}
+    </>
   );
 }
 
@@ -105,25 +105,14 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
 
   return (
     <div className="page-fill page-fill--hero">
-      <PageNumeral index={0} />
 
       <div className="page-content page-content--hero flex flex-col items-center text-center">
-        {/* Compact vertical rhythm: clock → name morph → role/status/
-            tagline/intro → CTAs. Services discovery lives in top nav;
-            no redundant offer/point block. HUD safe zone is
-            page-fill--hero bottom padding. */}
-        <div className="hero-clock-wrap">
-          <IdentityClock part="time" />
-          <IdentityClock part="date" />
-        </div>
-
-        {/* Fixed name ⇄ keyword slot — reserved height supports ≤2-line
-            service titles so copy/CTAs never shift when the keyword changes. */}
-        <div className="hero-story-stage">
-          <h1 className="hero-name text-[clamp(min(3.25rem,13vw),11vw,6.6rem)] font-semibold leading-[1.02] tracking-tight">
-            <SignatureName text={t.profile.nameFull} reducedMotion={reducedMotion} armed={armed} />
-          </h1>
-        </div>
+        <p className="hero-kicker font-mono text-[10px] uppercase tracking-[0.32em]">
+          {t.profile.location}
+        </p>
+        <h1 className="hero-name">
+          <NameReveal text={t.profile.nameFull} reducedMotion={reducedMotion} armed={armed} />
+        </h1>
 
         <div className="hero-copy">
           <motion.p
@@ -202,7 +191,6 @@ export function StatsScene() {
   const { t } = useLang();
   return (
     <div className="page-fill">
-      <PageNumeral index={1} />
       <div className="page-content page-content-wide flex flex-col items-center">
         <Reveal>
           <p className="ph-e font-mono text-[10px] uppercase tracking-[0.3em] mb-3 text-center" style={{ color: '#22c55e' }}>
@@ -265,7 +253,6 @@ export function AboutScene() {
   const { t } = useLang();
   return (
     <div className="page-fill">
-      <PageNumeral index={2} />
       <div className="page-content page-content-wide">
         <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
           <div>
@@ -681,7 +668,6 @@ export function WorkScene() {
   const { t } = useLang();
   return (
     <div className="page-fill">
-      <PageNumeral index={3} />
       <div className="page-content page-content-wide">
         <PageHeading eyebrow={t.work.eyebrow} heading={t.work.heading} />
 
@@ -713,7 +699,6 @@ export function ResearchScene() {
   const { t } = useLang();
   return (
     <div className="page-fill">
-      <PageNumeral index={4} />
       <div className="page-content page-content-wide">
         <PageHeading eyebrow={t.research.eyebrow} heading={t.research.heading} />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -917,7 +902,6 @@ export function ExperienceScene() {
   const { t, lang } = useLang();
   return (
     <div className="page-fill">
-      <PageNumeral index={5} />
       <div className="page-content page-content-wide">
         <div className="grid gap-6 lg:grid-cols-[1fr_1.6fr] lg:gap-12">
           <div>
@@ -997,7 +981,6 @@ export function ContactScene() {
   const { t, lang } = useLang();
   return (
     <div className="page-fill">
-      <PageNumeral index={6} />
       <div className="page-content page-content-wide">
         {/* pb keeps the content mass clear of the map's arrival label —
             the camera centres the focus country (Singapore here) in the
