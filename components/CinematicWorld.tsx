@@ -1,7 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
+
+const LivingAtmosphere = dynamic(() => import('@/components/LivingAtmosphere').then((module) => module.LivingAtmosphere), { ssr: false });
 
 type Shot = { asset: 0 | 1 | 2; x: string; y: string; scale: number };
 
@@ -27,10 +30,43 @@ const SHOTS: readonly Shot[] = [
 export function CinematicWorld({ sceneIndex, reducedMotion = false }: { sceneIndex: number; reducedMotion?: boolean }) {
   const shot = SHOTS[sceneIndex] ?? SHOTS[0];
   const lastPose = useRef<Shot[]>([SHOTS[0], SHOTS[2], SHOTS[5]]);
+  const worldRef = useRef<HTMLDivElement>(null);
   lastPose.current[shot.asset] = shot;
 
+  useEffect(() => {
+    const root = worldRef.current;
+    if (!root || reducedMotion || !window.matchMedia('(pointer: fine)').matches) return;
+    let frame = 0;
+    let x = 0;
+    let y = 0;
+    const update = () => {
+      root.style.setProperty('--look-x', `${x * 1.6}%`);
+      root.style.setProperty('--look-y', `${y * 1.2}%`);
+      frame = 0;
+    };
+    const move = (event: PointerEvent) => {
+      x = event.clientX / window.innerWidth - 0.5;
+      y = event.clientY / window.innerHeight - 0.5;
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    const reset = () => {
+      x = 0;
+      y = 0;
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    window.addEventListener('pointermove', move, { passive: true });
+    window.addEventListener('blur', reset);
+    return () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('blur', reset);
+      cancelAnimationFrame(frame);
+      root.style.removeProperty('--look-x');
+      root.style.removeProperty('--look-y');
+    };
+  }, [reducedMotion]);
+
   return (
-    <div className="cinema-world" aria-hidden="true" data-shot={sceneIndex}>
+    <div ref={worldRef} className="cinema-world" aria-hidden="true" data-shot={sceneIndex}>
       {PLATES.map((src, asset) => {
         const pose = lastPose.current[asset];
         return (
@@ -52,11 +88,14 @@ export function CinematicWorld({ sceneIndex, reducedMotion = false }: { sceneInd
               scale: { duration: 1.8, ease: [0.16, 1, 0.3, 1] },
             }}
           >
-            <div className="cinema-world-image" style={{ backgroundImage: `url(${src})` }} />
+            <div className="cinema-world-look">
+              <div className="cinema-world-image" style={{ backgroundImage: `url(${src})` }} />
+            </div>
           </motion.div>
         );
       })}
       <div className="cinema-world-grade" />
+      <LivingAtmosphere sceneIndex={sceneIndex} reducedMotion={reducedMotion} />
       <div className="cinema-world-air" />
     </div>
   );

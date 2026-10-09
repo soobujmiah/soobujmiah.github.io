@@ -30,6 +30,7 @@ import { NavOverlay } from '@/components/NavOverlay';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { DocumentMotion } from '@/components/DocumentMotion';
 import { CinematicWorld } from '@/components/CinematicWorld';
+import { LivingInteractions } from '@/components/LivingInteractions';
 import {
   HeroScene,
   StatsScene,
@@ -338,6 +339,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
   return (
     <NavProvider value={{ goToScene, goToTop: () => goToScene(0), openNav }}>
       <CustomCursor />
+      <LivingInteractions />
       {/* boot splash — only on the true entry point; deep links land
           straight on their section instead of waiting for a splash */}
       <AnimatePresence>
@@ -394,7 +396,9 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
               <PageBody index={index} reducedMotion={reducedMotion} armed={!splashActive} />
               <DocumentMotion
                 scopeSelector={`.page-scroll[data-section="${SECTION_IDS[index]}"]`}
-                beatSelector=".page-content .rounded-xl h3, .page-content .rounded-xl p, .page-content .rounded-xl li, .page-content .rounded-full:not(a):not(button)"
+                beatSelector={index === 0
+                  ? '.page-content .rounded-full:not(a):not(button)'
+                  : '.page-content h2, .page-content h3, .page-content p, .page-content li, .page-content dt, .page-content dd, .page-content .rounded-xl, .page-content .rounded-2xl, .page-content .repo-card, .page-content .rounded-full:not(a):not(button)'}
               />
             </div>
           </motion.div>
