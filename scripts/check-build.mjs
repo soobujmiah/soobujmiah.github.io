@@ -31,6 +31,9 @@ const ORIGIN = 'https://soobujmiah.github.io';
 const SECTIONS = [
   'home', 'presence', 'about', 'work', 'research', 'experience', 'contact',
 ];
+const CINEMA_LOCATIONS = [
+  'observatory', 'observatory', 'causeway', 'causeway', 'causeway', 'archive', 'archive',
+];
 const LEGACY_ROUTES = [['stack', 'presence'], ['open-source', 'work']];
 /* The service-intent layer (app/services.ts): hub + eight pages. Kept
    separate from SECTIONS on purpose — these are documents outside the
@@ -69,13 +72,9 @@ const MIN_VISIBLE_CHARS = 220;
     the full projection. The new page loads 134 kB on its own route — well
     under the per-route ceiling below — so the site-wide sum moved only
     because a real route now exists that did not before.
-    384 KB for the 2026-10 cinematic site: seven native-canvas 3D chapter
-    forms live in a separately loaded chunk. Initial per-route payload
-    remains under its existing 270 KB ceiling.
-    388 KB for the 2026-10 expanded cinematic journey: the renderer adds
-    shaded surfaces and two document-specific scenes, loaded only where
-    needed. The measured site-wide sum is 385 KB; the per-route 271 KB
-    ceiling below remains unchanged. */
+    388 KB for the 2026-10 cinematic journey. The current film plates are
+    local WebP assets and the old canvas renderer is removed; the measured
+    site-wide JS sum is 379 KB, with the per-route ceiling still 271 KB. */
 const MAX_TOTAL_JS_GZIP = 388 * 1024;
 /** Per-route payload ceiling: the gzipped sum of every script a single
     HTML page references. The home page measured ~250 KB before the
@@ -131,7 +130,7 @@ const routePath = (slug) => (slug === 'home' ? '/' : `/${slug}/`);
 const textByRoute = {};
 const publicTitles = new Set();
 const publicDescriptions = new Set();
-for (const slug of SECTIONS) {
+for (const [sceneIndex, slug] of SECTIONS.entries()) {
   const file = routeFile(slug);
   if (!existsSync(file)) {
     fail(`missing static route for "${slug}" — expected ${file.replace(ROOT, 'out')}`);
@@ -143,6 +142,13 @@ for (const slug of SECTIONS) {
   if (!/<html[^>]*lang="en"/.test(html)) fail(`route "${slug}" does not declare lang=en`);
   if ((html.match(/<h1(?:\s|>)/g) || []).length !== 1) fail(`route "${slug}" must render exactly one h1`);
   if (html.includes('cinematic-chapter')) fail(`route "${slug}" still renders a second chapter title`);
+  if (!html.includes(`class="cinema-world" aria-hidden="true" data-shot="${sceneIndex}"`)) {
+    fail(`route "${slug}" has no server-rendered cinematic shot`);
+  }
+  const activePlate = html.match(/<div class="cinema-world-plate" data-active="true" style="[^"]*opacity:1[^"]*"><div class="cinema-world-image" style="background-image:url\(([^)]+)\)/);
+  if (activePlate?.[1] !== `/cinema/${CINEMA_LOCATIONS[sceneIndex]}.webp`) {
+    fail(`route "${slug}" does not server-render its opening film plate`);
+  }
 
   if (text.length < MIN_VISIBLE_CHARS) {
     fail(`route "${slug}" ships only ${text.length} visible chars (min ${MIN_VISIBLE_CHARS}) — content is not server-rendered`);
@@ -430,6 +436,22 @@ for (const f of ['og.png', 'robots.txt', 'sitemap.xml', 'icon.svg', '404.html'])
   if (!existsSync(join(OUT, f))) fail(`out/${f} is missing`);
 }
 ok('og.png, robots.txt, sitemap.xml, icon.svg, 404.html all present');
+
+let cinemaBytes = 0;
+for (const name of ['observatory', 'causeway', 'archive']) {
+  const file = join(OUT, 'cinema', `${name}.webp`);
+  if (!existsSync(file)) {
+    fail(`out/cinema/${name}.webp is missing`);
+    continue;
+  }
+  const bytes = readFileSync(file);
+  if (bytes.toString('ascii', 0, 4) !== 'RIFF' || bytes.toString('ascii', 8, 12) !== 'WEBP') {
+    fail(`out/cinema/${name}.webp is not a WebP image`);
+  }
+  cinemaBytes += bytes.length;
+}
+if (cinemaBytes > 400 * 1024) fail(`cinematic plates total ${Math.round(cinemaBytes / 1024)} KB, over 400 KB`);
+else ok(`three local cinematic plates total ${Math.round(cinemaBytes / 1024)} KB`);
 
 const og = join(OUT, 'og.png');
 if (existsSync(og)) {

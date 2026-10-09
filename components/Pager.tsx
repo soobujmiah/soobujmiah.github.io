@@ -1,8 +1,8 @@
 'use client';
 
 /* ═══════════════════════════════════════════════════════════════
-   DISCRETE PAGER — one full-screen page at a time. Pages turn like
-   dark technical paper: subtle tilt + depth scale + spring slide.
+   DISCRETE PAGER — one full-screen chapter at a time. The world
+   moves like a camera; content settles into the next shot.
    Each page centers when it fits and scrolls internally when it
    doesn't — gestures yield to the inner scroller until its edges,
    then flip exactly one page.
@@ -13,7 +13,6 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import dynamic from 'next/dynamic';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { MOTION } from '@/app/design-tokens';
 import { PAGE_COUNT, SECTION_IDS, indexFromPathname, sectionHref } from '@/app/sections';
@@ -30,6 +29,7 @@ import {
 import { NavOverlay } from '@/components/NavOverlay';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { DocumentMotion } from '@/components/DocumentMotion';
+import { CinematicWorld } from '@/components/CinematicWorld';
 import {
   HeroScene,
   StatsScene,
@@ -41,7 +41,6 @@ import {
 } from '@/components/sections';
 
 const WHEEL_THRESHOLD = 24;
-const CinematicStage = dynamic(() => import('@/components/CinematicStage').then((module) => module.CinematicStage), { ssr: false });
 const SWIPE_THRESHOLD = 60;
 const EDGE_SLACK = 2; // px tolerance for scroll-edge detection
 
@@ -69,15 +68,15 @@ function PageBody({ index, reducedMotion, armed }: { index: number; reducedMotio
   }
 }
 
-/* Paper turn. Every number comes from the shared motion tokens, so the
-   docs, this component, and any future project site cannot drift. */
+/* The page body has a restrained depth move while the environment
+   carries the larger camera transition. */
 const PT = MOTION.pageTurn;
 
 const pageVariants = {
   enter: (dir: number) => ({
     y: dir >= 0 ? `${PT.yPercent}%` : `-${PT.yPercent}%`,
-    rotateX: dir >= 0 ? PT.rotateX : -PT.rotateX,
-    rotateY: dir >= 0 ? PT.rotateY : -PT.rotateY,
+    rotateX: dir >= 0 ? PT.rotateX * 0.18 : -PT.rotateX * 0.18,
+    rotateY: dir >= 0 ? PT.rotateY * 0.12 : -PT.rotateY * 0.12,
     scale: PT.scale,
     z: MOTION.depth.zRise,
     opacity: 0,
@@ -86,8 +85,8 @@ const pageVariants = {
   center: { y: '0%', rotateX: 0, rotateY: 0, scale: 1, z: 0, opacity: 1, transformPerspective: PT.perspective },
   exit: (dir: number) => ({
     y: dir >= 0 ? `-${PT.yPercent}%` : `${PT.yPercent}%`,
-    rotateX: dir >= 0 ? -PT.rotateX : PT.rotateX,
-    rotateY: dir >= 0 ? -PT.rotateY : PT.rotateY,
+    rotateX: dir >= 0 ? -PT.rotateX * 0.18 : PT.rotateX * 0.18,
+    rotateY: dir >= 0 ? -PT.rotateY * 0.12 : PT.rotateY * 0.12,
     scale: PT.scale,
     z: -MOTION.depth.zRecede,
     opacity: 0,
@@ -356,8 +355,9 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
+        {/* Geography remains the crawlable fallback beneath the film world. */}
         <WorldMap sectionIndex={index} reducedMotion={reducedMotion} />
-        {!splashActive && !reducedMotion && <CinematicStage sectionIndex={index} reducedMotion={reducedMotion} />}
+        <CinematicWorld sceneIndex={index} reducedMotion={reducedMotion} />
         <div className="pager-vignette" aria-hidden />
         <AnimatePresence custom={dir} initial={false} mode="sync">
           <motion.div

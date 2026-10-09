@@ -205,15 +205,14 @@ English tree. Neither language borrows the other's script.
 
 ## 5. Motion language
 
-- **Page turn** (portfolio): direction-aware spring on `y`, `rotateX` and
-  `scale`, with a `1000ms` flip lock — one gesture, one page. Restrained:
-  felt, not noticed. Values are in the token block.
+- **Chapter change** (portfolio): direction-aware spring on content depth
+  with a `1000ms` gesture lock; the environment carries the larger camera
+  move and crossfade. Values are in the token block.
 - Reveals: `0.7s cubic-bezier(0.16, 1, 0.3, 1)` fade-up; pages remount, so
   reveals replay on each entry.
 - Micro: 0.1–0.5s; magnetic links ease-out 0.12s, release 0.5s expo.
-- Environment responds to paging: the map camera flies to each page's
-  geographic focus (~1.25s ease-in-out viewBox flight) and the progress bar
-  springs forward.
+- Environment responds to paging: the film world moves to the next shot over
+  ~1.8s, or dissolves to the next location over ~1.1s; progress advances.
 - Animate **transform + opacity only** (compositor-friendly). The identity
   mark's continuous life is pure CSS; its pointer loop writes CSS variables
   and stops itself the moment nothing is moving.
@@ -451,16 +450,16 @@ no model change needed.
 
 A **dark, deep-green global map** (`components/WorldMap.tsx`): Natural Earth
 1:110m land contours in a Miller projection, cropped to the inhabited
-latitudes and simplified by `tools/make-worldmap.py`. It is an environment,
-not a spectacle — and it **travels with the story**.
+latitudes and simplified by `tools/make-worldmap.py`. It remains the
+server-rendered geographic fallback beneath the cinematic plates.
 
 **Page-aware camera.** Each of the seven sections owns one deterministic
 geographic focus (`app/geo.ts` → `GEO_FOCUS`, aligned with `SECTION_IDS` by
-index; Home is Bangladesh). When the pager turns a page, the camera flies to
-the new focus by interpolating the SVG **viewBox attribute** (~1.25s,
-ease-in-out, rAF) — never a CSS transform on map geometry. Deep links and
-crawlers get the route's own camera server-rendered. Under reduced motion
-the camera snaps instead of flying.
+index; Home is Bangladesh). The map supports a flight to the new focus by
+interpolating the SVG **viewBox attribute** (~1.25s, ease-in-out, rAF) — never
+a CSS transform on map geometry. The current portfolio passes its still mode
+beneath the visible film world, which owns the scene movement. Deep links and
+crawlers still get the route's own map focus server-rendered.
 
 Layers, back to front (content always wins):
 
@@ -580,7 +579,7 @@ components/PullToRefresh.tsx  real mobile pull-to-refresh gesture
 components/SignatureName.tsx  the signature identity mark (§5b)
 components/IdentityClock.tsx  the dot-matrix identity clock (§5c)
 components/WorldMap.tsx   dark-green page-aware map environment (§9)
-components/CinematicStage.tsx  lightweight chapter-specific 3D scenery
+components/CinematicWorld.tsx  continuous three-location film environment
 components/world-map-path.ts  generated land contours (do not edit)
 components/world-map-countries.ts  generated per-country shapes (do not edit)
 tools/make-worldmap.py    regenerates the contours from Natural Earth
@@ -592,32 +591,31 @@ scripts/check-design.mjs         token/document/CSS drift gate
 scripts/check-build.mjs          routes, deep links, SEO assets, JS budget
 ```
 
-## CSS 3D motion
+## Cinematic world
 
-Page turns use the shared depth tokens to bring the incoming page forward,
-rotate it on both axes, and recede the outgoing page. Each of the seven pager
-chapters has its own perspective-projected 3D form, with translucent surfaces,
-illuminated nodes, a restrained field of depth particles, and an atmospheric
-light volume over the world map. The scenery crossfades with a camera dolly
-when the chapter changes, follows fine pointers slightly, and renders at no
-more than 30 fps. It is loaded separately from the main route script, pauses
-in hidden tabs, and is absent under reduced motion. The content heading is
-the only page title; there is no separate chapter caption. Service and
-verification documents have distinct background scenes alongside their slow
-ambient light and viewport-triggered entrances for headings, copy, list
-items, and cards. Card details in the pager reveal as they enter view.
-Content remains visible without JavaScript, and reduced motion removes those
-entrances.
+Three local WebP plates define a continuous journey: exterior observatory
+(Home and Presence), interior causeway (About through Research), and archive
+(Experience and Contact). Each chapter has a camera pose within its location.
+The camera pans and pushes over 1.8s when the location remains the same;
+the next location dissolves over 1.1s. Services uses the causeway, and
+Verification uses the archive. The content layer keeps a much smaller depth
+move so the environment, rather than a rotating page, carries the scene.
+The central image grade preserves text contrast; mobile receives a darker
+grade. The three plates are generated project assets, stored locally under
+`public/cinema/`, and total under 300 KB. There is no video stream, runtime
+image request, WebGL engine, or paid service. The real geographic map remains
+server-rendered behind the plates as a fallback. Under reduced
+motion, the scene changes instantly and the ambient light stops. The content
+heading is the only page title, and text is present without JavaScript.
 
 All shared section reveals now use the depth reveal variant. Presence cards tilt at most five degrees on
 fine pointers; their content lifts fourteen pixels. Touch gestures retain
 native scrolling and cards remain flat. Pointer cancellation, reduced-motion
 changes, and pointer-capability changes reset the card immediately.
 
-The map combines section flight and pointer drift in one camera write, so
-changing sections while hovering cannot overwrite the drift. Drift responds
-only to fine pointers, relaxes on window blur or pointer exit, and resets
-under reduced motion. The verified footer count animates only the generated
+The map retains its section-flight and pointer-drift implementation for
+fallback or reuse beneath the film plates. The verified
+footer count animates only the generated
 evidence value, preserves the final value in static HTML and its accessible
 label, and restores that value when an animation is interrupted. Reduced
 motion shows final counts and revealed content immediately.
