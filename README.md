@@ -6,7 +6,7 @@
 Personal portfolio of **Sobuj Miah**, an independent software and AI systems builder.
 Live at **https://soobujmiah.github.io**.
 
-[![SEO audited](https://img.shields.io/badge/SEO-audited%202026--09--24-22c55e?style=flat-square)](docs/SEO.md)
+[![SEO audited](https://img.shields.io/badge/SEO-audited%202026--10--11-22c55e?style=flat-square)](docs/SEO.md)
 
 Discrete cinematic pager (Next.js static export + framer-motion),
 fully bilingual **English / বাংলা**, green-on-black theme. The hero name is
