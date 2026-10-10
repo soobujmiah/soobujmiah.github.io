@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "framer-motion": "^11.11.9",
-    "next": "15.5.24",
+    "next": "15.5.27",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -35,7 +35,7 @@
     "eslint-config-next": "14.2.35"
   },
   "overrides": {
-    "next": "15.5.24",
+    "next": "15.5.27",
     "postcss": "^8.5.23",
     "eslint-config-next": {
       "glob": "^10.5.0"
