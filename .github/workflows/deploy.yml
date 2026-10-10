@@ -77,9 +77,9 @@ jobs:
       - name: Build (runs the content, purity and design gates)
         run: npm run build
 
-      # Validates the exported artifact itself: 9 real routes with
-      # server-rendered text, per-route title/canonical/social card,
-      # robots/sitemap/og.png presence, and the JavaScript budget.
+      # Validates the exported artifact itself: 34 primary bilingual routes
+      # plus four canonicalized legacy URLs; checks server-rendered text,
+      # metadata, sitemap XML/alternates, robots/social assets and JS budgets.
       - name: Validate static export, deep links and budget
         run: npm run check:build
 
