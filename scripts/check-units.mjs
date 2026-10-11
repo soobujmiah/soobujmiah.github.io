@@ -128,6 +128,49 @@ try {
   Intl.Segmenter = realSegmenter;
 }
 
+console.log('\nSignature motion tokens (MOTION.signature)');
+const { MOTION } = await import(pathToFileURL(tokensPath).href);
+const SIG = MOTION.signature;
+
+/* The signature is the brand's primary object, so its tokens are
+   load-bearing, not decoration. These invariants are the ones a future
+   edit could plausibly break while still "looking fine" locally. */
+eq('the retired particle token group is gone', 'nameAssemble' in MOTION, false);
+eq('the signature token group exists', typeof SIG, 'object');
+
+const DURATIONS = ['clusterSeconds', 'clusterStaggerSeconds', 'leadSeconds', 'sweepSeconds', 'sweepStaggerSeconds', 'sweepLeadSeconds', 'pointerFollowSeconds'];
+eq('every duration is a finite positive number', DURATIONS.filter((k) => !(Number.isFinite(SIG[k]) && SIG[k] > 0)), []);
+eq('every geometry token is finite', ['perspective', 'enterZ', 'enterRotateY', 'enterRotateX', 'enterRiseEm', 'pointerTiltDeg'].filter((k) => !Number.isFinite(SIG[k])), []);
+
+/* The light must never sweep a cluster that has not arrived yet: the
+   sweep has to start no earlier than the first cluster's entrance. */
+eq('the sweep starts no earlier than the entrance', SIG.sweepLeadSeconds >= SIG.leadSeconds, true);
+
+/* Clusters rise *out of* depth, so enterZ is away from the viewer. */
+eq('clusters rise out of depth (enterZ is negative)', SIG.enterZ < 0, true);
+eq('perspective is a real camera distance, not a flattened one', SIG.perspective >= 600, true);
+
+/* Readability ceiling: the resting signature must stay crisp. A large
+   pointer tilt on display type at 8.5rem is unreadable, not premium. */
+eq('the pointer tilt stays subtle (<= 6deg)', SIG.pointerTiltDeg > 0 && SIG.pointerTiltDeg <= 6, true);
+eq('the entrance rotation stays within a quarter turn', Math.abs(SIG.enterRotateY) <= 90 && Math.abs(SIG.enterRotateX) <= 90, true);
+eq('the easing is an explicit cubic-bezier', /^cubic-bezier\(/.test(SIG.ease), true);
+
+/* Total time to a fully legible name, for the longest canonical name.
+   The stagger is per grapheme cluster, so the Latin name (9 clusters,
+   the longer of the two) sets the worst case. Both the entrance and
+   the sweep must finish inside it. */
+const clustersOf = (name) => segmentGraphemes(name).filter((c) => c.trim()).length;
+eq('the canonical Latin name is 9 clusters', clustersOf('Sobuj Miah'), 9);
+eq('the canonical Bengali name is 5 clusters', clustersOf('সবুজ মিয়া'), 5);
+
+const last = clustersOf('Sobuj Miah') - 1;
+const entranceEnd = SIG.leadSeconds + last * SIG.clusterStaggerSeconds + SIG.clusterSeconds;
+const sweepEnd = SIG.sweepLeadSeconds + last * SIG.sweepStaggerSeconds + SIG.sweepSeconds;
+eq('the whole name is legible within 2s', entranceEnd <= 2.0, true);
+eq('the sweep ends after the entrance (light reads as a finishing pass)', sweepEnd >= entranceEnd, true);
+eq('the signature settles within 2.5s — one pass, with an end', Math.max(entranceEnd, sweepEnd) <= 2.5, true);
+
 console.log('\nSection routing');
 eq('seven sections', SECTION_IDS.length, 7);
 eq('home is the site root', sectionHref(0), '/');

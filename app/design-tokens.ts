@@ -82,51 +82,53 @@ export const MOTION = {
     /** Drift follow spring. */
     followSpring: { stiffness: 60, damping: 18, mass: 1 },
   },
-  /** Signature identity — the wordmark is *constructed* from its own
-      rendered ink, then becomes a continuous particle storytelling
-      canvas (life/work cycle → back to name). Deterministic and seeded
-      from the name. Shares of `totalSeconds` are a budget that must sum
-      to 1: last cluster starts at clusterShare + jitterShare and travels
-      for travelShare, so `clusterShare + jitterShare + travelShare === 1`. */
-  nameAssemble: {
-    /** Whole name construction, seconds. */
-    totalSeconds: 2.0,
-    /** Outgoing wordmark's exit when the language changes, seconds. */
-    outgoingSeconds: 0.22,
-    /** Cross-fade from particles to the real DOM text, seconds. */
-    resolveSeconds: 0.34,
-    /** Language retarget: the old particle glyphs loosen and fade over
-        this many seconds while the new field prepares to form. */
-    dissolveSeconds: 0.45,
-    /** Name-hold micro-drift amplitude, CSS px — keep tiny so the name
-        stays clearly readable during the stable identity beat. */
-    microPx: 0.18,
-    /** Reserved breath period (story holds use near-zero breath). */
-    breathSeconds: 8.0,
-    /** Reserved breath window share. */
-    breathWindow: 0.2,
-    /** Name-hold breath peak, CSS px — intentionally minimal. */
-    breathPx: 0.6,
-    /** Baseline rule + cluster ticks fade out over this share. */
-    guideShare: 0.55,
-    /** Left-to-right stagger across the grapheme clusters. */
-    clusterShare: 0.3,
-    /** Deterministic timing spread inside one cluster. */
-    jitterShare: 0.15,
-    /** Each particle's travel time. */
-    travelShare: 0.55,
-    /** Ease-out overshoot strength — 0 is plain, 0.7 seats subtly. */
-    settleBack: 0.55,
-    /** Dispersal radius, as a multiple of the wordmark box height. */
-    disperseRadius: 1.15,
-    /** Hard ceiling on the single global particle population.
-        Bedroom multi-object scenes (bed+pillow+blanket+human+robot)
-        need more ink than a wordmark alone; one shared pool still. */
-    maxParticles: 2800,
-    /** Sampling grid step in CSS px before the budget adapts it. */
-    sampleStepPx: 2.2,
-    /** Device-pixel-ratio cap for the construction canvas. */
-    maxDpr: 2,
+  /** Signature identity — the canonical name as a dimensional object.
+
+      The name stays real DOM text in the page's only `h1`. Depth comes
+      from CSS 3D: the line sits in one perspective, and each grapheme
+      cluster is its own transformed box that rises out of that depth in
+      a left-to-right stagger, after which a light sweep travels across
+      the letterforms. A single light-wave pass, not a cycle — the
+      resting state is crisp, legible typography.
+
+      Clusters come from `app/graphemes.ts`, so a Bengali conjunct
+      (`ক্ষ`, `স্ট্র`) or a consonant carrying a matra (`মি`, `বু`,
+      `য়া`) is one indivisible box and its shaping is never torn apart.
+
+      The retired particle construction is not coming back
+      (`docs/CINEMATIC_AUDIT.md`): no canvas, no WebGL, no sampled ink. */
+  signature: {
+    /** Perspective for the whole signature line, px. */
+    perspective: 1500,
+    /** Depth a cluster rises from, px (negative = away from the viewer). */
+    enterZ: -220,
+    /** A cluster's entrance rotateY, degrees. */
+    enterRotateY: -28,
+    /** A cluster's entrance rotateX, degrees. */
+    enterRotateX: 14,
+    /** Vertical travel of a cluster's entrance, em of the name's size. */
+    enterRiseEm: 0.42,
+    /** One cluster's entrance duration, seconds. */
+    clusterSeconds: 0.92,
+    /** Delay between consecutive clusters, seconds. */
+    clusterStaggerSeconds: 0.055,
+    /** Delay before the first cluster moves, seconds. */
+    leadSeconds: 0.35,
+    /** Shared easing for the entrance and the sweep. */
+    ease: 'cubic-bezier(0.16, 1, 0.3, 1)',
+    /** One cluster's share of the light sweep, seconds. */
+    sweepSeconds: 1.15,
+    /** Delay between clusters inside the sweep, seconds — this is what
+        makes the highlight read as travelling across the letterforms. */
+    sweepStaggerSeconds: 0.042,
+    /** Delay before the sweep starts, seconds. Must be >= leadSeconds so
+        the light never crosses a cluster that has not arrived yet. */
+    sweepLeadSeconds: 0.62,
+    /** Pointer-driven tilt ceiling, degrees. Fine pointers only, and
+        small on purpose: presence without harming readability. */
+    pointerTiltDeg: 3.5,
+    /** How long the signature takes to follow the pointer, seconds. */
+    pointerFollowSeconds: 0.45,
   },
   /** Pull-to-refresh gesture. */
   pullToRefresh: {

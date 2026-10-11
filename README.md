@@ -9,19 +9,34 @@ Live at **https://soobujmiah.github.io**.
 [![SEO audited](https://img.shields.io/badge/SEO-audited%202026--09--24-22c55e?style=flat-square)](docs/SEO.md)
 
 Discrete cinematic pager (Next.js static export + framer-motion),
-fully bilingual **English / বাংলা**, green-on-black theme. The hero name is
-**constructed, not revealed**: its own rendered ink is sampled into a
-particle field that travels home and resolves into real typography.
-The visual story moves through three connected futuristic locations: an
-observatory exterior, a passage into its core, and a final archive. Camera
-positions advance within each location and dissolve between locations. A
-live canvas adds location-specific weather, energy, light travel and depth;
-fine-pointer movement shifts the camera. Cards and controls catch a moving
-pointer light, while copy and details enter in sequence. The three local WebP
-plates total under 300 KB and need no hosted runtime service.
-The geographic map remains a crawlable fallback beneath them. Each
-page shows its title once; reduced-motion visitors see still shots and all
-text stays readable without JavaScript.
+fully bilingual **English / বাংলা**, green-on-black theme.
+
+**The signature name** — `Sobuj Miah` / `সবুজ মিয়া` — is the brand's primary
+visual object, and it is real DOM text in the page's only `h1`. Its depth is
+CSS 3D: the line sits in one perspective and each **grapheme cluster** is its
+own transformed box, rising out of depth in a left-to-right stagger before a
+light sweep travels across the letterforms. Clustering (never splitting by
+code point) is what keeps Bengali correct — a conjunct such as `ক্ষ`, or a
+consonant carrying a matra such as `মি`, stays one indivisible, correctly
+shaped box. One pass, with a defined end; the resting state is crisp
+typography. No canvas, no WebGL and no image text are involved
+(`DESIGN_SYSTEM.md` §5b).
+
+**The environment** is *Silicon Nocturne*: one procedural Canvas 2D scene —
+an invented floorplan of a phone system-on-chip (CPU clusters, GPU, NPU,
+memory, interconnect, I/O ring) seen by a low camera. It is drawn from a
+seeded generator, so the same seed always yields the same chip, and it is
+resolution-independent rather than an upscaled photograph. Each chapter
+lights the region of the chip it is about, with arced camera flights between
+chapters and three-band depth haze. Device pixel ratio is capped, the scene
+pauses when the tab is hidden, phones get a lighter plan, reduced motion gets
+a single static frame, and without JavaScript a CSS gradient remains.
+
+Each page shows its title once, and all text stays readable without
+JavaScript. The earlier stock-footage layer, world map, particle name and
+dot-matrix clock were removed in favour of this single system — see
+[`docs/CINEMATIC_AUDIT.md`](docs/CINEMATIC_AUDIT.md) for why, and
+`scripts/check-design.mjs` for the gate that keeps them from returning.
 
 ## Stack
 
@@ -62,8 +77,8 @@ deliberate change, not cleanup.
 |---|---|
 | `check:content` | en/bn key parity, **two-way language purity**, `selected` ⊆ repos, labels/nav/URL sanity, the **canonical professional title** (and the absence of retired positioning), and the **complete 17-link social ecosystem** — exact, de-duplicated, identical in both trees. Self-tests its own predicates every run. |
 | `check:purity` | Adversarial suite — injects `"এটি AI Work Section GitHub"` and `"This is বাংলা বিভাগ"` into copies of the real content and asserts the gate rejects each, with an unmodified control that must pass. |
-| `check:design` | `app/design-tokens.ts` = `DESIGN_SYSTEM.md` = `globals.css :root` = browser `themeColor`. Documentation drift fails the build. Also asserts the identity mark's engineering contract (§6) and palette family (§7), and guards retired hero motifs — including the character-substitution wordmark — against returning. |
-| `check:units` | Bengali grapheme segmentation (both the `Intl.Segmenter` path and the fallback), section routing, digit localisation, and the signature-name motion logic: determinism, exact landing, baseline derivation, particle budget, cluster ordering, colour ramp, and the motion-token budget adding up to 1. |
+| `check:design` | `app/design-tokens.ts` = `DESIGN_SYSTEM.md` = `globals.css :root` = browser `themeColor`. Documentation drift fails the build. Also asserts the retired-motif blacklist (the stock-media world, the world map, the particle name and the dot-matrix clock cannot return, by file or by class name), that `SiliconWorld` is wired in as the page background and honours reduced motion, tab visibility, a DPR cap and resize, and that the type system stays serif + sans + mono. |
+| `check:units` | Bengali grapheme segmentation (both the `Intl.Segmenter` path and the fallback, including conjuncts and pre-base matras), section routing, digit localisation, the `MOTION.signature` invariants (the light never sweeps a cluster before it arrives, the tilt stays subtle, the whole name is legible within 2s, the retired particle group stays gone), and the Silicon Nocturne generator, PRNG, camera and projector. |
 | `check:build` | From the built `out/`: 34 primary routes (7 pager sections + 9 service pages + 1 verification document, each in both languages), plus 4 canonicalized legacy section URLs; server-rendered text, locale metadata and alternates, sitemap, social assets, and JavaScript budget. |
 
 ### Deterministic repository state

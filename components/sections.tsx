@@ -8,6 +8,8 @@ import { BrandIcon, type BrandIconId } from './social-icons';
 import { sectionHref } from '@/app/sections';
 import { serviceHref } from '@/app/services';
 import { useLang, localizeDigits } from '@/app/language';
+import { segmentGraphemes } from '@/app/graphemes';
+import { MOTION } from '@/app/design-tokens';
 import type { Project, Repo } from '@/app/content';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -21,20 +23,90 @@ import type { Project, Repo } from '@/app/content';
 
 const CARD_BG = 'rgba(6,7,6,0.66)';
 
-/** Masked line reveal of the name: a clean rise, one word at a time. Visible without JS. */
+/* ── THE SIGNATURE (DESIGN_SYSTEM.md §5b) ──────────────────────
+   The canonical name as a dimensional object, and still real DOM text
+   in the page's only `h1`. Words carry the shaping; grapheme clusters
+   carry the motion.
+
+   Splitting on clusters (never code points) is what makes Bengali safe:
+   a conjunct (`ক্ষ`, `স্ট্র`) or a consonant plus its matra (`মি`,
+   `বু`, `য়া`) stays inside one box, so it shapes as a unit and a
+   pre-base vowel sign still renders in its correct place.
+
+   `cluster` runs across the whole name rather than restarting per word,
+   so the entrance stagger and the light sweep read as one continuous
+   move over the signature. No canvas, no WebGL, no image text. */
 function NameReveal({ text, reducedMotion, armed }: { text: string; reducedMotion: boolean; armed: boolean }) {
+  const play = armed && !reducedMotion;
+  let cluster = 0;
   return (
     <>
       {text.split(/(\s+)/).map((part, index) => part.trim() ? (
-        <span key={index} className="cinema-word-mask">
-          <span
-            className={`cinema-word${armed && !reducedMotion ? ' cinema-word--play' : ''}`}
-            style={{ animationDelay: `${0.5 + index * 0.12}s` }}
-          >{part}</span>
+        <span key={index} className="sig-word">
+          {/* the exact `cinema-word` contract the build gate asserts */}
+          <span className={`cinema-word${play ? ' cinema-word--play' : ''}`}>
+            {segmentGraphemes(part).map((g, gi) => (
+              <span key={gi} className="sig-c" style={{ '--i': cluster++ } as React.CSSProperties}>{g}</span>
+            ))}
+          </span>
         </span>
       ) : <span key={index}>{part}</span>)}
     </>
   );
+}
+
+/* Every signature number comes from MOTION.signature, written once as
+   custom properties. CSS therefore cannot drift from the tokens, and
+   `check-design` keeps the tokens and their documentation in step. */
+const SIG = MOTION.signature;
+const SIG_VARS = {
+  '--sig-perspective': `${SIG.perspective}px`,
+  '--sig-enter-z': `${SIG.enterZ}px`,
+  '--sig-enter-ry': `${SIG.enterRotateY}deg`,
+  '--sig-enter-rx': `${SIG.enterRotateX}deg`,
+  '--sig-rise': `${SIG.enterRiseEm}em`,
+  '--sig-cluster': `${SIG.clusterSeconds}s`,
+  '--sig-stagger': `${SIG.clusterStaggerSeconds}s`,
+  '--sig-lead': `${SIG.leadSeconds}s`,
+  '--sig-ease': SIG.ease,
+  '--sig-sweep': `${SIG.sweepSeconds}s`,
+  '--sig-sweep-stagger': `${SIG.sweepStaggerSeconds}s`,
+  '--sig-sweep-lead': `${SIG.sweepLeadSeconds}s`,
+  '--sig-follow': `${SIG.pointerFollowSeconds}s`,
+} as React.CSSProperties;
+
+/* Pointer-driven depth on the signature. Fine pointers only (a touch
+   screen has no hover to track), nothing at all under reduced motion,
+   and a deliberately small ceiling — presence, not a toy. It writes two
+   custom properties; the transform and its easing stay in CSS. */
+function useSignatureTilt(reducedMotion: boolean) {
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || reducedMotion) return;
+    if (!window.matchMedia('(pointer: fine)').matches) return;
+    const max = SIG.pointerTiltDeg;
+    const clamp = (n: number) => (n < -1 ? -1 : n > 1 ? 1 : n);
+    const onMove = (event: PointerEvent) => {
+      const box = el.getBoundingClientRect();
+      if (!box.width || !box.height) return;
+      const dx = (event.clientX - (box.left + box.width / 2)) / (box.width / 2);
+      const dy = (event.clientY - (box.top + box.height / 2)) / (box.height / 2);
+      el.style.setProperty('--sig-ry', `${(clamp(dx) * max).toFixed(2)}deg`);
+      el.style.setProperty('--sig-rx', `${(clamp(-dy) * max).toFixed(2)}deg`);
+    };
+    const rest = () => {
+      el.style.setProperty('--sig-ry', '0deg');
+      el.style.setProperty('--sig-rx', '0deg');
+    };
+    window.addEventListener('pointermove', onMove, { passive: true });
+    window.addEventListener('pointerleave', rest);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerleave', rest);
+    };
+  }, [reducedMotion]);
+  return ref;
 }
 
 function CinematicHeading({ children, className, style }: { children: string; className: string; style?: React.CSSProperties }) {
@@ -102,6 +174,7 @@ function iconFor(href: string): 'portfolio' | BrandIconId {
 export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: boolean; armed?: boolean }) {
   const { t, lang } = useLang();
   const { goToScene } = useNav();
+  const tiltRef = useSignatureTilt(reducedMotion);
 
   return (
     <div className="page-fill page-fill--hero">
@@ -110,8 +183,16 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
         <p className="hero-kicker font-mono text-[10px] uppercase tracking-[0.32em]">
           {t.profile.location}
         </p>
+        {/* The h1 keeps exactly `class="hero-name"` — the build gate
+            asserts that literal. Tokens and tilt ride on the stage. */}
         <h1 className="hero-name">
-          <NameReveal text={t.profile.nameFull} reducedMotion={reducedMotion} armed={armed} />
+          <span className="sig-stage" style={SIG_VARS}>
+            <span className="sig-tilt" ref={tiltRef}>
+              {/* keyed by language so switching replays the signature
+                  as a designed transition instead of swapping text */}
+              <NameReveal key={lang} text={t.profile.nameFull} reducedMotion={reducedMotion} armed={armed} />
+            </span>
+          </span>
         </h1>
 
         <div className="hero-copy">
