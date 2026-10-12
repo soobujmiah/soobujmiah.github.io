@@ -41,8 +41,8 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
       <h1 className="hero-name"><NameReveal text={t.profile.nameFull} play={mounted && armed && !reducedMotion} /></h1>
       <p className="film-role">{t.profile.title}</p><p className="film-thesis">{t.profile.tagline}</p>
       <div className="film-actions"><a href={sectionHref(4, lang)}>{t.hero.ctaWork}</a><a href={t.profile.github}>{t.hero.ctaGithub}</a></div>
-    </div><p className="film-side-note">{t.hero.availability}</p></div>
-    <details className="field-record"><summary>{lang === 'bn' ? 'ভূমিকা পড়ুন' : 'Read the introduction'} <span aria-hidden="true">↗</span></summary><div className="field-record-body"><p>{t.hero.intro}</p></div></details>
+    </div></div>
+    <details className="field-record"><summary>{lang === 'bn' ? 'ভূমিকা পড়ুন' : 'Read the introduction'} <span aria-hidden="true">↗</span></summary><div className="field-record-body"><p>{t.hero.intro}</p><p>{t.hero.availability}</p></div></details>
   </section>;
 }
 

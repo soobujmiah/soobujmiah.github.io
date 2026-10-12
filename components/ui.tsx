@@ -1,13 +1,12 @@
 'use client';
 
-import { Children, createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { animate, motion, useInView, useMotionValue, useReducedMotion, useSpring, useVelocity, useTransform } from 'framer-motion';
+import { Children, createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { motion, useInView, useMotionValue, useReducedMotion, useSpring, useVelocity, useTransform } from 'framer-motion';
 import { useLang, localizeDigits } from '@/app/language';
 import { sectionHref } from '@/app/sections';
 import { MOTION } from '@/app/design-tokens';
 import { serviceHref } from '@/app/services';
 import { verificationHref } from '@/app/verification-routes';
-import { formatVerifiedDate, lastVerifiedAt, machineClaimCount, verifiedCount } from '@/app/verification';
 import { BrandIcon } from './social-icons';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -233,7 +232,6 @@ const bezierOf = (css: string): [number, number, number, number] =>
     .map((v) => Number(v.trim())) as [number, number, number, number]);
 
 const REVEAL_EASE = bezierOf(MOTION.reveal.ease);
-const COUNTUP_EASE = bezierOf(MOTION.countUp.ease);
 
 export function Reveal({
   children,
@@ -283,56 +281,6 @@ export function Reveal({
     >
       {children}
     </motion.div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   COUNT-UP — a real numeral that eases 0 → value on the shared
-   countUp token. For genuine, data-backed numbers only (e.g. the
-   verification proof count) — never a fabricated stat.
-   SSR renders the final value so no-JS / crawlers see it; the client
-   re-counts from 0 in a layout effect (no first-paint flicker) and
-   the whole thing no-ops under reduced motion.
-   ═══════════════════════════════════════════════════════════════ */
-export function CountUp({
-  value,
-  className = '',
-  style,
-}: {
-  value: number;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  const { lang } = useLang();
-  const reduced = useReducedMotion() ?? false;
-  const ref = useRef<HTMLSpanElement>(null);
-  const final = localizeDigits(String(value), lang);
-
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (reduced) {
-      el.textContent = localizeDigits(String(value), lang);
-      return;
-    }
-    el.textContent = localizeDigits('0', lang);
-    const controls = animate(0, value, {
-      duration: MOTION.countUp.seconds,
-      ease: COUNTUP_EASE,
-      onUpdate: (v) => {
-        if (el) el.textContent = localizeDigits(String(Math.round(v)), lang);
-      },
-    });
-    return () => {
-      controls.stop();
-      el.textContent = localizeDigits(String(value), lang);
-    };
-  }, [reduced, value, lang]);
-
-  return (
-    <span ref={ref} className={className} style={style} aria-label={final}>
-      {final}
-    </span>
   );
 }
 
@@ -741,32 +689,6 @@ export function Footer({ progress = 0 }: { progress?: number }) {
           >
             {t.footer.claims} <span aria-hidden>↗</span>
           </a>
-        </div>
-        {/* PROOF LINE — generated, not written. Every value here comes from
-            public/verification.json, which tools/verification regenerates from
-            each repository's own deterministic state. The wording is the only
-            human-authored part; the numbers and the date never are. */}
-        <div
-          className="mx-auto mt-1 flex max-w-5xl flex-wrap items-center justify-center gap-x-1.5 px-6 font-mono text-[10px]"
-          style={{ color: 'rgba(228,226,223,0.28)' }}
-        >
-          <span>{t.footer.proofLabel}</span>
-          {machineClaimCount > 0 && (
-            <>
-              <span aria-hidden>·</span>
-              <span>
-                <CountUp value={verifiedCount} />/{localizeDigits(String(machineClaimCount), lang)} {t.footer.checksPassing}
-              </span>
-              {lastVerifiedAt && (
-                <>
-                  <span aria-hidden>·</span>
-                  <span>
-                    {t.footer.lastVerified} {formatVerifiedDate(lastVerifiedAt, lang)}
-                  </span>
-                </>
-              )}
-            </>
-          )}
         </div>
       </div>
     </footer>
