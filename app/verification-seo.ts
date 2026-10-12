@@ -14,7 +14,13 @@ export function verificationMetadata(lang: Lang): Metadata {
   const bnUrl = verificationUrl('bn');
   const url = lang === 'en' ? enUrl : bnUrl;
   return {
-    title: `${v.heading} — ${tree.profile.nameFull}`,
+    /* `absolute` for the same reason as `homeMetadata`: this title already
+       ends with the name, and the root layout's `title.template` would
+       append it a second time. It shipped as
+       "Verification — Sobuj Miah — Sobuj Miah" until the title gate in
+       `check-build` caught it. OG and Twitter titles below are unaffected:
+       the layout defines no template for those. */
+    title: { absolute: `${v.heading} — ${tree.profile.nameFull}` },
     description: v.intro,
     alternates: {
       canonical: url,
