@@ -4,6 +4,10 @@ This repository is operated under Sobuj's SKB project-bootstrap standard. GitHub
 
 ## Mandatory reading
 
+0. **`HANDOFF.md`, only if it exists.** A temporary session handoff, written when work
+   was left mid-stream. It carries live-state facts and enforced traps that are not
+   obvious from the source. It is deliberately deleted once its open items are closed,
+   so its absence is normal and means nothing is pending.
 1. `README.md`
 2. **SKB context discovery:** consult `soobujmiah/skb` and begin at `ASSISTANT_CONTEXT.md` before making non-trivial project decisions.
 3. Live repository source and current state
