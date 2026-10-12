@@ -38,7 +38,15 @@ export function homeMetadata(lang: Lang): Metadata {
   const enUrl = `${ORIGIN}/`;
   const bnUrl = `${ORIGIN}/bn/`;
   return {
-    title: home.title,
+    /* `absolute`, not a bare string: the root layout carries
+       `title.template = '%s — <name>'`, and the home title already ends
+       with the name. A bare string here gets the template applied and the
+       name lands twice — which is exactly what shipped on `/bn/` (the EN
+       home escaped it only because `app/(en)/page.tsx` exports no
+       metadata at all and inherits `title.default`). Section and service
+       routes keep the bare string on purpose: their titles do not carry
+       the name, so the suffix is correct there. */
+    title: { absolute: home.title },
     description: home.description,
     alternates: {
       canonical: lang === 'en' ? enUrl : bnUrl,

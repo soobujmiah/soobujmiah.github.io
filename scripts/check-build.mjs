@@ -537,6 +537,37 @@ if (existsSync(join(OUT, 'robots.txt'))) {
   else ok('robots.txt allows crawling and references sitemap.xml');
 }
 
+/* ── 4c. no title may carry the site name twice ──
+   The root layout appends `— <name>` via `title.template`. A page whose
+   own title already ends with the name therefore ships it twice. That
+   shipped on `/bn/` until the home metadata switched to `title.absolute`:
+   "সবুজ মিয়া — … — সবুজ মিয়া". Uniqueness checks cannot catch it, because
+   a doubled title is still unique. */
+{
+  const NAMES = ['Sobuj Miah', 'সবুজ মিয়া'];
+  const titleRoutes = [
+    ...SECTIONS.map((slug) => [routePath(slug), routeFile(slug)]),
+    ...SERVICE_ROUTES.map((r) => [r, join(OUT, ...r.split('/').filter(Boolean), 'index.html')]),
+    ...VERIFICATION_ROUTES.map((r) => [r, join(OUT, ...r.split('/').filter(Boolean), 'index.html')]),
+    ...localizedRoutes.map(([route]) => [route, join(OUT, ...route.split('/').filter(Boolean), 'index.html')]),
+  ];
+  let doubled = 0;
+  for (const [route, file] of titleRoutes) {
+    if (!existsSync(file)) continue;
+    const m = readFileSync(file, 'utf8').match(/<title>([^<]*)<\/title>/);
+    if (!m) continue;
+    const title = m[1];
+    for (const name of NAMES) {
+      const hits = title.split(name).length - 1;
+      if (hits > 1) {
+        doubled += 1;
+        fail(`route ${route} ships the name ${hits}x in one <title>: "${title}"`);
+      }
+    }
+  }
+  if (!doubled) ok(`no route repeats the site name inside its <title> (${titleRoutes.length} routes checked)`);
+}
+
 /* ── 5. JavaScript budget ── */
 function walkJs(dir, acc = []) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
