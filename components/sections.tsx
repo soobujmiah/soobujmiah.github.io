@@ -180,9 +180,19 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
     <div className="page-fill page-fill--hero">
 
       <div className="page-content page-content--hero flex flex-col items-center text-center">
-        <p className="hero-kicker font-mono text-[10px] uppercase tracking-[0.32em]">
-          {t.profile.location}
-        </p>
+        {/* The status line leads, above the name — the hierarchy this
+            file's stylesheet has always documented: status → name →
+            descriptor → what/why → where to explore, nothing repeated.
+            Location used to appear here *and* again below the name. */}
+        <motion.p
+          className="hero-status hero-status--lead font-mono text-[10px] uppercase tracking-[0.4em]"
+          initial={reducedMotion ? false : { opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={reducedMotion ? { duration: 0 } : { delay: 0.2, duration: 0.7 }}
+        >
+          <span className="hero-status-dot" aria-hidden />
+          {t.profile.location} · {t.hero.availability}
+        </motion.p>
         {/* The h1 keeps exactly `class="hero-name"` — the build gate
             asserts that literal. Tokens and tilt ride on the stage. */}
         <h1 className="hero-name">
@@ -203,16 +213,6 @@ export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: bool
             transition={reducedMotion ? { duration: 0 } : { delay: 1.6, duration: 0.7 }}
           >
             {t.profile.title}
-          </motion.p>
-
-          <motion.p
-            className="hero-status font-mono text-[10px] uppercase tracking-[0.4em]"
-            initial={reducedMotion ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={reducedMotion ? { duration: 0 } : { delay: 0.4, duration: 0.7 }}
-          >
-            <span className="hero-status-dot" aria-hidden />
-            {t.profile.location} · {t.hero.availability}
           </motion.p>
 
           <motion.p
