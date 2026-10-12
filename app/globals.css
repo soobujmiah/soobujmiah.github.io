@@ -1995,7 +1995,6 @@ body.lang-bn .contact-primary span:first-child { font-family: var(--font-serif-b
 html[data-scene-mode='webgl'] body:not(.lang-bn) .film-home .hero-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .film-role { color: #f1f7ee; font-size: clamp(16px, 1.35vw, 21px); margin: 0 0 8px; }
 .film-thesis { color: #b4eac0; font: 400 clamp(17px, 1.55vw, 24px)/1.35 var(--font-serif), serif; margin: 0; max-width: 28ch; }
-.film-side-note { position: absolute; right: 5vw; bottom: calc(var(--site-footer-height, 76px) + 104px); max-width: 220px; color: #b7d7bc; font: 11px/1.5 var(--font-mono), monospace; text-align: right; }
 .film-project-selector { display: flex; gap: 5px; flex-wrap: wrap; width: 100%; }
 .film-project-selector button { border: 1px solid rgba(136,210,154,.38); border-radius: 0; padding: 5px 9px; color: #bdd3c1; font: inherit; background: rgba(4,16,10,.68); cursor: pointer; }
 .film-project-selector button[aria-current='true'] { color: #06150b; background: #b6f3c4; border-color: #b6f3c4; }
@@ -2038,7 +2037,6 @@ body.lang-bn .film-cue, body.lang-bn .film-actions, body.lang-bn .film-status, b
   .film-home .hero-name { font-size: clamp(2.7rem, 12vw, 4.3rem); line-height: 1.04; }
   .film-role { font-size: 15px; }
   .film-thesis { font-size: 17px; }
-  .film-side-note { display: none; }
   .film-project-selector { gap: 4px; }
   .film-project-selector button { padding: 4px 7px; font-size: 11px; }
   .field-record { padding: 0 22px calc(var(--site-footer-height, 76px) + 100px); }
