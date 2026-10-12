@@ -44,7 +44,7 @@ import {
 
 export type CinematicHandle = {
   setChapter(index: number): void;
-  setProject(index: number): void;
+  setBeat(index: number): void;
   setLanguage(lang: 'en' | 'bn'): void;
   setReducedMotion(reduced: boolean): void;
   setPointer(nx: number, ny: number): void;
@@ -60,7 +60,7 @@ const COLOR = {
 
 export function createCinematicScene(
   canvas: HTMLCanvasElement,
-  opts: { chapter: number; reducedMotion: boolean; coarse: boolean; lang: 'en' | 'bn'; onContextLost?: () => void }
+  opts: { chapter: number; beat: number; reducedMotion: boolean; coarse: boolean; lang: 'en' | 'bn'; onAnchor?: (x: number, y: number) => void; onContextLost?: () => void }
 ): CinematicHandle {
   const renderer = new THREE.WebGLRenderer({
     canvas,
@@ -183,10 +183,10 @@ export function createCinematicScene(
   const compute = stages[1];
   box(8.3, 13.7, .8, chassisMat, 0, 7.35, -1.4, compute);
   box(7.4, 12.8, .11, glassMat, 0, 7.35, -.94, compute);
-  const nodes = [[0, 9.7], [-2, 6.7], [2, 4.5]];
+  const nodes = [[-1.8, 10.2], [1.8, 10.2], [-1.8, 7.2], [1.8, 7.2], [-1.8, 4.2], [1.8, 4.2]];
   nodes.forEach(([x, y], i) => {
-    box(i === 0 ? 3.5 : 2.7, i === 0 ? 2.8 : 2.4, .3, i === 0 ? porcelainMat : litMat, x, y, -.74, compute);
-    box(i === 0 ? 2.7 : 1.9, .13, .32, signalMat, x, y - .85, -.54, compute);
+    box(2.75, 2.3, .3, i === 0 ? porcelainMat : litMat, x, y, -.74, compute);
+    box(1.9, .13, .32, signalMat, x, y - .82, -.54, compute);
   });
   box(.12, 2, .09, signalMat, 0, 7.6, -.49, compute);
   box(2, .12, .09, signalMat, -1, 5.8, -.49, compute);
@@ -267,11 +267,12 @@ export function createCinematicScene(
   /* 5: qualification bench. A bright CPU module is validated; NPU and
      GPU fixtures remain warm amber, consistent with the actual evidence. */
   const research = stages[5];
-  [-6, 0, 6].forEach((x, i) => {
-    box(4.9, .55, 7.2, glassMat, x, 1, 0, research);
-    box(3.8, 2.5, 3.8, i === 0 ? porcelainMat : chassisMat, x, 2.53, 0, research);
-    box(3.2, .12, .15, i === 0 ? signalMat : amberMat, x, 3.86, 1.91, research);
-    for (let j = 0; j < 4; j++) box(.13, .09, .8, i === 0 ? signalMat : amberMat, x - 1.2 + j * .8, 1.35, 3.1, research);
+  const researchPoints = [[-6, -3], [0, -3], [6, -3], [-6, 3], [0, 3], [6, 3]];
+  researchPoints.forEach(([x, z], i) => {
+    box(4.9, .45, 4.5, glassMat, x, 1, z, research);
+    box(3.8, 1.75, 3.3, i === 0 || i > 2 ? porcelainMat : chassisMat, x, 2.2, z, research);
+    box(3.2, .12, .15, i === 1 || i === 2 ? amberMat : signalMat, x, 3.17, z + 1.7, research);
+    for (let j = 0; j < 4; j++) box(.13, .09, .45, i === 1 || i === 2 ? amberMat : signalMat, x - 1.2 + j * .8, 1.35, z + 1.9, research);
   });
 
   /* 6: eight dated steps. Earlier practical work and later engineering
@@ -295,10 +296,44 @@ export function createCinematicScene(
     box(2.15, .12, .22, signalMat, x, 3.95, -1.16, contact);
   });
   box(10.6, .1, .1, signalMat, 0, 9.28, -1.42, contact);
+  const contactPoints = [[-1.7, 5.1], [1.7, 5.1], [-4, 2.2], [-2.4, 2.2], [-.8, 2.2], [.8, 2.2], [2.4, 2.2], [4, 2.2]];
+  contactPoints.slice(2).forEach(([x, y]) => {
+    box(1.25, .5, .16, litMat, x, y, -1.23, contact);
+    box(.8, .07, .18, signalMat, x, y - .15, -1.1, contact);
+  });
+  /* The visible green pin is attached to the real piece of the model
+     described by each beat. Projection drives both the inscription's
+     connector and the camera's secondary reveal. */
+  const anchors: THREE.Object3D[][] = DISTRICTS.map(() => []);
+  const pin = (chapterIndex: number, parent: THREE.Object3D, x: number, y: number, z: number) => {
+    const node = new THREE.Group();
+    node.position.set(x, y, z);
+    const head = new THREE.Mesh(geo(new THREE.SphereGeometry(.14, 8, 6)), signalMat);
+    node.add(head); parent.add(node);
+    anchors[chapterIndex].push(node);
+  };
+  pin(0, home, -2.5, 4.2, -7.1); pin(0, home, 7.8, 7.1, -13.2);
+  nodes.forEach(([x, y]) => pin(1, compute, x, y, -.38));
+  for (let i = 0; i < 8; i++) pin(2, about, i < 3 ? -2 + i * 1.1 : 7.6, i < 3 ? 2.15 + i * .55 : 2.1 + (i - 3) * .88, i < 3 ? 3 - i * .32 : -.7);
+  stackMeshes.forEach((layer, i) => pin(3, layer, 0, .6, 3.25));
+  projects.slice(0, 4).forEach((g, i) => pin(4, g, 0, i === 2 ? 4.3 : 4.2, 2.35));
+  pin(4, projects[4], 0, 4.7, 2.35);
+  const songjog = new THREE.Group(); songjog.position.set(7.4, 0, -5.4); work.add(songjog);
+  box(2.8, 4.5, .3, chassisMat, 0, 3.2, 0, songjog);
+  box(2.3, 3.9, .1, glassMat, 0, 3.2, .22, songjog);
+  for (let i = 0; i < 3; i++) box(1.7, .12, .12, i === 1 ? signalMat : porcelainMat, 0, 4.2 - i * .9, .29, songjog);
+  pin(4, songjog, 0, 5.2, .35);
+  pin(4, work, -6.4, 5.8, -2.8);
+  pin(4, work, 0, 1.1, 5.1);
+  researchPoints.forEach(([x, z]) => pin(5, research, x, 3.4, z + 1.8));
+  pin(6, history, -9.4, 1.3, 1.2);
+  historyHeights.forEach((h, i) => pin(6, history, -8.4 + i * 2.4, 1.2 + h, 1.1));
+  pin(6, history, 9.4, 1.3, 1.2);
+  contactPoints.forEach(([x, y]) => pin(7, contact, x, y + .5, -1));
   /* ── Camera state — critically damped flight + pointer orbit ── */
   let chapter = Math.max(0, Math.min(SHOTS.length - 1, opts.chapter));
+  let beat = Math.max(0, opts.beat);
   let lang = opts.lang;
-  let projectIndex = 0;
   let reduced = opts.reducedMotion;
   const pos: DampedVec3 = makeDamped(SHOTS[chapter].position);
   const look: DampedVec3 = makeDamped(SHOTS[chapter].target);
@@ -339,13 +374,18 @@ export function createCinematicScene(
     for (let i = 0; i < stackMeshes.length; i += 1) stackMeshes[i].position.y = stackLayerY(i, act3);
     for (const m of accentMats) m.emissiveIntensity = m.userData.base ?? (m.userData.base = m.emissiveIntensity);
     for (const m of accentMats) m.emissiveIntensity = (m.userData.base as number) * (0.85 + 0.25 * activations[chapter].v);
-    for (let i = 0; i < projects.length; i += 1) projects[i].scale.setScalar(chapter === 4 && i === projectIndex ? 1.08 : 1);
+    for (let i = 0; i < projects.length; i += 1) projects[i].scale.setScalar(chapter === 4 && i === beat ? 1.08 : 1);
   }
 
   function composeCamera(dt: number, instant: boolean) {
     const shot = SHOTS[chapter];
-    const subject = chapter === 4 ? { x: shot.target.x + projectX[projectIndex] * .52, y: shot.target.y, z: shot.target.z } : shot.target;
-    const eye = chapter === 4 ? { x: shot.position.x + projectX[projectIndex] * .52, y: shot.position.y, z: shot.position.z } : shot.position;
+    const anchor = anchors[chapter][Math.min(beat, anchors[chapter].length - 1)];
+    const focus = new THREE.Vector3();
+    anchor?.getWorldPosition(focus);
+    const shiftX = anchor ? Math.max(-5, Math.min(5, (focus.x - shot.target.x) * .5)) : 0;
+    const shiftY = anchor ? Math.max(-2, Math.min(2, (focus.y - shot.target.y) * .3)) : 0;
+    const subject = { x: shot.target.x + shiftX, y: shot.target.y + shiftY, z: shot.target.z };
+    const eye = { x: shot.position.x + shiftX, y: shot.position.y + shiftY, z: shot.position.z };
     if (instant) {
       pos.value = { ...eye };
       look.value = { ...subject };
@@ -369,7 +409,15 @@ export function createCinematicScene(
     const vy = pos.value.y - look.value.y;
     const vz = pos.value.z - look.value.z;
     camera.position.set(look.value.x + vx * k + off.x, look.value.y + vy * k + off.y, look.value.z + vz * k + off.z);
-    camera.lookAt(look.value.x, look.value.y, look.value.z);
+    /* Portrait reserves the lower half for the object-linked inscription.
+       Pitch the stage upward in frame, then keep its projected pin in view. */
+    const portraitLift = Math.max(0, 1 - camera.aspect) * 6.5;
+    camera.lookAt(look.value.x, look.value.y - portraitLift, look.value.z);
+    camera.updateMatrixWorld();
+    if (anchor && opts.onAnchor) {
+      const projected = anchor.getWorldPosition(new THREE.Vector3()).project(camera);
+      opts.onAnchor(Math.max(.05, Math.min(.95, (projected.x + 1) / 2)), Math.max(.08, Math.min(.76, (1 - projected.y) / 2)));
+    }
   }
 
   function renderFrame(dt: number, _t: number, instant: boolean) {
@@ -431,8 +479,8 @@ export function createCinematicScene(
       chapter = Math.max(0, Math.min(SHOTS.length - 1, index));
       requestRender();
     },
-    setProject(index: number) {
-      projectIndex = Math.max(0, Math.min(3, index));
+    setBeat(index: number) {
+      beat = Math.max(0, index);
       requestRender();
     },
     setLanguage(next: 'en' | 'bn') {

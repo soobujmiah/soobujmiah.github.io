@@ -134,7 +134,7 @@ export function NavOverlay({
       className="nav-overlay-root"
       data-open={open ? 'true' : 'false'}
       aria-hidden={!open}
-      {...(open ? {} : { inert: '' as unknown as boolean })}
+      {...(open ? {} : { inert: true })}
     >
       {/* backdrop */}
       <motion.div

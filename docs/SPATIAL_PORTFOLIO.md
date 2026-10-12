@@ -25,16 +25,18 @@ materials and geometry. The scene design and forms here are original.
   scenery. A connected signal route explains the sequence.
 - The identity is actual extruded 3D lettering in English. Bengali uses DOM
   text because browser shaping is required for accurate glyphs.
-- The chapter frame holds one short inscription at the lower scene edge.
-  The full factual record opens below the frame on request, where evidence,
-  links, and long copy stay selectable and accessible.
-- The project scene contains five named instruments: Ternux, ADT, LAI,
-  GGEN, and SKB. Ternux is a desktop on phone, ADT a build gantry, LAI a
-  local inference module, GGEN layered document sheets, and SKB linked
-  documents. Choosing one of the four public featured projects changes
-  the camera focus.
+- Each chapter advances through scene beats. Every beat has a pin attached
+  to the exact modeled object it describes; the projected pin and camera
+  movement connect readable DOM type to that object. The text is semantic
+  and server-rendered. JavaScript presents one beat at a time; without it,
+  every beat reads as a continuous document.
+- The project scene contains named instruments for Ternux, ADT, LAI, GGEN,
+  SKB, and Songjog. Ternux is a desktop on phone, ADT a build gantry, LAI a
+  local inference module, GGEN layered document sheets, SKB linked
+  documents, and Songjog a phone ledger. The camera studies each in turn.
 - The workstation uses six visibly separated physical layers. The research
-  bench distinguishes a validated CPU path from GPU/NPU qualification.
+  bench has six distinct fixtures; validated CPU and experimental GPU/NPU
+  paths use different material signals.
   The experience route contains eight chronological markers.
 - Portrait screens show the object in the upper scene and its inscription
   below, with room for native scrolling. The footer and pager retain clear
@@ -48,6 +50,5 @@ The WebGL scene is decorative for assistive technology. The DOM supplies
 semantic headings, links, Bengali shaping, and the complete evidence record.
 
 Repository gates and GitHub Pages deployment results are recorded in the PR.
-The owner requested that local visual browser testing be skipped and will
-review the deployed site manually. This document does not claim that a
-successful build proves visual acceptance.
+Visual acceptance requires actual rendered review at portrait and desktop
+sizes in both languages, beyond the static build gates.

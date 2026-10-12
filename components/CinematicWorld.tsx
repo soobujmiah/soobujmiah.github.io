@@ -37,14 +37,17 @@ function webglSupported(): boolean {
   }
 }
 
-export function CinematicWorld({ sceneIndex, reducedMotion }: { sceneIndex: number; reducedMotion: boolean }) {
+export function CinematicWorld({ sceneIndex, beatIndex, reducedMotion }: { sceneIndex: number; beatIndex: number; reducedMotion: boolean }) {
   const { lang } = useLang();
   const [mode, setMode] = useState<'probing' | 'webgl' | 'fallback'>('probing');
   const hostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const handleRef = useRef<CinematicHandle | null>(null);
+  const lastAnchor = useRef({ x: -1, y: -1 });
   const indexRef = useRef(sceneIndex);
   indexRef.current = sceneIndex;
+  const beatRef = useRef(beatIndex);
+  beatRef.current = beatIndex;
   const reducedRef = useRef(reducedMotion);
   reducedRef.current = reducedMotion;
   const langRef = useRef(lang);
@@ -54,12 +57,6 @@ export function CinematicWorld({ sceneIndex, reducedMotion }: { sceneIndex: numb
     document.documentElement.dataset.sceneMode = mode;
     return () => { delete document.documentElement.dataset.sceneMode; };
   }, [mode]);
-
-  useEffect(() => {
-    const onProject = (event: Event) => handleRef.current?.setProject((event as CustomEvent<number>).detail);
-    window.addEventListener('portfolio-project', onProject);
-    return () => window.removeEventListener('portfolio-project', onProject);
-  }, []);
 
   /* Probe, then lazy-load three.js only when it can actually run. */
   useEffect(() => {
@@ -76,9 +73,18 @@ export function CinematicWorld({ sceneIndex, reducedMotion }: { sceneIndex: numb
         const coarse = window.matchMedia('(pointer: coarse)').matches;
         const handle = mod.createCinematicScene(canvasRef.current, {
           chapter: indexRef.current,
+          beat: beatRef.current,
           reducedMotion: reducedRef.current,
           coarse,
           lang: langRef.current,
+          onAnchor: (x, y) => {
+            const root = hostRef.current?.parentElement;
+            if (!root) return;
+            if (Math.abs(lastAnchor.current.x - x) < .0015 && Math.abs(lastAnchor.current.y - y) < .0015) return;
+            lastAnchor.current = { x, y };
+            root.style.setProperty('--anchor-x', `${(x * 100).toFixed(2)}%`);
+            root.style.setProperty('--anchor-y', `${(y * 100).toFixed(2)}%`);
+          },
           onContextLost: () => {
             handleRef.current?.dispose();
             handleRef.current = null;
@@ -103,6 +109,10 @@ export function CinematicWorld({ sceneIndex, reducedMotion }: { sceneIndex: numb
   useEffect(() => {
     handleRef.current?.setChapter(sceneIndex);
   }, [sceneIndex, mode]);
+
+  useEffect(() => {
+    handleRef.current?.setBeat(beatIndex);
+  }, [beatIndex, mode]);
 
   useEffect(() => {
     handleRef.current?.setReducedMotion(reducedMotion);
