@@ -20,3 +20,11 @@ Production publication requires owner approval: merging this repository's PR
 triggers the GitHub Pages deployment workflow. Keep the feature branch and PR
 for review until that approval is given. No temporary downloads or toolchain
 installations were needed.
+
+## 2026-10-09 — environment continuity
+
+The background engine was rebuilt for continuity: velocity-preserving flight
+retargets, a clamped engine clock, continuous depth fog, pivot-preserving
+pointer orbit with an over-damped spring, chapter-light crossfades composed
+away from text, a pixel budget with a one-way quality ratchet, and a single
+lockstep render loop. Parameters, math and their tests: `docs/ENVIRONMENT.md`.

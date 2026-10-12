@@ -18,6 +18,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { gzipSync } from 'node:zlib';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -427,7 +428,7 @@ ok(`${checkedLinks} same-origin HTML links resolve to exported files`);
 
 if (textByRoute['home']) ok(`home ships ${textByRoute['home'].length} visible chars without JavaScript (audit baseline: 226)`);
 
-/* ── 4. static assets ── */
+/* ── 4. static assets and strict sitemap validation ── */
 for (const f of ['og.png', 'robots.txt', 'sitemap.xml', 'icon.svg', '404.html']) {
   if (!existsSync(join(OUT, f))) fail(`out/${f} is missing`);
 }
@@ -470,6 +471,51 @@ if (existsSync(join(OUT, 'sitemap.xml'))) {
     if (!xml.includes(url)) fail(`sitemap.xml is missing ${url}`);
   }
   ok('sitemap.xml lists every section route');
+  /* Search Console can fetch XML successfully and still reject it during
+     sitemap processing. Parse the exported document with Python's strict
+     XML parser and validate sitemap + XHTML namespace structure, unique
+     canonical URLs, timestamps, and reciprocal language alternates. */
+  const xmlCheck = String.raw`import sys, xml.etree.ElementTree as ET
+from datetime import datetime
+p = sys.argv[1]
+ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9", "xhtml": "http://www.w3.org/1999/xhtml"}
+root = ET.parse(p).getroot()
+if root.tag != "{http://www.sitemaps.org/schemas/sitemap/0.9}urlset":
+    raise SystemExit("root must be a sitemap 0.9 urlset with the standard namespace")
+urls = root.findall("sm:url", ns)
+locs = [node.findtext("sm:loc", namespaces=ns) for node in urls]
+if any(not loc for loc in locs):
+    raise SystemExit("every url entry must contain a non-empty loc")
+if len(locs) != len(set(locs)):
+    raise SystemExit("duplicate loc values found")
+for node in urls:
+    loc = node.findtext("sm:loc", namespaces=ns)
+    if not loc.startswith("https://soobujmiah.github.io/"):
+        raise SystemExit("non-canonical host or non-HTTPS URL: " + loc)
+    lastmod = node.findtext("sm:lastmod", namespaces=ns)
+    if lastmod:
+        try: datetime.fromisoformat(lastmod.replace("Z", "+00:00"))
+        except ValueError: raise SystemExit("invalid lastmod for " + loc + ": " + lastmod)
+    alts = {}
+    for alt in node.findall("xhtml:link", ns):
+        lang, href = alt.get("hreflang"), alt.get("href")
+        if not lang or not href: raise SystemExit("alternate link missing hreflang/href for " + loc)
+        if lang in alts: raise SystemExit("duplicate hreflang " + lang + " for " + loc)
+        alts[lang] = href
+    if set(alts) != {"en", "bn", "x-default"}:
+        raise SystemExit("expected en, bn and x-default alternates for " + loc)
+    if alts["x-default"] != alts["en"]:
+        raise SystemExit("x-default must match the English URL for " + loc)
+    if loc not in (alts["en"], alts["bn"]):
+        raise SystemExit("loc must match its own English or Bengali alternate for " + loc)
+    for href in alts.values():
+        if href not in locs: raise SystemExit("alternate URL absent from sitemap loc entries: " + href)
+if len(locs) != 34:
+    raise SystemExit("expected exactly 34 primary URLs (17 routes in EN + BN), got " + str(len(locs)))
+print("  ok   sitemap.xml is well-formed XML; 34 unique URLs, valid lastmod and reciprocal en/bn/x-default alternates")`;
+  const parsed = spawnSync('python3', ['-c', xmlCheck, join(OUT, 'sitemap.xml')], { encoding: 'utf8' });
+  if (parsed.status !== 0) fail(`sitemap.xml strict XML/alternate validation failed: ${(parsed.stderr || parsed.stdout).trim()}`);
+  else process.stdout.write(parsed.stdout);
   for (const route of SERVICE_ROUTES) {
     const url = new URL(route, ORIGIN).href;
     if (!xml.includes(url)) fail(`sitemap.xml is missing ${url}`);

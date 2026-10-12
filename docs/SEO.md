@@ -6,8 +6,9 @@ The pager has seven sections in each language. `/presence/` combines the
 former overview and technical stack; `/work/` includes featured projects and
 other selected repositories. `/stack/` and `/open-source/` (and their Bengali
 equivalents) remain exported entry URLs with canonicals and language alternates
-pointing to the merged pages. The sitemap lists the 32 primary English/Bengali
-section and service URLs; the four legacy URLs remain available outside it.
+pointing to the merged pages. The sitemap lists 34 primary English/Bengali URLs: seven sections, nine service
+routes, and the verification page in both languages. Four legacy URLs remain
+available outside the sitemap.
 
 ## Portfolio refinement — 2026-09-24
 
@@ -33,10 +34,45 @@ and sitemap output are covered by the source and exported-artifact checks.
 | Field | Value |
 |---|---|
 | **SEO standard** | [soobujmiah SEO Standard v1](https://github.com/soobujmiah/soobujmiah.github.io/blob/main/docs/SEO_STANDARD.md) |
-| **Last audit** | 2026-09-24 (portfolio content, route, and static-export audit; see refinement record below) |
+| **Last audit** | 2026-10-11 (sitemap/Search Console troubleshooting, live endpoint review, and exported-artifact validation hardening; see latest audit below) |
 | **Site status** | `LIVE_SITE` — https://soobujmiah.github.io/ (GitHub Pages, workflow deploy) |
 | **Role in identity graph** | **Hub.** Every public project links back here; this site links to every public project. |
 | **Search intent** | `Sobuj Miah` / `soobujmiah` identity → software, AI, practical technology, and digital services |
+
+## Technical SEO re-audit — 2026-10-11
+
+Scope: live sitemap and robots endpoints, sitemap source, static-export validation,
+route inventory, language alternates, canonical host, and Search Console observations.
+
+- Live `/sitemap.xml` returned HTTP 200 with `application/xml`; the response was
+  visibly XML with a sitemap `urlset`, and its entries included English/Bengali
+  `xhtml:link` alternates. Live `/robots.txt` returned HTTP 200 and references
+  the canonical sitemap URL.
+- Search Console's Live URL Test reported the sitemap URL fetchable and indexable,
+  but the Sitemap report still said **“Sitemap could not be read”** and showed zero
+  discovered URLs. These are different checks: successful URL Inspection is not
+  proof that the sitemap-processing pipeline accepted the document.
+- Source review found that `scripts/check-build.mjs` checked sitemap presence,
+  expected URL strings and route counts, but did not parse the generated XML.
+  It also had no structural checks for unique `loc` values, valid `lastmod`
+  timestamps, or reciprocal `en`/`bn`/`x-default` alternates.
+- Added strict XML parsing and namespace/alternate checks to the exported-artifact
+  gate on the audit branch. The checks require 34 unique canonical URLs (17
+  English/Bengali route pairs), valid timestamps when present, and each alternate
+  URL to exist in the sitemap. This improves regression detection; it does **not**
+  by itself prove Google's original processing error is fixed.
+- Updated the README SEO badge and this record to the audit date. No title,
+  canonical, robots policy, verification token, or public URL was changed.
+- Search Console follow-up remains required after a validated deployment. Remove
+  the obsolete `/ternux` entry from Search Console's Sitemaps report if it is
+  still present; keep only `/sitemap.xml` as the sitemap submission.
+
+### Verification boundary
+
+The live endpoint was reviewed and the source/export gate was strengthened. A new
+build/deployment and subsequent Search Console re-read are required before marking
+Google sitemap processing as resolved. No claim of re-indexing or successful
+Google processing is made in this audit.
 
 ## Previous baseline (2026-09-16; superseded by the 2026-09-24 refinement above)
 

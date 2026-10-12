@@ -60,17 +60,39 @@ export function CustomCursor() {
   );
 
   useEffect(() => {
+    /* Touch and coarse pointers never see the cursor (CSS hides it), so
+       they get no listeners and no animation loop at all. */
+    let fine = false;
+    let reduce = false;
+    try {
+      fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+      /* no matchMedia: treat as touch */
+    }
+    if (!fine) return;
     let raf = 0;
+    /* The ring eases toward the pointer and the loop stops once it has
+       arrived, instead of running every frame forever. Under reduced
+       motion the ring snaps to the pointer (no trailing). */
+    const animate = () => {
+      raf = 0;
+      const dx = mouseX.get() - ringX.get();
+      const dy = mouseY.get() - ringY.get();
+      if (reduce || (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1)) {
+        ringX.set(mouseX.get());
+        ringY.set(mouseY.get());
+        return;
+      }
+      ringX.set(ringX.get() + dx * 0.12);
+      ringY.set(ringY.get() + dy * 0.12);
+      raf = requestAnimationFrame(animate);
+    };
     const onMove = (e: MouseEvent) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
       setVisible(true);
-    };
-
-    const animate = () => {
-      ringX.set(ringX.get() + (mouseX.get() - ringX.get()) * 0.12);
-      ringY.set(ringY.get() + (mouseY.get() - ringY.get()) * 0.12);
-      raf = requestAnimationFrame(animate);
+      if (!raf) raf = requestAnimationFrame(animate);
     };
 
     const onDown = () => setClicking(true);
@@ -93,7 +115,6 @@ export function CustomCursor() {
     document.addEventListener('mouseover', onOver);
     document.addEventListener('mouseout', onOut);
 
-    raf = requestAnimationFrame(animate);
     return () => {
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mousedown', onDown);

@@ -75,7 +75,7 @@ export const MOTION = {
   },
   /** Presence count-up numeral. */
   countUp: { seconds: 1.1, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' },
-  /** Pointer-driven camera drift on the world map (section-relative). */
+  /** Pointer-driven camera orbit of the background environment (see docs/ENVIRONMENT.md §3). */
   cameraDrift: {
     /** Max drift as a multiple of the camera half-width (≈ ±2%). */
     maxOffsetHw: 0.02,

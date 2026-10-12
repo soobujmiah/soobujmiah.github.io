@@ -6,7 +6,7 @@
 Personal portfolio of **Sobuj Miah**, an independent software and AI systems builder.
 Live at **https://soobujmiah.github.io**.
 
-[![SEO audited](https://img.shields.io/badge/SEO-audited%202026--09--24-22c55e?style=flat-square)](docs/SEO.md)
+[![SEO audited](https://img.shields.io/badge/SEO-audited%202026--10--11-22c55e?style=flat-square)](docs/SEO.md)
 
 Discrete cinematic pager (Next.js static export + framer-motion),
 fully bilingual **English / বাংলা**, green-on-black theme.
@@ -22,21 +22,18 @@ shaped box. One pass, with a defined end; the resting state is crisp
 typography. No canvas, no WebGL and no image text are involved
 (`DESIGN_SYSTEM.md` §5b).
 
-**The environment** is *Silicon Nocturne*: one procedural Canvas 2D scene —
-an invented floorplan of a phone system-on-chip (CPU clusters, GPU, NPU,
-memory, interconnect, I/O ring) seen by a low camera. It is drawn from a
-seeded generator, so the same seed always yields the same chip, and it is
-resolution-independent rather than an upscaled photograph. Each chapter
-lights the region of the chip it is about, with arced camera flights between
-chapters and three-band depth haze. Device pixel ratio is capped, the scene
-pauses when the tab is hidden, phones get a lighter plan, reduced motion gets
-a single static frame, and without JavaScript a CSS gradient remains.
+**The background** is one continuous environment: an abstract, seeded
+system-on-chip floorplan drawn as emerald wireframe with Canvas 2D. Each
+chapter flies the camera to the region it is about and lights it; depth fog,
+signal pulses and, on fine pointers, a damped pointer parallax keep it alive
+without competing with the copy. Parameters and math: `docs/ENVIRONMENT.md`.
 
-Each page shows its title once, and all text stays readable without
-JavaScript. The earlier stock-footage layer, world map, particle name and
-dot-matrix clock were removed in favour of this single system — see
-[`docs/CINEMATIC_AUDIT.md`](docs/CINEMATIC_AUDIT.md) for why, and
-`scripts/check-design.mjs` for the gate that keeps them from returning.
+Each page shows its title once; reduced-motion visitors see a still scene and
+all text stays readable without JavaScript. The earlier stock-footage layer,
+world map, particle name and dot-matrix clock were removed in favour of this
+single system — see [`docs/CINEMATIC_AUDIT.md`](docs/CINEMATIC_AUDIT.md) for
+why, and `scripts/check-design.mjs` for the gate that keeps them from
+returning.
 
 ## Stack
 
