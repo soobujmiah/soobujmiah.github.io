@@ -27,6 +27,7 @@ import {
 import { NavOverlay } from '@/components/NavOverlay';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { CinematicWorld } from '@/components/CinematicWorld';
+import type { StoryControls } from '@/components/WorldStory';
 import {
   HeroScene,
   StatsScene,
@@ -42,29 +43,26 @@ const WHEEL_THRESHOLD = 24;
 const SWIPE_THRESHOLD = 60;
 const EDGE_SLACK = 2; // px tolerance for scroll-edge detection
 
-type PageProps = { reducedMotion: boolean; pageIndex: number; armed: boolean };
-
-function PageBody({ index, reducedMotion, armed }: { index: number; reducedMotion: boolean; armed: boolean }) {
-  const props: PageProps = { reducedMotion, pageIndex: index, armed };
+function PageBody({ index, reducedMotion, armed, ...controls }: { index: number; reducedMotion: boolean; armed: boolean } & StoryControls) {
   switch (index) {
     case 0:
-      return <HeroScene {...props} />;
+      return <HeroScene reducedMotion={reducedMotion} armed={armed} {...controls} />;
     case 1:
-      return <StatsScene />;
+      return <StatsScene {...controls} />;
     case 2:
-      return <AboutScene />;
+      return <AboutScene {...controls} />;
     case 3:
-      return <WorkstationScene />;
+      return <WorkstationScene {...controls} />;
     case 4:
-      return <WorkScene />;
+      return <WorkScene {...controls} />;
     case 5:
-      return <ResearchScene />;
+      return <ResearchScene {...controls} />;
     case 6:
-      return <ExperienceScene />;
+      return <ExperienceScene {...controls} />;
     case 7:
-      return <ContactScene />;
+      return <ContactScene {...controls} />;
     default:
-      return <HeroScene {...props} />;
+      return <HeroScene reducedMotion={reducedMotion} armed={armed} {...controls} />;
   }
 }
 
@@ -112,6 +110,17 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
   const { t, lang } = useLang();
   const splashActive = false;
   const [index, setIndex] = useState(initialIndex);
+  const [beat, setBeat] = useState(0);
+  const beatRef = useRef(0);
+  const beatCount = useRef(1);
+  const onBeatCount = useCallback((count: number) => { beatCount.current = Math.max(1, count); }, []);
+  const onBeat = useCallback((next: number) => {
+    const value = Math.max(0, Math.min(beatCount.current - 1, next));
+    beatRef.current = value;
+    setBeat(value);
+    lastFlip.current = Date.now();
+    activeScroller.current?.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
   const [dir, setDir] = useState(1);
   const [navOpen, setNavOpen] = useState(false);
   const lastFlip = useRef(0);
@@ -122,6 +131,11 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
   const indexRef = useRef(initialIndex);
   indexRef.current = index;
   const urlSynced = useRef(false);
+
+  useEffect(() => {
+    document.documentElement.dataset.storyReady = 'true';
+    return () => { delete document.documentElement.dataset.storyReady; };
+  }, []);
 
   /* Legacy `#work` deep links from the previous hash-only build are
      rewritten to their real route so old shares keep working. */
@@ -138,6 +152,8 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
       if (window.location.pathname !== href) window.history.replaceState(null, '', href);
       indexRef.current = i;
       setIndex(i);
+      beatRef.current = 0;
+      setBeat(0);
       setDir(1);
     } catch {
       /* ignore */
@@ -153,6 +169,8 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
         indexRef.current = i;
         setDir(i > prev ? 1 : -1);
         setIndex(i);
+        beatRef.current = 0;
+        setBeat(0);
       }
       lastFlip.current = Date.now();
     };
@@ -182,17 +200,31 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
     setDir(clamped > prev ? 1 : -1);
     lastFlip.current = Date.now();
     setIndex(clamped);
+    beatRef.current = 0;
+    beatCount.current = 1;
+    setBeat(0);
   }, []);
 
   const tryFlip = useCallback((delta: 1 | -1) => {
     const now = Date.now();
     if (now - lastFlip.current < PT.flipLockMs) return;
+    const nextBeat = beatRef.current + delta;
+    if (nextBeat >= 0 && nextBeat < beatCount.current) {
+      beatRef.current = nextBeat;
+      setBeat(nextBeat);
+      lastFlip.current = now;
+      activeScroller.current?.scrollTo({ top: 0, behavior: 'instant' });
+      return;
+    }
     const next = Math.max(0, Math.min(PAGE_COUNT - 1, indexRef.current + delta));
     if (next === indexRef.current) return;
     lastFlip.current = now;
     indexRef.current = next;
     setDir(delta);
     setIndex(next);
+    beatRef.current = 0;
+    beatCount.current = 1;
+    setBeat(0);
   }, []);
 
   /* Touch: dominant-axis vertical swipes. If the page has further to
@@ -341,7 +373,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        <CinematicWorld sceneIndex={index} reducedMotion={reducedMotion} />
+        <CinematicWorld sceneIndex={index} beatIndex={beat} reducedMotion={reducedMotion} />
         <div className="pager-vignette" aria-hidden />
         <AnimatePresence custom={dir} initial={false} mode="sync">
           <motion.div
@@ -379,7 +411,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
               aria-label={t.ui.pageLabels[index]}
               className="page-scroll"
             >
-              <PageBody index={index} reducedMotion={reducedMotion} armed={!splashActive} />
+              <PageBody index={index} reducedMotion={reducedMotion} armed={!splashActive} beat={beat} onBeat={onBeat} onBeatCount={onBeatCount} />
             </main>
           </motion.div>
         </AnimatePresence>
