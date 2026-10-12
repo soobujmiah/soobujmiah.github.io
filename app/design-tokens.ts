@@ -87,8 +87,11 @@ export const MOTION = {
       The name stays real DOM text in the page's only `h1`. Depth comes
       from CSS 3D: the line sits in one perspective, and each grapheme
       cluster is its own transformed box that rises out of that depth in
-      a left-to-right stagger, after which a light sweep travels across
-      the letterforms. A single light-wave pass, not a cycle — the
+      a left-to-right stagger, after which a gleam travels across the
+      letterforms. The gleam is a halo on the glyphs themselves, in the
+      brand green — deliberately NOT the retired near-white `.sig-sweep`
+      band that sat *behind* the name, which `check-build` still bans
+      along with its near-white ink. One pass, not a cycle — the
       resting state is crisp, legible typography.
 
       Clusters come from `app/graphemes.ts`, so a Bengali conjunct
@@ -116,14 +119,14 @@ export const MOTION = {
     leadSeconds: 0.35,
     /** Shared easing for the entrance and the sweep. */
     ease: 'cubic-bezier(0.16, 1, 0.3, 1)',
-    /** One cluster's share of the light sweep, seconds. */
-    sweepSeconds: 1.15,
-    /** Delay between clusters inside the sweep, seconds — this is what
+    /** One cluster's share of the travelling gleam, seconds. */
+    gleamSeconds: 1.15,
+    /** Delay between clusters inside the gleam, seconds — this is what
         makes the highlight read as travelling across the letterforms. */
-    sweepStaggerSeconds: 0.042,
-    /** Delay before the sweep starts, seconds. Must be >= leadSeconds so
+    gleamStaggerSeconds: 0.042,
+    /** Delay before the gleam starts, seconds. Must be >= leadSeconds so
         the light never crosses a cluster that has not arrived yet. */
-    sweepLeadSeconds: 0.62,
+    gleamLeadSeconds: 0.62,
     /** Pointer-driven tilt ceiling, degrees. Fine pointers only, and
         small on purpose: presence without harming readability. */
     pointerTiltDeg: 3.5,

@@ -69,9 +69,9 @@ const SIG_VARS = {
   '--sig-stagger': `${SIG.clusterStaggerSeconds}s`,
   '--sig-lead': `${SIG.leadSeconds}s`,
   '--sig-ease': SIG.ease,
-  '--sig-sweep': `${SIG.sweepSeconds}s`,
-  '--sig-sweep-stagger': `${SIG.sweepStaggerSeconds}s`,
-  '--sig-sweep-lead': `${SIG.sweepLeadSeconds}s`,
+  '--sig-gleam': `${SIG.gleamSeconds}s`,
+  '--sig-gleam-stagger': `${SIG.gleamStaggerSeconds}s`,
+  '--sig-gleam-lead': `${SIG.gleamLeadSeconds}s`,
   '--sig-follow': `${SIG.pointerFollowSeconds}s`,
 } as React.CSSProperties;
 

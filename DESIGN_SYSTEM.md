@@ -115,9 +115,9 @@ below verbatim. Both stay correct — the gate guarantees it.
       "clusterStaggerSeconds": 0.055,
       "leadSeconds": 0.35,
       "ease": "cubic-bezier(0.16, 1, 0.3, 1)",
-      "sweepSeconds": 1.15,
-      "sweepStaggerSeconds": 0.042,
-      "sweepLeadSeconds": 0.62,
+      "gleamSeconds": 1.15,
+      "gleamStaggerSeconds": 0.042,
+      "gleamLeadSeconds": 0.62,
       "pointerTiltDeg": 3.5,
       "pointerFollowSeconds": 0.45
     },
@@ -239,9 +239,12 @@ CSS cannot drift from the tokens):
 
 1. **Emergence** — each cluster rises from `enterZ` with `enterRotateX` /
    `enterRotateY`, in a left-to-right stagger of `clusterStaggerSeconds`.
-2. **Light sweep** — a brightness wave crosses the letterforms, one cluster
-   at a time (`sweepStaggerSeconds`). One pass, with a defined end. Not a
-   cycle, and no blend modes.
+2. **Gleam** — a green halo crosses the letterforms, one cluster at a time
+   (`gleamStaggerSeconds`). The ink itself never changes colour: the glyphs
+   stay `--fg` and only gain a brand-green `text-shadow`. One pass, with a
+   defined end. Not a cycle, and no blend modes. This is explicitly *not*
+   the retired `.sig-sweep` band — that was a near-white light band behind
+   the name, and `check-build` bans both it and its `#86efac` ink.
 3. **Rest** — crisp, fully legible typography. On fine pointers only, the
    whole signature tilts up to `pointerTiltDeg` (3.5°) with the pointer.
 

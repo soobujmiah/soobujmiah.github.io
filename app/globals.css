@@ -733,17 +733,23 @@ a, button {
 
 /* Two animations, two properties, one pass each.
    `sig-rise`  — transform + opacity: the cluster arrives out of depth.
-   `sig-sheen` — colour + shadow: light travels across the letterforms.
-   The sweep's extra per-cluster delay is what makes it read as travel
+   `sig-gleam` — shadow only: light travels across the letterforms.
+   The gleam's extra per-cluster delay is what makes it read as travel
    rather than a simultaneous flash. `backwards` fill holds the opening
-   frame during the delay, so nothing flickers in at full strength. */
+   frame during the delay, so nothing flickers in at full strength.
+
+   The gleam is a halo on the glyphs, in the brand green. It is NOT the
+   retired near-white light band that sat *behind* the name: that motif
+   and its near-white ink are both on the banned list in
+   `scripts/check-build.mjs`, which scans this stylesheet as shipped.
+   The ink here never changes colour at all — hence shadow only. */
 .hero-name .cinema-word--play .sig-c {
   animation:
     sig-rise var(--sig-cluster, 0.92s) var(--sig-ease, ease-out) backwards,
-    sig-sheen var(--sig-sweep, 1.15s) var(--sig-ease, ease-out) backwards;
+    sig-gleam var(--sig-gleam, 1.15s) var(--sig-ease, ease-out) backwards;
   animation-delay:
     calc(var(--sig-lead, 0.35s) + var(--i, 0) * var(--sig-stagger, 0.055s)),
-    calc(var(--sig-sweep-lead, 0.62s) + var(--i, 0) * var(--sig-sweep-stagger, 0.042s));
+    calc(var(--sig-gleam-lead, 0.62s) + var(--i, 0) * var(--sig-gleam-stagger, 0.042s));
 }
 
 @keyframes sig-rise {
@@ -757,12 +763,9 @@ a, button {
   to { opacity: 1; transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg); }
 }
 
-@keyframes sig-sheen {
-  0%, 100% { color: var(--fg); text-shadow: none; }
-  50% {
-    color: #f4fbf6;
-    text-shadow: 0 0 0.42em rgba(74, 222, 128, 0.42);
-  }
+@keyframes sig-gleam {
+  0%, 100% { text-shadow: none; }
+  50% { text-shadow: 0 0 0.36em rgba(74, 222, 128, 0.38); }
 }
 
 /* Reduced motion: the signature is simply present. The server ships the

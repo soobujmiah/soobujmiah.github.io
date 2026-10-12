@@ -139,13 +139,13 @@ const SIG = MOTION.signature;
 eq('the retired particle token group is gone', 'nameAssemble' in MOTION, false);
 eq('the signature token group exists', typeof SIG, 'object');
 
-const DURATIONS = ['clusterSeconds', 'clusterStaggerSeconds', 'leadSeconds', 'sweepSeconds', 'sweepStaggerSeconds', 'sweepLeadSeconds', 'pointerFollowSeconds'];
+const DURATIONS = ['clusterSeconds', 'clusterStaggerSeconds', 'leadSeconds', 'gleamSeconds', 'gleamStaggerSeconds', 'gleamLeadSeconds', 'pointerFollowSeconds'];
 eq('every duration is a finite positive number', DURATIONS.filter((k) => !(Number.isFinite(SIG[k]) && SIG[k] > 0)), []);
 eq('every geometry token is finite', ['perspective', 'enterZ', 'enterRotateY', 'enterRotateX', 'enterRiseEm', 'pointerTiltDeg'].filter((k) => !Number.isFinite(SIG[k])), []);
 
 /* The light must never sweep a cluster that has not arrived yet: the
    sweep has to start no earlier than the first cluster's entrance. */
-eq('the sweep starts no earlier than the entrance', SIG.sweepLeadSeconds >= SIG.leadSeconds, true);
+eq('the gleam starts no earlier than the entrance', SIG.gleamLeadSeconds >= SIG.leadSeconds, true);
 
 /* Clusters rise *out of* depth, so enterZ is away from the viewer. */
 eq('clusters rise out of depth (enterZ is negative)', SIG.enterZ < 0, true);
@@ -167,10 +167,10 @@ eq('the canonical Bengali name is 5 clusters', clustersOf('সবুজ মি�
 
 const last = clustersOf('Sobuj Miah') - 1;
 const entranceEnd = SIG.leadSeconds + last * SIG.clusterStaggerSeconds + SIG.clusterSeconds;
-const sweepEnd = SIG.sweepLeadSeconds + last * SIG.sweepStaggerSeconds + SIG.sweepSeconds;
+const gleamEnd = SIG.gleamLeadSeconds + last * SIG.gleamStaggerSeconds + SIG.gleamSeconds;
 eq('the whole name is legible within 2s', entranceEnd <= 2.0, true);
-eq('the sweep ends after the entrance (light reads as a finishing pass)', sweepEnd >= entranceEnd, true);
-eq('the signature settles within 2.5s — one pass, with an end', Math.max(entranceEnd, sweepEnd) <= 2.5, true);
+eq('the gleam ends after the entrance (light reads as a finishing pass)', gleamEnd >= entranceEnd, true);
+eq('the signature settles within 2.5s — one pass, with an end', Math.max(entranceEnd, gleamEnd) <= 2.5, true);
 
 console.log('\nSection routing');
 eq('seven sections', SECTION_IDS.length, 7);

@@ -15,7 +15,8 @@ fully bilingual **English / বাংলা**, green-on-black theme.
 visual object, and it is real DOM text in the page's only `h1`. Its depth is
 CSS 3D: the line sits in one perspective and each **grapheme cluster** is its
 own transformed box, rising out of depth in a left-to-right stagger before a
-light sweep travels across the letterforms. Clustering (never splitting by
+green gleam travels across the letterforms — a halo on the glyphs, which keep
+their `--fg` ink throughout. Clustering (never splitting by
 code point) is what keeps Bengali correct — a conjunct such as `ক্ষ`, or a
 consonant carrying a matra such as `মি`, stays one indivisible, correctly
 shaped box. One pass, with a defined end; the resting state is crisp
