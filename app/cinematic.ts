@@ -22,33 +22,29 @@ export type Shot = {
   target: Vec3;
 };
 
-/* ── The city plan ──────────────────────────────────────────────
-   One district per chapter, laid out as a gentle zig-zag down the
-   wafer so every flight travels THROUGH the city, never cuts. The
-   indices match app/sections.ts SECTION_IDS order. */
+/* One station per chapter along the same device-to-delivery route. */
 export const DISTRICTS: readonly Vec3[] = [
-  { x: 0, y: 0, z: 0 }, //      0 home — identity plaza
-  { x: -26, y: 0, z: -34 }, //  1 presence — measurement field
-  { x: 24, y: 0, z: -64 }, //   2 about — quiet quad
-  { x: -22, y: 0, z: -98 }, //  3 workstation — the layer tower
-  { x: 24, y: 0, z: -132 }, //  4 work — three monuments
-  { x: -24, y: 0, z: -166 }, // 5 research — polyhedra field
-  { x: 20, y: 0, z: -198 }, //  6 experience — the year rail
-  { x: 0, y: 0, z: -232 }, //   7 contact — the overlook
+  { x: 0, y: 0, z: 0 }, // identity
+  { x: -26, y: 0, z: -34 }, // computing
+  { x: 24, y: 0, z: -64 }, // biography / method
+  { x: -22, y: 0, z: -98 }, // workstation
+  { x: 24, y: 0, z: -132 }, // projects
+  { x: -24, y: 0, z: -166 }, // research
+  { x: 20, y: 0, z: -198 }, // experience
+  { x: 0, y: 0, z: -232 }, // contact
 ] as const;
 
-/* Resting shot per chapter. Camera always above the wafer (y > 0),
-   subjects at monument height. The contact shot rises and looks past
-   the last district to the horizon — the journey's closing frame. */
+/* Resting shots face each chapter's actual instrument, including the
+   contact terminal rather than an empty horizon. */
 export const SHOTS: readonly Shot[] = [
-  { position: { x: 0, y: 5.4, z: 26 }, target: { x: 0, y: 5.5, z: -10 } },
-  { position: { x: -12, y: 7.5, z: -14 }, target: { x: -26, y: 3.6, z: -34 } },
-  { position: { x: 34, y: 5.4, z: -46 }, target: { x: 24, y: 2.6, z: -64 } },
-  { position: { x: -5, y: 8.5, z: -80 }, target: { x: -28.5, y: 7.2, z: -92 } },
-  { position: { x: 11, y: 6.2, z: -114 }, target: { x: 24, y: 4.2, z: -132 } },
-  { position: { x: -10, y: 7.4, z: -148 }, target: { x: -24, y: 5.6, z: -166 } },
-  { position: { x: 7, y: 5.2, z: -182 }, target: { x: 20, y: 3.2, z: -202 } },
-  { position: { x: -4, y: 26, z: -200 }, target: { x: 0, y: 8, z: -300 } },
+  { position: { x: 0, y: 6, z: 26 }, target: { x: 0, y: 4.2, z: -10 } },
+  { position: { x: -13, y: 8, z: -13 }, target: { x: -26, y: 6.2, z: -34 } },
+  { position: { x: 34, y: 7, z: -46 }, target: { x: 24, y: 3.1, z: -64 } },
+  { position: { x: -8, y: 10, z: -77 }, target: { x: -22, y: 7.5, z: -98 } },
+  { position: { x: 11, y: 8, z: -110 }, target: { x: 24, y: 3.6, z: -132 } },
+  { position: { x: -11, y: 8, z: -145 }, target: { x: -24, y: 3, z: -166 } },
+  { position: { x: 7, y: 7, z: -180 }, target: { x: 20, y: 4, z: -198 } },
+  { position: { x: -4, y: 10, z: -207 }, target: { x: 0, y: 5, z: -232 } },
 ] as const;
 
 export const FOV = 52;
@@ -168,14 +164,14 @@ export function stackLayerY(i: number, activation: number): number {
   return STACK.thickness / 2 + i * pitch;
 }
 
-/* ── Work monuments ─────────────────────────────────────────────
-   Three verified projects, three recognizable forms. Positions are
-   relative to the work district center. The DOM cards remain the
-   interactive source of truth; these are their places in the world. */
+/* Five actual systems named on the project stage. SKB has a private
+   source; its label describes knowledge infrastructure only. */
 export const MONUMENTS = [
-  { id: 'lai', dx: -7.5, dz: 1.5 }, //  monolith with a pulsing core
-  { id: 'ggen', dx: 0, dz: -2.5 }, //   layered sheets
-  { id: 'skb', dx: 7.5, dz: 1 }, //     knowledge lattice
+  { id: 'ternux', dx: -8.5, dz: 0 },
+  { id: 'adt', dx: -4.25, dz: 0 },
+  { id: 'lai', dx: 0, dz: 0 },
+  { id: 'ggen', dx: 4.25, dz: 0 },
+  { id: 'skb', dx: 8.5, dz: 0 },
 ] as const;
 
 /** Activation (0..1 destination) of district `i` when chapter `c` is current. */

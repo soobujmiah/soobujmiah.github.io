@@ -1,5 +1,9 @@
 # Cinematic 3D environment — research, architecture and decisions
 
+> Historical record for the first WebGL environment. Its silicon-city
+> compositions and verification screenshots were superseded by the
+> [Pocket Systems redesign](SPATIAL_PORTFOLIO.md) on 2026-10-12.
+
 Recorded 2026-10-12 before implementation; the Verification section is
 updated with measured results as they are produced. This document is the
 Phase 0 research record and the Phase 2 architecture record for replacing

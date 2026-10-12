@@ -437,7 +437,7 @@ console.log('\nSilicon Nocturne — the procedural environment');
   eq('every shot is finite and the camera never dips under the wafer', SHOTS.every((s) => [s.position, s.target].every((v) => [v.x, v.y, v.z].every(Number.isFinite)) && s.position.y > 0), true);
   eq('consecutive shots are distinct — every chapter change is a real flight', SHOTS.every((s, i) => i === 0 || Math.hypot(s.position.x - SHOTS[i - 1].position.x, s.position.y - SHOTS[i - 1].position.y, s.position.z - SHOTS[i - 1].position.z) > 5), true);
   eq('the journey travels forward through the city (z strictly decreasing)', DISTRICTS.every((d, i) => i === 0 || d.z < DISTRICTS[i - 1].z), true);
-  eq('the three monuments are LAI, GGEN and SKB', MONUMENTS.map((m) => m.id), ['lai', 'ggen', 'skb']);
+  eq('project stations name the actual systems', MONUMENTS.map((m) => m.id), ['ternux', 'adt', 'lai', 'ggen', 'skb']);
 
   console.log('\n3D cinematic logic — critically damped flight');
   {
