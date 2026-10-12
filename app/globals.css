@@ -869,9 +869,10 @@ body.lang-bn .hero-name {
   line-height: 1.25;
 }
 
-.hero-kicker {
+/* The leading status line sits above the name and is the only place
+   the location appears. `.hero-kicker` was retired with the duplicate. */
+.hero-status--lead {
   margin: 0 0 1.2rem;
-  color: var(--accent);
   opacity: 0.9;
 }
 
@@ -1513,10 +1514,6 @@ body:has(> .services-doc) button {
 
 .hero-copy .hero-role {
   margin: 0 0 0.4rem;
-}
-
-.hero-copy .hero-status {
-  margin: 0 0 0.35rem;
 }
 
 .hero-copy .hero-tagline {
