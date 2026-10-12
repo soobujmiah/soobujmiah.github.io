@@ -44,7 +44,7 @@ export const SHOTS: readonly Shot[] = [
   { position: { x: 0, y: 5.4, z: 26 }, target: { x: 0, y: 5.5, z: -10 } },
   { position: { x: -12, y: 7.5, z: -14 }, target: { x: -26, y: 3.6, z: -34 } },
   { position: { x: 34, y: 5.4, z: -46 }, target: { x: 24, y: 2.6, z: -64 } },
-  { position: { x: -5, y: 8.5, z: -80 }, target: { x: -22, y: 7.2, z: -98 } },
+  { position: { x: -5, y: 8.5, z: -80 }, target: { x: -28.5, y: 7.2, z: -92 } },
   { position: { x: 11, y: 6.2, z: -114 }, target: { x: 24, y: 4.2, z: -132 } },
   { position: { x: -10, y: 7.4, z: -148 }, target: { x: -24, y: 5.6, z: -166 } },
   { position: { x: 7, y: 5.2, z: -182 }, target: { x: 20, y: 3.2, z: -202 } },

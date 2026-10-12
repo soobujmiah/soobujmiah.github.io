@@ -183,6 +183,19 @@ a, button {
   height: 100%;
 }
 
+/* Reading scrim over the WebGL scene. The 3D objects keep their place
+   and shape at the edges and floor; the reading column sits on a calm
+   dark field so text never competes with a lit slab behind it. */
+.cinematic-world::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 56% at 50% 46%, rgba(5, 5, 7, 0.78), rgba(5, 5, 7, 0.34) 68%, transparent 100%),
+    linear-gradient(0deg, rgba(5, 5, 7, 0.6), transparent 28%);
+}
+
 .silicon-canvas {
   position: absolute;
   inset: 0;
@@ -632,6 +645,15 @@ a, button {
   .pager-hud {
     padding: 0 12px;
   }
+}
+
+/* Phone: content dissolves before the fixed footer and the section pill.
+   Without this, body copy ran underneath both and was unreadable where
+   they overlapped. The fade is a visual edge only; scrolling still
+   reaches the last line, which clears the chrome clearance above. */
+.page-scroll {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 210px), transparent calc(100% - 136px));
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 210px), transparent calc(100% - 136px));
 }
 
 /* Footer + scroll-progress seam (immediately above the footer bar). */
