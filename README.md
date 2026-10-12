@@ -8,39 +8,25 @@ Live at **https://soobujmiah.github.io**.
 
 [![SEO audited](https://img.shields.io/badge/SEO-audited%202026--10--11-22c55e?style=flat-square)](docs/SEO.md)
 
-Discrete cinematic pager (Next.js static export + framer-motion),
-fully bilingual **English / বাংলা**, green-on-black theme.
+A bilingual spatial portfolio, built as eight chapters of one phone-silicon
+exhibit. Each chapter has a deliberate camera shot, a three-dimensional
+monument and readable DOM inscriptions aligned to the scene's ground datum.
+The identity, mobile workstation, projects, research, experience and contact
+form one architectural journey instead of a set of cards. The theme comes
+from Sobuj's documented phone-first Android, ARM64 Linux and on-device systems
+work. Design and verification notes: [`docs/SPATIAL_PORTFOLIO.md`](docs/SPATIAL_PORTFOLIO.md).
 
-**The signature name** — `Sobuj Miah` / `সবুজ মিয়া` — is the brand's primary
-visual object, and it is real DOM text in the page's only `h1`. Its depth is
-CSS 3D: the line sits in one perspective and each **grapheme cluster** is its
-own transformed box, rising out of depth in a left-to-right stagger before a
-green gleam travels across the letterforms — a halo on the glyphs, which keep
-their `--fg` ink throughout. Clustering (never splitting by
-code point) is what keeps Bengali correct — a conjunct such as `ক্ষ`, or a
-consonant carrying a matra such as `মি`, stays one indivisible, correctly
-shaped box. One pass, with a defined end; the resting state is crisp
-typography. No canvas, no WebGL and no image text are involved
-(`DESIGN_SYSTEM.md` §5b).
-
-**The background** is one continuous environment: an abstract, seeded
-system-on-chip floorplan drawn as emerald wireframe with Canvas 2D. Each
-chapter flies the camera to the region it is about and lights it; depth fog,
-signal pulses and, on fine pointers, a damped pointer parallax keep it alive
-without competing with the copy. Parameters and math: `docs/ENVIRONMENT.md`.
-
-Each page shows its title once; reduced-motion visitors see a still scene and
-all text stays readable without JavaScript. The earlier stock-footage layer,
-world map, particle name and dot-matrix clock were removed in favour of this
-single system — see [`docs/CINEMATIC_AUDIT.md`](docs/CINEMATIC_AUDIT.md) for
-why, and `scripts/check-design.mjs` for the gate that keeps them from
-returning.
+WebGL renders the primary world using a lazy-loaded Three.js scene. Canvas 2D
+renders an intentionally brighter silicon floorplan when WebGL fails. The
+static HTML and CSS remain readable with JavaScript disabled. The signature
+name is real DOM text in English and Bengali; Bengali letters are split only
+at grapheme boundaries to preserve shaping.
 
 ## Stack
 
-- Next.js 15.5.24 (static export), React 18, TypeScript, Tailwind CSS
+- Next.js 15.5.27 (static export), React 18, TypeScript, Tailwind CSS
 - framer-motion for chapter transitions and camera moves + inner page scroll
-- Procedural Canvas 2D environment (no stock media); no paid service or new runtime dependency
+- Procedural Three.js environment, Canvas 2D fallback and static CSS fallback; no stock media
 - GitHub Pages deploy via `.github/workflows/deploy.yml` (lint → build → upload `./out`)
 
 ## Develop
@@ -134,19 +120,16 @@ fabricate); the UI maps it to `Explore`, repos to Source/Code links.
   arrows/PageUp/PageDown/Home/End, dots, and nav links yield to inner
   content until its edges, then advance exactly one chapter (subtle content
   depth + environment camera flight, ~1s gesture lock).
-- `components/SiliconWorld.tsx` + `app/silicon.ts` — **Silicon Nocturne**, the
-  one environment: an abstract, procedurally generated phone-chip floorplan
-  seen by a low camera, drawn with Canvas 2D at native resolution. Each chapter
-  has its own camera pose; chapter changes fly the camera. No stock media. See
-  `DESIGN_SYSTEM.md` §9 and `docs/ASSETS.md`.
-- `components/sections.tsx` — the seven curated pages (Hero → Contact).
-  Technical work combines the former overview and stack. Work includes the
-  featured spotlight and selected repositories (curated subset + GitHub route),
-  Experience accordion below `md` / timeline above.
-- `components/ui.tsx` — cursor, magnetic links, reveals, preloader, header
-  (with EN/BN toggle), footer, the bottom HUD control (ONE button: its
-  border is the perimeter progress trace, fixed bottom-centre origin;
-  pressing it opens the index HUD), snap carousel.
+- `components/CinematicWorld.tsx` + `components/cinematic-scene.ts` +
+  `app/cinematic.ts` — the lazy WebGL silicon city and chapter camera shots.
+- `components/SiliconWorld.tsx` + `app/silicon.ts` — the Canvas 2D fallback
+  when WebGL fails; static HTML and CSS cover the no-JavaScript path.
+- `components/sections.tsx` — all eight chapters as scene-aligned DOM
+  inscriptions; selected projects, supporting repositories, workstation
+  layers, research, experience and contact remain accessible and crawlable.
+- `components/ui.tsx` — navigation, language toggle, footer, index control
+  and the verification proof line. The pager advances after inner scroll
+  reaches its edge.
 
 Visual language is specified in `DESIGN_SYSTEM.md` — the shared DNA for this
 portfolio and future repository websites (same brand, different context).

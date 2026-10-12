@@ -1,1296 +1,143 @@
 'use client';
 
-import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
-import { Magnetic, Reveal, SnapCarousel, useNav } from './ui';
-import { TiltCard } from './TiltCard';
-import { BrandIcon, type BrandIconId } from './social-icons';
-import { sectionHref } from '@/app/sections';
-import { serviceHref } from '@/app/services';
+import { useEffect, useState } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import { useLang, localizeDigits } from '@/app/language';
 import { segmentGraphemes } from '@/app/graphemes';
-import { MOTION } from '@/app/design-tokens';
-import type { Project, Repo } from '@/app/content';
+import { sectionHref } from '@/app/sections';
+import { serviceHref } from '@/app/services';
+import type { ReactNode } from 'react';
 
-/* ═══════════════════════════════════════════════════════════════
-   PAGE CONTENT — every page fits its viewport (no vertical scroll
-   anywhere). Desktop uses wide editorial layouts (heading rails,
-   fitted grids, a work spotlight); phones use horizontal snap
-   carousels and an accordion. Giant outlined numerals fill the
-   negative space. Cards sit over the live tech background, so they
-   use translucent fills + backdrop blur for readability.
-   ═══════════════════════════════════════════════ */
+/* The exhibit is a single architectural route. Every inscription is real,
+   selectable DOM text; the WebGL and Canvas scenes supply the monuments. */
+function Inscription({ index, eyebrow, title, children, className = '' }: {
+  index: number; eyebrow: string; title: string; children: ReactNode; className?: string;
+}) {
+  const { lang } = useLang();
+  return <div className={`exhibit exhibit--${index} ${className}`}>
+    <div className="exhibit-sightline" aria-hidden="true"><span /></div>
+    <div className="exhibit-body">
+      <p className="exhibit-kicker"><span className="exhibit-index">{localizeDigits(String(index + 1).padStart(2, '0'), lang)}</span><span className="exhibit-rule" />{eyebrow.replace(/^\s*[0-9০-৯]{2}\s*[—-]\s*/, '')}</p>
+      <h1 className="exhibit-title">{title}</h1>
+      <div className="exhibit-copy">{children}</div>
+    </div>
+  </div>;
+}
 
-const CARD_BG = 'rgba(6,7,6,0.66)';
-
-/* ── THE SIGNATURE (DESIGN_SYSTEM.md §5b) ──────────────────────
-   The canonical name as a dimensional object, and still real DOM text
-   in the page's only `h1`. Words carry the shaping; grapheme clusters
-   carry the motion.
-
-   Splitting on clusters (never code points) is what makes Bengali safe:
-   a conjunct (`ক্ষ`, `স্ট্র`) or a consonant plus its matra (`মি`,
-   `বু`, `য়া`) stays inside one box, so it shapes as a unit and a
-   pre-base vowel sign still renders in its correct place.
-
-   `cluster` runs across the whole name rather than restarting per word,
-   so the entrance stagger and the light sweep read as one continuous
-   move over the signature. No canvas, no WebGL, no image text. */
-function NameReveal({ text, reducedMotion, armed }: { text: string; reducedMotion: boolean; armed: boolean }) {
-  const play = armed && !reducedMotion;
+function NameReveal({ text, play }: { text: string; play: boolean }) {
   let cluster = 0;
-  return (
-    <>
-      {text.split(/(\s+)/).map((part, index) => part.trim() ? (
-        <span key={index} className="sig-word">
-          {/* the exact `cinema-word` contract the build gate asserts */}
-          <span className={`cinema-word${play ? ' cinema-word--play' : ''}`}>
-            {segmentGraphemes(part).map((g, gi) => (
-              <span key={gi} className="sig-c" style={{ '--i': cluster++ } as React.CSSProperties}>{g}</span>
-            ))}
-          </span>
-        </span>
-      ) : <span key={index}>{part}</span>)}
-    </>
-  );
+  return <>{text.split(/(\s+)/).map((part, index) => part.trim() ?
+    <span className="sig-word" key={index}><span className={`cinema-word${play ? ' cinema-word--play' : ''}`}>
+      {segmentGraphemes(part).map((g, gi) => <span className="sig-c" key={gi} style={{ '--i': cluster++ } as React.CSSProperties}>{g}</span>)}
+    </span></span> : <span key={index}>{part}</span>)}</>;
 }
-
-/* Every signature number comes from MOTION.signature, written once as
-   custom properties. CSS therefore cannot drift from the tokens, and
-   `check-design` keeps the tokens and their documentation in step. */
-const SIG = MOTION.signature;
-const SIG_VARS = {
-  '--sig-perspective': `${SIG.perspective}px`,
-  '--sig-enter-z': `${SIG.enterZ}px`,
-  '--sig-enter-ry': `${SIG.enterRotateY}deg`,
-  '--sig-enter-rx': `${SIG.enterRotateX}deg`,
-  '--sig-rise': `${SIG.enterRiseEm}em`,
-  '--sig-cluster': `${SIG.clusterSeconds}s`,
-  '--sig-stagger': `${SIG.clusterStaggerSeconds}s`,
-  '--sig-lead': `${SIG.leadSeconds}s`,
-  '--sig-ease': SIG.ease,
-  '--sig-gleam': `${SIG.gleamSeconds}s`,
-  '--sig-gleam-stagger': `${SIG.gleamStaggerSeconds}s`,
-  '--sig-gleam-lead': `${SIG.gleamLeadSeconds}s`,
-  '--sig-follow': `${SIG.pointerFollowSeconds}s`,
-} as React.CSSProperties;
-
-/* Pointer-driven depth on the signature. Fine pointers only (a touch
-   screen has no hover to track), nothing at all under reduced motion,
-   and a deliberately small ceiling — presence, not a toy. It writes two
-   custom properties; the transform and its easing stay in CSS. */
-function useSignatureTilt(reducedMotion: boolean) {
-  const ref = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || reducedMotion) return;
-    if (!window.matchMedia('(pointer: fine)').matches) return;
-    const max = SIG.pointerTiltDeg;
-    const clamp = (n: number) => (n < -1 ? -1 : n > 1 ? 1 : n);
-    const onMove = (event: PointerEvent) => {
-      const box = el.getBoundingClientRect();
-      if (!box.width || !box.height) return;
-      const dx = (event.clientX - (box.left + box.width / 2)) / (box.width / 2);
-      const dy = (event.clientY - (box.top + box.height / 2)) / (box.height / 2);
-      el.style.setProperty('--sig-ry', `${(clamp(dx) * max).toFixed(2)}deg`);
-      el.style.setProperty('--sig-rx', `${(clamp(-dy) * max).toFixed(2)}deg`);
-    };
-    const rest = () => {
-      el.style.setProperty('--sig-ry', '0deg');
-      el.style.setProperty('--sig-rx', '0deg');
-    };
-    window.addEventListener('pointermove', onMove, { passive: true });
-    window.addEventListener('pointerleave', rest);
-    return () => {
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerleave', rest);
-    };
-  }, [reducedMotion]);
-  return ref;
-}
-
-function CinematicHeading({ children, className, style }: { children: string; className: string; style?: React.CSSProperties }) {
-  const reducedMotion = useReducedMotion();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  return (
-    <h1 className={className} style={style}>
-      {children.split(/(\s+)/).map((part, index) => part.trim() ? (
-        <span key={index} className="cinema-word-mask">
-          <span
-            className={`cinema-word${mounted && !reducedMotion ? ' cinema-word--play' : ''}`}
-            style={{ animationDelay: `${0.12 + index * 0.038}s` }}
-          >{part}</span>
-        </span>
-      ) : <span key={index}>{part}</span>)}
-    </h1>
-  );
-}
-
-/* ── 00b · HOME VISUAL — the designed information panel ──────────
-   Replaces the old opaque landscape band. The person artwork is a
-   blended, edge-masked layer that dissolves into the page background
-   (no rectangle, no card); the informational structure from the
-   supplied composition — stat rail, project chips — is rebuilt as
-   real bilingual DOM floating over the existing hero environment.
-   A transparent PNG dropped at /images/home-figure.png is the
-   artwork layer; the blend simply respects its alpha.              */
-
-/* ── 00c · SOCIAL ICON RESOLUTION ────────────────────────────────
-   Icons resolve from the link target, so both language trees share
-   one mapping without duplicating identifiers in content.          */
-const SOCIAL_ICON_HOSTS: Record<string, BrandIconId> = {
-  'github.com': 'github',
-  'linkedin.com': 'linkedin',
-  'peerlist.io': 'peerlist',
-  'producthunt.com': 'producthunt',
-  'huggingface.co': 'huggingface',
-  'dev.to': 'devdotto',
-  'hashnode.com': 'hashnode',
-  'medium.com': 'medium',
-  'x.com': 'x',
-  'instagram.com': 'instagram',
-  'threads.net': 'threads',
-  'facebook.com': 'facebook',
-  'youtube.com': 'youtube',
-  't.me': 'telegram',
-  'wa.me': 'whatsapp',
-  'about.me': 'aboutdotme',
-  'buymeacoffee.com': 'buymeacoffee',
-};
-
-function iconFor(href: string): 'portfolio' | BrandIconId {
-  if (href.startsWith('mailto:')) return 'mail';
-  try {
-    const host = new URL(href).hostname.replace(/^www\./, '');
-    return SOCIAL_ICON_HOSTS[host] ?? 'portfolio';
-  } catch {
-    return 'portfolio';
-  }
-}
-
-/* ── 01 · HERO ───────────────────────────────────────────────── */
 
 export function HeroScene({ reducedMotion, armed = true }: { reducedMotion: boolean; armed?: boolean }) {
   const { t, lang } = useLang();
-  const { goToScene } = useNav();
-  const tiltRef = useSignatureTilt(reducedMotion);
-
-  return (
-    <div className="page-fill page-fill--hero">
-
-      <div className="page-content page-content--hero flex flex-col items-center text-center">
-        {/* The status line leads, above the name — the hierarchy this
-            file's stylesheet has always documented: status → name →
-            descriptor → what/why → where to explore, nothing repeated.
-            Location used to appear here *and* again below the name. */}
-        <motion.p
-          className="hero-status hero-status--lead font-mono text-[10px] uppercase tracking-[0.4em]"
-          initial={reducedMotion ? false : { opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={reducedMotion ? { duration: 0 } : { delay: 0.2, duration: 0.7 }}
-        >
-          <span className="hero-status-dot" aria-hidden />
-          {t.profile.location} · {t.hero.availability}
-        </motion.p>
-        {/* The h1 keeps exactly `class="hero-name"` — the build gate
-            asserts that literal. Tokens and tilt ride on the stage. */}
-        <h1 className="hero-name">
-          <span className="sig-stage" style={SIG_VARS}>
-            <span className="sig-tilt" ref={tiltRef}>
-              {/* keyed by language so switching replays the signature
-                  as a designed transition instead of swapping text */}
-              <NameReveal key={lang} text={t.profile.nameFull} reducedMotion={reducedMotion} armed={armed} />
-            </span>
-          </span>
-        </h1>
-
-        <div className="hero-copy">
-          <motion.p
-            className="hero-role text-[13px] font-medium sm:text-sm"
-            initial={reducedMotion ? false : { opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={reducedMotion ? { duration: 0 } : { delay: 1.6, duration: 0.7 }}
-          >
-            {t.profile.title}
-          </motion.p>
-
-          <motion.p
-            className="hero-tagline font-mono text-[10px] leading-relaxed tracking-[0.18em] sm:text-[11px]"
-            style={{ color: '#4ade80' }}
-            initial={reducedMotion ? false : { opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={reducedMotion ? { duration: 0 } : { delay: 1.68, duration: 0.7 }}
-          >
-            {t.profile.tagline}
-          </motion.p>
-
-          <motion.p
-            className="hero-intro mx-auto max-w-lg text-sm leading-relaxed"
-            style={{ color: 'rgba(228,226,223,0.62)' }}
-            initial={reducedMotion ? false : { opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={reducedMotion ? { duration: 0 } : { delay: 1.75, duration: 0.7 }}
-          >
-            {t.hero.intro}
-          </motion.p>
-
-          <motion.div
-            className="hero-ctas flex flex-wrap items-center justify-center gap-3"
-            initial={reducedMotion ? false : { opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={reducedMotion ? { duration: 0 } : { delay: 2.0, duration: 0.7 }}
-          >
-            <Magnetic
-              href={sectionHref(3, lang)}
-              onClick={(e) => {
-                e.preventDefault();
-                goToScene(3);
-              }}
-              className="rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300"
-              style={{ background: '#22c55e', color: '#060608' }}
-            >
-              {t.hero.ctaWork}
-            </Magnetic>
-            <Magnetic
-              href="https://github.com/soobujmiah"
-              className="rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300 backdrop-blur-md"
-              style={{ border: '1px solid rgba(228,226,223,0.15)', color: '#e4e2df', background: 'rgba(8,10,8,0.5)' }}
-            >
-              {t.hero.ctaGithub}
-            </Magnetic>
-          </motion.div>
-        </div>
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return <div className="exhibit exhibit--0 exhibit-home">
+    <div className="exhibit-sightline" aria-hidden="true"><span /></div>
+    <div className="exhibit-body">
+      <p className="exhibit-kicker"><span className="exhibit-index">{localizeDigits('01', lang)}</span><span className="exhibit-rule" />{t.profile.location}</p>
+      <h1 className="hero-name"><NameReveal text={t.profile.nameFull} play={mounted && armed && !reducedMotion} /></h1>
+      <p className="hero-profession">{t.profile.title}</p>
+      <p className="hero-thesis">{t.profile.tagline}</p>
+      <p className="hero-introduction">{t.hero.intro}</p>
+      <div className="exhibit-actions">
+        <a href={sectionHref(4, lang)}>{t.hero.ctaWork}</a>
+        <a href={t.profile.github}>{t.hero.ctaGithub}</a>
       </div>
     </div>
-  );
+    <p className="exhibit-groundnote">{t.hero.availability}</p>
+  </div>;
 }
-
-/* ── 02 · PRESENCE ───────────────────────────────────────────── */
 
 export function StatsScene() {
   const { t, lang } = useLang();
-  return (
-    <div className="page-fill">
-      <div className="page-content page-content-wide flex flex-col items-center">
-        <Reveal>
-          <p className="ph-e font-mono text-[10px] uppercase tracking-[0.3em] mb-3 text-center" style={{ color: '#22c55e' }}>
-            {t.presence.eyebrow}
-          </p>
-        </Reveal>
-        <CinematicHeading
-          className="ph-h text-[clamp(1.35rem,5.2vw,2.6rem)] font-semibold leading-[1.12] tracking-tight max-w-3xl mb-6 text-center"
-          style={{ color: '#e4e2df' }}
-        >{t.presence.heading}</CinematicHeading>
-        {/* a layered system diagram: each focus is a layer of the stack */}
-        <ol className="stack-layers w-full">
-          {t.presence.items.map((p, i) => (
-            <Reveal key={p.label} delay={i * 0.07}>
-              <li className="stack-layer">
-                <span className="stack-layer-index font-mono" aria-hidden>{localizeDigits(String(i + 1).padStart(2, '0'), lang)}</span>
-                <span className="stack-layer-main">
-                  <span className="stack-layer-label">{p.label}</span>
-                  <span className="stack-layer-detail font-mono">{p.detail}</span>
-                </span>
-                <span className="stack-layer-tools">{p.tools}</span>
-              </li>
-            </Reveal>
-          ))}
-        </ol>
-      </div>
-    </div>
-  );
+  return <Inscription index={1} eyebrow={t.presence.eyebrow} title={t.presence.heading}>
+    <ol className="engraved-list">{t.presence.items.map((p, i) => <li key={p.label}>
+      <span className="engraved-number">{localizeDigits(String(i + 1).padStart(2, '0'), lang)}</span>
+      <div><h2>{p.label}</h2><p>{p.detail}</p><small>{p.tools}</small></div>
+    </li>)}</ol>
+  </Inscription>;
 }
-
-/* ── shared compact eyebrow + heading ──
-   Each section route server-renders exactly one scene, and the pager
-   keeps only one scene in the DOM, so every page carries exactly one
-   <h1>: the hero name on home, the section topic everywhere else. */
-
-function PageHeading({ eyebrow, heading }: { eyebrow: string; heading: string }) {
-  return (
-    <>
-      <Reveal>
-        <p className="ph-e font-mono text-[10px] uppercase tracking-[0.3em] mb-3" style={{ color: '#22c55e' }}>
-          {eyebrow}
-        </p>
-      </Reveal>
-      <CinematicHeading
-        className="ph-h text-[clamp(1.35rem,5.2vw,2.6rem)] font-semibold leading-[1.12] tracking-tight max-w-2xl mb-4 sm:mb-6"
-        style={{ color: '#e4e2df' }}
-      >{heading}</CinematicHeading>
-    </>
-  );
-}
-
-/* ── 04 · THE MOBILE WORKSTATION ──────────────────────────────
-   The brief's "exploded view", done as a cross-section rather than a
-   floating product shot: six slabs in one shared perspective, stacked
-   in the order they actually depend on each other, with the Android
-   host at the bottom. Selecting a layer lifts it out of the stack and
-   opens its detail.
-
-   Depth is CSS 3D, the same language as the signature — no WebGL, no
-   canvas, no new dependency. The stack is a real list of real buttons:
-   it works by click, tap, Tab and arrow keys, and a screen reader gets
-   an ordinary list with the selected layer expanded. Hover is a
-   nicety, never the only way in.
-
-   Honesty: these are documented environment facts carried in
-   `content.ts`, not live system telemetry, and the scene says so. */
-export function WorkstationScene() {
-  const { t, lang } = useLang();
-  const reducedMotion = useReducedMotion();
-  const w = t.workstation;
-  const [active, setActive] = useState(0);
-  const refs = useRef<(HTMLButtonElement | null)[]>([]);
-
-  const move = (delta: number) => {
-    const next = (active + delta + w.layers.length) % w.layers.length;
-    setActive(next);
-    refs.current[next]?.focus();
-  };
-
-  const onKeyDown = (event: React.KeyboardEvent) => {
-    /* Arrow keys walk the stack. Down means "deeper", which is visually
-       downward here, so the mapping matches what the eye sees. */
-    if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
-      event.preventDefault();
-      move(1);
-    } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
-      event.preventDefault();
-      move(-1);
-    }
-  };
-
-  const layer = w.layers[active];
-
-  return (
-    <div className="page-fill">
-      <div className="page-content">
-        {/* the shared heading, so this chapter sits at the same scale
-            and rhythm as About, Work and Research rather than inventing
-            its own — and so the page keeps exactly one <h1> */}
-        <PageHeading eyebrow={w.eyebrow} heading={w.heading} />
-        <Reveal delay={0.1}>
-          <p className="ws-intro max-w-2xl text-sm leading-relaxed">{w.intro}</p>
-        </Reveal>
-
-        <div className="ws-grid">
-          {/* The stack. Topmost in the DOM is the topmost layer on
-              screen and the last one in the dependency chain. */}
-          <Reveal delay={0.15}>
-            <ul className="ws-stack" onKeyDown={onKeyDown}>
-              {w.layers.map((l, i) => {
-                const selected = i === active;
-                /* Depth within the slab stack: the selected layer comes
-                   forward, the rest stay seated. */
-                const style = {
-                  '--d': w.layers.length - 1 - i,
-                  '--lift': selected ? 1 : 0,
-                } as React.CSSProperties;
-                return (
-                  <li key={l.id} className="ws-slab-row" style={style}>
-                    <button
-                      type="button"
-                      ref={(el) => {
-                        refs.current[i] = el;
-                      }}
-                      className={`ws-slab${selected ? ' ws-slab--on' : ''}`}
-                      aria-expanded={selected}
-                      aria-controls="ws-detail"
-                      onClick={() => setActive(i)}
-                      onMouseEnter={() => {
-                        if (!reducedMotion) setActive(i);
-                      }}
-                    >
-                      <span className="ws-slab-index font-mono">
-                        {localizeDigits(String(i + 1).padStart(2, '0'), lang)}
-                      </span>
-                      <span className="ws-slab-label">{l.label}</span>
-                      <span className="ws-slab-runs font-mono">{l.runs}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </Reveal>
-
-          {/* One detail panel, replaced in place. A panel per layer
-              would be six duplicated regions for a screen reader. */}
-          <Reveal delay={0.2}>
-            <div className="ws-detail" id="ws-detail" aria-live="polite">
-              <p className="ws-detail-kicker font-mono text-[10px] uppercase tracking-[0.3em]">
-                {w.layerLabel} {localizeDigits(String(active + 1).padStart(2, '0'), lang)}
-              </p>
-              <h2 className="ws-detail-title">{layer.label}</h2>
-              <p className="ws-detail-body">{layer.detail}</p>
-              <p className="ws-detail-line font-mono">
-                <span className="ws-detail-tag">{w.runsLabel}</span>
-                {layer.runs}
-              </p>
-              <p className="ws-detail-line ws-detail-evidence">
-                <span className="ws-detail-tag">{w.evidenceLabel}</span>
-                {layer.evidence}
-              </p>
-            </div>
-          </Reveal>
-        </div>
-
-        <Reveal delay={0.25}>
-          <p className="ws-note font-mono">{w.note}</p>
-        </Reveal>
-      </div>
-    </div>
-  );
-}
-
-/* ── 03 · ABOUT ──────────────────────────────────────────────── */
 
 export function AboutScene() {
   const { t } = useLang();
-  return (
-    <div className="page-fill">
-      <div className="page-content page-content-wide">
-        <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
-          <div>
-            <PageHeading eyebrow={t.about.eyebrow} heading={t.about.heading} />
-          </div>
-          <div>
-            <div className="space-y-3 mb-5">
-              {t.about.paragraphs.map((p, i) => (
-                <Reveal key={i} delay={0.1 + i * 0.06} depth>
-                  {i === 0 ? (
-                    <p className="about-lead">{p}</p>
-                  ) : (
-                    <p className="about-p text-[13px] sm:text-sm leading-[1.75]" style={{ color: 'rgba(228,226,223,0.65)' }}>{p}</p>
-                  )}
-                </Reveal>
-              ))}
-            </div>
-            {/* Engineering method, as working principles — the same
-                discipline the evidence lines on the work page rely on. */}
-            <Reveal delay={0.13}>
-              <div className="flex flex-wrap gap-1.5 mb-5 justify-center">
-                {t.about.principles.map((p) => (
-                  <span
-                    key={p}
-                    className="rounded-full px-2.5 py-1 font-mono text-[10px]"
-                    style={{ border: '1px solid rgba(34,197,94,0.25)', color: 'rgba(228,226,223,0.6)', background: 'rgba(34,197,94,0.05)' }}
-                  >
-                    {p}
-                  </span>
-                ))}
-              </div>
-            </Reveal>
-            <Reveal delay={0.15}>
-              <div className="fact-grid grid grid-cols-2">
-                {t.about.facts.map((f) => (
-                  <div key={f.label} className="fact-cell">
-                    <p className="font-mono text-[9px] uppercase tracking-wider mb-1.5" style={{ color: 'rgba(228,226,223,0.4)' }}>{f.label}</p>
-                    <p className="fact-v text-xs font-medium leading-snug" style={{ color: '#e4e2df' }}>{f.value}</p>
-                  </div>
-                ))}
-              </div>
-            </Reveal>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <Inscription index={2} eyebrow={t.about.eyebrow} title={t.about.heading}>
+    <div className="exhibit-prose">{t.about.paragraphs.map((p, i) => <p key={i}>{p}</p>)}</div>
+    <ul className="exhibit-principles">{t.about.principles.map(p => <li key={p}>{p}</li>)}</ul>
+    <dl className="exhibit-facts">{t.about.facts.map(f => <div key={f.label}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}</dl>
+  </Inscription>;
 }
 
-/* ── 04 · FEATURED WORK ──────────────────────────────────────── */
-
-function ProjectCard({ project, index }: { project: Project; index: number }) {
+export function WorkstationScene() {
   const { t, lang } = useLang();
-  const reducedMotion = useReducedMotion() ?? false;
-  const ref = useRef<HTMLElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-40px' });
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-  };
-
-  return (
-    <motion.article
-      ref={ref}
-      className="dense-card group relative h-full plate p-4 sm:p-5 transition-all duration-500"
-      style={{ border: '1px solid rgba(228,226,223,0.09)', background: CARD_BG }}
-      initial={reducedMotion ? false : { opacity: 0, y: 36, rotateX: 3, transformPerspective: 1200 }}
-      animate={reducedMotion || inView ? { opacity: 1, y: 0, rotateX: 0 } : {}}
-      transition={reducedMotion ? { duration: 0 } : { duration: 0.7, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onMouseMove={handleMouseMove}
-      whileHover={reducedMotion ? undefined : { borderColor: 'rgba(228,226,223,0.16)', y: -4 }}
-    >
-      {isHovered && (
-        <div
-          className="absolute inset-0 pointer-events-none transition-opacity duration-300"
-          style={{
-            background: `radial-gradient(300px circle at ${mousePos.x}px ${mousePos.y}px, ${project.accent}08, transparent 60%)`,
-          }}
-          aria-hidden
-        />
-      )}
-
-      <div className="relative z-10">
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div>
-            <div className="flex items-center gap-3 mb-1.5">
-              <span className="font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>{localizeDigits(`0${index + 1}`, lang)}</span>
-              <span className="font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.35)' }}>{project.year}</span>
-            </div>
-            <h3 className="text-xl sm:text-2xl font-semibold tracking-tight" style={{ color: '#e4e2df' }}>
-              {project.websiteUrl ? (
-                <a
-                  href={project.websiteUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="project-name-link"
-                  aria-label={`${project.name} — ${t.ui.liveSiteWord}`}
-                >
-                  {project.name}
-                </a>
-              ) : (
-                project.name
-              )}
-            </h3>
-            <p className="mt-0.5 text-xs" style={{ color: project.accent }}>{project.tagline}</p>
-            <p className="mt-1 font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.55)' }}>
-              {project.status}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {project.websiteUrl && (
-              <Magnetic
-                href={project.websiteUrl}
-                className="rounded-full px-2.5 py-1 font-mono text-[10px] transition-colors duration-300"
-                style={{ border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80' }}
-                strength={0.15}
-              >
-                {t.work.liveLabel}
-              </Magnetic>
-            )}
-            <Magnetic
-              href={project.repo}
-              ariaLabel={`${project.name} ${t.ui.repoWord}`}
-              className="flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-300"
-              style={{ border: '1px solid rgba(228,226,223,0.1)', color: 'rgba(228,226,223,0.55)' }}
-            >
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden>
-                <path d="M1 13L13 1M13 1H3M13 1V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </Magnetic>
-          </div>
-        </div>
-
-        <p className="text-xs leading-[1.7] mb-3" style={{ color: 'rgba(228,226,223,0.6)' }}>
-          {project.description}
-        </p>
-
-        <p className="text-[11px] leading-[1.6] mb-3" style={{ color: 'rgba(228,226,223,0.48)' }}>
-          <span style={{ color: 'rgba(228,226,223,0.62)' }}>{t.work.roleLabel}</span>{project.role}
-        </p>
-
-        <p className="dc-evidence text-xs leading-[1.7] mb-4" style={{ color: 'rgba(228,226,223,0.5)' }}>
-          <span style={{ color: 'rgba(228,226,223,0.65)' }}>{t.work.evidenceLabel}</span>{project.evidence}
-        </p>
-
-        <div className="dc-topics flex flex-wrap items-center gap-1.5">
-          {project.topics.map((topic) => (
-            <span key={topic} className="rounded-full px-2.5 py-0.5 font-mono text-[10px]" style={{ border: '1px solid rgba(228,226,223,0.08)', color: 'rgba(228,226,223,0.5)' }}>
-              {topic}
-            </span>
-          ))}
-        </div>
-      </div>
-    </motion.article>
-  );
-}
-
-function SongjogSlide() {
-  const { t } = useLang();
-  const nb = t.work.nowBuilding;
-  return (
-    <Magnetic
-      href={nb.url}
-      className="flex h-full flex-col justify-between gap-4 plate p-5 sm:p-6 text-left transition-all duration-500"
-      style={{ border: '1px solid rgba(34,197,94,0.25)', background: 'rgba(34,197,94,0.07)' }}
-      strength={0.05}
-    >
-      <span>
-        <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: '#4ade80' }}>
-          {nb.eyebrow}
-        </span>
-        <span className="block text-xl font-semibold" style={{ color: '#e4e2df' }}>{nb.name}</span>
-        <span className="mt-2 block text-xs leading-relaxed" style={{ color: 'rgba(228,226,223,0.6)' }}>
-          {nb.description}
-        </span>
-        <span className="mt-2 block font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.45)' }}>
-          {nb.testsNote}
-        </span>
-      </span>
-      <span
-        className="rounded-full px-5 py-2 text-center text-xs font-medium"
-        style={{ background: '#22c55e', color: '#060608' }}
-      >
-        {nb.cta}
-      </span>
-    </Magnetic>
-  );
-}
-
-/* Desktop spotlight: compact selector + one rich detail card.
-   Auto-advances until the visitor takes over; always fits. */
-function WorkSpotlight() {
-  const { t, lang } = useLang();
-  const prefersReduced = useReducedMotion();
-  const reducedMotion = prefersReduced ?? false;
-  const projects = t.work.projects;
-  const nb = t.work.nowBuilding;
-  const total = projects.length + 1;
-  const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
-
-  useEffect(() => {
-    if (paused || reducedMotion) return;
-    const id = setInterval(() => setActive((a) => (a + 1) % total), 6000);
-    return () => clearInterval(id);
-  }, [paused, reducedMotion, total]);
-
-  return (
-    <div
-      className="hidden lg:grid lg:grid-cols-[1fr_1.5fr] gap-5"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
-    >
-      <div className="flex flex-col gap-2" role="tablist" aria-label={t.work.heading}>
-        {projects.map((p, i) => {
-          const isActive = active === i;
-          return (
-            <button
-              key={p.name}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              onClick={() => setActive(i)}
-              className="flex items-center gap-3 plate px-4 py-3 text-left transition-all duration-300"
-              style={{
-                border: isActive ? '1px solid rgba(34,197,94,0.35)' : '1px solid rgba(228,226,223,0.08)',
-                background: isActive ? 'rgba(34,197,94,0.07)' : CARD_BG,
-              }}
-            >
-              <span className="font-mono text-[10px]" style={{ color: isActive ? '#4ade80' : 'rgba(228,226,223,0.35)' }}>
-                {localizeDigits(`0${i + 1}`, lang)}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold" style={{ color: '#e4e2df' }}>{p.name}</span>
-                <span className="block truncate text-[11px]" style={{ color: 'rgba(228,226,223,0.55)' }}>{p.status}</span>
-              </span>
-              <span
-                aria-hidden
-                className="font-mono text-xs transition-all duration-300"
-                style={{ color: '#4ade80', opacity: isActive ? 1 : 0, transform: isActive ? 'translateX(0)' : 'translateX(-4px)' }}
-              >
-                →
-              </span>
-            </button>
-          );
-        })}
-        <button
-          type="button"
-          role="tab"
-          aria-selected={active === projects.length}
-          onClick={() => setActive(projects.length)}
-          className="flex items-center gap-3 plate px-4 py-3 text-left transition-all duration-300"
-          style={{
-            border: active === projects.length ? '1px solid rgba(34,197,94,0.4)' : '1px solid rgba(34,197,94,0.2)',
-            background: 'rgba(34,197,94,0.07)',
-          }}
-        >
-          <span className="relative flex h-2 w-2" aria-hidden>
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ background: '#22c55e' }} />
-            <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: '#22c55e' }} />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-semibold" style={{ color: '#e4e2df' }}>{nb.name}</span>
-            <span className="block truncate font-mono text-[10px]" style={{ color: '#4ade80' }}>{nb.eyebrow}</span>
-          </span>
-        </button>
-      </div>
-
-      <div className="relative min-w-0">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={active}
-            role="tabpanel"
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -24 }}
-            transition={reducedMotion ? { duration: 0 } : { duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {active < projects.length ? (
-              <ProjectCard project={projects[active]} index={active} />
-            ) : (
-              <div
-                className="dense-card plate p-5 h-full"
-                style={{ border: '1px solid rgba(34,197,94,0.25)', background: 'rgba(34,197,94,0.07)' }}
-              >
-                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: '#4ade80' }}>
-                  {nb.eyebrow}
-                </p>
-                <h3 className="text-2xl font-semibold tracking-tight" style={{ color: '#e4e2df' }}>{nb.name}</h3>
-                <p className="mt-2 text-xs leading-[1.7]" style={{ color: 'rgba(228,226,223,0.6)' }}>
-                  {nb.description}
-                </p>
-                <p className="mt-2 font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.45)' }}>
-                  {nb.testsNote}
-                </p>
-                <Magnetic
-                  href={nb.url}
-                  className="mt-4 inline-block rounded-full px-5 py-2 text-xs font-medium"
-                  style={{ background: '#22c55e', color: '#060608' }}
-                >
-                  {nb.cta}
-                </Magnetic>
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-    </div>
-  );
-}
-
-/* ── ecosystem relationship — Ternux → ADT ──────────────────────
-   One physical Android device, host and toolchain. Compact by
-   design: a device rail, the two layer cards, then one evidence line
-   each way (verified / not yet proven). It reuses the page's existing
-   card idiom and each project's own accent, so it adds no animation,
-   no dependency and no new design token. */
-function RelationshipBlock() {
-  const { t } = useLang();
-  const rel = t.work.relationship;
-  const edge = { borderColor: 'rgba(228,226,223,0.08)' };
-
-  return (
-    <Reveal delay={0.16}>
-      <section
-        aria-labelledby="work-ecosystem"
-        className="mt-4 plate"
-        style={{ border: '1px solid rgba(34,197,94,0.18)', background: CARD_BG }}
-      >
-        <div className="flex items-center gap-2.5 border-b px-4 py-2.5" style={edge}>
-          <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: '#22c55e' }} aria-hidden />
-          <span className="font-mono text-[9px] uppercase tracking-[0.2em]" style={{ color: 'rgba(228,226,223,0.45)' }}>
-            {rel.deviceLabel}
-          </span>
-          <span className="ml-auto hidden font-mono text-[9px] uppercase tracking-[0.2em] sm:block" style={{ color: 'rgba(74,222,128,0.7)' }}>
-            {rel.eyebrow}
-          </span>
-        </div>
-
-        <div className="px-4 pt-3">
-          <h3 id="work-ecosystem" className="text-sm font-semibold tracking-tight" style={{ color: '#e4e2df' }}>
-            {rel.heading}
-          </h3>
-          <p className="mt-1 text-[11px] leading-[1.6]" style={{ color: 'rgba(228,226,223,0.55)' }}>
-            {rel.body}
-          </p>
-        </div>
-
-        <div className="grid sm:grid-cols-2">
-          {rel.layers.map((layer, i) => {
-            const accent = t.work.projects.find((p) => p.name === layer.name)?.accent ?? '#4ade80';
-            return (
-              <div
-                key={layer.name}
-                className={`border-t px-4 py-3 sm:border-t-0 ${i === 1 ? 'sm:border-l' : ''}`}
-                style={edge}
-              >
-                <div className="mb-1.5 flex items-center gap-2">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: accent }}>
-                    {layer.name}
-                  </span>
-                  <span className="h-px flex-1" style={{ background: 'rgba(228,226,223,0.08)' }} aria-hidden />
-                  <span className="font-mono text-[9px]" style={{ color: 'rgba(228,226,223,0.4)' }}>{layer.role}</span>
-                </div>
-                <p className="text-[11px] leading-[1.6]" style={{ color: 'rgba(228,226,223,0.6)' }}>{layer.note}</p>
-                <div className="mt-2.5 flex items-center gap-2">
-                  <Magnetic
-                    href={layer.websiteUrl}
-                    ariaLabel={`${layer.name} — ${t.ui.liveSiteWord}`}
-                    className="rounded-full px-2.5 py-1 font-mono text-[10px] transition-colors duration-300"
-                    style={{ border: `1px solid ${accent}59`, color: accent }}
-                    strength={0.15}
-                  >
-                    {t.work.liveLabel}
-                  </Magnetic>
-                  <Magnetic
-                    href={layer.repo}
-                    ariaLabel={`${layer.name} ${t.ui.repoWord}`}
-                    className="rounded-full px-2.5 py-1 font-mono text-[10px] transition-colors duration-300"
-                    style={{ border: '1px solid rgba(228,226,223,0.1)', color: 'rgba(228,226,223,0.55)' }}
-                    strength={0.15}
-                  >
-                    {t.work.codeLabel}
-                  </Magnetic>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="grid gap-2 border-t px-4 py-3 sm:grid-cols-2" style={edge}>
-          <p className="text-[11px] leading-[1.6]" style={{ color: 'rgba(228,226,223,0.5)' }}>
-            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full align-middle" style={{ background: '#22c55e' }} aria-hidden />
-            <span style={{ color: 'rgba(228,226,223,0.7)' }}>{rel.verifiedLabel}</span>
-            {rel.verified}
-          </p>
-          <p className="text-[11px] leading-[1.6]" style={{ color: 'rgba(228,226,223,0.5)' }}>
-            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full align-middle" style={{ background: 'rgba(228,226,223,0.3)' }} aria-hidden />
-            <span style={{ color: 'rgba(228,226,223,0.7)' }}>{rel.experimentalLabel}</span>
-            {rel.experimental}
-          </p>
-        </div>
-      </section>
-    </Reveal>
-  );
+  const w = t.workstation;
+  return <Inscription index={3} eyebrow={w.eyebrow} title={w.heading}>
+    <p className="exhibit-lead">{w.intro}</p>
+    <ol className="engraved-list workstation-strata">{w.layers.map((l, i) => <li key={l.id}>
+      <span className="engraved-number">{localizeDigits(String(i + 1).padStart(2, '0'), lang)}</span>
+      <div><h2>{l.label}</h2><p>{l.detail}</p><small>{l.runs}</small><p className="exhibit-evidence">{l.evidence}</p></div>
+    </li>)}</ol>
+    <p className="exhibit-footnote">{w.note}</p>
+  </Inscription>;
 }
 
 export function WorkScene() {
-  const { t } = useLang();
-  return (
-    <div className="page-fill">
-      <div className="page-content page-content-wide">
-        <PageHeading eyebrow={t.work.eyebrow} heading={t.work.heading} />
-
-        {/* phones + tablets: swipeable project pages (Songjog is last) */}
-        <div className="lg:hidden">
-          <SnapCarousel label={t.work.heading} prevLabel={t.ui.carouselPrev} nextLabel={t.ui.carouselNext}>
-            {t.work.projects.map((p, i) => (
-              <ProjectCard key={p.name} project={p} index={i} />
-            ))}
-            <SongjogSlide />
-          </SnapCarousel>
-        </div>
-
-        {/* desktop: interactive spotlight, always fits */}
-        <WorkSpotlight />
-
-        {/* ecosystem: Ternux hosts the ARM64 environment for ADT */}
-        <RelationshipBlock />
-
-        <SelectedRepositories />
+  const { t, lang } = useLang();
+  const selected = t.openSource.selected.map(name => t.openSource.repos.find(r => r.name === name)).filter(Boolean);
+  return <Inscription index={4} eyebrow={t.work.eyebrow} title={t.work.heading}>
+    <div className="project-monuments">{t.work.projects.map((p, i) => <article className="project-monument" key={p.name}>
+      <span className="engraved-number">{localizeDigits(String(i + 1).padStart(2, '0'), lang)}</span>
+      <div><p className="project-state">{p.status} · {localizeDigits(p.year, lang)}</p><h2>{p.name}</h2><p className="project-tagline">{p.tagline}</p><p>{p.description}</p>
+        <p className="exhibit-evidence">{p.evidence}</p>
+        <div className="exhibit-actions"><a href={p.repo}>{t.work.codeLabel}</a>{p.websiteUrl && <a href={p.websiteUrl}>{t.work.liveLabel}</a>}</div>
       </div>
+    </article>)}</div>
+    <div className="exhibit-secondary"><h2>{t.work.nowBuilding.name}</h2><p>{t.work.nowBuilding.description}</p><p className="exhibit-evidence">{t.work.nowBuilding.testsNote}</p><a href={t.work.nowBuilding.url}>{t.work.nowBuilding.cta}</a></div>
+    <div className="exhibit-secondary"><h2>{t.work.relationship.heading}</h2><p>{t.work.relationship.body}</p>
+      {t.work.relationship.layers.map(l => <p key={l.name}><a href={l.repo}>{l.name} ↗</a> — {l.role}. {l.note}</p>)}
+      <p className="exhibit-evidence">{t.work.relationship.verified}</p><p className="exhibit-evidence">{t.work.relationship.experimental}</p>
     </div>
-  );
+    <div className="exhibit-secondary"><h2>{t.openSource.heading}</h2><p>{t.openSource.note}</p>
+      <ul className="source-links">{selected.map(r => r && <li key={r.name}><a href={r.url}>{r.name} ↗</a><span>{r.desc}</span></li>)}</ul>
+      <a href="https://github.com/soobujmiah">{t.openSource.moreLabel} ↗</a>
+    </div>
+  </Inscription>;
 }
-
-/* ── 05 · RESEARCH & EXPERIMENTS ─────────────────────────────── */
 
 export function ResearchScene() {
-  const { t } = useLang();
-  return (
-    <div className="page-fill">
-      <div className="page-content page-content-wide">
-        <PageHeading eyebrow={t.research.eyebrow} heading={t.research.heading} />
-        {/* lab notebook: a status legend, then dated-style entries ruled like a page */}
-        <ul className="lab-legend font-mono" aria-hidden>
-          {Array.from(new Map(t.research.entries.map((r) => [r.status, r.statusLabel])).entries()).map(([status, label]) => (
-            <li key={status}><span className="lab-dot" data-status={status} />{label}</li>
-          ))}
-        </ul>
-        <ol className="lab-notebook">
-          {t.research.entries.map((r, i) => (
-            <Reveal key={r.title} delay={0.06 + i * 0.05}>
-              <li className="lab-entry">
-                <span className="lab-status font-mono">
-                  <span className="lab-dot" data-status={r.status} aria-hidden />
-                  {r.statusLabel}
-                </span>
-                <div>
-                  <h3 className="lab-title">{r.title}</h3>
-                  <p className="lab-desc">{r.description}</p>
-                </div>
-              </li>
-            </Reveal>
-          ))}
-        </ol>
-      </div>
-    </div>
-  );
-}
-
-/* ── Supporting repositories on the Work page ───────────────── */
-
-function RepoCard({ repo, liveLabel, codeLabel }: { repo: Repo; liveLabel: string; codeLabel: string }) {
   const { t, lang } = useLang();
-  return (
-    <div
-      className="repo-card dense-card flex flex-col plate p-4 text-left h-full"
-      style={{ border: '1px solid rgba(228,226,223,0.08)', background: CARD_BG }}
-    >
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1.5">
-        <h3 className="font-mono text-xs font-semibold transition-colors duration-300" style={{ color: '#e4e2df' }}>{repo.name}</h3>
-        {repo.tier === 'applied' && (
-          <span
-            className="rounded-full px-2 py-0.5 font-mono text-[9px]"
-            style={{ border: '1px solid rgba(34,197,94,0.3)', color: '#4ade80' }}
-          >
-            {t.openSource.appliedBadge}
-          </span>
-        )}
-        {repo.stars > 0 && <span className="font-mono text-[9px]" style={{ color: 'rgba(228,226,223,0.4)' }}>★ {localizeDigits(repo.stars, lang)}</span>}
-      </div>
-      <p className="flex-1 text-[11px] leading-relaxed mb-2.5" style={{ color: 'rgba(228,226,223,0.55)' }}>{repo.desc}</p>
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span className="h-2 w-2 rounded-full" aria-hidden style={{ background: '#22c55e', opacity: 0.6 }} />
-        <span className="font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.45)' }}>{repo.lang}</span>
-        <span className="ml-auto flex items-center gap-2">
-          {repo.websiteUrl && (
-            <Magnetic href={repo.websiteUrl} className="font-mono text-[10px] transition-colors duration-300" style={{ color: '#4ade80' }} strength={0.15}>
-              {liveLabel}
-            </Magnetic>
-          )}
-          <Magnetic href={repo.url} ariaLabel={`${repo.name} ${t.ui.repoWord}`} className="font-mono text-[10px] transition-colors duration-300" style={{ color: 'rgba(228,226,223,0.55)' }} strength={0.15}>
-            {codeLabel}
-          </Magnetic>
-        </span>
-      </div>
-    </div>
-  );
-}
-
-/* ── 07 · SELECTED OPEN SOURCE ────────────────────────────────────────── */
-
-/* Curated set only (content.openSource.selected) + one GitHub route.
-   Featured projects are NOT repeated here. */
-
-function GithubRouteCard() {
-  const { t } = useLang();
-  return (
-    <Magnetic
-      href="https://github.com/soobujmiah"
-      className="repo-card flex h-full flex-col justify-between gap-3 plate p-4 text-left"
-      style={{ border: '1px solid rgba(34,197,94,0.25)', background: 'rgba(34,197,94,0.07)' }}
-      strength={0.08}
-    >
-      <span>
-        <span className="block text-sm font-semibold" style={{ color: '#e4e2df' }}>{t.openSource.moreLabel}</span>
-        <span className="mt-1 block text-[11px] leading-relaxed" style={{ color: 'rgba(228,226,223,0.55)' }}>{t.openSource.moreSub}</span>
-      </span>
-      <span aria-hidden className="font-mono text-lg leading-none" style={{ color: '#4ade80' }}>
-        &rarr;
-      </span>
-    </Magnetic>
-  );
-}
-
-function SelectedRepositories() {
-  const { t } = useLang();
-  const selected = t.openSource.selected
-    .map((name) => t.openSource.repos.find((r) => r.name === name))
-    .filter((r): r is Repo => Boolean(r));
-  const cells: (Repo | null)[] = [...selected, null]; // null = GitHub route card
-  const slides: (Repo | null)[][] = [cells.slice(0, 4), cells.slice(4, 8)];
-
-  const renderCell = (c: Repo | null, key: string) =>
-    c === null ? (
-      <GithubRouteCard key={key} />
-    ) : (
-      <RepoCard key={key} repo={c} liveLabel={t.openSource.liveLabel} codeLabel={t.openSource.codeLabel} />
-    );
-
-  return (
-    <section className="mt-6" aria-labelledby="selected-repositories">
-      <p className="ph-e font-mono text-[10px] uppercase tracking-[0.3em] mb-2" style={{ color: '#22c55e' }}>
-        {t.openSource.eyebrow}
-      </p>
-      <h2 id="selected-repositories" className="text-xl font-semibold mb-3" style={{ color: '#e4e2df' }}>
-        {t.openSource.heading}
-      </h2>
-      <Reveal delay={0.1}>
-        <p className="text-xs mb-4 sm:mb-5" style={{ color: 'rgba(228,226,223,0.5)' }}>
-          {t.openSource.note}
-        </p>
-      </Reveal>
-
-      {/* phones + tablets: 2 swipeable 2x2 slides */}
-      <div className="lg:hidden">
-        <SnapCarousel label={t.openSource.heading} prevLabel={t.ui.carouselPrev} nextLabel={t.ui.carouselNext}>
-          {slides.map((group, i) => (
-            <div key={i} className="grid grid-cols-2 gap-2.5">
-              {group.map((c, j) => renderCell(c, `${i}-${j}`))}
-            </div>
-          ))}
-        </SnapCarousel>
-      </div>
-
-      {/* desktop: fitted 4-column grid */}
-      <div className="hidden lg:grid gap-3 lg:grid-cols-4">
-        {cells.map((c, i) => renderCell(c, `d-${i}`))}
-      </div>
-    </section>
-  );
-}
-
-/* ── 06 · EXPERIENCE ─────────────────────────────────────────── */
-
-function ExperienceAccordion() {
-  const { t } = useLang();
-  const [open, setOpen] = useState(0);
-  return (
-    <div className="plate overflow-hidden" style={{ border: '1px solid rgba(228,226,223,0.09)', background: CARD_BG }}>
-      {t.experience.entries.map((w, i) => {
-        const isOpen = open === i;
-        return (
-          <div key={`${w.company}-${i}`} style={i > 0 ? { borderTop: '1px solid rgba(228,226,223,0.06)' } : {}}>
-            <button
-              type="button"
-              onClick={() => setOpen(isOpen ? -1 : i)}
-              aria-expanded={isOpen}
-              className="acc-btn flex w-full items-center gap-3 px-4 py-3 text-left"
-            >
-              <span
-                className="font-mono text-xs transition-transform duration-300"
-                style={{ color: '#22c55e', transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}
-                aria-hidden
-              >
-                ›
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block break-words text-[13px] font-semibold leading-snug" style={{ color: '#e4e2df' }}>{w.role}</span>
-                <span className="block font-mono text-[10px]" style={{ color: 'rgba(228,226,223,0.45)' }}>{w.period}</span>
-              </span>
-            </button>
-            <AnimatePresence initial={false}>
-              {isOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  className="overflow-hidden"
-                >
-                  <div className="px-4 pb-3.5 pl-9">
-                    <p className="text-xs" style={{ color: 'rgba(228,226,223,0.6)' }}>
-                      {w.company} · {w.location}
-                    </p>
-                    <p className="text-xs mt-1 leading-relaxed" style={{ color: 'rgba(228,226,223,0.5)' }}>{w.desc}</p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        );
-      })}
-    </div>
-  );
+  return <Inscription index={5} eyebrow={t.research.eyebrow} title={t.research.heading}>
+    <ol className="engraved-list research-records">{t.research.entries.map((r, i) => <li key={r.title}>
+      <span className="engraved-number">{localizeDigits(String(i + 1).padStart(2, '0'), lang)}</span>
+      <div><small>{r.statusLabel}</small><h2>{r.title}</h2><p>{r.description}</p></div>
+    </li>)}</ol>
+  </Inscription>;
 }
 
 export function ExperienceScene() {
   const { t, lang } = useLang();
-  return (
-    <div className="page-fill">
-      <div className="page-content page-content-wide">
-        <div className="grid gap-6 lg:grid-cols-[1fr_1.6fr] lg:gap-12">
-          <div>
-            <PageHeading eyebrow={t.experience.eyebrow} heading={t.experience.heading} />
-            <Reveal delay={0.06}>
-              <p className="mt-3 text-center text-xs leading-relaxed lg:text-left" style={{ color: 'rgba(228,226,223,0.56)' }}>
-                {t.experience.intro}
-              </p>
-            </Reveal>
-            {/* Practical professional layer — deliberately separate
-                from the engineering identity on the work pages. */}
-            <Reveal delay={0.1} className="mt-6 text-center">
-              <p className="font-mono text-[9px] uppercase tracking-wider mb-2" style={{ color: 'rgba(228,226,223,0.4)' }}>
-                {t.experience.services.label}
-              </p>
-              <div className="flex flex-wrap gap-1.5 justify-center">
-                {t.experience.services.items.map((s) => (
-                  <span
-                    key={s}
-                    className="rounded-full px-2.5 py-1 font-mono text-[10px]"
-                    style={{ border: '1px solid rgba(228,226,223,0.09)', color: 'rgba(228,226,223,0.55)', background: 'rgba(8,10,8,0.45)' }}
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
-              {/* Discovery link into the service-intent layer (/services/),
-                  which lives outside the pager by design. */}
-              <a
-                href={serviceHref(undefined, lang)}
-                className="mt-3 inline-block font-mono text-[10px] transition-colors duration-300 hover:text-[#4ade80]"
-                style={{ color: 'rgba(228,226,223,0.5)' }}
-                data-magnetic
-              >
-                {t.contact.servicesLink}
-              </a>
-            </Reveal>
-          </div>
-          <div>
-            <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: 'rgba(228,226,223,0.42)' }}>
-              {t.experience.professionalLabel}
-            </p>
-            {/* phones: accordion, one story at a time */}
-            <div className="md:hidden">
-              <ExperienceAccordion />
-            </div>
-
-            {/* tablet + desktop: full timeline */}
-            <div className="rail hidden md:block">
-              {t.experience.entries.map((w, i) => (
-                <Reveal key={`${w.company}-${i}`} delay={0.04 + i * 0.04} depth>
-                  <div className="rail-entry">
-                    <span className="rail-period font-mono">{w.period}</span>
-                    <span className="rail-node" aria-hidden />
-                    <div>
-                      <h3 className="rail-role">{w.role}</h3>
-                      <p className="text-xs" style={{ color: 'rgba(228,226,223,0.6)' }}>
-                        {w.company} · {w.location}
-                      </p>
-                      <p className="text-xs mt-0.5 leading-relaxed" style={{ color: 'rgba(228,226,223,0.5)' }}>{w.desc}</p>
-                    </div>
-                  </div>
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <Inscription index={6} eyebrow={t.experience.eyebrow} title={t.experience.heading}>
+    <p className="exhibit-lead">{t.experience.intro}</p>
+    <ol className="engraved-list experience-records">{t.experience.entries.map((w, i) => <li key={`${w.company}-${i}`}>
+      <span className="engraved-number">{localizeDigits(w.period, lang)}</span>
+      <div><h2>{w.role}</h2><small>{w.company} · {w.location}</small><p>{w.desc}</p></div>
+    </li>)}</ol>
+    <div className="exhibit-secondary"><h2>{t.experience.services.label}</h2><ul>{t.experience.services.items.map(x => <li key={x}>{x}</li>)}</ul></div>
+  </Inscription>;
 }
-
-/* ── 09 · CONTACT ────────────────────────────────────────────── */
 
 export function ContactScene() {
   const { t, lang } = useLang();
-  return (
-    <div className="page-fill">
-      <div className="page-content page-content-wide">
-        {/* pb keeps the content mass clear of the map's arrival label —
-            the camera centres the focus country (Singapore here) in the
-            viewport, so the contact block deliberately leaves that band
-            open; lg:gap-20 widens the desktop channel the label sits in */}
-        <div className="grid gap-8 pb-14 lg:grid-cols-2 lg:gap-20 lg:pb-8 items-start">
-          <div className="text-center lg:text-left">
-            <Reveal>
-              <p className="ph-e font-mono text-[10px] uppercase tracking-[0.3em] mb-3" style={{ color: '#22c55e' }}>
-                {t.contact.eyebrow}
-              </p>
-            </Reveal>
-            <Reveal delay={0.06}>
-              <h1 className="ph-h contact-title mb-4" style={{ color: '#e4e2df' }}>
-                {t.contact.headingA}
-                <br />
-                <span className="gradient-text">{t.contact.headingB}</span>
-              </h1>
-            </Reveal>
-            <Reveal delay={0.12}>
-              <p className="mx-auto lg:mx-0 max-w-md text-sm" style={{ color: 'rgba(228,226,223,0.6)' }}>
-                {t.contact.sub}{' '}
-                <a
-                  href={serviceHref(undefined, lang)}
-                  className="transition-colors duration-300 hover:text-[#4ade80]"
-                  style={{ color: 'rgba(228,226,223,0.85)', textDecoration: 'underline', textUnderlineOffset: 3 }}
-                  data-magnetic
-                >
-                  {t.contact.servicesLink}
-                </a>
-              </p>
-            </Reveal>
-
-            {/* The one primary channel, visually first and on its own —
-                Telegram is the way to reach the person directly; email
-                joins the compact contact buttons below. */}
-            <Reveal delay={0.18}>
-              <Magnetic
-                href={t.contact.telegram.href}
-                ariaLabel={`${t.contact.telegram.label}: ${t.contact.telegram.value}`}
-                className="contact-primary group mx-auto mt-6 flex flex-col gap-1 lg:mx-0 lg:mt-8"
-                strength={0.12}
-              >
-                <span className="text-sm font-semibold transition-colors duration-300" style={{ color: '#e4e2df' }}>
-                  {t.contact.telegram.label}
-                </span>
-                <span className="font-mono text-[11px] truncate" style={{ color: 'rgba(228,226,223,0.5)' }}>
-                  {t.contact.telegram.value}
-                </span>
-              </Magnetic>
-            </Reveal>
-          </div>
-
-          {/* The complete ecosystem: 18 canonical links, grouped, one
-              line each. Deliberately typographic rather than a wall of
-              platform icons — these are navigation, not content, and
-              they stay inside the green-on-black system. The handle is
-              carried in the accessible name and on hover, so the row
-              stays quiet without hiding anything. */}
-          <Reveal delay={0.22}>
-            {/* One balanced grid: official marks in currentColor, equal
-                cards, handle carried quietly — navigation, not noise. */}
-            <p className="mb-4 text-center font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: 'rgba(228,226,223,0.4)' }}>
-              {t.contact.groupsHeading}
-            </p>
-            <div className="space-y-5">
-              {t.contact.groups.map((group) => (
-                <div key={group.label} className="text-center">
-                  <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.24em]" style={{ color: 'rgba(34,197,94,0.8)' }}>
-                    {group.label}
-                  </p>
-                  <div className="social-icons justify-center">
-                    {group.links.map((l) => (
-                      <a
-                        key={l.href}
-                        href={l.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        data-magnetic
-                        className="soc-btn"
-                        title={`${l.label} — ${l.handle}`}
-                        aria-label={`${l.label}: ${l.handle}`}
-                      >
-                        <BrandIcon id={iconFor(l.href)} size={16} />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-            {/* Closing beat: the supporting line stays quiet, the
-                handle becomes the focal point — its own line, larger,
-                accent green with the clock's glow language, centred in
-                both languages. Links to the canonical origin of the
-                handle; the hover is the site's standard color shift. */}
-            <p className="mt-7 text-center font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: 'rgba(228,226,223,0.4)' }}>
-              {t.contact.groupsNote}
-            </p>
-            <a
-              href="https://github.com/soobujmiah"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="soobujmiah on GitHub"
-              data-magnetic
-              className="mt-3 block text-center font-mono text-[clamp(1.3rem,4.2vw,1.75rem)] font-medium tracking-tight transition-opacity duration-300 hover:opacity-80"
-              style={{ color: '#4ade80', textShadow: '0 0 26px rgba(34,197,94,0.32)' }}
-            >
-              @soobujmiah
-            </a>
-          </Reveal>
-        </div>
-      </div>
+  return <Inscription index={7} eyebrow={t.contact.eyebrow} title={`${t.contact.headingA} ${t.contact.headingB}`}>
+    <p className="exhibit-lead">{t.contact.sub} <a href={serviceHref(undefined, lang)}>{t.contact.servicesLink} ↗</a></p>
+    <div className="contact-portal"><a href={t.contact.telegram.href}>{t.contact.telegram.value} <span aria-hidden>↗</span></a><span>{t.contact.telegram.label}</span></div>
+    <div className="contact-portal"><a href={t.contact.email.href}>{t.contact.email.value} <span aria-hidden>↗</span></a><span>{t.contact.email.label}</span></div>
+    <div className="exhibit-secondary"><h2>{t.contact.groupsHeading}</h2><p>{t.contact.groupsNote}</p>
+      {t.contact.groups.map(g => <div className="contact-network" key={g.label}><h3>{g.label}</h3><ul>{g.links.map(l => <li key={l.href}><a href={l.href}>{l.label} ↗</a></li>)}</ul></div>)}
     </div>
-  );
+  </Inscription>;
 }

@@ -53,9 +53,9 @@ export type CinematicHandle = {
 
 const COLOR = {
   bg: 0x050507,
-  slab: 0x0b0e0c,
-  slabLit: 0x141a16,
-  fg: 0xd8d6d2,
+  slab: 0x26382e,
+  slabLit: 0x355540,
+  fg: 0xe9f4e9,
   accent: 0x22c55e,
   signal: 0x10b981,
 } as const;
@@ -72,9 +72,9 @@ function gridTexture(): THREE.CanvasTexture {
   c.height = 256;
   const g = c.getContext('2d');
   if (g) {
-    g.fillStyle = '#050507';
+    g.fillStyle = '#25392b';
     g.fillRect(0, 0, 256, 256);
-    g.strokeStyle = 'rgba(34,197,94,0.14)';
+    g.strokeStyle = 'rgba(168,247,184,0.24)';
     g.lineWidth = 1;
     g.beginPath();
     g.moveTo(0.5, 0);
@@ -82,7 +82,7 @@ function gridTexture(): THREE.CanvasTexture {
     g.moveTo(0, 0.5);
     g.lineTo(256, 0.5);
     g.stroke();
-    g.strokeStyle = 'rgba(34,197,94,0.05)';
+    g.strokeStyle = 'rgba(168,247,184,0.10)';
     for (const q of [64, 128, 192]) {
       g.beginPath();
       g.moveTo(q + 0.5, 0);
@@ -131,17 +131,17 @@ export function createCinematicScene(
   });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  renderer.toneMappingExposure = 1.55;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(COLOR.bg);
-  scene.fog = new THREE.FogExp2(COLOR.bg, 0.0055);
+  scene.fog = new THREE.FogExp2(0x08130d, 0.0023);
 
   const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 700);
 
   /* ── Lighting — a night exterior: cool hemisphere, one green key. ── */
-  scene.add(new THREE.HemisphereLight(0x25332a, 0x04050a, 0.85));
-  const key = new THREE.DirectionalLight(0xbdf0cd, 1.1);
+  scene.add(new THREE.HemisphereLight(0xc9f9d4, 0x183525, 2.25));
+  const key = new THREE.DirectionalLight(0xe3ffe9, 2.15);
   key.position.set(60, 90, 30);
   scene.add(key);
   const rim = new THREE.PointLight(COLOR.accent, 160, 90, 2);
@@ -152,7 +152,7 @@ export function createCinematicScene(
   const groundTex = gridTexture();
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(1400, 1400),
-    new THREE.MeshStandardMaterial({ color: 0x0a0c0a, map: groundTex, roughness: 0.95, metalness: 0.05 })
+    new THREE.MeshStandardMaterial({ color: 0xffffff, map: groundTex, roughness: 0.8, metalness: 0.14 })
   );
   ground.rotation.x = -Math.PI / 2;
   ground.position.y = -0.01;
@@ -165,7 +165,7 @@ export function createCinematicScene(
   /* ── Shared materials (disposed once at the end) ── */
   const slabMat = new THREE.MeshStandardMaterial({ color: COLOR.slab, roughness: 0.9, metalness: 0.12 });
   const litMat = new THREE.MeshStandardMaterial({ color: COLOR.slabLit, roughness: 0.75, metalness: 0.2 });
-  const fgMat = new THREE.MeshStandardMaterial({ color: 0x77756f, roughness: 0.5, metalness: 0.3 });
+  const fgMat = new THREE.MeshStandardMaterial({ color: 0xd3e8d6, roughness: 0.42, metalness: 0.25 });
   const accentMats: THREE.MeshStandardMaterial[] = [];
   const accentMat = (intensity: number) => {
     const m = new THREE.MeshStandardMaterial({
@@ -177,7 +177,7 @@ export function createCinematicScene(
     accentMats.push(m);
     return m;
   };
-  const wireMat = new THREE.MeshBasicMaterial({ color: COLOR.signal, wireframe: true, transparent: true, opacity: 0.5 });
+  const wireMat = new THREE.MeshStandardMaterial({ color: 0x4c9564, emissive: 0x136530, emissiveIntensity: 0.25, roughness: 0.52, metalness: 0.25 });
 
   const disposables: Array<{ dispose(): void }> = [groundTex, slabMat, litMat, fgMat, wireMat];
   const geo = <T extends THREE.BufferGeometry>(g: T): T => {

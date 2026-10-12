@@ -1,6 +1,8 @@
 # Handoff — soobujmiah.github.io
 
 > **TEMPORARY FILE. DELETE IT WHEN THE WORK IN §6 IS DONE.**
+> The 2026-10-12 spatial redesign in `docs/SPATIAL_PORTFOLIO.md` supersedes
+> the visual-layout descriptions below; verify live state before reuse.
 >
 > This is a session handoff, not a standing document. It exists so the next agent can
 > pick up mid-stream. Once the open items in §6 are finished or formally dropped,

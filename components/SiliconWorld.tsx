@@ -78,12 +78,12 @@ const PIXEL_BUDGET = [2.6e6, 1.4e6, 0.9e6] as const;
 
 /* Line classes: 0 faint detail, 1 block edge, 2 zone edge. */
 const STYLE = [
-  { alpha: 0.12, width: 0.6 },
-  { alpha: 0.24, width: 0.9 },
-  { alpha: 0.46, width: 1.3 },
+  { alpha: 0.21, width: 0.85 },
+  { alpha: 0.39, width: 1.15 },
+  { alpha: 0.72, width: 1.7 },
 ] as const;
-const LINE_RGB = '74, 222, 128';
-const LIT_RGB = '120, 236, 166';
+const LINE_RGB = '111, 221, 147';
+const LIT_RGB = '192, 255, 204';
 /** Extra alpha for lit lines, per lit level, as a multiple of the class alpha. */
 const LIT_GAIN = [0, 0.28, 0.6] as const;
 

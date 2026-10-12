@@ -20,14 +20,12 @@ import { LanguageProvider, useLang } from '@/app/language';
 import {
   NavProvider,
   CustomCursor,
-  Preloader,
   Header,
   Footer,
   HudControl,
 } from '@/components/ui';
 import { NavOverlay } from '@/components/NavOverlay';
 import { PullToRefresh } from '@/components/PullToRefresh';
-import { DocumentMotion } from '@/components/DocumentMotion';
 import { CinematicWorld } from '@/components/CinematicWorld';
 import {
   HeroScene,
@@ -112,13 +110,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
   const prefersReduced = useReducedMotion();
   const reducedMotion = prefersReduced ?? false;
   const { t, lang } = useLang();
-  const [ready, setReady] = useState(false);
-  /* True only while the boot splash is actually covering the page. The
-     hero's signature construction waits for this to clear, so the
-     wordmark is not assembled behind an opaque splash where nobody can
-     see it. False for deep links and for reduced-motion users, who
-     never get a splash at all. */
-  const splashActive = !ready && !reducedMotion && initialIndex === 0;
+  const splashActive = false;
   const [index, setIndex] = useState(initialIndex);
   const [dir, setDir] = useState(1);
   const [navOpen, setNavOpen] = useState(false);
@@ -340,14 +332,6 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
   return (
     <NavProvider value={{ goToScene, goToTop: () => goToScene(0), openNav }}>
       <CustomCursor />
-      {/* boot splash — only on the true entry point; deep links land
-          straight on their section instead of waiting for a splash */}
-      <AnimatePresence>
-        {splashActive && (
-          <Preloader key="preloader" onComplete={() => setReady(true)} />
-        )}
-      </AnimatePresence>
-
       <Header />
 
       <div
@@ -396,12 +380,6 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
               className="page-scroll"
             >
               <PageBody index={index} reducedMotion={reducedMotion} armed={!splashActive} />
-              <DocumentMotion
-                scopeSelector={`.page-scroll[data-section="${SECTION_IDS[index]}"]`}
-                beatSelector={index === 0
-                  ? '.page-content .rounded-full:not(a):not(button)'
-                  : '.page-content h2, .page-content h3, .page-content p, .page-content li, .page-content dt, .page-content dd, .page-content .plate, .page-content .stack-layer, .page-content .lab-entry, .page-content .rounded-2xl, .page-content .repo-card, .page-content .rounded-full:not(a):not(button)'}
-              />
             </main>
           </motion.div>
         </AnimatePresence>

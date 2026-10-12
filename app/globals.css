@@ -183,6 +183,19 @@ a, button {
   height: 100%;
 }
 
+/* Reading scrim over the WebGL scene. The 3D objects keep their place
+   and shape at the edges and floor; the reading column sits on a calm
+   dark field so text never competes with a lit slab behind it. */
+.cinematic-world::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 56% at 50% 46%, rgba(5, 5, 7, 0.78), rgba(5, 5, 7, 0.34) 68%, transparent 100%),
+    linear-gradient(0deg, rgba(5, 5, 7, 0.6), transparent 28%);
+}
+
 .silicon-canvas {
   position: absolute;
   inset: 0;
@@ -632,6 +645,15 @@ a, button {
   .pager-hud {
     padding: 0 12px;
   }
+}
+
+/* Phone: content dissolves before the fixed footer and the section pill.
+   Without this, body copy ran underneath both and was unreadable where
+   they overlapped. The fade is a visual edge only; scrolling still
+   reaches the last line, which clears the chrome clearance above. */
+.page-scroll {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 210px), transparent calc(100% - 136px));
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 210px), transparent calc(100% - 136px));
 }
 
 /* Footer + scroll-progress seam (immediately above the footer bar). */
@@ -1944,3 +1966,116 @@ body.lang-bn .contact-title { line-height: 1.3; font-size: clamp(2rem, 6.5vw, 4.
 .contact-primary:hover { border-color: #4ade80; }
 .contact-primary span:first-child { font-family: var(--font-serif), serif; font-weight: 400; font-size: 1.6rem; }
 body.lang-bn .contact-primary span:first-child { font-family: var(--font-serif-bn), var(--font-bengali), sans-serif; font-weight: 500; }
+
+/* Spatial exhibit: inscriptions share a ground datum with the monuments. */
+.cinematic-world::after {
+  background: linear-gradient(90deg, rgba(5,7,7,.97) 0%, rgba(5,7,7,.89) 28%, rgba(5,7,7,.38) 49%, transparent 73%);
+}
+.silicon-grade {
+  background: linear-gradient(90deg, rgba(5,7,7,.97), rgba(5,7,7,.78) 34%, transparent 72%);
+}
+.pager-vignette { background: linear-gradient(0deg, rgba(3,9,7,.64), transparent 20%); }
+.exhibit {
+  position: relative;
+  isolation: isolate;
+  min-height: 100%;
+  padding: clamp(106px, 15vh, 152px) max(5vw, 30px) calc(var(--site-footer-height, 76px) + 104px);
+  color: #edf3ec;
+}
+.exhibit-body { position: relative; width: min(46vw, 640px); z-index: 1; }
+.exhibit-sightline {
+  position: absolute; left: 51%; top: 19%; width: 38%; height: 58%;
+  border-left: 1px solid rgba(129,241,170,.22);
+  border-bottom: 1px solid rgba(129,241,170,.16);
+  transform: skewY(-11deg); pointer-events: none;
+}
+.exhibit-sightline::before { content: ''; position: absolute; left: -4px; top: 0; width: 7px; height: 7px; background: #7beaa5; box-shadow: 0 0 25px #32df7e; }
+.exhibit-sightline span { position: absolute; bottom: -5px; right: 0; width: 48px; height: 8px; border-top: 1px solid rgba(129,241,170,.3); }
+.exhibit-kicker { display:flex; align-items:center; gap: 12px; margin-bottom: 24px; font: 500 11px/1.5 var(--font-mono), monospace; letter-spacing: .18em; text-transform: uppercase; color: #8ee5ac; }
+.exhibit-index { color: #f0f6ee; font-variant-numeric: tabular-nums; }
+.exhibit-rule { width: 38px; height: 1px; background: #56ca83; flex: none; }
+.exhibit-title { font-size: clamp(2.65rem, 5.1vw, 5.7rem); line-height: 1.04; margin: 0 0 38px; font-weight: 400; max-width: 11ch; text-wrap: balance; text-shadow: 0 3px 28px rgba(0,0,0,.45); }
+body.lang-bn .exhibit-title { font-family: var(--font-serif-bn), var(--font-bengali), serif; font-size: clamp(2.1rem, 4vw, 4rem); line-height: 1.35; letter-spacing: 0; max-width: 16ch; }
+.exhibit-copy { border-left: 1px solid rgba(139,233,169,.45); padding-left: clamp(20px, 2.4vw, 38px); max-width: 600px; }
+.exhibit-copy p { color: #c1d1c3; line-height: 1.67; font-size: clamp(14px, 1.05vw, 16px); }
+.exhibit-copy a, .exhibit-actions a { color: #b0f6c4; text-decoration: none; border-bottom: 1px solid rgba(145,238,173,.48); padding-bottom: 3px; }
+.exhibit-copy a:hover, .exhibit-copy a:focus-visible, .exhibit-actions a:hover, .exhibit-actions a:focus-visible { color: white; border-color: white; }
+.exhibit-copy h2 { color: #f0f6ee; font-size: clamp(1.4rem,2vw,2rem); line-height: 1.2; margin: 0 0 7px; }
+.exhibit-copy small, .exhibit-evidence, .exhibit-footnote { font: 400 12px/1.55 var(--font-mono), monospace; color: #8fb39a !important; }
+.exhibit-lead { font-size: clamp(17px,1.45vw,21px) !important; color: #e0eae0 !important; margin-bottom: 28px; }
+.exhibit-prose p { margin-bottom: 18px; }
+.exhibit-prose p:first-child { font-size: clamp(18px,1.45vw,23px); color: #e7eee6; }
+.exhibit-principles { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 24px 0; color: #9ee6ae; font: 12px/1.5 var(--font-mono), monospace; }
+.exhibit-principles li::before { content: '· '; }
+.exhibit-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 26px; padding-top: 20px; border-top: 1px solid rgba(145,238,173,.2); }
+.exhibit-facts dt { font: 11px/1.5 var(--font-mono), monospace; color: #85b391; }
+.exhibit-facts dd { font-size: 14px; line-height: 1.5; }
+.engraved-list { list-style:none; padding:0; border-top: 1px solid rgba(145,238,173,.32); }
+.engraved-list > li, .project-monument { display:grid; grid-template-columns: 40px 1fr; gap: 14px; padding: 20px 0 22px; border-bottom: 1px solid rgba(145,238,173,.18); }
+.engraved-number { color: #91eaa9; font: 11px/1.6 var(--font-mono), monospace; padding-top: 4px; }
+.engraved-list h2 { margin-bottom: 6px; }
+.engraved-list p { margin-bottom: 8px; }
+.engraved-list small { display: block; color: #8ccaa0; }
+.exhibit-evidence { margin-top: 10px; }
+.exhibit-footnote { margin-top: 26px; }
+.project-monuments { border-top: 1px solid rgba(145,238,173,.32); }
+.project-monument h2 { font-size: clamp(1.8rem, 2.6vw, 2.8rem); }
+.project-monument p { margin-bottom: 10px; }
+.project-state { color: #8fcda1 !important; font: 11px/1.5 var(--font-mono), monospace !important; }
+.project-tagline { color: #f0f6ee !important; font-size: 16px !important; }
+.exhibit-actions { display:flex; flex-wrap:wrap; gap: 14px 28px; margin-top: 25px; font: 12px/1.5 var(--font-mono), monospace; }
+.exhibit-secondary { padding: 30px 0; border-bottom: 1px solid rgba(145,238,173,.18); }
+.exhibit-secondary > p, .exhibit-secondary li { margin: 0 0 12px; }
+.exhibit-secondary ul { list-style: none; }
+.source-links li { display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 9px 0; border-bottom: 1px solid rgba(145,238,173,.12); }
+.source-links span { color: #adbcaf; font-size: 13px; }
+.contact-portal { display: flex; flex-direction: column-reverse; gap: 8px; padding: 23px 0; border-top: 1px solid rgba(145,238,173,.25); overflow-wrap: anywhere; }
+.contact-portal a { font-family: var(--font-serif), serif; font-size: clamp(1.35rem, 2vw, 2.2rem); color: #f0f6ee; border: 0; }
+.contact-portal span { font: 11px/1.4 var(--font-mono), monospace; color: #8fcda1; }
+.contact-network { padding-top: 18px; }
+.contact-network h3 { font: 11px/1.5 var(--font-mono), monospace; color: #86c699; margin-bottom: 8px; }
+.contact-network ul { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.exhibit-home { display: flex; flex-direction: column; justify-content: center; }
+.exhibit-home .exhibit-body { width: min(53vw, 740px); }
+.exhibit-home .hero-name { margin: 0 0 14px; font-size: clamp(4.2rem, 9vw, 9rem); line-height: 1.06; }
+.exhibit-home .sig-word { display: inline-block; margin-right: .18em; }
+.exhibit-home .sig-c { display: inline-block; }
+.exhibit-home .hero-profession { font: 500 clamp(15px,1.3vw,20px)/1.5 var(--font-inter), sans-serif; color: #e3eee3; margin-bottom: 28px; }
+.exhibit-home .hero-thesis { font: 400 clamp(19px,1.9vw,29px)/1.4 var(--font-serif), serif; color: #a5e7b6; margin-bottom: 15px; }
+.exhibit-home .hero-introduction { max-width: 530px; color: #c2d1c4; line-height: 1.65; }
+.exhibit-groundnote { position: absolute; right: 5vw; bottom: calc(var(--site-footer-height, 76px) + 88px); color: #9edcae; font: 11px/1.5 var(--font-mono), monospace; letter-spacing: .13em; text-transform: uppercase; }
+body.lang-bn .exhibit-home .hero-name { font-size: clamp(3.2rem, 6.5vw, 6rem); line-height: 1.4; }
+body.lang-bn .exhibit-kicker, body.lang-bn .engraved-number, body.lang-bn .exhibit-copy small, body.lang-bn .exhibit-groundnote { font-family: var(--font-bengali), sans-serif; letter-spacing: 0; }
+@media (max-width: 767px) {
+  .cinematic-world::after, .silicon-grade { background: linear-gradient(0deg, #050908 4%, rgba(5,9,8,.95) 31%, rgba(5,9,8,.32) 59%, transparent 84%); }
+  .pager-vignette { background: linear-gradient(0deg, rgba(3,8,6,.65), transparent 24%); }
+  .exhibit { padding: clamp(285px, 38dvh, 385px) 22px calc(var(--site-footer-height, 76px) + 98px); }
+  .exhibit-body, .exhibit-home .exhibit-body { width: 100%; max-width: 620px; }
+  .exhibit-sightline { left: 9%; top: 92px; width: 81%; height: 150px; opacity: .85; }
+  .exhibit-title { font-size: clamp(2.25rem, 9vw, 4rem); max-width: 14ch; margin-bottom: 24px; }
+  body.lang-bn .exhibit-title { font-size: clamp(2rem, 7.8vw, 3.3rem); }
+  .exhibit-home { justify-content: flex-start; }
+  .exhibit-home .hero-name { font-size: clamp(3.3rem, 15vw, 5.8rem); }
+  body.lang-bn .exhibit-home .hero-name { font-size: clamp(2.55rem, 11vw, 4.6rem); }
+  .exhibit-home .hero-profession { margin-bottom: 18px; }
+  .exhibit-groundnote { position: static; margin: 26px 0 0; }
+  .exhibit-copy { padding-left: 18px; }
+  .exhibit-kicker { margin-bottom: 17px; }
+}
+@media (max-width: 390px) { .exhibit { padding-left: 17px; padding-right: 17px; } .exhibit-home .hero-name { font-size: 14vw; } }
+@media (prefers-reduced-motion: reduce) { .exhibit *, .exhibit-sightline { animation: none !important; transition: none !important; } }
+
+/* The reading datum occupies the left of the camera shot, with open air
+   for the sculpture. On a narrow screen the exhibit sits below the shot. */
+.exhibit::before {
+  content: '';
+  position: absolute; inset: 0;
+  z-index: -1; pointer-events: none;
+  background: linear-gradient(90deg, #050908 0%, rgba(5,9,8,.97) 31%, rgba(5,9,8,.75) 45%, transparent 62%);
+}
+.exhibit-title, .exhibit-home .hero-name { font-family: var(--font-serif), 'Times New Roman', serif; }
+body.lang-bn .exhibit-title, body.lang-bn .exhibit-home .hero-name { font-family: var(--font-serif-bn), var(--font-bengali), serif; }
+@media (max-width: 767px) {
+  .exhibit::before { background: linear-gradient(0deg, #050908 0%, #050908 46%, rgba(5,9,8,.97) 63%, rgba(5,9,8,.1) 89%); }
+  .silicon-grade { background: linear-gradient(0deg, #050908 3%, rgba(5,9,8,.8) 28%, transparent 65%); }
+}
