@@ -333,59 +333,31 @@ no model change needed.
   pull, and performs a real `location.reload()`. On every other section a
   downward pull keeps its original meaning — turn back one page.
 
-## 9. Background & atmosphere — Silicon Nocturne
+## 9. Spatial exhibit — phone silicon as architecture
 
-One environment for the whole site: `components/SiliconWorld.tsx`, drawn by
-`app/silicon.ts`. It is an **abstract, invented** floorplan of a phone
-system-on-chip (CPU clusters, GPU shader array, NPU MAC array, memory
-arrays, media blocks, DRAM interface, interconnect, I/O pad ring) seen by a
-low camera with perspective. It is not a photograph or a real die, and no
-real product's layout is implied. Block labels are never drawn.
+The eight pager chapters form one continuous, invented silicon landscape. The
+primary renderer is `components/cinematic-scene.ts` (Three.js, loaded only
+when WebGL is available). A camera flight connects a distinct district per
+chapter. The workstation has six separated layers; featured work has project
+monuments; Research has solid geometric objects; Experience has a rail;
+Contact has a beacon. Bright physical materials and broad, controlled light
+make forms legible against the dark floor. This is a conceptual environment,
+not a literal chip photograph or a claim about a commercial SoC layout.
 
-- **Resolution-independent.** Vector lines drawn with Canvas 2D at native
-  device pixels (DPR capped at 2). There is no raster or video asset.
-- **Deterministic.** A seeded PRNG: the same seed always yields the same chip.
-- **Camera per chapter** (`POSES`): Home wide establishing shot with a low
-  horizon; Focus & Tools over the compute blocks; About over calm memory
-  arrays; Work over the GPU; Research over the NPU; Experience tracking down
-  a long bus; Contact pulled back to the I/O ring; Services and Verification
-  calm static shots. Chapter changes fly the camera over 1.5 s on an arc
-  (`flightAt`: C² eased, shortest-way heading, the camera rises mid-flight);
-  paging again mid-flight keeps the camera's position *and* velocity.
-- **Meaning.** Each chapter lights the region of the chip it is about
-  (`FOCUS`): Work the GPU, Research the NPU, About the memory arrays,
-  Experience the long bus, Contact the I/O ring where signals leave the chip.
-  The lit region crossfades over 1.1 s, and signal pulses on routes through it
-  burn brighter. Strength scales down for large regions (`chapterGain`) and
-  poses keep lit regions out of the text column. No labels are drawn.
-- **Opening.** On a true entry to the home chapter the horizon line exists
-  first, then the chip fades in as the camera rises (1.8 s). Any pointer, key
-  or wheel input skips it.
-- **Depth.** Continuous exponential fog, exact for the floor plane, folded
-  with the sky and horizon glow into one gradient. Nothing pops between depth
-  bands.
-- **Life & interaction.** On fine-pointer, full-detail screens the camera
-  orbits its subject: a damped pointer parallax (±2 %, over-damped spring),
-  a very slow ambient drift, and a small scroll dolly. Phones, touch and
-  reduced motion hold the camera still between chapters.
-- **Light.** A second canvas draws the signal pulses in lockstep with the
-  scene. The scene canvas, including the chapter light pool, redraws only
-  while something moves (and every 125 ms for the sub-pixel ambient drift).
-- **Safety.** Paused when the tab is hidden; frame gaps are clamped so
-  motion never jumps; a pixel budget and a one-way quality ratchet protect
-  slow devices; mobile uses a lighter plan;
-  reduced motion draws one static frame per chapter with no pulses; without
-  JavaScript a CSS gradient (`.silicon-world`) remains. A scrim
-  (`.silicon-grade`) keeps text legible.
+The content is part of the composition. A slim illuminated line and ground
+sightline tie real, accessible DOM inscriptions to each camera shot. Desktop
+reserves the left reading datum and lets monuments occupy the right field.
+Portrait screens show the world above the inscription; native inner scroll
+reveals the complete chapter. No conventional cards or translucent panels
+appear in the eight pager chapters.
 
-All parameters and the math behind them: [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md).
-
-### Chapter compositions
-
-Focus & Tools `.stack-layer` (layered stack) · About `.about-lead` + `.fact-grid`
-· Work `.plate` (corner-ticked, square) · Research `.lab-notebook` with
-`.lab-legend` · Experience `.rail` year rail · Contact `.contact-title` and
-`.contact-primary`. No `backdrop-filter` surfaces in the pager chapters.
+`components/SiliconWorld.tsx` and `app/silicon.ts` remain the Canvas 2D
+fallback; its line brightness is tuned so the structure remains visible when
+WebGL is unavailable. Without JavaScript, the static route renders every
+chapter's text and a CSS architectural backdrop. Reduced motion keeps the
+scene still; visibility pause, pixel budget and mobile quality policy remain.
+See [`docs/CINEMATIC_3D.md`](docs/CINEMATIC_3D.md) and
+[`docs/SPATIAL_PORTFOLIO.md`](docs/SPATIAL_PORTFOLIO.md).
 
 ## 10. Accessibility
 
