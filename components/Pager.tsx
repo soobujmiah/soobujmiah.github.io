@@ -98,7 +98,7 @@ const pageVariants = {
 
 /* Can the page's inner scroller move further in this direction?
    dir = 1 means "toward next page" (scroll down), -1 "toward prev". */
-function canScrollInner(el: HTMLDivElement | null, dir: 1 | -1): boolean {
+function canScrollInner(el: HTMLElement | null, dir: 1 | -1): boolean {
   if (!el) return false;
   try {
     if (dir > 0) return el.scrollTop + el.clientHeight < el.scrollHeight - EDGE_SLACK;
@@ -125,8 +125,8 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
   const lastFlip = useRef(0);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
-  const scrollRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const activeScroller = useRef<HTMLDivElement | null>(null);
+  const scrollRefs = useRef<Array<HTMLElement | null>>([]);
+  const activeScroller = useRef<HTMLElement | null>(null);
   const indexRef = useRef(initialIndex);
   indexRef.current = index;
   const urlSynced = useRef(false);
@@ -381,13 +381,17 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
                   }
             }
           >
-            <div
+            {/* The chapter is the page's main landmark. Exactly one
+                `.page-scroll` is rendered per route, so this stays a
+                single <main>. It was a role="region" div, which left
+                every pager chapter without a main landmark at all while
+                /services/ and /verification/ had one. */}
+            <main
               ref={(el) => {
                 scrollRefs.current[index] = el;
                 if (index === indexRef.current) activeScroller.current = el;
               }}
               data-section={SECTION_IDS[index]}
-              role="region"
               aria-label={t.ui.pageLabels[index]}
               className="page-scroll"
             >
@@ -398,7 +402,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
                   ? '.page-content .rounded-full:not(a):not(button)'
                   : '.page-content h2, .page-content h3, .page-content p, .page-content li, .page-content dt, .page-content dd, .page-content .plate, .page-content .stack-layer, .page-content .lab-entry, .page-content .rounded-2xl, .page-content .repo-card, .page-content .rounded-full:not(a):not(button)'}
               />
-            </div>
+            </main>
           </motion.div>
         </AnimatePresence>
 

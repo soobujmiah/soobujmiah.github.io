@@ -42,7 +42,7 @@ export function PullToRefresh({
   onRefresh,
 }: {
   enabled: boolean;
-  scrollerRef: React.RefObject<HTMLDivElement | null>;
+  scrollerRef: React.RefObject<HTMLElement | null>;
   onRefresh: () => void;
 }) {
   const { t } = useLang();
