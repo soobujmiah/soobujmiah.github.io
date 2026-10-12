@@ -124,7 +124,18 @@ export function NavOverlay({
   const progress = total > 1 ? index / (total - 1) : 0;
 
   return (
-    <div className="nav-overlay-root" data-open={open ? 'true' : 'false'} aria-hidden={!open}>
+    /* `inert` is what actually removes the closed panel from the tab
+       order. `aria-hidden` alone hid it from screen readers while a
+       keyboard still walked its ten rows — the two disagreed, which is
+       worse than either on its own. Written through a spread so it is a
+       real boolean attribute (present or absent) rather than
+       inert="false", which browsers treat as inert. */
+    <div
+      className="nav-overlay-root"
+      data-open={open ? 'true' : 'false'}
+      aria-hidden={!open}
+      {...(open ? {} : { inert: '' as unknown as boolean })}
+    >
       {/* backdrop */}
       <motion.div
         className="nav-overlay-backdrop"
