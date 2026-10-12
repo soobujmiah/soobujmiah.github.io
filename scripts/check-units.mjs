@@ -173,23 +173,28 @@ eq('the gleam ends after the entrance (light reads as a finishing pass)', gleamE
 eq('the signature settles within 2.5s — one pass, with an end', Math.max(entranceEnd, gleamEnd) <= 2.5, true);
 
 console.log('\nSection routing');
-eq('seven sections', SECTION_IDS.length, 7);
+/* The chapter list is the registry's to decide; these assertions pin
+   the *routing contract*, not a fixed chapter count, so adding a
+   chapter does not falsify them. */
+const WORK = SECTION_IDS.indexOf('work');
+eq('every section id is unique', new Set(SECTION_IDS).size, SECTION_IDS.length);
+eq('the registry has a work chapter', WORK >= 0, true);
 eq('home is the site root', sectionHref(0), '/');
-eq('a section is a real directory route', sectionHref(3), '/work/');
+eq('a section is a real directory route', sectionHref(WORK), '/work/');
 eq('index → slug → index round-trips for every section', SECTION_IDS.map((_, i) => indexForSlug(SECTION_IDS[i])), [...SECTION_IDS.keys()]);
 eq('unknown slug is null', indexForSlug('nope'), null);
 eq('legacy stack slug resolves to merged section', indexForSlug('stack'), 1);
 eq('legacy stack pathname resolves to merged section', indexFromPathname('/bn/stack/'), 1);
-eq('legacy open-source slug resolves to work', indexForSlug('open-source'), 3);
-eq('legacy open-source pathname resolves to work', indexFromPathname('/bn/open-source/'), 3);
-eq('pathname /work/ → index 3', indexFromPathname('/work/'), 3);
+eq('legacy open-source slug resolves to work', indexForSlug('open-source'), WORK);
+eq('legacy open-source pathname resolves to work', indexFromPathname('/bn/open-source/'), WORK);
+eq('pathname /work/ maps back to the work chapter', indexFromPathname('/work/'), WORK);
 eq('pathname / → home', indexFromPathname('/'), 0);
 eq('unknown pathname falls back to home', indexFromPathname('/nonsense/'), 0);
-eq('absolute section URL', sectionUrl(3), `${SITE_ORIGIN}/work/`);
-eq('Bengali section path has locale prefix', sectionHref(3, 'bn'), '/bn/work/');
+eq('absolute section URL', sectionUrl(WORK), `${SITE_ORIGIN}/work/`);
+eq('Bengali section path has locale prefix', sectionHref(WORK, 'bn'), '/bn/work/');
 eq('Bengali home path has locale prefix', sectionHref(0, 'bn'), '/bn/');
-eq('Bengali section URL', sectionUrl(3, 'bn'), `${SITE_ORIGIN}/bn/work/`);
-eq('Bengali pathname maps to section', indexFromPathname('/bn/work/'), 3);
+eq('Bengali section URL', sectionUrl(WORK, 'bn'), `${SITE_ORIGIN}/bn/work/`);
+eq('Bengali pathname maps to section', indexFromPathname('/bn/work/'), WORK);
 
 console.log('\nBengali digits');
 eq('English digits unchanged', localizeDigits('2026', 'en'), '2026');
@@ -213,15 +218,20 @@ console.log('\nSilicon Nocturne — the procedural environment');
   eq('every coordinate is finite', full.lines.every((l) => l.every(Number.isFinite)), true);
   eq('signal routes are Manhattan polylines of whole points', full.routes.every((r) => r.length >= 4 && r.length % 2 === 0), true);
   eq('zones sit inside the die', Object.values(ZONES).every((z) => z[0] >= -DIE.halfW && z[2] <= DIE.halfW && z[1] >= -DIE.halfD && z[3] <= DIE.halfD), true);
-  eq('one camera pose per chapter plus services and verification', POSES.length, 9);
+  eq('one camera pose per chapter plus services and verification', POSES.length, SECTION_IDS.length + 2);
   eq('poseFor falls back to the establishing shot', poseFor(99), POSES[0]);
-  eq('no two chapters share a camera', new Set(POSES.map((p) => JSON.stringify(p))).size, 9);
+  eq('no two chapters share a camera', new Set(POSES.map((p) => JSON.stringify(p))).size, SECTION_IDS.length + 2);
   eq('the flight eases through its endpoints', [easeInOut(0), easeInOut(1)], [0, 1]);
   eq('the flight eases monotonically', [0.1, 0.3, 0.5, 0.7, 0.9].every((t, i, a) => i === 0 || easeInOut(t) > easeInOut(a[i - 1])), true);
   eq('lerpPose hits both endpoints', [lerpPose(POSES[0], POSES[3], 0), lerpPose(POSES[0], POSES[3], 1)], [POSES[0], POSES[3]]);
   eq('every chapter lights at least one region of the chip', FOCUS.length === POSES.length && FOCUS.every((rs) => rs.length > 0), true);
   eq('every lit region lies on the die', FOCUS.every((rs) => rs.every((r) => r[0] >= -DIE.halfW && r[2] <= DIE.halfW && r[1] >= -DIE.halfD && r[3] <= DIE.halfD && r[0] < r[2] && r[1] < r[3])), true);
-  eq('Work lights the GPU, Research the NPU', [FOCUS[3][0] === ZONES.gpu, FOCUS[4][0] === ZONES.npu], [true, true]);
+  const idx = (id) => SECTION_IDS.indexOf(id);
+  eq('each chapter lights the region it is about', [
+    FOCUS[idx('work')][0] === ZONES.gpu,
+    FOCUS[idx('research')][0] === ZONES.npu,
+    FOCUS[idx('workstation')][0] === ZONES.cpu,
+  ], [true, true, true]);
   eq('focusFor falls back to the whole die', focusFor(99), FOCUS[0]);
   eq('inRects is inclusive and exact', [inRects([[0, 0, 10, 10]], 10, 10), inRects([[0, 0, 10, 10]], 11, 5)], [true, false]);
   eq('yaw takes the short way round', [shortYaw(170, -170), shortYaw(-90, 90) === -180 || shortYaw(-90, 90) === 180, shortYaw(10, 30)], [20, true, 20]);

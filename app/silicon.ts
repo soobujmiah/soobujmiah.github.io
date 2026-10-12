@@ -265,12 +265,13 @@ export const POSES: readonly Pose[] = [
   { x: 40, z: 980, h: 150, yaw: 0, pitch: 11, fov: 58 }, //  0 home: wide establishing, horizon low
   { x: -520, z: 440, h: 170, yaw: -18, pitch: 28, fov: 52 }, //  1 focus & tools: over the compute blocks
   { x: 120, z: 680, h: 180, yaw: -28, pitch: 22, fov: 50 }, //  2 about: memory arrays in the empty lower-left, clear of the text column
-  { x: 120, z: 430, h: 150, yaw: 4, pitch: 30, fov: 50 }, //  3 work: over the GPU
-  { x: 850, z: 250, h: 140, yaw: -8, pitch: 32, fov: 50 }, //  4 research: over the NPU
-  { x: -1380, z: 215, h: 90, yaw: 90, pitch: 14, fov: 54 }, // 5 experience: tracking a long bus
-  { x: 40, z: 1100, h: 260, yaw: 0, pitch: 30, fov: 60 }, //  6 contact: pulled back to the I/O ring
-  { x: -300, z: 800, h: 260, yaw: 10, pitch: 44, fov: 52 }, //  7 services: calm static
-  { x: 300, z: 800, h: 260, yaw: -10, pitch: 44, fov: 52 }, //  8 verification: calm static
+  { x: -760, z: 600, h: 112, yaw: -6, pitch: 24, fov: 54 }, //  3 workstation: low over the CPU clusters — the host the stack runs on
+  { x: 120, z: 430, h: 150, yaw: 4, pitch: 30, fov: 50 }, //  4 work: over the GPU
+  { x: 850, z: 250, h: 140, yaw: -8, pitch: 32, fov: 50 }, //  5 research: over the NPU
+  { x: -1380, z: 215, h: 90, yaw: 90, pitch: 14, fov: 54 }, // 6 experience: tracking a long bus
+  { x: 40, z: 1100, h: 260, yaw: 0, pitch: 30, fov: 60 }, //  7 contact: pulled back to the I/O ring
+  { x: -300, z: 800, h: 260, yaw: 10, pitch: 44, fov: 52 }, //  8 services: calm static
+  { x: 300, z: 800, h: 260, yaw: -10, pitch: 44, fov: 52 }, //  9 verification: calm static
 ];
 
 export function poseFor(index: number): Pose {
@@ -288,17 +289,18 @@ export const FOCUS: readonly (readonly Rect[])[] = [
   [[-DIE.halfW, -DIE.halfD, DIE.halfW, DIE.halfD]], //  0 home: the whole die
   [ZONES.cpu, ZONES.gpu, ZONES.npu], //  1 focus & tools: the compute blocks
   [ZONES.mem], //  2 about: memory — what persists
-  [ZONES.gpu], //  3 work: the GPU, where things are rendered
-  [ZONES.npu], //  4 research: the NPU
-  [[-1100, 183, 1100, 227]], //  5 experience: the long interconnect bus
+  [ZONES.cpu], //  3 workstation: the CPU clusters — where the host actually runs
+  [ZONES.gpu], //  4 work: the GPU, where things are rendered
+  [ZONES.npu], //  5 research: the NPU
+  [[-1100, 183, 1100, 227]], //  6 experience: the long interconnect bus
   [
     [-DIE.halfW, -DIE.halfD, DIE.halfW, -DIE.halfD + 110],
     [-DIE.halfW, DIE.halfD - 110, DIE.halfW, DIE.halfD],
     [-DIE.halfW, -DIE.halfD, -DIE.halfW + 110, DIE.halfD],
     [DIE.halfW - 110, -DIE.halfD, DIE.halfW, DIE.halfD],
-  ], //  6 contact: the I/O ring, where signals leave the chip
-  [ZONES.media], //  7 services
-  [ZONES.dram], //  8 verification
+  ], //  7 contact: the I/O ring, where signals leave the chip
+  [ZONES.media], //  8 services
+  [ZONES.dram], //  9 verification
 ];
 
 export function focusFor(index: number): readonly Rect[] {

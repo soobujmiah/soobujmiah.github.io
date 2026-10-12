@@ -144,6 +144,20 @@ export interface Content {
     principles: string[];
     facts: { label: string; value: string }[];
   };
+  /* The mobile workstation, as a stack rather than a device photo. Each
+     layer says what it is, what actually runs there, and the evidence
+     behind it. `note` is the honesty line: this is a documented
+     environment, not live telemetry. */
+  workstation: {
+    eyebrow: string;
+    heading: string;
+    intro: string;
+    note: string;
+    layerLabel: string;
+    runsLabel: string;
+    evidenceLabel: string;
+    layers: { id: string; label: string; detail: string; runs: string; evidence: string }[];
+  };
   work: {
     eyebrow: string;
     heading: string;
@@ -327,6 +341,60 @@ const en: Content = {
       { label: 'Languages', value: 'Bangla (native), English (professional working), Hindi/Urdu (conversational, non-writing), Arabic (basic comprehension)' },
       { label: 'Reference device', value: 'Redmi Turbo 4 Pro — SD 8s Gen 4' },
       { label: 'Build pipeline', value: 'GitHub Actions CI/CD' },
+    ],
+  },
+  workstation: {
+    eyebrow: '04 — The Workstation',
+    heading: 'The workstation is a phone. These are its layers.',
+    intro:
+      'Not a laptop with a phone beside it. The device below is the whole environment: each layer runs on the one under it, and the work in the rest of this portfolio was built through this stack.',
+    note: 'A documented environment, not live telemetry. Each layer carries the evidence behind it.',
+    layerLabel: 'Layer',
+    runsLabel: 'Runs here: ',
+    evidenceLabel: 'Evidence: ',
+    layers: [
+      {
+        id: 'device',
+        label: 'Android host',
+        detail: 'The hardware and operating system everything else sits on. No desktop machine is involved.',
+        runs: 'Redmi Turbo 4 Pro · Snapdragon 8s Gen 4 · Android 16',
+        evidence: 'Device records kept from on-device diagnostics: model 25053RT47C, SoC SM8735, Android 16 at API level 36.',
+      },
+      {
+        id: 'termux',
+        label: 'Termux',
+        detail: 'A native Android terminal. This is where a phone stops being only a phone: a real shell, with no root required.',
+        runs: 'Native Android shell · package manager · no root',
+        evidence: 'The host layer Ternux installs into; every session in this stack begins here.',
+      },
+      {
+        id: 'proot',
+        label: 'Debian 13 in PRoot',
+        detail: 'A full Linux userland inside the Android app sandbox. Ordinary Debian: apt, a home directory, system packages, and a desktop when one is wanted.',
+        runs: 'Debian 13 trixie · arm64 · apt · Xfce over Termux:X11',
+        evidence: 'Installed by Ternux, which adds the Debian ARM64 userspace, an Xfce4 desktop and a Zink/Turnip GPU route in one command.',
+      },
+      {
+        id: 'toolchain',
+        label: 'ARM64 toolchain',
+        detail: 'Compilers and Android build-tools built for arm64 and running on the phone itself, rather than cross-compiled from a PC.',
+        runs: 'Clang · CMake · Ninja · AOSP build-tools',
+        evidence: 'ADT supplies native ARM64 build-tools and platform-tools from AOSP source, inside the Debian layer above.',
+      },
+      {
+        id: 'adb',
+        label: 'ADB and the device loop',
+        detail: 'The loop that closes against real hardware: install, read the logs, observe, fix. Heavy builds go to CI; the phone stays the thing that proves the result.',
+        runs: 'ADB · logcat · signed installs · GitHub Actions for heavy builds',
+        evidence: 'ADT produced, signed and installed a real APK end to end on this same device.',
+      },
+      {
+        id: 'inference',
+        label: 'Local AI runtime',
+        detail: 'One capability among the layers rather than the point of the stack: language models running on the device, offline, with nothing leaving it.',
+        runs: 'llama.cpp · arm64 CPU inference · GGUF',
+        evidence: 'LAI: arm64 llama.cpp CPU inference measured at 12–20 tokens per second decode with KV-prefix reuse. GPU and NPU paths remain in qualification.',
+      },
     ],
   },
   work: {
@@ -642,15 +710,16 @@ const en: Content = {
   },
   nav: [
     { scene: 1, label: 'Focus & tools' },
-    { scene: 3, label: 'Work' },
-    { scene: 4, label: 'Research' },
-    { scene: 6, label: 'Contact' },
+    { scene: 3, label: 'Workstation' },
+    { scene: 4, label: 'Work' },
+    { scene: 5, label: 'Research' },
+    { scene: 7, label: 'Contact' },
   ],
   header: { homeLabel: 'Back to home', githubLabel: 'GitHub', langLabel: 'Bangla', langAria: 'Switch to Bangla', githubAria: 'GitHub profile', cvLabel: 'CV', cvAria: 'Download CV (PDF)', servicesLabel: 'How I Can Help' },
   ui: {
     carouselPrev: 'Previous',
     carouselNext: 'Next',
-    pageLabels: ['Home', 'Focus & tools', 'About', 'Work', 'Research', 'Experience', 'Contact'],
+    pageLabels: ['Home', 'Focus & tools', 'About', 'Workstation', 'Work', 'Research', 'Experience', 'Contact'],
     repoWord: 'repository',
     liveSiteWord: 'live site',
     navOpen: 'Open section index',
@@ -694,6 +763,11 @@ const en: Content = {
         title: 'About — Independent Software & AI Systems Engineer in Dhaka',
         description:
           'About Sobuj Miah: an independent software and AI systems engineer in Dhaka, Bangladesh, learning through practical projects, real devices and evidence-backed problem-solving.',
+      },
+      {
+        title: 'The Workstation — Android, Termux, Debian PRoot & ARM64',
+        description:
+          'How Sobuj Miah builds from a phone: the Android host, Termux, Debian PRoot, an ARM64 toolchain, ADB device validation and local AI inference, layer by layer with evidence.',
       },
       {
         title: 'Work & Repositories — Ternux, ADT, LAI & GGEN',
@@ -782,6 +856,60 @@ const bn: Content = {
       { label: 'ভাষা', value: 'বাংলা, ইংরেজি, হিন্দি/উর্দু, আরবি' },
       { label: 'রেফারেন্স ডিভাইস', value: 'রেডমি টার্বো ৪ প্রো — এসডি ৮এস জেন ৪' },
       { label: 'বিল্ড পাইপলাইন', value: 'গিটহাব অ্যাকশনস সিআই/সিডি' },
+    ],
+  },
+  workstation: {
+    eyebrow: '০৪ — ওয়ার্কস্টেশন',
+    heading: 'ওয়ার্কস্টেশনটি একটি ফোন। এগুলোই এর স্তর।',
+    intro:
+      'পাশে ফোন রাখা কোনো ল্যাপটপ নয়। নিচের ডিভাইসটিই পুরো পরিবেশ: প্রতিটি স্তর তার নিচের স্তরের উপর চলে, আর এই পোর্টফোলিওর বাকি কাজগুলো এই স্তরগুলোর মধ্য দিয়েই তৈরি।',
+    note: 'এটি নথিভুক্ত পরিবেশ, সরাসরি সিস্টেম-তথ্য নয়। প্রতিটি স্তরের সঙ্গে তার প্রমাণ যুক্ত আছে।',
+    layerLabel: 'স্তর',
+    runsLabel: 'এখানে চলে: ',
+    evidenceLabel: 'প্রমাণ: ',
+    layers: [
+      {
+        id: 'device',
+        label: 'অ্যান্ড্রয়েড হোস্ট',
+        detail: 'যে হার্ডওয়্যার ও অপারেটিং সিস্টেমের উপর বাকি সবকিছু দাঁড়িয়ে আছে। কোনো ডেস্কটপ কম্পিউটার এতে যুক্ত নেই।',
+        runs: 'রেডমি টার্বো ৪ প্রো · স্ন্যাপড্রাগন ৮এস জেন ৪ · অ্যান্ড্রয়েড ১৬',
+        evidence: 'ডিভাইসে চালানো ডায়াগনস্টিক থেকে রাখা নথি: মডেল ২৫০৫৩আরটি৪৭সি, এসওসি এসএম৮৭৩৫, অ্যান্ড্রয়েড ১৬, এপিআই স্তর ৩৬।',
+      },
+      {
+        id: 'termux',
+        label: 'টারমাক্স',
+        detail: 'অ্যান্ড্রয়েডের নেটিভ টার্মিনাল। এখানেই ফোন কেবল ফোন থাকে না — সত্যিকারের শেল, রুট ছাড়াই।',
+        runs: 'নেটিভ অ্যান্ড্রয়েড শেল · প্যাকেজ ম্যানেজার · রুট ছাড়া',
+        evidence: 'টারনাক্স যে স্তরের ভিতরে ইনস্টল হয়; এই স্তরগুলোর প্রতিটি সেশন এখান থেকেই শুরু।',
+      },
+      {
+        id: 'proot',
+        label: 'পি-রুটে ডেবিয়ান ১৩',
+        detail: 'অ্যান্ড্রয়েড অ্যাপ স্যান্ডবক্সের ভিতরে পূর্ণ লিনাক্স ইউজারল্যান্ড। সাধারণ ডেবিয়ানই: অ্যাপ্ট, হোম ডিরেক্টরি, সিস্টেম প্যাকেজ, আর প্রয়োজনে ডেস্কটপ।',
+        runs: 'ডেবিয়ান ১৩ ট্রিক্সি · এআরএম ৬৪ · অ্যাপ্ট · টারমাক্স এক্স১১-এ এক্সএফসিই',
+        evidence: 'টারনাক্স এটি ইনস্টল করে — এক কমান্ডেই ডেবিয়ান এআরএম ৬৪ ইউজারস্পেস, এক্সএফসিই৪ ডেস্কটপ এবং জিংক/টার্নিপ জিপিইউ পথ যুক্ত হয়।',
+      },
+      {
+        id: 'toolchain',
+        label: 'এআরএম ৬৪ টুলচেইন',
+        detail: 'এআরএম ৬৪-এর জন্য তৈরি কম্পাইলার ও অ্যান্ড্রয়েড বিল্ড-টুল, যা কোনো পিসি থেকে ক্রস-কম্পাইল না করে ফোনেই চলে।',
+        runs: 'ক্ল্যাং · সিএমেক · নিনজা · এওএসপি বিল্ড-টুল',
+        evidence: 'এডিটি উপরের ডেবিয়ান স্তরের ভিতরে এওএসপি সোর্স থেকে নেটিভ এআরএম ৬৪ বিল্ড-টুল ও প্ল্যাটফর্ম-টুল সরবরাহ করে।',
+      },
+      {
+        id: 'adb',
+        label: 'এডিবি ও ডিভাইস-চক্র',
+        detail: 'বাস্তব হার্ডওয়্যারে যে চক্রটি সম্পূর্ণ হয়: ইনস্টল, লগ পড়া, পর্যবেক্ষণ, সংশোধন। ভারী বিল্ড সিআই-তে যায়; ফলাফল প্রমাণ করার কাজটি ফোনেরই থাকে।',
+        runs: 'এডিবি · লগক্যাট · স্বাক্ষরিত ইনস্টল · ভারী বিল্ডের জন্য গিটহাব অ্যাকশনস',
+        evidence: 'এডিটি এই একই ডিভাইসে শুরু থেকে শেষ পর্যন্ত একটি সত্যিকারের এপিকে তৈরি, স্বাক্ষর ও ইনস্টল করেছে।',
+      },
+      {
+        id: 'inference',
+        label: 'লোকাল এআই রানটাইম',
+        detail: 'এটি স্তরগুলোর একটি সক্ষমতা, পুরো কাঠামোর উদ্দেশ্য নয়: ভাষা-মডেল ডিভাইসেই চলে, অফলাইনে, কিছুই বাইরে যায় না।',
+        runs: 'লামা.সিপিপি · এআরএম ৬৪ সিপিইউ ইনফারেন্স · জিজিইউএফ',
+        evidence: 'লাই: এআরএম ৬৪ লামা.সিপিপি সিপিইউ ইনফারেন্সে কেভি-প্রিফিক্স পুনর্ব্যবহারসহ ডিকোড মাপা হয়েছে সেকেন্ডে ১২–২০ টোকেন। জিপিইউ ও এনপিইউ পথ এখনো যোগ্যতা-পরীক্ষার পর্যায়ে।',
+      },
     ],
   },
   work: {
@@ -1097,9 +1225,10 @@ const bn: Content = {
   },
   nav: [
     { scene: 1, label: 'ফোকাস ও টুলিং' },
-    { scene: 3, label: 'কাজ' },
-    { scene: 4, label: 'গবেষণা' },
-    { scene: 6, label: 'যোগাযোগ' },
+    { scene: 3, label: 'ওয়ার্কস্টেশন' },
+    { scene: 4, label: 'কাজ' },
+    { scene: 5, label: 'গবেষণা' },
+    { scene: 7, label: 'যোগাযোগ' },
   ],
   header: {
     homeLabel: 'হোমে ফিরুন',
@@ -1114,7 +1243,7 @@ const bn: Content = {
   ui: {
     carouselPrev: 'আগের',
     carouselNext: 'পরের',
-    pageLabels: ['হোম', 'ফোকাস ও টুলিং', 'পরিচিতি', 'কাজ', 'গবেষণা', 'অভিজ্ঞতা', 'যোগাযোগ'],
+    pageLabels: ['হোম', 'ফোকাস ও টুলিং', 'পরিচিতি', 'ওয়ার্কস্টেশন', 'কাজ', 'গবেষণা', 'অভিজ্ঞতা', 'যোগাযোগ'],
     repoWord: 'রিপোজিটরি',
     liveSiteWord: 'লাইভ সাইট',
     navOpen: 'সূচি খুলুন',
@@ -1155,6 +1284,11 @@ const bn: Content = {
         title: 'পরিচিতি — ঢাকার স্বাধীন সফটওয়্যার ও এআই সিস্টেম ইঞ্জিনিয়ার',
         description:
           'সবুজ মিয়া সম্পর্কে: ঢাকার স্বাধীন সফটওয়্যার ও এআই সিস্টেম ইঞ্জিনিয়ার, যিনি ব্যবহারিক প্রকল্প, বাস্তব ডিভাইস ও প্রমাণভিত্তিক সমস্যা সমাধানের মধ্য দিয়ে শেখেন।',
+      },
+      {
+        title: 'ওয়ার্কস্টেশন — অ্যান্ড্রয়েড, টারমাক্স, ডেবিয়ান পি-রুট ও এআরএম ৬৪',
+        description:
+          'সবুজ মিয়া কীভাবে ফোন থেকে তৈরি করেন: অ্যান্ড্রয়েড হোস্ট, টারমাক্স, ডেবিয়ান পি-রুট, এআরএম ৬৪ টুলচেইন, এডিবি ডিভাইস যাচাই ও লোকাল এআই ইনফারেন্স — স্তরে স্তরে, প্রমাণসহ।',
       },
       {
         title: 'কাজ ও রিপোজিটরি — টারনাক্স, এডিটি, লাই ও জিজেন',

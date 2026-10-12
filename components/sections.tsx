@@ -323,6 +323,128 @@ function PageHeading({ eyebrow, heading }: { eyebrow: string; heading: string })
   );
 }
 
+/* ── 04 · THE MOBILE WORKSTATION ──────────────────────────────
+   The brief's "exploded view", done as a cross-section rather than a
+   floating product shot: six slabs in one shared perspective, stacked
+   in the order they actually depend on each other, with the Android
+   host at the bottom. Selecting a layer lifts it out of the stack and
+   opens its detail.
+
+   Depth is CSS 3D, the same language as the signature — no WebGL, no
+   canvas, no new dependency. The stack is a real list of real buttons:
+   it works by click, tap, Tab and arrow keys, and a screen reader gets
+   an ordinary list with the selected layer expanded. Hover is a
+   nicety, never the only way in.
+
+   Honesty: these are documented environment facts carried in
+   `content.ts`, not live system telemetry, and the scene says so. */
+export function WorkstationScene() {
+  const { t, lang } = useLang();
+  const reducedMotion = useReducedMotion();
+  const w = t.workstation;
+  const [active, setActive] = useState(0);
+  const refs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const move = (delta: number) => {
+    const next = (active + delta + w.layers.length) % w.layers.length;
+    setActive(next);
+    refs.current[next]?.focus();
+  };
+
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    /* Arrow keys walk the stack. Down means "deeper", which is visually
+       downward here, so the mapping matches what the eye sees. */
+    if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+      event.preventDefault();
+      move(1);
+    } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+      event.preventDefault();
+      move(-1);
+    }
+  };
+
+  const layer = w.layers[active];
+
+  return (
+    <div className="page-fill">
+      <div className="page-content">
+        {/* the shared heading, so this chapter sits at the same scale
+            and rhythm as About, Work and Research rather than inventing
+            its own — and so the page keeps exactly one <h1> */}
+        <PageHeading eyebrow={w.eyebrow} heading={w.heading} />
+        <Reveal delay={0.1}>
+          <p className="ws-intro max-w-2xl text-sm leading-relaxed">{w.intro}</p>
+        </Reveal>
+
+        <div className="ws-grid">
+          {/* The stack. Topmost in the DOM is the topmost layer on
+              screen and the last one in the dependency chain. */}
+          <Reveal delay={0.15}>
+            <ul className="ws-stack" onKeyDown={onKeyDown}>
+              {w.layers.map((l, i) => {
+                const selected = i === active;
+                /* Depth within the slab stack: the selected layer comes
+                   forward, the rest stay seated. */
+                const style = {
+                  '--d': w.layers.length - 1 - i,
+                  '--lift': selected ? 1 : 0,
+                } as React.CSSProperties;
+                return (
+                  <li key={l.id} className="ws-slab-row" style={style}>
+                    <button
+                      type="button"
+                      ref={(el) => {
+                        refs.current[i] = el;
+                      }}
+                      className={`ws-slab${selected ? ' ws-slab--on' : ''}`}
+                      aria-expanded={selected}
+                      aria-controls="ws-detail"
+                      onClick={() => setActive(i)}
+                      onMouseEnter={() => {
+                        if (!reducedMotion) setActive(i);
+                      }}
+                    >
+                      <span className="ws-slab-index font-mono">
+                        {localizeDigits(String(i + 1).padStart(2, '0'), lang)}
+                      </span>
+                      <span className="ws-slab-label">{l.label}</span>
+                      <span className="ws-slab-runs font-mono">{l.runs}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </Reveal>
+
+          {/* One detail panel, replaced in place. A panel per layer
+              would be six duplicated regions for a screen reader. */}
+          <Reveal delay={0.2}>
+            <div className="ws-detail" id="ws-detail" aria-live="polite">
+              <p className="ws-detail-kicker font-mono text-[10px] uppercase tracking-[0.3em]">
+                {w.layerLabel} {localizeDigits(String(active + 1).padStart(2, '0'), lang)}
+              </p>
+              <h2 className="ws-detail-title">{layer.label}</h2>
+              <p className="ws-detail-body">{layer.detail}</p>
+              <p className="ws-detail-line font-mono">
+                <span className="ws-detail-tag">{w.runsLabel}</span>
+                {layer.runs}
+              </p>
+              <p className="ws-detail-line ws-detail-evidence">
+                <span className="ws-detail-tag">{w.evidenceLabel}</span>
+                {layer.evidence}
+              </p>
+            </div>
+          </Reveal>
+        </div>
+
+        <Reveal delay={0.25}>
+          <p className="ws-note font-mono">{w.note}</p>
+        </Reveal>
+      </div>
+    </div>
+  );
+}
+
 /* ── 03 · ABOUT ──────────────────────────────────────────────── */
 
 export function AboutScene() {

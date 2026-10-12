@@ -781,6 +781,197 @@ a, button {
   }
 }
 
+/* ── THE MOBILE WORKSTATION — a stack, not a product shot ──────
+   Six slabs in one shared perspective, stacked in dependency order
+   with the Android host at the bottom. The selected slab comes
+   forward and brightens; the rest stay seated and recede.
+
+   CSS 3D only — same language as the signature, no canvas and no
+   WebGL. Depth per slab comes from `--d` (how deep it sits) and
+   `--lift` (0 or 1, whether it is the selected one), both written by
+   the component. Touch and keyboard select; hover is only a shortcut. */
+
+/* Left-aligned with the shared PageHeading above it; the chapter reads
+   as one column rather than a centred block under a left-set title. */
+.ws-intro {
+  color: rgba(228, 226, 223, 0.62);
+  margin: 0 0 1.6rem;
+}
+
+.ws-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.2rem;
+  align-items: start;
+  width: 100%;
+}
+
+@media (min-width: 900px) {
+  .ws-grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 2rem;
+  }
+}
+
+.ws-stack {
+  list-style: none;
+  margin: 0;
+  padding: 0.6rem 0;
+  perspective: 1100px;
+  perspective-origin: 50% 40%;
+}
+
+.ws-slab-row {
+  display: block;
+  transform-style: preserve-3d;
+}
+
+/* Each slab sits a little further back and a little lower the deeper
+   it is in the stack; the selected one steps toward the viewer. */
+.ws-slab {
+  --slab-z: calc(var(--lift, 0) * 26px - var(--d, 0) * 3px);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: 'index label' 'index runs';
+  gap: 0 0.85rem;
+  width: 100%;
+  padding: 0.62rem 0.9rem;
+  margin: 0 0 0.3rem;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-left: 2px solid rgba(74, 222, 128, calc(0.18 + var(--lift, 0) * 0.62));
+  background: linear-gradient(
+    90deg,
+    rgba(34, 197, 94, calc(0.03 + var(--lift, 0) * 0.07)),
+    rgba(6, 7, 6, 0.5)
+  );
+  color: var(--fg);
+  transform: translate3d(0, 0, var(--slab-z)) rotateX(calc(var(--lift, 0) * -1.5deg));
+  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.42s ease,
+    background-color 0.42s ease, opacity 0.42s ease;
+  opacity: calc(0.62 + var(--lift, 0) * 0.38);
+  cursor: pointer;
+}
+
+.ws-slab--on {
+  border-color: rgba(74, 222, 128, 0.42);
+}
+
+.ws-slab-index {
+  grid-area: index;
+  align-self: center;
+  font-size: 10px;
+  color: rgba(74, 222, 128, 0.7);
+  letter-spacing: 0.1em;
+}
+
+.ws-slab-label {
+  grid-area: label;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ws-slab-runs {
+  grid-area: runs;
+  font-size: 10px;
+  line-height: 1.5;
+  color: rgba(228, 226, 223, 0.45);
+}
+
+.ws-detail {
+  border: 1px solid var(--border);
+  border-top: 2px solid rgba(74, 222, 128, 0.38);
+  background: var(--card);
+  padding: 1.1rem 1.1rem 1.2rem;
+}
+
+.ws-detail-kicker {
+  margin: 0 0 0.45rem;
+  color: rgba(74, 222, 128, 0.75);
+}
+
+.ws-detail-title {
+  margin: 0 0 0.6rem;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.ws-detail-body {
+  margin: 0 0 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: rgba(228, 226, 223, 0.78);
+}
+
+.ws-detail-line {
+  margin: 0 0 0.45rem;
+  font-size: 10px;
+  line-height: 1.6;
+  color: rgba(228, 226, 223, 0.55);
+}
+
+.ws-detail-evidence {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 0.78rem;
+  color: rgba(228, 226, 223, 0.6);
+}
+
+.ws-detail-tag {
+  color: rgba(74, 222, 128, 0.8);
+}
+
+.ws-note {
+  margin: 1.4rem 0 0;
+  font-size: 10px;
+  color: rgba(228, 226, 223, 0.38);
+}
+
+/* Phones: one column, so the stack and its detail have to share a
+   short viewport. The slabs tighten, the detail is pulled up directly
+   under them, and the column keeps enough bottom room that the fixed
+   pager control never sits on top of the last layer. */
+@media (max-width: 899px) {
+  .ws-grid {
+    gap: 0.75rem;
+    padding-bottom: 4.5rem;
+  }
+
+  .ws-stack {
+    padding: 0.2rem 0;
+  }
+
+  .ws-slab {
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.25rem;
+    gap: 0 0.6rem;
+  }
+
+  .ws-slab-label {
+    font-size: 12px;
+  }
+
+  .ws-slab-runs {
+    font-size: 9px;
+  }
+
+  .ws-detail {
+    padding: 0.9rem 0.9rem 1rem;
+  }
+
+  .ws-detail-title {
+    font-size: 1.15rem;
+  }
+}
+
+/* Reduced motion: the stack is a plain list. Selection still works and
+   still reads, it simply does not travel in depth. */
+@media (prefers-reduced-motion: reduce) {
+  .ws-slab {
+    transform: none;
+    transition: none;
+  }
+}
+
 /* ── keyboard focus ── */
 :focus-visible {
   outline: 2px solid rgba(34, 197, 94, 0.8);

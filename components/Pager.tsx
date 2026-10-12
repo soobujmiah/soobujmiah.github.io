@@ -33,6 +33,7 @@ import {
   HeroScene,
   StatsScene,
   AboutScene,
+  WorkstationScene,
   WorkScene,
   ResearchScene,
   ExperienceScene,
@@ -55,12 +56,14 @@ function PageBody({ index, reducedMotion, armed }: { index: number; reducedMotio
     case 2:
       return <AboutScene />;
     case 3:
-      return <WorkScene />;
+      return <WorkstationScene />;
     case 4:
-      return <ResearchScene />;
+      return <WorkScene />;
     case 5:
-      return <ExperienceScene />;
+      return <ResearchScene />;
     case 6:
+      return <ExperienceScene />;
+    case 7:
       return <ContactScene />;
     default:
       return <HeroScene {...props} />;
