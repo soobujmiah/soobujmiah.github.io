@@ -1,7 +1,7 @@
 {
   "schema": "skb.verification-projection/v1",
   "schema_version": 1,
-  "as_of": "2026-10-12T08:01:00Z",
+  "as_of": "2026-10-12T08:35:54Z",
   "summary": {
     "verified": 16,
     "failed": 1,
@@ -15,14 +15,14 @@
       "id": "portfolio.source.public",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-10-12T08:01:00Z",
+      "verified_at": "2026-10-12T08:35:54Z",
       "public": true,
       "evidence": {
         "type": "public_repository",
         "repository": "soobujmiah/soobujmiah.github.io",
         "value": "public",
         "public": true,
-        "at": "2026-10-12T08:01:00Z",
+        "at": "2026-10-12T08:35:54Z",
         "url": "https://github.com/soobujmiah/soobujmiah.github.io"
       }
     },
@@ -30,7 +30,7 @@
       "id": "portfolio.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-10-12T07:55:34Z",
+      "verified_at": "2026-10-12T08:03:36Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -38,9 +38,9 @@
         "repository": "soobujmiah/soobujmiah.github.io",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-10-12T07:55:34Z",
-        "commit": "3b4fcba966cdfd6675de5576e755c11e2b2e02ff",
-        "run_id": "38220366858",
+        "at": "2026-10-12T08:03:36Z",
+        "commit": "8620e1a3f9af352eb7443b71fe53fdde7a4ecbe1",
+        "run_id": "38221039067",
         "public": true,
         "url": "https://github.com/soobujmiah/soobujmiah.github.io/blob/main/.repo/project.yaml"
       }
@@ -49,7 +49,7 @@
       "id": "portfolio.export.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-10-12T07:55:16Z",
+      "verified_at": "2026-10-12T08:03:06Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -57,9 +57,9 @@
         "repository": "soobujmiah/soobujmiah.github.io",
         "field": "test.status",
         "value": "passed",
-        "at": "2026-10-12T07:55:16Z",
-        "commit": "3b4fcba966cdfd6675de5576e755c11e2b2e02ff",
-        "run_id": "38220366858",
+        "at": "2026-10-12T08:03:06Z",
+        "commit": "8620e1a3f9af352eb7443b71fe53fdde7a4ecbe1",
+        "run_id": "38221039067",
         "public": true,
         "url": "https://github.com/soobujmiah/soobujmiah.github.io/blob/main/.repo/project.yaml"
       }
