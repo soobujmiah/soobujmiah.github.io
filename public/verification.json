@@ -1,7 +1,7 @@
 {
   "schema": "skb.verification-projection/v1",
   "schema_version": 1,
-  "as_of": "2026-10-12T09:35:58Z",
+  "as_of": "2026-10-12T16:01:46Z",
   "summary": {
     "verified": 16,
     "failed": 1,
@@ -15,14 +15,14 @@
       "id": "portfolio.source.public",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-10-12T09:35:58Z",
+      "verified_at": "2026-10-12T16:01:46Z",
       "public": true,
       "evidence": {
         "type": "public_repository",
         "repository": "soobujmiah/soobujmiah.github.io",
         "value": "public",
         "public": true,
-        "at": "2026-10-12T09:35:58Z",
+        "at": "2026-10-12T16:01:46Z",
         "url": "https://github.com/soobujmiah/soobujmiah.github.io"
       }
     },
