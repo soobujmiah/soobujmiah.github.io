@@ -2,15 +2,15 @@
 # portfolio -- deterministic status
 
 - Repository: `soobujmiah/soobujmiah.github.io`
-- Generated at: 2026-10-12T01:07:34Z (by `tools/repo_knowledge collect`)
-- Version: `ab81ead`
-- Head: `ab81ead52764657fafcea6cd83835a9f68792079` on `main` (2026-10-12T01:06:19Z)
+- Generated at: 2026-10-12T06:28:18Z (by `tools/repo_knowledge collect`)
+- Version: `79e52a6`
+- Head: `79e52a6172fbe1b378b7258da5f26685714ff7d1` on `main` (2026-10-12T06:26:42Z)
 
 ## Build / test
 
-- Build: **failed** (run `38190587462`)
-- Test: **unknown** -- Build and Deploy: Validate static export, deep links and budget
-- Last successful build: `b62d3dbc9cb253b18e93fd759d11652b1e89e2ef` at 2026-10-12T00:54:03Z
+- Build: **passed** (run `38212548723`)
+- Test: **passed** -- Build and Deploy: Validate static export, deep links and budget
+- Last successful build: `79e52a6172fbe1b378b7258da5f26685714ff7d1` at 2026-10-12T06:28:18Z
 - Last failed build: `ab81ead52764657fafcea6cd83835a9f68792079` at 2026-10-12T01:07:34Z
 
 ## Phases
@@ -20,4 +20,4 @@
 
 - Status: ok
 - Source: ci
-- Last synced at: 2026-10-12T01:07:34Z
+- Last synced at: 2026-10-12T06:28:18Z
