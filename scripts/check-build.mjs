@@ -29,9 +29,20 @@ const ORIGIN = 'https://soobujmiah.github.io';
 
 /* Kept in sync with app/sections.ts by construction: the route list is
    the source, and this asserts the built artifact matches it. */
-const SECTIONS = [
-  'home', 'presence', 'about', 'work', 'research', 'experience', 'contact',
-];
+/* Read from the section registry rather than duplicated here. This list
+   was a second source of truth: adding a chapter left the gate checking
+   the old order, so it demanded `data-shot` indices that had shifted and
+   expected a sitemap two URLs short — while never checking the new
+   chapter at all. The registry is `app/sections.ts`; this gate runs on
+   plain Node, so it reads the static array instead of compiling it. */
+const SECTIONS = (() => {
+  const src = readFileSync(join(ROOT, 'app', 'sections.ts'), 'utf8');
+  const m = src.match(/export const SECTION_IDS = \[([\s\S]*?)\] as const;/);
+  if (!m) throw new Error('check-build: could not read SECTION_IDS from app/sections.ts');
+  const ids = [...m[1].matchAll(/'([a-z-]+)'/g)].map((x) => x[1]);
+  if (!ids.length) throw new Error('check-build: SECTION_IDS parsed as empty');
+  return ids;
+})();
 const LEGACY_ROUTES = [['stack', 'presence'], ['open-source', 'work']];
 /* The service-intent layer (app/services.ts): hub + eight pages. Kept
    separate from SECTIONS on purpose — these are documents outside the
@@ -510,9 +521,9 @@ for node in urls:
         raise SystemExit("loc must match its own English or Bengali alternate for " + loc)
     for href in alts.values():
         if href not in locs: raise SystemExit("alternate URL absent from sitemap loc entries: " + href)
-if len(locs) != 34:
-    raise SystemExit("expected exactly 34 primary URLs (17 routes in EN + BN), got " + str(len(locs)))
-print("  ok   sitemap.xml is well-formed XML; 34 unique URLs, valid lastmod and reciprocal en/bn/x-default alternates")`;
+if len(locs) != ${EXPECTED_CANONICAL_ROUTES}:
+    raise SystemExit("expected exactly ${EXPECTED_CANONICAL_ROUTES} primary URLs (${EXPECTED_CANONICAL_ROUTES / 2} routes in EN + BN), got " + str(len(locs)))
+print("  ok   sitemap.xml is well-formed XML; ${EXPECTED_CANONICAL_ROUTES} unique URLs, valid lastmod and reciprocal en/bn/x-default alternates")`;
   const parsed = spawnSync('python3', ['-c', xmlCheck, join(OUT, 'sitemap.xml')], { encoding: 'utf8' });
   if (parsed.status !== 0) fail(`sitemap.xml strict XML/alternate validation failed: ${(parsed.stderr || parsed.stdout).trim()}`);
   else process.stdout.write(parsed.stdout);
