@@ -23,6 +23,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { SiliconWorld } from '@/components/SiliconWorld';
 import type { CinematicHandle } from '@/components/cinematic-scene';
+import { useLang } from '@/app/language';
 
 function webglSupported(): boolean {
   try {
@@ -37,6 +38,7 @@ function webglSupported(): boolean {
 }
 
 export function CinematicWorld({ sceneIndex, reducedMotion }: { sceneIndex: number; reducedMotion: boolean }) {
+  const { lang } = useLang();
   const [mode, setMode] = useState<'probing' | 'webgl' | 'fallback'>('probing');
   const hostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -45,6 +47,19 @@ export function CinematicWorld({ sceneIndex, reducedMotion }: { sceneIndex: numb
   indexRef.current = sceneIndex;
   const reducedRef = useRef(reducedMotion);
   reducedRef.current = reducedMotion;
+  const langRef = useRef(lang);
+  langRef.current = lang;
+
+  useEffect(() => {
+    document.documentElement.dataset.sceneMode = mode;
+    return () => { delete document.documentElement.dataset.sceneMode; };
+  }, [mode]);
+
+  useEffect(() => {
+    const onProject = (event: Event) => handleRef.current?.setProject((event as CustomEvent<number>).detail);
+    window.addEventListener('portfolio-project', onProject);
+    return () => window.removeEventListener('portfolio-project', onProject);
+  }, []);
 
   /* Probe, then lazy-load three.js only when it can actually run. */
   useEffect(() => {
@@ -63,6 +78,7 @@ export function CinematicWorld({ sceneIndex, reducedMotion }: { sceneIndex: numb
           chapter: indexRef.current,
           reducedMotion: reducedRef.current,
           coarse,
+          lang: langRef.current,
           onContextLost: () => {
             handleRef.current?.dispose();
             handleRef.current = null;
@@ -91,6 +107,10 @@ export function CinematicWorld({ sceneIndex, reducedMotion }: { sceneIndex: numb
   useEffect(() => {
     handleRef.current?.setReducedMotion(reducedMotion);
   }, [reducedMotion, mode]);
+
+  useEffect(() => {
+    handleRef.current?.setLanguage(lang);
+  }, [lang, mode]);
 
   /* Pause while the tab is hidden; resume on return. */
   useEffect(() => {

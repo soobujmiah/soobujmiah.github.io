@@ -1,16 +1,16 @@
 /* ═══════════════════════════════════════════════════════════════
    CINEMATIC SCENE — the real-time WebGL environment.
 
-   One coherent place: a nocturnal silicon wafer under a green signal
-   horizon, one district per chapter (see docs/CINEMATIC_3D.md §4 and
-   the shot table in app/cinematic.ts). The camera never cuts — it
+   One coherent route through phone-first computing systems, with one
+   purposeful instrument per chapter (docs/SPATIAL_PORTFOLIO.md and
+   app/cinematic.ts). The camera never cuts — it
    flies on critically damped springs, inheriting velocity when the
    chapter changes mid-flight.
 
    This module is imported dynamically by CinematicWorld AFTER a
    successful WebGL probe, so `three` lives in its own lazy chunk and
    no route pays for it at parse time. Everything rendered here is
-   procedural: no downloaded models, no textures from disk, no stock
+   procedural: no downloaded models, no bitmap textures, no stock
    media. The extruded name uses the MIT helvetiker typeface served
    from /fonts/ and the scene renders fine if that fetch fails.
 
@@ -44,6 +44,8 @@ import {
 
 export type CinematicHandle = {
   setChapter(index: number): void;
+  setProject(index: number): void;
+  setLanguage(lang: 'en' | 'bn'): void;
   setReducedMotion(reduced: boolean): void;
   setPointer(nx: number, ny: number): void;
   setVisible(visible: boolean): void;
@@ -52,76 +54,13 @@ export type CinematicHandle = {
 };
 
 const COLOR = {
-  bg: 0x050507,
-  slab: 0x26382e,
   slabLit: 0x355540,
-  fg: 0xe9f4e9,
   accent: 0x22c55e,
-  signal: 0x10b981,
 } as const;
-
-/* Deterministic variation — same skyline on every visit. */
-function hash01(n: number): number {
-  const s = Math.sin(n * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-}
-
-function gridTexture(): THREE.CanvasTexture {
-  const c = document.createElement('canvas');
-  c.width = 256;
-  c.height = 256;
-  const g = c.getContext('2d');
-  if (g) {
-    g.fillStyle = '#25392b';
-    g.fillRect(0, 0, 256, 256);
-    g.strokeStyle = 'rgba(168,247,184,0.24)';
-    g.lineWidth = 1;
-    g.beginPath();
-    g.moveTo(0.5, 0);
-    g.lineTo(0.5, 256);
-    g.moveTo(0, 0.5);
-    g.lineTo(256, 0.5);
-    g.stroke();
-    g.strokeStyle = 'rgba(168,247,184,0.10)';
-    for (const q of [64, 128, 192]) {
-      g.beginPath();
-      g.moveTo(q + 0.5, 0);
-      g.lineTo(q + 0.5, 256);
-      g.moveTo(0, q + 0.5);
-      g.lineTo(256, q + 0.5);
-      g.stroke();
-    }
-  }
-  const tex = new THREE.CanvasTexture(c);
-  tex.wrapS = THREE.RepeatWrapping;
-  tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(120, 120);
-  return tex;
-}
-
-function glowSprite(): THREE.Sprite {
-  const c = document.createElement('canvas');
-  c.width = 128;
-  c.height = 128;
-  const g = c.getContext('2d');
-  if (g) {
-    const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-    grad.addColorStop(0, 'rgba(74,222,128,0.55)');
-    grad.addColorStop(0.4, 'rgba(34,197,94,0.18)');
-    grad.addColorStop(1, 'rgba(34,197,94,0)');
-    g.fillStyle = grad;
-    g.fillRect(0, 0, 128, 128);
-  }
-  const tex = new THREE.CanvasTexture(c);
-  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, fog: false });
-  const sprite = new THREE.Sprite(mat);
-  sprite.scale.set(260, 90, 1);
-  return sprite;
-}
 
 export function createCinematicScene(
   canvas: HTMLCanvasElement,
-  opts: { chapter: number; reducedMotion: boolean; coarse: boolean; onContextLost?: () => void }
+  opts: { chapter: number; reducedMotion: boolean; coarse: boolean; lang: 'en' | 'bn'; onContextLost?: () => void }
 ): CinematicHandle {
   const renderer = new THREE.WebGLRenderer({
     canvas,
@@ -131,41 +70,34 @@ export function createCinematicScene(
   });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.55;
+  renderer.toneMappingExposure = 1.85;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(COLOR.bg);
-  scene.fog = new THREE.FogExp2(0x08130d, 0.0023);
+  scene.background = new THREE.Color(0x07100d);
+  scene.fog = new THREE.FogExp2(0x07100d, 0.0018);
 
   const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 700);
 
   /* ── Lighting — a night exterior: cool hemisphere, one green key. ── */
-  scene.add(new THREE.HemisphereLight(0xc9f9d4, 0x183525, 2.25));
-  const key = new THREE.DirectionalLight(0xe3ffe9, 2.15);
+  scene.add(new THREE.HemisphereLight(0xe8ffeb, 0x29583b, 3.1));
+  const key = new THREE.DirectionalLight(0xf3fff2, 3.3);
   key.position.set(60, 90, 30);
   scene.add(key);
-  const rim = new THREE.PointLight(COLOR.accent, 160, 90, 2);
+  const rim = new THREE.PointLight(COLOR.accent, 230, 90, 2);
   rim.position.set(0, 7, -9);
   scene.add(rim);
 
   /* ── The wafer ── */
-  const groundTex = gridTexture();
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(1400, 1400),
-    new THREE.MeshStandardMaterial({ color: 0xffffff, map: groundTex, roughness: 0.8, metalness: 0.14 })
+    new THREE.MeshStandardMaterial({ color: 0x11241a, roughness: 0.96, metalness: 0.08 })
   );
   ground.rotation.x = -Math.PI / 2;
   ground.position.y = -0.01;
   scene.add(ground);
 
-  const horizon = glowSprite();
-  horizon.position.set(0, 6, -520);
-  scene.add(horizon);
-
   /* ── Shared materials (disposed once at the end) ── */
-  const slabMat = new THREE.MeshStandardMaterial({ color: COLOR.slab, roughness: 0.9, metalness: 0.12 });
   const litMat = new THREE.MeshStandardMaterial({ color: COLOR.slabLit, roughness: 0.75, metalness: 0.2 });
-  const fgMat = new THREE.MeshStandardMaterial({ color: 0xd3e8d6, roughness: 0.42, metalness: 0.25 });
   const accentMats: THREE.MeshStandardMaterial[] = [];
   const accentMat = (intensity: number) => {
     const m = new THREE.MeshStandardMaterial({
@@ -177,9 +109,7 @@ export function createCinematicScene(
     accentMats.push(m);
     return m;
   };
-  const wireMat = new THREE.MeshStandardMaterial({ color: 0x4c9564, emissive: 0x136530, emissiveIntensity: 0.25, roughness: 0.52, metalness: 0.25 });
-
-  const disposables: Array<{ dispose(): void }> = [groundTex, slabMat, litMat, fgMat, wireMat];
+  const disposables: Array<{ dispose(): void }> = [ground.geometry, ground.material, litMat];
   const geo = <T extends THREE.BufferGeometry>(g: T): T => {
     disposables.push(g);
     return g;
@@ -193,188 +123,182 @@ export function createCinematicScene(
     return obj;
   };
 
-  /* ── 0 · Identity plaza — plinth now; extruded name arrives async.
-         Set back from the district origin so the monument reads in the
-         lower third of the frame, under the DOM hero, never against it. ── */
-  const PLAZA_Z = -10;
-  const plinth = new THREE.Mesh(geo(new THREE.BoxGeometry(14, 0.6, 6)), litMat);
-  plinth.position.set(0, 0.3, PLAZA_Z);
-  at(0, plinth);
-  const nameEdge = new THREE.Mesh(geo(new THREE.BoxGeometry(14, 0.08, 0.08)), accentMat(1.2));
-  nameEdge.position.set(0, 0.64, PLAZA_Z + 3.02);
-  at(0, nameEdge);
+  /* Eight sets on one manufacturing spine. Every solid has a role: device,
+     software layer, project instrument, test fixture or timeline marker. */
+  const chassisMat = new THREE.MeshStandardMaterial({ color: 0x365543, roughness: .52, metalness: .62 });
+  const glassMat = new THREE.MeshStandardMaterial({ color: 0x0b271c, roughness: .24, metalness: .44 });
+  const porcelainMat = new THREE.MeshStandardMaterial({ color: 0xd9e8d9, roughness: .35, metalness: .18 });
+  const amberMat = new THREE.MeshStandardMaterial({ color: 0x5c4b2d, emissive: 0x976c22, emissiveIntensity: .28, roughness: .65 });
+  disposables.push(chassisMat, glassMat, porcelainMat, amberMat);
+  const signalMat = accentMat(.95);
+  const box = (w: number, h: number, d: number, mat: THREE.Material, x: number, y: number, z: number, parent: THREE.Object3D) => {
+    const mesh = new THREE.Mesh(geo(new THREE.BoxGeometry(w, h, d)), mat);
+    mesh.position.set(x, y, z); parent.add(mesh); return mesh;
+  };
+  const group = (i: number) => { const g = new THREE.Group(); at(i, g); return g; };
+  const stages = DISTRICTS.map((_, i) => {
+    const g = group(i);
+    box(23, .55, 17, chassisMat, 0, .275, 0, g);
+    box(22.4, .065, .07, signalMat, 0, .59, 8.2, g);
+    box(.07, .065, 16.5, litMat, -11.15, .59, 0, g);
+    const light = new THREE.PointLight(0x7df4a3, 65, 35, 2);
+    light.position.set(1, 13, 4); g.add(light);
+    return g;
+  });
+  /* A copper-green route joins the stations; it follows the real narrative
+     from phone hardware through tools, products, experiments and delivery. */
+  for (let i = 0; i < DISTRICTS.length - 1; i += 1) {
+    const a = DISTRICTS[i], b = DISTRICTS[i + 1];
+    const start = new THREE.Vector3(a.x, .04, a.z - 8.5);
+    const end = new THREE.Vector3(b.x, .04, b.z + 8.5);
+    const path = new THREE.Vector3().subVectors(end, start);
+    const beam = new THREE.Mesh(geo(new THREE.BoxGeometry(.18, .05, path.length())), signalMat);
+    beam.position.copy(start).add(end).multiplyScalar(.5);
+    beam.rotation.y = Math.atan2(path.x, path.z);
+    scene.add(beam);
+  }
 
+  /* 0: an engraved identity block with real 3D lettering and a machined
+     phone spine behind it. Bengali uses correctly shaped DOM lettering. */
+  const home = stages[0];
+  box(18, 1.3, 7.5, glassMat, 0, 1.2, -9, home);
+  box(17.5, .1, .1, signalMat, 0, 1.93, -5.28, home);
+  box(6.2, 10.6, .55, chassisMat, 7.8, 5.95, -13.8, home);
+  box(5.4, 9.4, .07, glassMat, 7.8, 5.95, -13.48, home);
+  box(3.3, .34, .1, signalMat, 7.8, 7.1, -13.41, home);
+  box(2.3, 2.3, .12, porcelainMat, 7.8, 5.3, -13.38, home);
   let nameMesh: THREE.Mesh | null = null;
-  new FontLoader().load(
-    '/fonts/helvetiker_bold.typeface.json',
-    (font) => {
-      if (disposed) return;
-      const tg = new TextGeometry('SOBUJ MIAH', {
-        font,
-        size: 1.9,
-        depth: 0.55,
-        curveSegments: 6,
-        bevelEnabled: true,
-        bevelThickness: 0.04,
-        bevelSize: 0.03,
-        bevelSegments: 2,
-      });
-      tg.computeBoundingBox();
-      const bb = tg.boundingBox;
-      const w = bb ? bb.max.x - bb.min.x : 0;
-      const mesh = new THREE.Mesh(geo(tg), fgMat);
-      mesh.position.set(-w / 2, 1.05, PLAZA_Z - 0.4);
-      const d0 = DISTRICTS[0];
-      mesh.position.x += d0.x;
-      mesh.position.z += d0.z;
-      scene.add(mesh);
-      nameMesh = mesh;
-      requestRender();
-    },
-    undefined,
-    () => {
-      /* Typeface fetch failed — the plaza still reads; the DOM carries the name. */
-    }
-  );
+  new FontLoader().load('/fonts/helvetiker_bold.typeface.json', font => {
+    if (disposed) return;
+    const tg = new TextGeometry('SOBUJ MIAH', { font, size: 2.15, depth: .55, curveSegments: 8, bevelEnabled: true, bevelThickness: .05, bevelSize: .045, bevelSegments: 2 });
+    tg.computeBoundingBox();
+    const w = tg.boundingBox ? tg.boundingBox.max.x - tg.boundingBox.min.x : 0;
+    const mesh = new THREE.Mesh(geo(tg), porcelainMat);
+    mesh.position.set(-w / 2 - 2.6, 2.15, -7.7);
+    home.add(mesh); nameMesh = mesh; requestRender();
+  }, undefined, () => { /* DOM name remains the accessible fallback. */ });
 
-  /* ── 1 · Measurement field — instanced columns ── */
-  const colGeo = geo(new THREE.BoxGeometry(1.4, 1, 1.4));
-  const COLS = 9 * 5;
-  const columns = new THREE.InstancedMesh(colGeo, slabMat, COLS);
-  {
-    const m = new THREE.Matrix4();
-    let n = 0;
-    for (let ix = 0; ix < 9; ix += 1) {
-      for (let iz = 0; iz < 5; iz += 1) {
-        const h = 1.2 + hash01(n * 7 + 1) * 5.4;
-        m.makeScale(1, h, 1);
-        m.setPosition((ix - 4) * 2.6, h / 2, (iz - 2) * 2.6);
-        columns.setMatrixAt(n, m);
-        n += 1;
-      }
-    }
-    columns.instanceMatrix.needsUpdate = true;
-  }
-  at(1, columns);
-  const colCap = new THREE.Mesh(geo(new THREE.BoxGeometry(1.5, 0.1, 1.5)), accentMat(0.8));
-  colCap.position.set(-2.6 * 2, 1.2 + hash01(7 * 11 + 1) * 5.4 + 0.08, 0);
-  at(1, colCap);
+  /* 1: device-to-runtime circuit. The tall phone is the substrate; three
+     illuminated processor bays visualize local computation, tooling and output. */
+  const compute = stages[1];
+  box(8.3, 13.7, .8, chassisMat, 0, 7.35, -1.4, compute);
+  box(7.4, 12.8, .11, glassMat, 0, 7.35, -.94, compute);
+  const nodes = [[0, 9.7], [-2, 6.7], [2, 4.5]];
+  nodes.forEach(([x, y], i) => {
+    box(i === 0 ? 3.5 : 2.7, i === 0 ? 2.8 : 2.4, .3, i === 0 ? porcelainMat : litMat, x, y, -.74, compute);
+    box(i === 0 ? 2.7 : 1.9, .13, .32, signalMat, x, y - .85, -.54, compute);
+  });
+  box(.12, 2, .09, signalMat, 0, 7.6, -.49, compute);
+  box(2, .12, .09, signalMat, -1, 5.8, -.49, compute);
+  box(2, .12, .09, signalMat, 1, 5.8, -.49, compute);
+  box(7.5, .55, 4.7, litMat, 0, .94, -1.4, compute);
 
-  /* ── 2 · Quiet quad — concentric rings and low slabs ── */
-  for (let r = 0; r < 3; r += 1) {
-    const ring = new THREE.Mesh(geo(new THREE.TorusGeometry(2.6 + r * 2.2, 0.06, 8, 72)), r === 1 ? accentMat(0.8) : litMat);
-    ring.rotation.x = -Math.PI / 2;
-    ring.position.y = 0.06;
-    at(2, ring);
-  }
-  const quadSlab = new THREE.Mesh(geo(new THREE.BoxGeometry(3.2, 1.1, 3.2)), litMat);
-  quadSlab.position.set(0, 0.55, 0);
-  at(2, quadSlab);
+  /* 2: a maker's working surface. Stacked notebooks stand for the method:
+     investigate, document, validate. No anonymous architectural filler. */
+  const about = stages[2];
+  box(15, .55, 9, glassMat, 0, 1.12, -1, about);
+  [0, 1, 2].forEach((i) => {
+    const leaf = box(9.8, .27, 6.6, i === 1 ? porcelainMat : litMat, -1.1 + i * .55, 1.62 + i * .55, -.2 - i * .32, about);
+    leaf.rotation.y = (i - 1) * .065;
+    box(7.6, .045, .08, signalMat, -1.1 + i * .55, 1.79 + i * .55, 1.7 - i * .32, about);
+  });
+  box(2.4, 5.7, 2.4, chassisMat, 7.6, 3.98, -2.1, about);
+  box(1.2, 1.2, .1, signalMat, 7.6, 5.5, -.85, about);
 
-  /* ── 3 · The layer tower — the workstation's exploded stack.
-         Six real layers in real dependency order (bottom → top):
-         Android host, Termux, PRoot Debian, ARM64 toolchain,
-         ADB validation, local AI runtime. Separation follows the
-         chapter's activation through stackLayerY(). ── */
-  const stackMeshes: THREE.Mesh[] = [];
-  const stackGeo = geo(new THREE.BoxGeometry(7.4, STACK.thickness, 5.2));
+  /* 3: the actual six-layer Android workstation. Each visible stratum has
+     a side bus and a distinct lip so its dependency order can be read. */
+  const stack = stages[3];
+  const stackMeshes: THREE.Group[] = [];
   for (let i = 0; i < STACK_LAYERS; i += 1) {
-    const topLayer = i === STACK_LAYERS - 1;
-    const mesh = new THREE.Mesh(stackGeo, topLayer ? accentMat(0.4) : i % 2 ? litMat : slabMat);
-    mesh.position.y = stackLayerY(i, 0);
-    at(3, mesh);
-    stackMeshes.push(mesh);
+    const layer = new THREE.Group(); stack.add(layer);
+    box(10.5, STACK.thickness, 6.3, i === 0 ? chassisMat : i === 5 ? porcelainMat : i % 2 ? litMat : glassMat, 0, 0, 0, layer);
+    box(10.1, .08, .1, i === 5 ? chassisMat : signalMat, 0, .52, 3.18, layer);
+    box(.35, .42, .14, signalMat, -4.55 + i * 1.75, .06, 3.2, layer);
+    layer.position.y = stackLayerY(i, 0) + .55;
+    stackMeshes.push(layer);
   }
+  box(1.2, 14.4, 1.2, chassisMat, -7.1, 7.75, -1.1, stack);
+  box(.22, 12.8, .22, signalMat, -7.1, 7.75, -.4, stack);
 
-  /* ── 4 · Three monuments — LAI, GGEN, SKB ── */
-  const monumentGroup = new THREE.Group();
-  const laiCore = new THREE.Mesh(geo(new THREE.TorusGeometry(0.9, 0.16, 10, 40)), accentMat(1.4));
-  {
-    const lai = MONUMENTS[0];
-    const monolith = new THREE.Mesh(geo(new THREE.BoxGeometry(3, 8.4, 1.8)), slabMat);
-    monolith.position.set(lai.dx, 4.2, lai.dz);
-    monumentGroup.add(monolith);
-    laiCore.position.set(lai.dx, 4.2, lai.dz + 0.95);
-    monumentGroup.add(laiCore);
-
-    const ggen = MONUMENTS[1];
-    for (let i = 0; i < 5; i += 1) {
-      const sheet = new THREE.Mesh(geo(new THREE.BoxGeometry(4.6, 0.22, 3.4)), i === 2 ? accentMat(0.45) : litMat);
-      sheet.position.set(ggen.dx + (hash01(i * 3 + 2) - 0.5) * 1.1, 1 + i * 1.05, ggen.dz + (hash01(i * 5 + 4) - 0.5) * 0.9);
-      sheet.rotation.y = (hash01(i * 9 + 6) - 0.5) * 0.5;
-      monumentGroup.add(sheet);
+  /* 4: project instruments. Ternux is a desktop on phone, ADT is a build
+     gantry, LAI is a local inference module, GGEN is layered sheets, SKB is
+     a linked document index. All five remain identifiable in one shot. */
+  const work = stages[4];
+  const projects: THREE.Group[] = [];
+  const projectX = MONUMENTS.map(m => m.dx);
+  projectX.forEach((x, i) => {
+    const g = new THREE.Group(); g.position.x = x; work.add(g); projects.push(g);
+    box(3.7, .35, 4.8, glassMat, 0, .78, 0, g);
+    box(3.4, .08, .08, signalMat, 0, 1, 2.3, g);
+    if (i === 0) { // Ternux: screen, window and terminal planes
+      box(3, 4.9, .34, chassisMat, 0, 3.5, -.6, g);
+      box(2.5, 4.1, .08, glassMat, 0, 3.5, -.37, g);
+      box(1.9, 1.2, .1, signalMat, -.15, 4.1, -.28, g);
+      box(1.5, .12, .12, porcelainMat, 0, 2.45, -.27, g);
+    } else if (i === 1) { // ADT: build pipeline from source to signed APK
+      for (let j = 0; j < 3; j++) box(2.5 - j * .3, 1.2, 2.8 - j * .25, j === 2 ? porcelainMat : litMat, 0, 1.9 + j * 1.55, 0, g);
+      box(.16, 4.3, .16, signalMat, -1.5, 3.2, 0, g);
+    } else if (i === 2) { // LAI: local processor and sequential token output
+      box(3, 5.2, 2.2, chassisMat, 0, 3.7, 0, g);
+      box(2.3, 2.3, .15, porcelainMat, 0, 4.1, 1.16, g);
+      for (let j = 0; j < 4; j++) box(.3, .3, .15, signalMat, -1 + j * .65, 2.25, 1.16, g);
+    } else if (i === 3) { // GGEN: document layers and one linked text flow
+      for (let j = 0; j < 4; j++) { const sheet = box(2.75, .12, 3.5, j === 2 ? porcelainMat : litMat, 0, 1.7 + j * 1.08, -.5 + j * .16, g); sheet.rotation.z = (j - 1.5) * .035; }
+      box(1.4, .12, .12, signalMat, 0, 5.18, 1.35, g);
+    } else { // SKB: canonical documents with explicit cross-links
+      for (let j = 0; j < 3; j++) box(2.8, 1.15, .43, j === 1 ? porcelainMat : litMat, 0, 2 + j * 1.5, j * -.35, g);
+      box(.15, 3.1, .15, signalMat, 1.55, 3.5, .45, g);
     }
-
-    const skb = MONUMENTS[2];
-    const cell = geo(new THREE.BoxGeometry(0.72, 0.72, 0.72));
-    const lattice = new THREE.InstancedMesh(cell, litMat, 27);
-    const m = new THREE.Matrix4();
-    let n = 0;
-    for (let x = -1; x <= 1; x += 1)
-      for (let y = -1; y <= 1; y += 1)
-        for (let z = -1; z <= 1; z += 1) {
-          m.makeScale(1, 1, 1);
-          m.setPosition(skb.dx + x * 1.2, 3.2 + y * 1.2, skb.dz + z * 1.2);
-          lattice.setMatrixAt(n, m);
-          n += 1;
-        }
-    lattice.instanceMatrix.needsUpdate = true;
-    monumentGroup.add(lattice);
-    const kernel = new THREE.Mesh(geo(new THREE.BoxGeometry(0.5, 0.5, 0.5)), accentMat(1.5));
-    kernel.position.set(skb.dx, 3.2, skb.dz);
-    monumentGroup.add(kernel);
-  }
-  at(4, monumentGroup);
-
-  /* ── 5 · Research field — floating wireframe polyhedra ── */
-  const polys: THREE.Mesh[] = [];
-  const polyGeos = [new THREE.IcosahedronGeometry(1.5), new THREE.OctahedronGeometry(1.3), new THREE.TetrahedronGeometry(1.4)];
-  polyGeos.forEach((g, i) => {
-    const p = new THREE.Mesh(geo(g), wireMat);
-    p.position.set((i - 1) * 4.4, 4.4 + hash01(i * 13 + 3) * 2.2, (hash01(i * 17 + 5) - 0.5) * 4);
-    at(5, p);
-    polys.push(p);
+  });
+  new FontLoader().load('/fonts/helvetiker_bold.typeface.json', font => {
+    if (disposed) return;
+    MONUMENTS.forEach((station, i) => {
+      const label = station.id.toUpperCase();
+      const tg = new TextGeometry(label, { font, size: .52, depth: .08, curveSegments: 4 });
+      tg.computeBoundingBox();
+      const w = tg.boundingBox ? tg.boundingBox.max.x - tg.boundingBox.min.x : 0;
+      const mesh = new THREE.Mesh(geo(tg), porcelainMat);
+      mesh.position.set(-w / 2, 1.12, 2.05);
+      projects[i].add(mesh);
+    });
+    requestRender();
   });
 
-  /* ── 6 · The year rail — a long bridge of markers ── */
-  const rail = new THREE.Mesh(geo(new THREE.BoxGeometry(26, 0.5, 2.4)), litMat);
-  rail.position.y = 0.25;
-  rail.rotation.y = -0.35;
-  at(6, rail);
-  const postGeo = geo(new THREE.BoxGeometry(0.3, 1, 0.3));
-  for (let i = 0; i < 8; i += 1) {
-    const h = 1 + hash01(i * 23 + 9) * 2.4;
-    const post = new THREE.Mesh(postGeo, i === 7 ? accentMat(1.1) : slabMat);
-    post.scale.y = h;
-    const t = (i - 3.5) * 3.2;
-    post.position.set(Math.cos(-0.35) * t, 0.5 + h / 2, Math.sin(-0.35) * t * -1 + 0.9);
-    at(6, post);
-  }
+  /* 5: qualification bench. A bright CPU module is validated; NPU and
+     GPU fixtures remain warm amber, consistent with the actual evidence. */
+  const research = stages[5];
+  [-6, 0, 6].forEach((x, i) => {
+    box(4.9, .55, 7.2, glassMat, x, 1, 0, research);
+    box(3.8, 2.5, 3.8, i === 0 ? porcelainMat : chassisMat, x, 2.53, 0, research);
+    box(3.2, .12, .15, i === 0 ? signalMat : amberMat, x, 3.86, 1.91, research);
+    for (let j = 0; j < 4; j++) box(.13, .09, .8, i === 0 ? signalMat : amberMat, x - 1.2 + j * .8, 1.35, 3.1, research);
+  });
 
-  /* ── 7 · The overlook — a far beacon the closing shot studies ── */
-  const beacon = new THREE.Mesh(geo(new THREE.BoxGeometry(0.8, 14, 0.8)), accentMat(1.8));
-  beacon.position.y = 7;
-  at(7, beacon);
+  /* 6: eight dated steps. Earlier practical work and later engineering
+     occupy the same physical route; the dates live in the field record. */
+  const history = stages[6];
+  box(19.5, .45, 2, glassMat, 0, .85, 0, history);
+  const historyHeights = [2.3, 2.7, 2.2, 3.2, 4.1, 5.5, 6.5, 7.3];
+  historyHeights.forEach((h, i) => {
+    const x = -8.4 + i * 2.4;
+    box(1.25, h, 1.2, i === 7 ? porcelainMat : litMat, x, 1.1 + h / 2, 0, history);
+    box(1.3, .09, 1.25, signalMat, x, 1.15 + h, 0, history);
+  });
 
-  /* ── Skyline filler — distant anonymous blocks framing the path ── */
-  {
-    const filler = new THREE.InstancedMesh(colGeo, slabMat, 160);
-    const m = new THREE.Matrix4();
-    for (let i = 0; i < 160; i += 1) {
-      const side = i % 2 ? 1 : -1;
-      const z = -20 - hash01(i * 3 + 7) * 250;
-      const x = side * (46 + hash01(i * 5 + 11) * 70);
-      const h = 2 + hash01(i * 7 + 13) * 14;
-      m.makeScale(2 + hash01(i * 11 + 17) * 3, h, 2 + hash01(i * 13 + 19) * 3);
-      m.setPosition(x, h / 2, z);
-      filler.setMatrixAt(i, m);
-    }
-    filler.instanceMatrix.needsUpdate = true;
-    scene.add(filler);
-  }
-
+  /* 7: an output terminal, not an abstract beacon. Its two lit channels
+     terminate at the actual Telegram and e-mail links in the caption. */
+  const contact = stages[7];
+  box(11, 8.6, 1, chassisMat, 0, 4.9, -2, contact);
+  box(9.7, 7.2, .12, glassMat, 0, 4.9, -1.4, contact);
+  [-1.7, 1.7].forEach(x => {
+    box(2.5, 3.4, .2, porcelainMat, x, 5.1, -1.3, contact);
+    box(2.15, .12, .22, signalMat, x, 3.95, -1.16, contact);
+  });
+  box(10.6, .1, .1, signalMat, 0, 9.28, -1.42, contact);
   /* ── Camera state — critically damped flight + pointer orbit ── */
   let chapter = Math.max(0, Math.min(SHOTS.length - 1, opts.chapter));
+  let lang = opts.lang;
+  let projectIndex = 0;
   let reduced = opts.reducedMotion;
   const pos: DampedVec3 = makeDamped(SHOTS[chapter].position);
   const look: DampedVec3 = makeDamped(SHOTS[chapter].target);
@@ -413,23 +337,23 @@ export function createCinematicScene(
     /* Workstation stack separates with its district's activation. */
     const act3 = activations[3].v;
     for (let i = 0; i < stackMeshes.length; i += 1) stackMeshes[i].position.y = stackLayerY(i, act3);
-    /* Monuments brighten when the work chapter is active. */
-    const act4 = activations[4].v;
-    laiCore.scale.setScalar(1 + act4 * 0.12);
     for (const m of accentMats) m.emissiveIntensity = m.userData.base ?? (m.userData.base = m.emissiveIntensity);
-    for (const m of accentMats) m.emissiveIntensity = (m.userData.base as number) * (0.75 + 0.45 * Math.max(act3, act4, activations[chapter].v));
+    for (const m of accentMats) m.emissiveIntensity = (m.userData.base as number) * (0.85 + 0.25 * activations[chapter].v);
+    for (let i = 0; i < projects.length; i += 1) projects[i].scale.setScalar(chapter === 4 && i === projectIndex ? 1.08 : 1);
   }
 
   function composeCamera(dt: number, instant: boolean) {
     const shot = SHOTS[chapter];
+    const subject = chapter === 4 ? { x: shot.target.x + projectX[projectIndex] * .52, y: shot.target.y, z: shot.target.z } : shot.target;
+    const eye = chapter === 4 ? { x: shot.position.x + projectX[projectIndex] * .52, y: shot.position.y, z: shot.position.z } : shot.position;
     if (instant) {
-      pos.value = { ...shot.position };
-      look.value = { ...shot.target };
+      pos.value = { ...eye };
+      look.value = { ...subject };
       pos.velocity = { x: 0, y: 0, z: 0 };
       look.velocity = { x: 0, y: 0, z: 0 };
     } else {
-      dampVec3(pos, shot.position, 1.25, dt);
-      dampVec3(look, shot.target, 1.05, dt);
+      dampVec3(pos, eye, 1.25, dt);
+      dampVec3(look, subject, 1.05, dt);
       const [ox, ovx] = smoothDamp(orbit.x, orbit.tx, orbit.vx, 0.5, dt);
       const [oy, ovy] = smoothDamp(orbit.y, orbit.ty, orbit.vy, 0.5, dt);
       orbit.x = ox;
@@ -448,18 +372,10 @@ export function createCinematicScene(
     camera.lookAt(look.value.x, look.value.y, look.value.z);
   }
 
-  function renderFrame(dt: number, t: number, instant: boolean) {
+  function renderFrame(dt: number, _t: number, instant: boolean) {
     applyActivations(dt, instant);
     composeCamera(dt, instant);
-    if (!instant) {
-      const spin = dt * 0.4;
-      for (let i = 0; i < polys.length; i += 1) {
-        polys[i].rotation.y += spin * (0.5 + i * 0.3);
-        polys[i].rotation.x += spin * 0.23;
-        polys[i].position.y += Math.sin(t * 0.0006 + i * 2.1) * dt * 0.18;
-      }
-      laiCore.rotation.z = t * 0.0005;
-    }
+    if (nameMesh) nameMesh.visible = lang === 'en';
     renderer.render(scene, camera);
   }
 
@@ -515,6 +431,14 @@ export function createCinematicScene(
       chapter = Math.max(0, Math.min(SHOTS.length - 1, index));
       requestRender();
     },
+    setProject(index: number) {
+      projectIndex = Math.max(0, Math.min(3, index));
+      requestRender();
+    },
+    setLanguage(next: 'en' | 'bn') {
+      lang = next;
+      requestRender();
+    },
     setReducedMotion(r: boolean) {
       reduced = r;
       if (reduced && raf) {
@@ -552,8 +476,6 @@ export function createCinematicScene(
       for (const d of disposables) d.dispose();
       for (const m of accentMats) m.dispose();
       if (nameMesh) nameMesh.geometry.dispose();
-      (horizon.material as THREE.SpriteMaterial).map?.dispose();
-      (horizon.material as THREE.SpriteMaterial).dispose();
       renderer.dispose();
     },
   };
