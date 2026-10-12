@@ -144,13 +144,20 @@ try {
     fail(`app/${layoutPath} must import its theme colour from design-tokens.ts rather than hard-coding it`);
   }
 
-  /* ── 4. the environment: one procedural silicon scene ──
+  /* ── 4. the environment: one procedural world, WebGL first ──
      The stock plates/footage, the world map and the particle name were
      retired (docs/CINEMATIC_AUDIT.md). These checks assert the removals
-     stay removed and that the replacement is wired in. */
+     stay removed and that the replacement is wired in.
+
+     2026-10-12: the environment became a real-time WebGL scene
+     (docs/CINEMATIC_3D.md). components/CinematicWorld.tsx returns as a
+     NEW file — a procedural three.js world with zero stock media — so
+     it left the retired list; the stock-media motif checks below still
+     apply to it. SiliconWorld stays as the WebGL-unavailable fallback
+     and keeps its own contract. */
   const tryRead = (rel) => (existsSync(join(ROOT, rel)) ? readFileSync(join(ROOT, rel), 'utf8') : '');
   const removed = [
-    'components/WorldMap.tsx', 'components/CinematicWorld.tsx', 'components/LivingAtmosphere.tsx',
+    'components/WorldMap.tsx', 'components/LivingAtmosphere.tsx',
     'components/SignatureName.tsx', 'components/IdentityClock.tsx', 'public/cinema',
   ];
   for (const rel of removed) {
@@ -167,24 +174,47 @@ try {
     ['cinema-world', 'the retired stock-footage world'],
     ['/cinema/', 'stock media paths'],
   ];
-  for (const rel of ['app/globals.css', 'components/Pager.tsx', 'components/sections.tsx', 'components/ui.tsx']) {
+  for (const rel of ['app/globals.css', 'components/Pager.tsx', 'components/sections.tsx', 'components/ui.tsx', 'components/CinematicWorld.tsx', 'components/cinematic-scene.ts']) {
     const text = tryRead(rel);
     for (const [needle, what] of removedMotifs) {
       if (text.includes(needle)) fail(`${rel} still references ${what} ("${needle}")`);
     }
   }
   const world = tryRead('components/SiliconWorld.tsx');
-  if (!world) fail('components/SiliconWorld.tsx is missing — the site environment');
+  if (!world) fail('components/SiliconWorld.tsx is missing — the WebGL-unavailable fallback environment');
   else {
     if (!/document\.hidden|visibilitychange/.test(world)) fail('SiliconWorld must pause when the tab is hidden');
     if (!/reducedMotion/.test(world)) fail('SiliconWorld must accept a reduced-motion path');
     if (!/Math\.min\(window\.devicePixelRatio/.test(world)) fail('SiliconWorld must cap the device pixel ratio');
     if (!/ResizeObserver/.test(world)) fail('SiliconWorld must redraw at native resolution on resize');
   }
-  if (!/from '@\/components\/SiliconWorld'/.test(tryRead('components/Pager.tsx'))) {
-    fail('components/Pager.tsx must mount SiliconWorld as the page background');
+  /* The primary environment: the WebGL world and its discipline. */
+  const cine = tryRead('components/CinematicWorld.tsx');
+  if (!cine) fail('components/CinematicWorld.tsx is missing — the WebGL environment host');
+  else {
+    if (!/webgl2|webgl/.test(cine)) fail('CinematicWorld must probe for a WebGL context before loading three.js');
+    if (!/import\(['"]@\/components\/cinematic-scene['"]\)/.test(cine)) fail('CinematicWorld must lazy-load the three.js scene module (no route pays for it up front)');
+    if (!/SiliconWorld/.test(cine)) fail('CinematicWorld must fall back to SiliconWorld when WebGL is unavailable');
+    if (!/document\.hidden|visibilitychange/.test(cine)) fail('CinematicWorld must pause when the tab is hidden');
+    if (!/reducedMotion/.test(cine)) fail('CinematicWorld must accept a reduced-motion path');
+    if (!/ResizeObserver/.test(cine)) fail('CinematicWorld must resize at native resolution');
+  }
+  const scene3d = tryRead('components/cinematic-scene.ts');
+  if (!scene3d) fail('components/cinematic-scene.ts is missing — the three.js world');
+  else {
+    if (!/pixelRatioFor3D/.test(scene3d)) fail('cinematic-scene must apply the unit-tested DPR policy (pixelRatioFor3D)');
+    if (!/ratchetScale/.test(scene3d)) fail('cinematic-scene must apply the one-way quality ratchet');
+    if (!/dispose\(\)/.test(scene3d)) fail('cinematic-scene must dispose renderer, geometries and materials on unmount');
+    if (/\.(glb|gltf|hdr|ktx2|webm|mp4|webp|jpe?g|png)['"]/i.test(scene3d)) fail('cinematic-scene must stay fully procedural — no downloaded models, textures or media');
+  }
+  if (!/Math\.min\(window\.devicePixelRatio/.test(tryRead('app/cinematic.ts') + scene3d)) {
+    fail('the 3D environment must cap the device pixel ratio (app/cinematic.ts pixelRatioFor3D)');
+  }
+  if (!/from '@\/components\/CinematicWorld'/.test(tryRead('components/Pager.tsx'))) {
+    fail('components/Pager.tsx must mount CinematicWorld as the page environment');
   }
   if (!/\.silicon-world\s*\{/.test(css)) fail('app/globals.css must style .silicon-world (including its no-JS gradient fallback)');
+  if (!/\.cinematic-world\s*\{/.test(css)) fail('app/globals.css must style .cinematic-world (including its no-JS gradient fallback)');
   const fontsSrc = tryRead('app/site-layout.tsx');
   for (const gone of ['Space_Grotesk', 'Chakra_Petch', 'Anek_Bangla']) {
     if (fontsSrc.includes(gone)) fail(`app/site-layout.tsx still loads ${gone} — the type system is serif + sans + mono`);
@@ -201,5 +231,5 @@ if (failures > 0) {
   process.exit(1);
 }
 console.log(
-  'check-design PASS (design-tokens.ts = DESIGN_SYSTEM.md = globals.css :root = themeColor · environment: procedural silicon scene, no stock media)'
+  'check-design PASS (design-tokens.ts = DESIGN_SYSTEM.md = globals.css :root = themeColor · environment: procedural WebGL world + silicon fallback, no stock media)'
 );

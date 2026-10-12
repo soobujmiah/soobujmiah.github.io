@@ -67,6 +67,7 @@ writeFileSync(
         'app/sections.ts',
         'app/language.tsx',
         'app/silicon.ts',
+        'app/cinematic.ts',
         'app/design-tokens.ts',
         'app/services.ts',
       ],
@@ -415,6 +416,84 @@ console.log('\nSilicon Nocturne — the procedural environment');
   eq('render scale: a 2× 1440p screen drops to 1× (budget below native, never sub-1×)', pixelRatioFor(2560, 1440, 2, 2.6e6), 1);
 }
 
+
+/* ── 3D cinematic logic (app/cinematic.ts) ──────────────────────
+   The WebGL environment's math: the shot table the camera flies,
+   the critically damped flight (no cuts, no overshoot, velocity
+   continuity on retarget), the DPR policy and one-way ratchet, and
+   the workstation exploded stack. Proven here because none of it is
+   visible in a build log. */
+{
+  const cinePath = pick('app/cinematic.js', 'cinematic.js');
+  if (!cinePath) {
+    console.error('check-units FAIL: compiled app/cinematic.ts not found');
+    process.exit(1);
+  }
+  const cine = await import(pathToFileURL(cinePath).href);
+  const { SHOTS, DISTRICTS, MONUMENTS, STACK, STACK_LAYERS, PIXEL_BUDGET, RATCHET } = cine;
+
+  console.log('\n3D cinematic logic — shot table');
+  eq('one district and one shot per chapter', [DISTRICTS.length, SHOTS.length], [SECTION_IDS.length, SECTION_IDS.length]);
+  eq('every shot is finite and the camera never dips under the wafer', SHOTS.every((s) => [s.position, s.target].every((v) => [v.x, v.y, v.z].every(Number.isFinite)) && s.position.y > 0), true);
+  eq('consecutive shots are distinct — every chapter change is a real flight', SHOTS.every((s, i) => i === 0 || Math.hypot(s.position.x - SHOTS[i - 1].position.x, s.position.y - SHOTS[i - 1].position.y, s.position.z - SHOTS[i - 1].position.z) > 5), true);
+  eq('the journey travels forward through the city (z strictly decreasing)', DISTRICTS.every((d, i) => i === 0 || d.z < DISTRICTS[i - 1].z), true);
+  eq('the three monuments are LAI, GGEN and SKB', MONUMENTS.map((m) => m.id), ['lai', 'ggen', 'skb']);
+
+  console.log('\n3D cinematic logic — critically damped flight');
+  {
+    let x = 0;
+    let v = 0;
+    let overshoot = false;
+    for (let i = 0; i < 600; i += 1) {
+      [x, v] = cine.smoothDamp(x, 10, v, 1.2, 1 / 60);
+      if (x > 10 + 1e-4) overshoot = true;
+    }
+    eq('flight converges and settles (600 frames @60fps)', Math.abs(x - 10) < 0.01 && Math.abs(v) < 0.01, true);
+    eq('flight never overshoots its destination', overshoot, false);
+  }
+  {
+    let x = 0;
+    let v = 0;
+    let prev = 0;
+    let maxStep = 0;
+    for (let i = 0; i < 540; i += 1) {
+      const dest = i < 90 ? 10 : -5; // chapter changes mid-flight
+      prev = x;
+      [x, v] = cine.smoothDamp(x, dest, v, 1.2, 1 / 60);
+      maxStep = Math.max(maxStep, Math.abs(x - prev));
+    }
+    eq('retarget mid-flight keeps the camera continuous (no frame jumps > 0.35u)', maxStep < 0.35 && Math.abs(x - -5) < 0.05, true);
+  }
+  {
+    const s = cine.makeDamped({ x: 0, y: 0, z: 0 });
+    for (let i = 0; i < 600; i += 1) cine.dampVec3(s, { x: 3, y: -4, z: 12 }, 1.0, 1 / 60);
+    eq('vector flight converges on every axis', [Math.abs(s.value.x - 3) < 0.01, Math.abs(s.value.y + 4) < 0.01, Math.abs(s.value.z - 12) < 0.01], [true, true, true]);
+  }
+  eq('pointer orbit clamps to its amplitude', cine.orbitOffset(5, -5), { x: cine.ORBIT.x, y: cine.ORBIT.y, z: 0 });
+  eq('portrait compensation: landscape unchanged, narrower = farther, bounded', [cine.portraitCompensation(1.6), cine.portraitCompensation(0.46) > 1.4 && cine.portraitCompensation(0.46) < 1.9, cine.portraitCompensation(0.1)], [1, true, cine.portraitCompensation(0.3)]);
+
+  console.log('\n3D cinematic logic — render quality policy');
+  eq('coarse pointers cap at 1.5× (phone floor, not Redmi headroom)', cine.pixelRatioFor3D(3, true, 390, 844), 1.5);
+  eq('fine pointers cap at 2×, small windows keep native DPR', cine.pixelRatioFor3D(1, false, 800, 600), 1);
+  {
+    const r = cine.pixelRatioFor3D(2, false, 1920, 1080);
+    eq('a 2× 1080p screen is held to the pixel budget (and above the floor)', 1920 * 1080 * r * r <= PIXEL_BUDGET.fine + 1 && r >= 0.75 && r < 2, true);
+  }
+  eq('quality ratchet: fast frames never change the scale', cine.ratchetScale(1, RATCHET.slowMs - 1), 1);
+  eq('quality ratchet: a slow window steps down once, one-way', cine.ratchetScale(1, RATCHET.slowMs + 10), RATCHET.step);
+  eq('quality ratchet: never below its floor', cine.ratchetScale(RATCHET.floor, 100), RATCHET.floor);
+
+  console.log('\n3D cinematic logic — workstation stack & districts');
+  {
+    const closed = Array.from({ length: STACK_LAYERS }, (_, i) => cine.stackLayerY(i, 0));
+    const open = Array.from({ length: STACK_LAYERS }, (_, i) => cine.stackLayerY(i, 1));
+    eq('six layers — the real phone-workstation dependency chain', STACK_LAYERS, 6);
+    eq('closed tower: compact, evenly pitched, bottom layer seated on the wafer', [closed[0], closed.every((y, i) => i === 0 || Math.abs(y - closed[i - 1] - (STACK.thickness + STACK.gapClosed)) < 1e-9)], [STACK.thickness / 2, true]);
+    eq('exploded view: every gap opens to the same air, wider than closed', open.every((y, i) => i === 0 || Math.abs(y - open[i - 1] - (STACK.thickness + STACK.gapOpen)) < 1e-9) && STACK.gapOpen > STACK.gapClosed, true);
+    eq('activation clamps outside 0..1', [cine.stackLayerY(2, -1), cine.stackLayerY(2, 2)], [cine.stackLayerY(2, 0), cine.stackLayerY(2, 1)]);
+  }
+  eq('district activation: current 1, neighbours 0.25, elsewhere 0', [cine.districtActivation(4, 4), cine.districtActivation(3, 4), cine.districtActivation(0, 4)], [1, 0.25, 0]);
+}
 
 rmSync(cfgPath, { force: true });
 rmSync(tmp, { recursive: true, force: true });

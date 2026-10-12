@@ -84,8 +84,14 @@ const MIN_VISIBLE_CHARS = 220;
     388 KB for the 2026-10 cinematic journey. The current film plates are
     local WebP assets and the old canvas renderer is removed; the measured
     site-wide JS sum is 379 KB. The later living-motion pass loads its
-    atmosphere separately; site-wide JS measures 383 KB. */
-const MAX_TOTAL_JS_GZIP = 388 * 1024;
+    atmosphere separately; site-wide JS measures 383 KB.
+    500 KB since the real-time WebGL environment (2026-10-12,
+    docs/CINEMATIC_3D.md): three.js r186 ships as lazily imported chunks
+    that load only after a successful WebGL probe — no pager route
+    references them from its HTML, so every per-route ceiling below is
+    unchanged. Measured site-wide sum with the 3D world: 494 KB. The
+    typeface JSON (61 KB raw) is a /fonts/ asset, not JS. */
+const MAX_TOTAL_JS_GZIP = 500 * 1024;
 /** Per-route payload ceiling: the gzipped sum of every script a single
     HTML page references. The home page measured ~250 KB before the
     service layer; this holds every route — pager and services — there.
@@ -154,8 +160,12 @@ for (const [sceneIndex, slug] of SECTIONS.entries()) {
   if (!/<html[^>]*lang="en"/.test(html)) fail(`route "${slug}" does not declare lang=en`);
   if ((html.match(/<h1(?:\s|>)/g) || []).length !== 1) fail(`route "${slug}" must render exactly one h1`);
   if (html.includes('cinematic-chapter')) fail(`route "${slug}" still renders a second chapter title`);
-  if (!html.includes(`class="silicon-world" aria-hidden="true" data-shot="${sceneIndex}"`)) {
-    fail(`route "${slug}" has no server-rendered silicon environment`);
+  /* 2026-10-12: the primary environment is the WebGL world
+     (docs/CINEMATIC_3D.md); SiliconWorld remains the client-side
+     WebGL-unavailable fallback, so the server artifact ships the
+     cinematic host with its per-route shot index. */
+  if (!html.includes(`class="cinematic-world" aria-hidden="true" data-shot="${sceneIndex}"`)) {
+    fail(`route "${slug}" has no server-rendered cinematic environment`);
   }
 
   if (text.length < MIN_VISIBLE_CHARS) {
@@ -644,10 +654,12 @@ if (homeHtml) {
   if (/<canvas[^>]*>\s*[^<\s]/.test(homeHtml)) fail('a canvas ships content — the environment must ship empty');
   for (const slug of SECTIONS) {
     const html = existsSync(routeFile(slug)) ? readFileSync(routeFile(slug), 'utf8') : '';
-    if ((html.match(/<canvas/g) || []).length !== 2) fail(`route "${slug}" must ship exactly the two environment canvases`);
+    /* One WebGL canvas per chapter (2026-10-12); the 2D fallback's two
+       canvases are client-mounted only when the probe fails. */
+    if ((html.match(/<canvas/g) || []).length !== 1) fail(`route "${slug}" must ship exactly the one environment canvas`);
     if (/cinema-world|worldmap|sig-cell/.test(html)) fail(`route "${slug}" still ships retired environment markup`);
   }
-  ok('every chapter ships the silicon environment (2 empty canvases + no-JS gradient) and no retired markup');
+  ok('every chapter ships the cinematic environment (1 empty canvas + no-JS gradient) and no retired markup');
 }
 
 const cssDir = join(OUT, '_next', 'static', 'css');

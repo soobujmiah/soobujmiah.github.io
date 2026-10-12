@@ -28,7 +28,7 @@ import {
 import { NavOverlay } from '@/components/NavOverlay';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { DocumentMotion } from '@/components/DocumentMotion';
-import { SiliconWorld } from '@/components/SiliconWorld';
+import { CinematicWorld } from '@/components/CinematicWorld';
 import {
   HeroScene,
   StatsScene,
@@ -357,7 +357,7 @@ function PagerInner({ initialIndex = 0 }: { initialIndex?: number }) {
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        <SiliconWorld sceneIndex={index} reducedMotion={reducedMotion} />
+        <CinematicWorld sceneIndex={index} reducedMotion={reducedMotion} />
         <div className="pager-vignette" aria-hidden />
         <AnimatePresence custom={dir} initial={false} mode="sync">
           <motion.div
