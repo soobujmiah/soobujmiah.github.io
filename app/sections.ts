@@ -12,6 +12,7 @@ export const SECTION_IDS = [
   'home',
   'presence',
   'about',
+  'workstation',
   'work',
   'research',
   'experience',
@@ -25,8 +26,10 @@ export const PAGE_COUNT = SECTION_IDS.length;
 
 /** Index of a section or supported legacy slug; null when unknown. */
 export function indexForSlug(slug: string): number | null {
-  if (slug === 'stack') return 1; // legacy URL for the merged technical page
-  if (slug === 'open-source') return 3; // legacy URL for selected repositories on Work
+  /* Legacy URLs, derived rather than hard-coded: inserting a chapter used
+     to silently re-point these at whatever now sat at the old index. */
+  if (slug === 'stack') return SECTION_IDS.indexOf('presence'); // merged technical page
+  if (slug === 'open-source') return SECTION_IDS.indexOf('work'); // selected repositories
   const i = (SECTION_IDS as readonly string[]).indexOf(slug);
   return i >= 0 ? i : null;
 }

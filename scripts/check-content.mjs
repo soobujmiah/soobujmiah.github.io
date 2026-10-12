@@ -22,7 +22,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { execSync } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -62,6 +62,11 @@ const IDENTIFIER_PATHS = new Set([
      and therefore stays under the purity rule (গিটহাব, not GitHub) */
   'contact.groups[].links[].handle',
   'contact.groups[].links[].href',
+  /* A layer's `id` is a React key and a stable handle for the layer,
+     never shown to anyone. It must stay the same string in both trees,
+     so it is data, not prose — the visible `label` beside it is prose
+     and stays under the purity rule (অ্যান্ড্রয়েড হোস্ট, not Android host). */
+  'workstation.layers[].id',
   'work.projects[].name',
   'work.projects[].repo',
   'work.projects[].websiteUrl',
@@ -423,12 +428,34 @@ try {
     fail('social group sizes differ between en and bn');
   }
 
+  /* The section registry is the single source of truth for how many
+     chapters exist. Read from source rather than compiled: this gate
+     already runs one tsc pass, and a static array does not need a
+     second. Hard-coding the count here meant adding a chapter left the
+     gate asserting the old one. */
+  const SECTION_COUNT = (() => {
+    const src = readFileSync(join(ROOT, 'app', 'sections.ts'), 'utf8');
+    const m = src.match(/export const SECTION_IDS = \[([\s\S]*?)\] as const;/);
+    if (!m) {
+      fail('could not read SECTION_IDS out of app/sections.ts');
+      return 0;
+    }
+    return (m[1].match(/'[a-z-]+'/g) || []).length;
+  })();
+  if (SECTION_COUNT < 1) fail('SECTION_IDS parsed as empty');
+
   /* 5 ── labels, nav, accents, URLs ── */
   for (const lang of ['en', 'bn']) {
     const tree = content[lang];
-    if (tree.ui.pageLabels.length !== 7) fail(`${lang}.ui.pageLabels length != 7`);
+    /* Derived from the section registry, not hard-coded: adding a chapter
+       used to leave these asserting the old count. */
+    if (tree.ui.pageLabels.length !== SECTION_COUNT) {
+      fail(`${lang}.ui.pageLabels length ${tree.ui.pageLabels.length} != ${SECTION_COUNT} sections`);
+    }
     /* per-route search metadata must cover every section route */
-    if (tree.seo.sections.length !== 7) fail(`${lang}.seo.sections length != 7`);
+    if (tree.seo.sections.length !== SECTION_COUNT) {
+      fail(`${lang}.seo.sections length ${tree.seo.sections.length} != ${SECTION_COUNT} sections`);
+    }
     for (const s of tree.seo.sections) {
       if (!s.title || !s.description) fail(`${lang}.seo.sections has an entry missing title/description`);
     }
@@ -438,6 +465,25 @@ try {
     const svc = services?.[lang];
     /* adversarial copies (CONTENT_FILE) exercise the main tree only */
     if (!OVERRIDE) checkServices(svc, lang);
+    /* The workstation stack: ids are the layer's identity, so they must
+       be unique and identical across languages — a translated id would
+       silently desynchronise the two trees' layer order. */
+    const layers = tree.workstation?.layers ?? [];
+    if (layers.length < 2) fail(`${lang}.workstation.layers needs at least two layers`);
+    const ids = layers.map((l) => l.id);
+    if (new Set(ids).size !== ids.length) fail(`${lang}.workstation.layers has duplicate ids: ${ids.join(', ')}`);
+    if (lang === 'bn') {
+      const enIds = content.en.workstation.layers.map((l) => l.id).join('|');
+      if (ids.join('|') !== enIds) {
+        fail(`workstation layer ids differ between trees:\n    en: ${enIds}\n    bn: ${ids.join('|')}`);
+      }
+    }
+    for (const l of layers) {
+      for (const field of ['label', 'detail', 'runs', 'evidence']) {
+        if (!l[field]) fail(`${lang}.workstation.layers[${l.id}].${field} is empty`);
+      }
+    }
+
     for (const l of tree.nav) {
       if (!Number.isInteger(l.scene) || l.scene < 0 || l.scene >= tree.ui.pageLabels.length) {
         fail(`${lang}.nav scene out of range: ${l.scene}`);
