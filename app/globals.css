@@ -680,52 +680,106 @@ a, button {
   min-width: 0;
 }
 
-/* ── signature identity — a wordmark that is constructed, not revealed ──
-   The rendered ink of the name is sampled into a dispersed particle
-   field, which travels home grapheme cluster by grapheme cluster and
-   resolves into the real DOM text. The canvas is scaffolding: it exists
-   only while the word is being built, then fades out and releases its
-   backing store. The resting state is typography — the brand wordmark
-   faces, the same multi-tone green ramp the identity has always
-   carried, and the same two-layer halo.
+/* ── THE SIGNATURE — the name as a dimensional object ──────────
+   See DESIGN_SYSTEM.md §5b. The canonical name stays real DOM text in
+   the page's only `h1`; the depth is CSS 3D. No canvas, no WebGL, no
+   image text, no blend modes.
 
-   Nothing here reflows. The cells are static from first paint, the
-   construction loop writes only to the canvas and to one `data-asm`
-   attribute, and the only property that animates is opacity. There is
-   no CSS animation on the name at all: the motion is a deliberate
-   construction with a defined end, not a cycle. */
-/* Neither wrapper may be a containing block: the construction layer is
-   anchored to the stable .hero-name box (see its rule), so the field can
-   disperse around the word and the layer never resizes with the text. */
+   Three nested layers share one perspective:
+     .hero-name   the type itself (size, family, colour)
+     .sig-stage   owns the perspective and every --sig-* token
+     .sig-tilt    owns the pointer tilt, in that perspective
+     .sig-c       one grapheme cluster, with its own depth
 
-/* One cell per grapheme cluster — never per code point, so a Bengali
-   cluster (মি, বু, য়া) is one indivisible cell. --ink is that
-   cluster's colour in the brand ramp. Static: nothing here is ever
-   rewritten at runtime. */
+   Every number arrives from MOTION.signature as a custom property
+   (written by HeroScene), so this file cannot drift from the tokens. */
 
-/* two-layer halo: a tight rim that defines the glyph edge, and a wide
-   bloom that carries the name — the identity mark reads first */
+.sig-stage {
+  display: inline-block;
+  perspective: var(--sig-perspective, 1500px);
+  /* slightly above centre: the name reads as seen from just below */
+  perspective-origin: 50% 45%;
+}
 
-/* The construction canvas: exactly over the wordmark, never
-   interactive, invisible unless a construction is running. */
-/* The construction canvas deliberately overhangs the wordmark: the field
-   disperses around the word, and a canvas clipped to the text box would
-   throw away every particle that leaves the letters. The padding is
-   written by the component from MOTION.nameAssemble.disperseRadius, and
-   defaults to zero so that without JavaScript the canvas simply covers the
-   (already legible) text. */
+.sig-tilt {
+  display: inline-block;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--sig-rx, 0deg)) rotateY(var(--sig-ry, 0deg));
+  transition: transform var(--sig-follow, 0.45s) cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-/* Phase states, driven by one attribute on the stage. The attribute
-   being *absent* is the legible state — no JavaScript, or nothing to
-   run, and the real text is simply there. */
+/* A word is the shaping unit: it never splits, so no ligature or matra
+   can be torn across a line break or a transform. */
+.sig-word {
+  display: inline-block;
+  transform-style: preserve-3d;
+}
 
-/* The handover: the particle field condenses into typography. The
-   duration is written by the component from
-   MOTION.nameAssemble.resolveSeconds, so the token stays the single
-   source of truth and this rule cannot drift from it. */
+/* A grapheme cluster is the motion unit — one indivisible box. */
+.sig-c {
+  display: inline-block;
+  transform-style: preserve-3d;
+  /* the resting state, and the only state without JS-driven motion */
+  transform: none;
+  opacity: 1;
+}
 
-/* reduced motion: a calm, fully designed multi-tone wordmark at rest.
-   No canvas is drawn and no timer is ever set. */
+/* The hero overrides the shared word-rise: the signature's motion is
+   per-cluster and three-dimensional, so the flat 2D rise would fight
+   it. Other headings keep `cinema-word-arrive` untouched. */
+.hero-name .cinema-word--play {
+  animation: none;
+}
+
+/* Two animations, two properties, one pass each.
+   `sig-rise`  — transform + opacity: the cluster arrives out of depth.
+   `sig-gleam` — shadow only: light travels across the letterforms.
+   The gleam's extra per-cluster delay is what makes it read as travel
+   rather than a simultaneous flash. `backwards` fill holds the opening
+   frame during the delay, so nothing flickers in at full strength.
+
+   The gleam is a halo on the glyphs, in the brand green. It is NOT the
+   retired near-white light band that sat *behind* the name: that motif
+   and its near-white ink are both on the banned list in
+   `scripts/check-build.mjs`, which scans this stylesheet as shipped.
+   The ink here never changes colour at all — hence shadow only. */
+.hero-name .cinema-word--play .sig-c {
+  animation:
+    sig-rise var(--sig-cluster, 0.92s) var(--sig-ease, ease-out) backwards,
+    sig-gleam var(--sig-gleam, 1.15s) var(--sig-ease, ease-out) backwards;
+  animation-delay:
+    calc(var(--sig-lead, 0.35s) + var(--i, 0) * var(--sig-stagger, 0.055s)),
+    calc(var(--sig-gleam-lead, 0.62s) + var(--i, 0) * var(--sig-gleam-stagger, 0.042s));
+}
+
+@keyframes sig-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, var(--sig-rise, 0.42em), var(--sig-enter-z, -220px))
+      rotateX(var(--sig-enter-rx, 14deg))
+      rotateY(var(--sig-enter-ry, -28deg));
+  }
+  60% { opacity: 1; }
+  to { opacity: 1; transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg); }
+}
+
+@keyframes sig-gleam {
+  0%, 100% { text-shadow: none; }
+  50% { text-shadow: 0 0 0.36em rgba(74, 222, 128, 0.38); }
+}
+
+/* Reduced motion: the signature is simply present. The server ships the
+   `--play` class either way, so this must switch the motion off here
+   rather than rely on the component. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-name .cinema-word--play .sig-c {
+    animation: none;
+  }
+  .sig-tilt {
+    transform: none;
+    transition: none;
+  }
+}
 
 /* ── keyboard focus ── */
 :focus-visible {
@@ -1447,24 +1501,7 @@ body:has(> .services-doc) button {
   margin-top: 0.45rem;
 }
 
-/* ── Identity clock — dotted sibling of the signature name ───────
-   The 12-hour clock with seconds, drawn as dot matrices sampled from
-   the wordmark face (components/IdentityClock.tsx) — the same visual
-   state the name's particles resolve into. It leads the hero under
-   the header; the bilingual date/location metadata line (its 'date'
-   part) closes the hero under the CTAs. Fixed-width digit slots, so
-   the block never shifts; only changed digits replay the short dot
-   settle. */
-
-/* Fixed name ⇄ keyword morph slot.
-   Height = two display lines at name scale (+ tiny particle air) — NOT a
-   giant viewport band. Mobile stays compact; desktop keeps the approved
-   cinematic proportions (see min-width: 768px). Zero CLS either way.
-   Canvas is positioned on THIS box so two-line service glyphs paint fully. */
-
-/* Particle field covers the full two-line slot via .hero-name (inset 0). */
-
-/* Identity copy stack — denser rhythm under a stable morph slot. */
+/* Identity copy stack — the dense rhythm under the signature. */
 .hero-copy {
   display: flex;
   flex-direction: column;

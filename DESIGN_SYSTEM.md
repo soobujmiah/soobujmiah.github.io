@@ -105,24 +105,21 @@ below verbatim. Both stay correct — the gate guarantees it.
         "mass": 1
       }
     },
-    "nameAssemble": {
-      "totalSeconds": 2.0,
-      "outgoingSeconds": 0.22,
-      "resolveSeconds": 0.34,
-      "dissolveSeconds": 0.45,
-      "microPx": 0.18,
-      "breathSeconds": 8.0,
-      "breathWindow": 0.2,
-      "breathPx": 0.6,
-      "guideShare": 0.55,
-      "clusterShare": 0.3,
-      "jitterShare": 0.15,
-      "travelShare": 0.55,
-      "settleBack": 0.55,
-      "disperseRadius": 1.15,
-      "maxParticles": 2800,
-      "sampleStepPx": 2.2,
-      "maxDpr": 2
+    "signature": {
+      "perspective": 1500,
+      "enterZ": -220,
+      "enterRotateY": -28,
+      "enterRotateX": 14,
+      "enterRiseEm": 0.42,
+      "clusterSeconds": 0.92,
+      "clusterStaggerSeconds": 0.055,
+      "leadSeconds": 0.35,
+      "ease": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "gleamSeconds": 1.15,
+      "gleamStaggerSeconds": 0.042,
+      "gleamLeadSeconds": 0.62,
+      "pointerTiltDeg": 3.5,
+      "pointerFollowSeconds": 0.45
     },
     "pullToRefresh": {
       "armPx": 12,
@@ -223,14 +220,48 @@ English tree. Neither language borrows the other's script.
   becomes a calm static wordmark. Reduced motion removes animation, never
   functionality.
 
-## 5b. Hero name
+## 5b. Signature name
 
-The name is real DOM text in the page's only `h1` (`.hero-name`). It enters
-with a masked word-by-word rise (`NameReveal` in `components/sections.tsx`,
-`cinema-word-*` in `globals.css`): transform only, no blur, no canvas. Without
-JavaScript, or under reduced motion, it is simply present. The retired
-particle construction, service-keyword morph and dot-matrix clock are gone
-(see `docs/CINEMATIC_AUDIT.md`). The accessible name never depends on motion.
+The canonical name — `Sobuj Miah` / `সবুজ মিয়া` — is the brand's signature
+object, and it is **real DOM text in the page's only `h1`** (`.hero-name`).
+Depth is CSS 3D, never canvas, never WebGL, never an image.
+
+**Structure.** `NameReveal` (`components/sections.tsx`) splits the name into
+words, then splits each word into **grapheme clusters** via
+`app/graphemes.ts`. Each cluster becomes one `.sig-c` box carrying its own
+index. `.hero-name` holds the single `perspective`; `.sig-stage` holds the
+pointer tilt; the cluster boxes hold the depth. One perspective, three
+layers.
+
+**Motion.** Three designed states, driven entirely by
+`MOTION.signature` (the component writes the `--sig-*` custom properties, so
+CSS cannot drift from the tokens):
+
+1. **Emergence** — each cluster rises from `enterZ` with `enterRotateX` /
+   `enterRotateY`, in a left-to-right stagger of `clusterStaggerSeconds`.
+2. **Gleam** — a green halo crosses the letterforms, one cluster at a time
+   (`gleamStaggerSeconds`). The ink itself never changes colour: the glyphs
+   stay `--fg` and only gain a brand-green `text-shadow`. One pass, with a
+   defined end. Not a cycle, and no blend modes. This is explicitly *not*
+   the retired `.sig-sweep` band — that was a near-white light band behind
+   the name, and `check-build` bans both it and its `#86efac` ink.
+3. **Rest** — crisp, fully legible typography. On fine pointers only, the
+   whole signature tilts up to `pointerTiltDeg` (3.5°) with the pointer.
+
+**Bengali is first-class.** Clusters, not code points, so a conjunct
+(`ক্ষ`, `স্ট্র`) or a consonant carrying a matra (`মি`, `বু`, `য়া`) is one
+indivisible box whose shaping is never torn apart. A pre-base vowel sign
+still renders in its correct position because the whole cluster shapes
+inside a single box. `scripts/check-units.mjs` proves the canonical names
+segment as expected on both the `Intl.Segmenter` and the fallback path.
+
+**Degradation.** Without JavaScript the name is present and animates from
+server-rendered markup. Under `prefers-reduced-motion: reduce` every
+signature animation is off and the name is simply there, at full opacity and
+zero transform. The accessible name never depends on motion.
+
+The retired particle construction, service-keyword morph and dot-matrix
+clock are gone and gate-guarded (see `docs/CINEMATIC_AUDIT.md`).
 
 ## 6. Interaction states
 
