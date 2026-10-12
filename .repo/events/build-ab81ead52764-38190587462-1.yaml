@@ -1,0 +1,16 @@
+event_id: build-ab81ead52764-38190587462-1
+repository: soobujmiah/soobujmiah.github.io
+commit: ab81ead52764657fafcea6cd83835a9f68792079
+kind: build
+occurred_at: '2026-10-12T01:07:34Z'
+run_id: '38190587462'
+run_attempt: '1'
+status: failed
+conclusion: failure
+workflow_name: Build and Deploy
+workflow_id: '353897823'
+event_type: push
+started_at: '2026-10-12T01:06:21Z'
+completed_at: '2026-10-12T01:07:34Z'
+actor: soobujmiah
+run_url: https://github.com/soobujmiah/soobujmiah.github.io/actions/runs/38190587462
