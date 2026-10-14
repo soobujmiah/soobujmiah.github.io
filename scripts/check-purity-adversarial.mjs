@@ -33,14 +33,14 @@ const original = readFileSync(SOURCE, 'utf8');
 const CASES = [
   {
     name: 'BN field containing Latin words ("এটি AI Work Section GitHub")',
-    anchor: "navOpen: 'সূচি খুলুন'",
-    replace: "navOpen: 'এটি AI Work Section GitHub'",
+    anchor: "depthLabel: 'গভীরতা'",
+    replace: "depthLabel: 'এটি AI Work Section GitHub'",
     expectFail: true,
   },
   {
     name: 'BN field containing a bare English brand word',
-    anchor: "navTitle: 'সূচি'",
-    replace: "navTitle: 'সূচি GitHub'",
+    anchor: "liveSiteWord: 'লাইভ সাইট'",
+    replace: "liveSiteWord: 'লাইভ সাইট GitHub'",
     expectFail: true,
   },
   {
@@ -57,14 +57,14 @@ const CASES = [
   },
   {
     name: 'EN field containing Bengali script ("This is বাংলা বিভাগ")',
-    anchor: "navOpen: 'Open section index'",
-    replace: "navOpen: 'This is বাংলা বিভাগ'",
+    anchor: "depthLabel: 'Depth'",
+    replace: "depthLabel: 'This is বাংলা বিভাগ'",
     expectFail: true,
   },
   {
     name: 'EN copy with a single Bengali vowel sign',
-    anchor: "navTitle: 'Index'",
-    replace: "navTitle: 'Indেx'",
+    anchor: "liveSiteWord: 'live site'",
+    replace: "liveSiteWord: 'livে site'",
     expectFail: true,
   },
   {

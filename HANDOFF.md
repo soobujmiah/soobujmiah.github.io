@@ -22,9 +22,9 @@ Written 2026-10-14 by a Claude Code CLI session (PRoot Debian on the Redmi Turbo
 | Item | Value |
 |---|---|
 | Repo | `soobujmiah/soobujmiah.github.io`, clone at `~/portfolio` |
-| Branch | `feat/scratch-cinematic-rebuild` — the rebuild below, **not yet pushed or merged** |
-| `main` | `9aab38d` at branch point |
-| Deployed | Not yet — `main` still carries the previous build |
+| Branch | `feat/inside-one-device` → **PR #74**, CI green (build, test, repo-contract) |
+| `main` | `2523027` at branch point (rebased onto it) |
+| Deployed | See §6 item 1 — merging PR #74 is what ships it |
 | `node_modules` | present; `npm run build` verified green locally |
 
 **Read first:** `~/portfolio/AI_ASSISTANT.md`, then SKB `~/skb/ASSISTANT_CONTEXT.md`,
@@ -152,28 +152,19 @@ Gate ceilings in `check-build.mjs` were lowered to sit just above what ships.
 
 ## 6. Known open items
 
-1. **The branch is not pushed, no PR, not merged, not deployed.** It is a scratch
-   rebuild of the whole presentation layer: it wants the owner's eyes before it
-   replaces the live site.
-2. **The WebGL scene is visually unverified** (§5). Highest-value next check.
-3. **`framer-motion` is still in `package.json`** with zero importers. Removing it
-   needs an `npm uninstall` and a lockfile update, which this session did not run.
-4. **`app/content.ts` still carries retired UI copy**: `ui.carouselPrev/Next`,
-   `ui.navOpen/navTitle/navClose/navHint`, `ui.current`, `ui.mapFocus`,
-   `ui.meridiemAm/Pm`, `ui.pull/release/refreshing`, `preloader.status`,
-   `openSource.appliedBadge`'s former badge role, `header.githubLabel`,
-   `work.relationship.deviceLabel`. They are parity-checked but no longer rendered.
-   Removing them is a content-gate change (both trees, same keys) and belongs in its
-   own commit.
-5. **`repo.apiloop.build.passing` is failing**, so the footer reads "16/17 checks
+1. **The WebGL scene is visually unverified** (§5). Highest-value next check: open
+   the live site on the phone and confirm `components/stage-scene.ts` renders the
+   strata, the aperture and the evidence marks as intended. Everything verified so
+   far was the Canvas 2D fallback.
+2. **`repo.apiloop.build.passing` is failing**, so the footer reads "16/17 checks
    passing" publicly. **That is correct, not a bug** — apiloop's CI genuinely failed
    2026-09-29. Fixing it means fixing `soobujmiah/apiloop`.
-6. **Phase 4 of the brief — project case studies.** Still not done. Projects now
+3. **Phase 4 of the brief — project case studies.** Still not done. Projects now
    carry status, role, evidence, topics and both links in one record shape, which is
    the structure a case study would extend.
-7. **`profile.title`** still reads "Independent Software & AI Systems Engineer" and
+4. **`profile.title`** still reads "Independent Software & AI Systems Engineer" and
    is gate-locked as `CANONICAL_TITLE`. Changing it is the owner's call.
-8. **`/3d-prototype/` carries `noindex,follow`** plus a canonical to the real site.
+5. **`/3d-prototype/` carries `noindex,follow`** plus a canonical to the real site.
 
 ---
 
@@ -203,5 +194,10 @@ npm run check:build    # validates the export — needs ./out
 ```
 
 Last full local run on this branch: all five gates PASS (100 logic checks),
-typecheck clean, `check-build` PASS (40 routes, home 868 visible chars, heaviest
-route 186 KB gz against a 200 KB ceiling, site-wide 423 KB against 440 KB).
+typecheck clean, lint clean, `check-build` PASS (40 routes, home 868 visible chars,
+heaviest route 185 KB gz against a 200 KB ceiling, site-wide 422 KB against 440 KB).
+
+36 stale remote branches remain, each one the head of an already-merged (squashed)
+PR, so their content is on `main` and the refs are dead weight. They are listed with
+their PR numbers in the session log; deleting them is one `git push origin --delete`
+per branch and needs the owner's explicit go-ahead.

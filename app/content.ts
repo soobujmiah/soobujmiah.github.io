@@ -181,7 +181,6 @@ export interface Content {
       eyebrow: string;
       heading: string;
       body: string;
-      deviceLabel: string;
       layers: {
         name: string;
         role: string;
@@ -239,7 +238,7 @@ export interface Content {
     servicesLink: string;
   };
   nav: { scene: number; label: string }[];
-  header: { homeLabel: string; githubLabel: string; langLabel: string; langAria: string; githubAria: string; cvLabel: string; cvAria: string; servicesLabel: string };
+  header: { homeLabel: string; langAria: string; githubAria: string; cvLabel: string; cvAria: string; servicesLabel: string };
   footer: {
     built: string;
     claims: string;
@@ -258,27 +257,12 @@ export interface Content {
     strata: string[];
     /** Accessible name for the depth navigation rail. */
     depthLabel: string;
-    carouselPrev: string;
-    carouselNext: string;
+    /** Accessible name for each chapter's <main>, in SECTION_IDS order. */
     pageLabels: string[];
+    /** "repository" / "live site" — the two reference kinds a record links to. */
     repoWord: string;
     liveSiteWord: string;
-    navOpen: string;
-    navTitle: string;
-    navClose: string;
-    navHint: string;
-    current: string;
-    /* Localized meridiem for the identity clock — Bengali must never
-       render a Latin "AM/PM" (content-gate purity applies). */
-    meridiemAm: string;
-    meridiemPm: string;
-    pull: string;
-    release: string;
-    refreshing: string;
-    mapFocus: string;
-    downloadCv: string;
   };
-  preloader: { status: string };
   /* Per-route search metadata, aligned with SECTION_IDS in
      app/sections.ts (home first). Titles are complete, unique and
      name-bearing; descriptions are factual summaries of the section.
@@ -484,7 +468,6 @@ const en: Content = {
       eyebrow: 'Ecosystem — two layers, one device',
       heading: 'Ternux hosts the ARM64 environment; ADT supplies Android development tools.',
       body: 'Ternux provides the no-root Debian ARM64 host on an Android phone. ADT runs inside that environment with native ARM64 Android build-tools and platform-tools, including ADB, for building, signing, installing and debugging apps on real hardware.',
-      deviceLabel: 'One physical Android device',
       layers: [
         {
           name: 'Ternux',
@@ -720,27 +703,13 @@ const en: Content = {
     { scene: 5, label: 'Research' },
     { scene: 7, label: 'Contact' },
   ],
-  header: { homeLabel: 'Back to home', githubLabel: 'GitHub', langLabel: 'Bangla', langAria: 'Switch to Bangla', githubAria: 'GitHub profile', cvLabel: 'CV', cvAria: 'Download CV (PDF)', servicesLabel: 'How I Can Help' },
+  header: { homeLabel: 'Back to home', langAria: 'Switch to Bangla', githubAria: 'GitHub profile', cvLabel: 'CV', cvAria: 'Download CV (PDF)', servicesLabel: 'How I Can Help' },
   ui: {
     strata: ['Surface', 'Display', 'Silicon', 'Userland', 'Toolchain', 'Frontier', 'Bus', 'Port'],
     depthLabel: 'Depth',
-    carouselPrev: 'Previous',
-    carouselNext: 'Next',
     pageLabels: ['Home', 'Focus & tools', 'About', 'Workstation', 'Work', 'Research', 'Experience', 'Contact'],
     repoWord: 'repository',
     liveSiteWord: 'live site',
-    navOpen: 'Open section index',
-    navTitle: 'Index',
-    navClose: 'Close index',
-    navHint: 'Arrow keys move · Enter opens · Esc closes',
-    current: 'You are here',
-    meridiemAm: 'AM',
-    meridiemPm: 'PM',
-    pull: 'Pull to refresh',
-    release: 'Release to refresh',
-    refreshing: 'Refreshing',
-    mapFocus: 'Background map focus',
-    downloadCv: 'Download CV',
   },
   footer: {
     built: 'Built from a phone.',
@@ -750,7 +719,6 @@ const en: Content = {
     lastVerified: 'last verified',
     proofLink: 'Open the public verification page',
   },
-  preloader: { status: 'Initializing' },
   seo: {
     /* Aligned with SECTION_IDS (app/sections.ts): home first, then one
        entry per section route. Titles are complete and name-bearing;
@@ -1001,7 +969,6 @@ const bn: Content = {
       eyebrow: 'ইকোসিস্টেম — এক ডিভাইস, দুই স্তর',
       heading: 'টার্নাক্স এআরএম ৬৪ পরিবেশ দেয়; তার ভেতরে এডিটি অ্যান্ড্রয়েড ডেভেলপমেন্ট টুল সরবরাহ করে।',
       body: 'অ্যান্ড্রয়েড ফোনে টার্নাক্স রুট ছাড়া ডেবিয়ান এআরএম ৬৪ হোস্ট তৈরি করে। সেই পরিবেশে এডিটির নেটিভ এআরএম ৬৪ অ্যান্ড্রয়েড বিল্ড-টুলস ও প্ল্যাটফর্ম-টুলস, এডিবিসহ, বাস্তব হার্ডওয়্যারে অ্যাপ বিল্ড, সাইন, ইনস্টল ও ডিবাগ করার কাজে ব্যবহৃত হয়।',
-      deviceLabel: 'একটিই ভৌত অ্যান্ড্রয়েড ডিভাইস',
       layers: [
         {
           name: 'Ternux',
@@ -1239,8 +1206,6 @@ const bn: Content = {
   ],
   header: {
     homeLabel: 'হোমে ফিরুন',
-    githubLabel: 'গিটহাব',
-    langLabel: 'ইংরেজি',
     langAria: 'ইংরেজিতে বদলান',
     githubAria: 'গিটহাব প্রোফাইল',
     cvLabel: 'সিভি',
@@ -1250,23 +1215,9 @@ const bn: Content = {
   ui: {
     strata: ['উপরিতল', 'ডিসপ্লে', 'সিলিকন', 'ইউজারল্যান্ড', 'টুলচেইন', 'প্রান্তসীমা', 'বাস', 'পোর্ট'],
     depthLabel: 'গভীরতা',
-    carouselPrev: 'আগের',
-    carouselNext: 'পরের',
     pageLabels: ['হোম', 'ফোকাস ও টুলিং', 'পরিচিতি', 'ওয়ার্কস্টেশন', 'কাজ', 'গবেষণা', 'অভিজ্ঞতা', 'যোগাযোগ'],
     repoWord: 'রিপোজিটরি',
     liveSiteWord: 'লাইভ সাইট',
-    navOpen: 'সূচি খুলুন',
-    navTitle: 'সূচি',
-    navClose: 'সূচি বন্ধ করুন',
-    navHint: 'অ্যারো কী দিয়ে চলুন · এন্টার দিয়ে খুলুন · এসকেপে বন্ধ করুন',
-    current: 'এখানে আছেন',
-    meridiemAm: 'এএম',
-    meridiemPm: 'পিএম',
-    pull: 'রিফ্রেশ করতে টানুন',
-    release: 'রিফ্রেশে ছেড়ে দিন',
-    refreshing: 'রিফ্রেশ হচ্ছে',
-    mapFocus: 'পটভূমি মানচিত্রের কেন্দ্র',
-    downloadCv: 'সিভি ডাউনলোড করুন',
   },
   footer: {
     built: 'ফোন থেকে তৈরি।',
@@ -1276,7 +1227,6 @@ const bn: Content = {
     lastVerified: 'সর্বশেষ যাচাই',
     proofLink: 'সর্বজনীন প্রমাণ-পৃষ্ঠা খুলুন',
   },
-  preloader: { status: 'চালু হচ্ছে' },
   seo: {
     sections: [
       {
