@@ -1,5 +1,9 @@
 # Environment engine — Silicon Nocturne
 
+> **SUPERSEDED on 2026-10-14.** The system described below was removed in the
+> "Inside One Device" rebuild; see [`docs/STAGE.md`](STAGE.md) for the shipped
+> architecture. This file is kept as history — do not implement from it.
+
 The site's continuous background: one abstract, seeded floorplan of a phone
 system-on-chip, seen by a perspective camera that moves between chapters.
 Pure math lives in `app/silicon.ts` (unit-tested in `scripts/check-units.mjs`);

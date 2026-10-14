@@ -8,25 +8,33 @@ Live at **https://soobujmiah.github.io**.
 
 [![SEO audited](https://img.shields.io/badge/SEO-audited%202026--10--11-22c55e?style=flat-square)](docs/SEO.md)
 
-A bilingual spatial portfolio, built as eight chapters of one phone-silicon
-exhibit. Each chapter has a deliberate camera shot, a three-dimensional
-monument and readable DOM inscriptions aligned to the scene's ground datum.
-The identity, mobile workstation, projects, research, experience and contact
-form one architectural journey instead of a set of cards. The theme comes
-from Sobuj's documented phone-first Android, ARM64 Linux and on-device systems
-work. Design and verification notes: [`docs/SPATIAL_PORTFOLIO.md`](docs/SPATIAL_PORTFOLIO.md).
+**Inside one device.** Everything here was built from inside a single Android
+phone, so the site is not a page with a picture of a device on it — the site
+is *inside* the device. There is exactly one subject, a cross-section of that
+machine, and the reader travels **into** it along the depth axis. Each of the
+eight chapters is a stratum of the real stack, in dependency order: glass →
+display → silicon → userland → toolchain → frontier → bus → port. Moving on
+means going deeper, not further down a page.
 
-WebGL renders the primary world using a lazy-loaded Three.js scene. Canvas 2D
-renders an intentionally brighter silicon floorplan when WebGL fails. The
-static HTML and CSS remain readable with JavaScript disabled. The signature
-name is real DOM text in English and Bengali; Bengali letters are split only
-at grapheme boundaries to preserve shaping.
+The instrument marks etched into the strata are the verification state, read
+from the same generated evidence the footer's proof line and `/verification/`
+use — so a failing machine check is visibly dark and the scene cannot flatter
+the work. Architecture, camera maths and budgets: [`docs/STAGE.md`](docs/STAGE.md).
+
+WebGL renders the one environment from a lazily imported Three.js module,
+loaded only after a successful context probe. Canvas 2D draws the same strata
+from the same numbers when WebGL is unavailable, and the static HTML plus a
+CSS depth gradient carry the whole document when JavaScript never arrives
+(the home route ships 868 characters of server-rendered text). The identity is
+real DOM text in the page's only `h1`, in English and Bengali.
 
 ## Stack
 
 - Next.js 15.5.27 (static export), React 18, TypeScript, Tailwind CSS
-- framer-motion for chapter transitions and camera moves + inner page scroll
-- Procedural Three.js environment, Canvas 2D fallback and static CSS fallback; no stock media
+- **No animation library.** The camera is requestAnimationFrame over
+  critically damped scalars; the text settle is one CSS animation
+- Procedural Three.js environment (lazy, one module), Canvas 2D fallback and
+  static CSS fallback; no stock media, no downloaded model or texture
 - GitHub Pages deploy via `.github/workflows/deploy.yml` (lint → build → upload `./out`)
 
 ## Develop
@@ -61,9 +69,9 @@ deliberate change, not cleanup.
 |---|---|
 | `check:content` | en/bn key parity, **two-way language purity**, `selected` ⊆ repos, labels/nav/URL sanity, the **canonical professional title** (and the absence of retired positioning), and the **complete 17-link social ecosystem** — exact, de-duplicated, identical in both trees. Self-tests its own predicates every run. |
 | `check:purity` | Adversarial suite — injects `"এটি AI Work Section GitHub"` and `"This is বাংলা বিভাগ"` into copies of the real content and asserts the gate rejects each, with an unmodified control that must pass. |
-| `check:design` | `app/design-tokens.ts` = `DESIGN_SYSTEM.md` = `globals.css :root` = browser `themeColor`. Documentation drift fails the build. Also asserts the retired-motif blacklist (the stock-media world, the world map, the particle name and the dot-matrix clock cannot return, by file or by class name), that `SiliconWorld` is wired in as the page background and honours reduced motion, tab visibility, a DPR cap and resize, and that the type system stays serif + sans + mono. |
-| `check:units` | Bengali grapheme segmentation (both the `Intl.Segmenter` path and the fallback, including conjuncts and pre-base matras), section routing, digit localisation, the `MOTION.signature` invariants (the light never sweeps a cluster before it arrives, the tilt stays subtle, the whole name is legible within 2s, the retired particle group stays gone), and the Silicon Nocturne generator, PRNG, camera and projector. |
-| `check:build` | From the built `out/`: 34 primary routes (7 pager sections + 9 service pages + 1 verification document, each in both languages), plus 4 canonicalized legacy section URLs; server-rendered text, locale metadata and alternates, sitemap, social assets, and JavaScript budget. |
+| `check:design` | `app/design-tokens.ts` = `DESIGN_SYSTEM.md` = `globals.css :root` = browser `themeColor`. Documentation drift fails the build. Also enforces the **one-subject rule**: every retired system stays deleted (by path) and its vocabulary stays out of the new files (by class name), **exactly one module may import `three`**, `Journey` mounts **exactly one** `<Stage>`, the stage probes WebGL before loading it and honours reduced motion, tab visibility, off-screen pause, a DPR cap and resize, the Canvas 2D fallback draws the same strata from `app/stage.ts`, both document shells use the one shared chrome, and the type system stays serif + sans + mono. |
+| `check:units` | 100 logic checks: Bengali grapheme segmentation (both the `Intl.Segmenter` path and the fallback, including conjuncts and pre-base matras), section routing, digit localisation, the motion-token invariants (depth is the slowest axis, the input lock covers the flight, every retired token group stays gone), and the whole stage — strata geometry, stations, critically damped flight with velocity-continuous retargeting, the DPR policy and one-way quality ratchet, depth presence, the evidence marks (a failing check is always visible and never lands on the identity stratum) and the seeded dust. |
+| `check:build` | From the built `out/`: 36 primary routes (8 chapters + 9 service pages + 1 verification document, each in both languages), plus 4 canonicalized legacy section URLs; server-rendered text (≥ 220 visible chars per route), exactly one `h1` and one chapter title per chapter route, the environment server-rendered empty at the route's own depth (`data-stratum`), locale metadata and alternates, sitemap, social assets, the retired-markup blacklist, and the JavaScript budget (site-wide 440 KB gz, per route 200 KB, largest chunk 96 KB). |
 
 ### Deterministic repository state
 
@@ -114,22 +122,30 @@ fabricate); the UI maps it to `Explore`, repos to Source/Code links.
 - `app/language.tsx` — `LanguageProvider` + `useLang()` hook. Locale is
   determined by the URL (`/` English, `/bn/` Bengali), so both versions are
   independently crawlable; switching language keeps the equivalent route.
-- `app/(en)/page.tsx` — **discrete pager**: fixed 100dvh root. Pages center when
-  they fit and scroll internally when they don't (viewport-first when
-  possible, content-first when necessary). Wheel ticks, vertical swipes,
-  arrows/PageUp/PageDown/Home/End, dots, and nav links yield to inner
-  content until its edges, then advance exactly one chapter (subtle content
-  depth + environment camera flight, ~1s gesture lock).
-- `components/CinematicWorld.tsx` + `components/cinematic-scene.ts` +
-  `app/cinematic.ts` — the lazy WebGL silicon city and chapter camera shots.
-- `components/SiliconWorld.tsx` + `app/silicon.ts` — the Canvas 2D fallback
-  when WebGL fails; static HTML and CSS cover the no-JavaScript path.
-- `components/sections.tsx` — all eight chapters as scene-aligned DOM
-  inscriptions; selected projects, supporting repositories, workstation
-  layers, research, experience and contact remain accessible and crawlable.
-- `components/ui.tsx` — navigation, language toggle, footer, index control
-  and the verification proof line. The pager advances after inner scroll
-  reaches its edge.
+- `components/Journey.tsx` — the host. One environment, one chapter, and
+  input (wheel, swipe, arrows/PageUp/PageDown/Home/End, rail) turned into
+  **one depth change at a time**: gestures yield to the chapter's own
+  scroller until its edges, then go a stratum deeper, with a 900 ms lock so
+  one gesture is never worth two strata. It animates nothing itself.
+- `app/stage.ts` — the stage's pure maths: the strata, the camera stations,
+  the critically damped flight, the render-quality policy, depth presence and
+  the evidence marks. No Three.js import; 100 unit checks cover it.
+- `components/Stage.tsx` + `components/stage-scene.ts` — the host and the one
+  module that imports Three.js, loaded only after a successful WebGL probe.
+- `components/StageFallback.tsx` — the same machine in Canvas 2D for browsers
+  with no WebGL at all; static HTML and CSS cover the no-JavaScript path.
+- `components/record.tsx` — the typographic system every chapter is built
+  from: `Chapter`, `Block`, `Rows`, `Record`, `Ref`, `Tags`, `Prose`. A mono
+  label on a hairline rule, and nothing enclosing anything. All
+  server-renderable, which is why every route ships its text.
+- `components/chapters.tsx` — the eight chapters, built only from
+  `content.ts`; projects, repositories, workstation layers, research,
+  experience and contact are all the same record shape.
+- `components/DepthRail.tsx` — the navigation, which is a depth gauge; every
+  tick is a real anchor to a real route.
+- `components/chrome.tsx` — one masthead and one footer for the whole site,
+  including the generated verification proof line. The service and
+  verification documents mount the same two components.
 
 Visual language is specified in `DESIGN_SYSTEM.md` — the shared DNA for this
 portfolio and future repository websites (same brand, different context).
@@ -183,11 +199,13 @@ URL attached, and the rows remain here for the historical measurement detail.
 
 Re-verify before reusing any figure professionally if significant time has passed.
 
-## Hero name
+## The identity
 
-The hero name is real DOM text in the only `h1`, revealed with a masked
-word-by-word rise (`NameReveal` in `components/sections.tsx`). No canvas, no
-particles. Bengali is set in Noto Serif Bengali. See `DESIGN_SYSTEM.md` §5b.
+The canonical name is real DOM text in the page's only `h1` — one element,
+set in Instrument Serif (Noto Serif Bengali for Bangla), with no canvas, no
+particles and no per-word animation. `check-build.mjs` asserts the `h1` reads
+exactly the canonical name as plain text, and bans the retired per-grapheme
+construction from returning. See `DESIGN_SYSTEM.md` §5b.
 
 ## Social ecosystem
 
@@ -208,17 +226,19 @@ the same route names (for example `/work/` and `/bn/work/`). Each pair has its
 own canonical plus reciprocal `en`, `bn`, and `x-default` alternates; both
 variants are included in the sitemap.
 
-Every section is a real static page. The pager is the presentation; the
+Every chapter is a real static page. The journey is the presentation; the
 route is the address.
 
 ```text
-/              /presence/   /about/      /work/       /research/
-/experience/   /contact/
+/              /presence/   /about/      /workstation/
+/work/         /research/   /experience/ /contact/
 ```
 
-Deep links land straight on their section (the boot splash only runs on `/`),
-the URL follows the visible page as you turn, back/forward move the pager, and
-legacy `#work`-style hashes are rewritten to the real route on load.
+A deep link lands at that chapter's own depth — the environment is
+server-rendered with its `data-stratum`, so `/work/` opens inside the machine
+rather than at its mouth. The URL follows the chapter as the reader goes
+deeper, back/forward move the camera, and legacy `#work`-style hashes are
+rewritten to the real route on load.
 The former `/stack/` and `/open-source/` URLs still load and canonicalize to
 `/presence/` and `/work/` (with equivalent Bengali URLs).
 
@@ -227,10 +247,11 @@ The former `/stack/` and `/open-source/` URLs still load and canonicalize to
 ```text
 app/
   design-tokens.ts   brand + motion tokens — the machine-checked root
-  sections.ts        the one section list driving routes, sitemap, overlay
+  sections.ts        the one section list driving routes, sitemap, the rail
   content.ts         bilingual copy (en/bn trees) + curated structure
   graphemes.ts       grapheme segmentation (Bengali-safe)
-  silicon.ts         seeded chip generator, camera poses, projector (pure)
+  stage.ts           the stage's pure maths: strata, stations, camera
+                     flight, quality policy, presence, evidence marks
   language.tsx       language provider + hook + digit localization
   site-layout.tsx    shared metadata, JSON-LD, fonts, and locale document shell
   (en)/              English routes at their existing public URLs
@@ -241,22 +262,26 @@ app/
   (en)/page.tsx          English home route (section 0)
   (en)/[section]/page.tsx six English section routes + two legacy aliases
   (bn)/bn/...             Bengali home, sections, service hub + pages
-  globals.css        tokens, pager, overlay, name, carousels, responsive, a11y
+  globals.css        tokens, stage, journey, record system, type, documents,
+                     reduced motion — written in that dependency order
   icon.svg           favicon (also the social-card fallback mark)
   not-found.tsx      bilingual 404 → 404.html on export
 components/
-  Pager.tsx           discrete pager, gestures, camera transition, route sync
-  SiliconWorld.tsx    the Canvas 2D environment (scene + signal pulses)
-  NavOverlay.tsx      the section index dialog (role=dialog, focus-managed)
-  PullToRefresh.tsx   real mobile pull-to-refresh
-  sections.tsx        the seven curated pages (spotlight, carousels, accordion)
-  ui.tsx              cursor, links, reveals, header, footer, dots, carousel
+  Journey.tsx         the host: input → one depth change, URL sync
+  Stage.tsx           the one environment host (probe, lazy load, pause)
+  stage-scene.ts      the only module that imports three.js
+  StageFallback.tsx   the same machine in Canvas 2D, when WebGL is missing
+  record.tsx          the typographic system (Chapter/Block/Rows/Record/Ref)
+  chapters.tsx        the eight chapters, built only from content.ts
+  DepthRail.tsx       the navigation, which is the depth gauge
+  chrome.tsx          one masthead + one footer for the whole site
 scripts/
   check-content.mjs         parity + two-way purity gate
   check-purity-adversarial.mjs  adversarial purity suite
   check-design.mjs          token/document/CSS drift gate
-  check-units.mjs           logic checks (segmentation, routing, digits,
-                            chip generator, camera and projector)
+  check-units.mjs           100 logic checks (stage geometry, camera flight,
+                            quality policy, evidence marks, motion tokens,
+                            segmentation, routing, digits)
   check-build.mjs           artifact validation (routes, deep links, budget)
 tools/
   make-og.py          generates public/og.png (run manually; see its header)

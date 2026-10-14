@@ -2,6 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════
+   INSIDE ONE DEVICE — the whole stylesheet.
+
+   Written from scratch in 2026-10. The file it replaces had grown
+   to ~2,000 lines across four generations of visual language (a
+   square grid, stock film plates, a world map, a chip floorplan, a
+   HUD overlay), each new layer added on top of the last without the
+   previous one being removed. That, not any single rule, is what
+   made the site read as overlapping layers.
+
+   The rules are therefore in dependency order, and there is exactly
+   one of each thing:
+
+     1. tokens          — mirrored from app/design-tokens.ts
+     2. base            — reset, document, selection, focus
+     3. stage           — the ONE environment
+     4. journey         — chrome, the chapter page, the depth rail
+     5. record          — the typographic system (components/record.tsx)
+     6. type            — serif display + Bangla metrics
+     7. documents       — /services/* and /verification/
+     8. reduced motion  — one block, at the end, that wins
+
+   Nothing here blurs a surface, encloses text in a card, or blends
+   a layer. If a rule cannot be explained by "the reader is inside
+   one machine", it does not belong in this file.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── 1. tokens ──────────────────────────────────────────────────
+   Checked against app/design-tokens.ts by scripts/check-design.mjs.
+   Never edit a value here without editing the token. */
 :root {
   --bg: #050507;
   --fg: #e4e2df;
@@ -12,11 +42,28 @@
   --accent-glow: rgba(34, 197, 94, 0.18);
   --signal: #10b981;
   --card: rgba(6, 7, 6, 0.66);
-  --card-hover: rgba(6, 7, 6, 0.8);
-  --green-soft: rgba(34, 197, 94, 0.08);
-  --green-mid: rgba(34, 197, 94, 0.15);
+  --chrome: #060608;
+
+  /* Measure and rhythm. One reading column, one gutter, everywhere. */
+  --measure: 64ch;
+  --gutter: clamp(18px, 5vw, 56px);
+  --rail-width: 232px;
+  --head-height: 52px;
+  /* Fallback only. `components/chrome.tsx` measures the real footer into
+     `--chrome-foot`, because the proof line wraps on a narrow phone and
+     wraps differently again in Bangla. */
+  --foot-height: 46px;
+  /* The depth gauge is a right-hand column on desktop and a strip above
+     the footer on phones; this is the height it reserves there. */
+  --rail-strip: 0px;
+
+  /* Motion, mirrored from MOTION.settle. */
+  --settle: 0.72s;
+  --settle-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --settle-stagger: 0.05s;
 }
 
+/* ── 2. base ────────────────────────────────────────────────────*/
 * {
   margin: 0;
   padding: 0;
@@ -25,2012 +72,834 @@
 
 html {
   height: 100%;
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: var(--bg);
   overflow: hidden;
   overscroll-behavior: none;
 }
 
 body {
   height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-inter), system-ui, sans-serif;
-  overflow: hidden;
-  overscroll-behavior: none;
-  cursor: none;
   -webkit-tap-highlight-color: transparent;
 }
 
 ::selection {
-  background: rgba(34, 197, 94, 0.35);
+  background: rgba(34, 197, 94, 0.3);
   color: #fff;
 }
 
-a, button {
-  cursor: none;
+::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(34, 197, 94, 0.28);
 }
 
-/* ── noise texture overlay ── */
+:focus-visible {
+  outline: 1px solid var(--accent-bright);
+  outline-offset: 3px;
+}
+
+/* The one surface treatment in the build: a static film grain, so a
+   near-black screen has tooth instead of banding. */
 .noise::before {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 60;
   pointer-events: none;
-  opacity: 0.025;
+  opacity: 0.022;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 256px 256px;
 }
 
-/* ── magnetic cursor ──
-   The motion wrapper (.cursor-pos) is positioned by JS transforms;
-   the inner dot/ring only centers itself, so the two transforms
-   never fight each other. */
-.cursor-pos {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 99999;
-  pointer-events: none;
-}
-
-.cursor-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-  pointer-events: none;
-  /* No blending here, deliberately. `difference` promoted the whole page
-     into a blend group, so every cursor move re-composited the backdrop —
-     a real flicker source over a full-screen SVG — and it inverted the dot
-     to magenta over the pale name, which is off-brand. check-design bans
-     blend modes in this file outright. */
-  box-shadow: 0 0 12px rgba(34, 197, 94, 0.35);
-  transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
-  transform: translate(-50%, -50%);
-}
-
-.cursor-ring {
-  width: 36px;
-  height: 36px;
-  border: 1.5px solid rgba(34, 197, 94, 0.5);
-  border-radius: 50%;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  transition: width 0.35s ease, height 0.35s ease, border-color 0.35s ease, opacity 0.35s ease;
-}
-
-.cursor-ring.hover {
-  width: 60px;
-  height: 60px;
-  border-color: rgba(34, 197, 94, 0.8);
-}
-
-/* ── scroll bar ── */
-::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg);
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(34, 197, 94, 0.3);
-  border-radius: 2px;
-}
-
-/* ── gradient text ── */
-.gradient-text {
-  background: linear-gradient(135deg, var(--fg) 0%, var(--accent) 50%, var(--signal) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   DISCRETE PAGER — one full-screen page at a time, zero vertical
-   scrolling. Pages are transparent layers over the world-map
-   environment; gestures flip exactly one page (see app/(en)/page.tsx).
-   ═══════════════════════════════════════════════════════════════ */
-
-.pager-root {
-  --anchor-x: 48%;
-  --anchor-y: 42%;
+/* ── 3. the stage ───────────────────────────────────────────────
+   The one environment. The gradient on `.stage` itself is the no-JS
+   and pre-hydration state: a reader who never runs JavaScript still
+   gets depth behind the document rather than a flat black field. */
+.stage {
   position: fixed;
   inset: 0;
-  height: 100dvh;
-  overflow: hidden;
-  background: #050507;
-}
-
-.pager-vignette {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background: radial-gradient(120% 90% at 50% 42%, transparent 55%, rgba(0, 0, 0, 0.52) 100%);
-}
-
-.silicon-world {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  overflow: hidden;
+  z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 80% 40% at 50% 34%, rgba(34, 197, 94, 0.07), transparent 70%),
-    linear-gradient(180deg, #050507 0%, #050507 32%, #07110c 100%);
+    radial-gradient(118% 78% at 50% 44%, rgba(34, 197, 94, 0.07) 0%, transparent 58%),
+    radial-gradient(76% 56% at 50% 108%, rgba(16, 185, 129, 0.05) 0%, transparent 72%),
+    var(--bg);
 }
 
-/* The WebGL environment host. Same layer contract and the same no-JS
-   gradient fallback as .silicon-world: without JavaScript (or before
-   the probe resolves) this gradient is the environment. */
-.cinematic-world {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  overflow: hidden;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 80% 40% at 50% 34%, rgba(34, 197, 94, 0.07), transparent 70%),
-    linear-gradient(180deg, #050507 0%, #050507 32%, #07110c 100%);
-}
-
-.cinematic-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-/* Reading scrim over the WebGL scene. The 3D objects keep their place
-   and shape at the edges and floor; the reading column sits on a calm
-   dark field so text never competes with a lit slab behind it. */
-.cinematic-world::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 60% 56% at 50% 46%, rgba(5, 5, 7, 0.78), rgba(5, 5, 7, 0.34) 68%, transparent 100%),
-    linear-gradient(0deg, rgba(5, 5, 7, 0.6), transparent 28%);
-}
-
-.silicon-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+.stage-canvas {
   display: block;
-}
-
-/* Text sits on a calm scrim: the chip stays visible at the edges and
-   floor, and goes quiet behind the reading column. */
-.silicon-grade {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 62% 58% at 50% 46%, rgba(5, 5, 7, 0.72), rgba(5, 5, 7, 0.28) 70%, transparent 100%),
-    linear-gradient(0deg, rgba(5, 5, 7, 0.55), transparent 30%);
-}
-
-/* one page layer; incoming paints above outgoing by DOM order */
-.page-abs {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  overflow: hidden;
-  background: transparent;
-  will-change: transform, opacity;
-}
-
-.page-fill {
-  position: relative;
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  /* Bottom padding clears the fixed footer + the floating section control
-     on every page and viewport. The footer publishes its measured height
-     (incl. the safe-area inset) as --site-footer-height; the control sits
-     12px above it and is 40px tall, plus 12px of breathing room = 64px.
-     Every .page-fill variant below uses this one value, so no breakpoint
-     can let content end underneath the chrome. */
-  --chrome-clearance: calc(var(--site-footer-height, 76px) + 64px);
-  padding: 80px 0 var(--chrome-clearance);
-  background: transparent;
-}
-
-/* Hero: compact top rhythm + HUD/footer clearance. Name morph is the
-   visual focus; CTAs close the stack (no motto band). */
-.page-fill--hero {
-  padding-top: clamp(64px, 10dvh, 88px);
-  padding-bottom: var(--chrome-clearance);
-  justify-content: flex-start;
-}
-
-/* Inner page scroll: when a page fits, its content centers; when it
-   overflows, the page scrolls internally instead of clipping.
-   Viewport-first when possible, content-first when necessary.
-   Pager gestures yield to this scroller until its edges (app/(en)/page.tsx). */
-.page-scroll {
+  width: 100%;
   height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  overscroll-behavior-y: contain;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(34, 197, 94, 0.35) transparent;
 }
 
-.page-scroll::-webkit-scrollbar {
-  width: 6px;
-}
-
-.page-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.page-scroll::-webkit-scrollbar-thumb {
-  background: rgba(34, 197, 94, 0.3);
-  border-radius: 3px;
-}
-
-.page-content {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 64rem;
-  margin: auto;
-  padding: 0 1.5rem;
-}
-
-/* Home uses the same viewport-first centering as the other pages.
-   Auto margins collapse to zero when the stack needs to scroll. */
-.page-fill--hero .page-content--hero {
-  margin: auto;
-  width: 100%;
-  max-width: 40rem;
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
-  /* Internal vertical rhythm between hero blocks */
-  gap: 0;
-}
-
-/* dense pages breathe wider on desktop */
-.page-content-wide {
-  max-width: 72rem;
-}
-
-@media (min-width: 768px) {
-  .page-fill {
-    padding: 92px 0 var(--chrome-clearance);
-  }
-  .page-fill--hero {
-    padding-top: 88px;
-    padding-bottom: var(--chrome-clearance);
-  }
-  .page-content {
-    padding: 0 2rem;
-  }
-  .page-content--hero {
-    max-width: 44rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
-
-/* short desktop windows: reclaim chrome space (footer is one line) */
-@media (min-width: 768px) and (max-height: 860px) {
-  .page-fill {
-    padding: 78px 0 var(--chrome-clearance);
-  }
-  .page-fill--hero {
-    padding-top: 72px;
-    padding-bottom: var(--chrome-clearance);
-  }
-  .page-content .ph-h {
-    font-size: 1.55rem;
-    margin-bottom: 1rem;
-  }
-  .page-content .ph-e {
-    margin-bottom: 0.6rem;
-  }
-  .page-content .dense-card {
-    padding: 1rem;
-  }
-}
-
-/* short phones: compact everything, hide decoration */
-@media (max-width: 767px) and (max-height: 740px) {
-  .page-fill {
-    padding: 70px 0 var(--chrome-clearance);
-  }
-  .page-fill--hero {
-    padding-top: 58px;
-    padding-bottom: var(--chrome-clearance);
-  }
-  
-  .page-content .ph-h {
-    font-size: 1.25rem;
-    margin-bottom: 0.9rem;
-  }
-  .page-content .ph-e {
-    margin-bottom: 0.5rem;
-  }
-  .page-content .dense-card {
-    padding: 0.9rem;
-  }
-  .page-content .dc-topics {
-    display: none;
-  }
-  .page-content .dc-evidence {
-    font-size: 11px;
-    margin-bottom: 0.5rem;
-  }
-  .page-content .about-p {
-    font-size: 12px;
-  }
-  .page-content .fact-v {
-    font-size: 11px;
-  }
-  .page-content .acc-btn {
-    padding-top: 0.55rem;
-    padding-bottom: 0.55rem;
-  }
-}
-
-/* tiny landscape windows: best-effort compaction */
-@media (max-height: 500px) {
-  .page-fill {
-    padding: 64px 0 var(--chrome-clearance);
-  }
-  
-  .page-content .ph-h {
-    font-size: 1.2rem;
-    margin-bottom: 0.75rem;
-  }
-}
-
-/* giant outlined page numerals fill the negative space */
-
-@keyframes living-numeral-glow {
-  from { -webkit-text-stroke-color: rgba(74, 222, 128, 0.08); }
-  to { -webkit-text-stroke-color: rgba(74, 222, 128, 0.24); }
-}
-
-/* The content is an active layer of the world: section titles breathe,
-   controls catch light, and cards respond where the pointer actually is. */
-.page-content .ph-h,
-.services-doc main h1,
-.services-doc main h2 {
-  position: relative;
-  /* Balanced line lengths: no single orphaned word ("it.") on a second
-     line at narrow widths. Ignored by browsers without support. */
-  text-wrap: balance;
-}
-
-/* Grid items default to min-width: auto, so one unbreakable child can make
-   an implicit single-column grid wider than its container (Experience at
-   360px was 345px inside 312px and clipped by the page scroller). */
-.page-content .grid > * {
-  min-width: 0;
-}
-
-.cinema-word-mask {
-  display: inline-block;
-  overflow: hidden;
-  vertical-align: top;
-  padding-bottom: 0.08em;
-  margin-bottom: -0.08em;
-}
-
-.cinema-word { display: inline-block; }
-.cinema-word--play {
-  animation: cinema-word-arrive 0.85s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-}
-
-@keyframes cinema-word-arrive {
-  from { transform: translateY(105%); }
-  to { transform: translateY(0); }
-}
-
-.page-content .ph-h::after,
-.services-doc main h1::after,
-.services-doc main h2::after {
-  content: '';
+/* The Canvas 2D fallback draws the same machine; it sits on top of
+   the gradient in the same box. */
+.stage-canvas--fallback {
   position: absolute;
-  left: 50%;
-  bottom: -0.65rem;
-  width: min(7rem, 28%);
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(74, 222, 128, 0.75), transparent);
-  transform-origin: center;
-  animation: living-title-light 8s ease-in-out infinite;
+  inset: 0;
 }
 
-@keyframes living-title-light {
-  0%, 65%, 100% { opacity: 0.18; transform: translateX(-50%) scaleX(0.55); }
-  78% { opacity: 0.85; transform: translateX(-50%) scaleX(1); }
+/* A column of shade under the text, so prose stays legible wherever
+   the camera happens to put a bright etch. On desktop it is a column:
+   the right side of the frame keeps the machine fully visible. On a
+   phone the text and the machine share the same column, so it becomes
+   an even wash instead — measured: an aperture rim was crossing the
+   prose as a green hairline at 390px wide. */
+.journey::before {
+  content: '';
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: min(100%, calc(var(--measure) + var(--gutter) * 2 + 8vw));
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(5, 5, 7, 0.88) 0%, rgba(5, 5, 7, 0.72) 52%, transparent 100%);
 }
 
-.page-content :is(.rounded-xl, .rounded-2xl, .repo-card),
-.services-doc main :is(.rounded-xl, .rounded-2xl) {
+/* ── 4. the journey ─────────────────────────────────────────────*/
+.journey {
   position: relative;
+  height: 100%;
   isolation: isolate;
 }
 
-.page-content :is(.rounded-xl, .rounded-2xl, .repo-card)::before,
-.services-doc main :is(.rounded-xl, .rounded-2xl)::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(circle at 70% 0%, rgba(74, 222, 128, 0.12), transparent 65%);
-  animation: living-card-light 9s ease-in-out infinite alternate;
-}
-
-.page-content :is(.rounded-xl, .rounded-2xl, .repo-card):nth-child(2n)::before,
-.services-doc main :is(.rounded-xl, .rounded-2xl):nth-child(2n)::before {
-  animation-delay: -4.5s;
-}
-
-@keyframes living-card-light {
-  from { opacity: 0.05; }
-  to { opacity: 0.52; }
-}
-
-.page-content [data-live-active='true'],
-.services-doc main [data-live-active='true'],
-.nav-overlay-panel [data-live-active='true'] {
-  outline: 1px solid rgba(74, 222, 128, 0.18);
-  outline-offset: 1px;
-}
-
-.page-content [data-live-active='true']::after,
-.services-doc main [data-live-active='true']::after,
-.nav-overlay-panel [data-live-active='true']::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(13rem circle at var(--live-x, 50%) var(--live-y, 50%), rgba(74, 222, 128, 0.09), transparent 68%);
-}
-
-.page-content :is(a, button),
-.services-doc main :is(a, button),
-.nav-overlay-panel :is(a, button) {
-  transition: color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, filter 0.35s ease;
-}
-
-.page-content :is(a, button):hover,
-.services-doc main :is(a, button):hover,
-.nav-overlay-panel :is(a, button):hover {
-  filter: brightness(1.18);
-  box-shadow: 0 0 28px rgba(74, 222, 128, 0.12);
-}
-
-.site-header nav a {
-  position: relative;
-}
-
-.site-header nav a::after {
-  content: '';
-  position: absolute;
+/* Masthead — one line of mono, no bar, no blur. */
+.masthead {
+  position: fixed;
+  top: 0;
   left: 0;
   right: 0;
-  bottom: -0.6rem;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #4ade80, transparent);
-  transform: scaleX(0);
-  opacity: 0;
-  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.42s ease;
-}
-
-.site-header nav a:hover::after,
-.site-header nav a:focus-visible::after {
-  transform: scaleX(1);
-  opacity: 1;
-}
-
-.site-header [data-magnetic]:hover,
-.site-footer a:hover,
-.pager-hud:hover {
-  filter: brightness(1.3);
-  text-shadow: 0 0 16px rgba(74, 222, 128, 0.5);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cinema-word--play { animation: none !important; }
-  
-  .page-content .ph-h::after,
-  .services-doc main h1::after,
-  .services-doc main h2::after,
-  .page-content :is(.rounded-xl, .rounded-2xl, .repo-card)::before,
-  .services-doc main :is(.rounded-xl, .rounded-2xl)::before { animation: none !important; }
-}
-
-/* repo card hover lift */
-.repo-card {
-  transition: border-color 0.4s ease, transform 0.4s ease;
-}
-
-.repo-card:hover {
-  border-color: rgba(228, 226, 223, 0.2);
-  transform: translateY(-2px);
-}
-
-/* ── page dots: desktop rail + phone row ── */
-
-/* Desktop rail lives in the dedicated lower navigation strip — the
-   same safe zone as the phone row — so it never sits over content,
-   imagery or controls. Horizontal, centred, above the footer. */
-/* ── TOC control — ONE bottom navigation pill (not progress) ──
-   Opens the section index. Progress lives on the footer seam. */
-.pager-hud-slot {
-  position: absolute;
   z-index: 30;
-  left: 50%;
-  bottom: calc(var(--site-footer-height, 76px) + 12px);
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
-  justify-content: center;
-  pointer-events: none;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: var(--head-height);
+  padding: 14px var(--gutter) 10px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
 }
 
-.pager-hud {
-  position: relative;
-  pointer-events: auto;
-  z-index: 1;
-  min-width: 44px;
-  min-height: 40px;
-  height: 40px;
-  max-width: min(220px, calc(100vw - 48px));
+.masthead[data-variant='document'] {
+  position: sticky;
+  border-bottom: 1px solid var(--border);
+  background: var(--chrome);
+}
+
+.masthead-mark {
+  color: var(--fg);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.masthead-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 2.4vw, 26px);
+}
+
+.masthead-link {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 14px 0 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(34, 197, 94, 0.35);
-  background: rgba(8, 10, 8, 0.62);
-  color: #4ade80;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  cursor: pointer;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
-}
-
-.pager-hud-label {
-  font-family: ui-monospace, monospace;
-  font-size: 10px;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
   letter-spacing: 0.08em;
+  text-decoration: none;
   text-transform: uppercase;
-  color: rgba(228, 226, 223, 0.72);
-  max-width: 9.5rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.3s ease;
 }
 
-.pager-hud:hover {
-  border-color: rgba(74, 222, 128, 0.6);
-  background: rgba(34, 197, 94, 0.12);
+.masthead-link:hover,
+.masthead-link:focus-visible {
+  color: var(--accent-bright);
 }
 
-.pager-hud:focus-visible {
-  outline: 2px solid rgba(74, 222, 128, 0.7);
-  outline-offset: 3px;
+.masthead-link--icon {
+  letter-spacing: 0;
 }
 
-.pager-hud[data-nav-open='true'] {
-  border-color: rgba(74, 222, 128, 0.65);
-  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
-}
-
-@media (min-width: 768px) {
-  .pager-hud-slot {
-    bottom: calc(var(--site-footer-height, 52px) + 12px);
-  }
-}
-
-@media (max-width: 360px) {
-  .pager-hud-label {
-    display: none;
-  }
-  .pager-hud {
-    padding: 0 12px;
-  }
-}
-
-/* Phone: content dissolves before the fixed footer and the section pill.
-   Without this, body copy ran underneath both and was unreadable where
-   they overlapped. The fade is a visual edge only; scrolling still
-   reaches the last line, which clears the chrome clearance above. */
-.page-scroll {
-  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 210px), transparent calc(100% - 136px));
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 210px), transparent calc(100% - 136px));
-}
-
-/* Footer + scroll-progress seam (immediately above the footer bar). */
-.site-footer {
-  pointer-events: none;
-}
-
-.site-footer .footer-bar {
-  pointer-events: auto;
-  padding-bottom: calc(0.625rem + env(safe-area-inset-bottom, 0px));
-}
-
-/* SVG camera movement and page turns compete with live card blur on both
-   phone and desktop. The translucent card fills retain their contrast. */
-.page-scroll .backdrop-blur-md {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-.footer-progress {
-  position: relative;
-  height: 2px;
-  width: 100%;
-  background: rgba(34, 197, 94, 0.12);
-  overflow: hidden;
-}
-
-.footer-progress-fill {
+/* The chapter page: one scroller, one reading column. */
+.page {
   position: absolute;
-  inset: 0;
-  transform-origin: left center;
-  background: linear-gradient(90deg, #16a34a, #4ade80);
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.45);
-  will-change: transform;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .footer-progress-fill {
-    transition: none;
-  }
-}
-
-/* ── snap carousels (dense pages on phones) ── */
-
-.snap-carousel {
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  margin: 0 -1.5rem;
-  padding: 0 1.5rem 6px;
-  overscroll-behavior-x: contain;
-}
-
-.snap-carousel::-webkit-scrollbar {
-  display: none;
-}
-
-.snap-slide {
-  flex: 0 0 100%;
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
-  min-width: 0;
-}
-
-/* ── THE SIGNATURE — the name as a dimensional object ──────────
-   See DESIGN_SYSTEM.md §5b. The canonical name stays real DOM text in
-   the page's only `h1`; the depth is CSS 3D. No canvas, no WebGL, no
-   image text, no blend modes.
-
-   Three nested layers share one perspective:
-     .hero-name   the type itself (size, family, colour)
-     .sig-stage   owns the perspective and every --sig-* token
-     .sig-tilt    owns the pointer tilt, in that perspective
-     .sig-c       one grapheme cluster, with its own depth
-
-   Every number arrives from MOTION.signature as a custom property
-   (written by HeroScene), so this file cannot drift from the tokens. */
-
-.sig-stage {
-  display: inline-block;
-  perspective: var(--sig-perspective, 1500px);
-  /* slightly above centre: the name reads as seen from just below */
-  perspective-origin: 50% 45%;
-}
-
-.sig-tilt {
-  display: inline-block;
-  transform-style: preserve-3d;
-  transform: rotateX(var(--sig-rx, 0deg)) rotateY(var(--sig-ry, 0deg));
-  transition: transform var(--sig-follow, 0.45s) cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* A word is the shaping unit: it never splits, so no ligature or matra
-   can be torn across a line break or a transform. */
-.sig-word {
-  display: inline-block;
-  transform-style: preserve-3d;
-}
-
-/* A grapheme cluster is the motion unit — one indivisible box. */
-.sig-c {
-  display: inline-block;
-  transform-style: preserve-3d;
-  /* the resting state, and the only state without JS-driven motion */
-  transform: none;
-  opacity: 1;
-}
-
-/* The hero overrides the shared word-rise: the signature's motion is
-   per-cluster and three-dimensional, so the flat 2D rise would fight
-   it. Other headings keep `cinema-word-arrive` untouched. */
-.hero-name .cinema-word--play {
-  animation: none;
-}
-
-/* Two animations, two properties, one pass each.
-   `sig-rise`  — transform + opacity: the cluster arrives out of depth.
-   `sig-gleam` — shadow only: light travels across the letterforms.
-   The gleam's extra per-cluster delay is what makes it read as travel
-   rather than a simultaneous flash. `backwards` fill holds the opening
-   frame during the delay, so nothing flickers in at full strength.
-
-   The gleam is a halo on the glyphs, in the brand green. It is NOT the
-   retired near-white light band that sat *behind* the name: that motif
-   and its near-white ink are both on the banned list in
-   `scripts/check-build.mjs`, which scans this stylesheet as shipped.
-   The ink here never changes colour at all — hence shadow only. */
-.hero-name .cinema-word--play .sig-c {
-  animation:
-    sig-rise var(--sig-cluster, 0.92s) var(--sig-ease, ease-out) backwards,
-    sig-gleam var(--sig-gleam, 1.15s) var(--sig-ease, ease-out) backwards;
-  animation-delay:
-    calc(var(--sig-lead, 0.35s) + var(--i, 0) * var(--sig-stagger, 0.055s)),
-    calc(var(--sig-gleam-lead, 0.62s) + var(--i, 0) * var(--sig-gleam-stagger, 0.042s));
-}
-
-@keyframes sig-rise {
-  from {
-    opacity: 0;
-    transform: translate3d(0, var(--sig-rise, 0.42em), var(--sig-enter-z, -220px))
-      rotateX(var(--sig-enter-rx, 14deg))
-      rotateY(var(--sig-enter-ry, -28deg));
-  }
-  60% { opacity: 1; }
-  to { opacity: 1; transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg); }
-}
-
-@keyframes sig-gleam {
-  0%, 100% { text-shadow: none; }
-  50% { text-shadow: 0 0 0.36em rgba(74, 222, 128, 0.38); }
-}
-
-/* Reduced motion: the signature is simply present. The server ships the
-   `--play` class either way, so this must switch the motion off here
-   rather than rely on the component. */
-@media (prefers-reduced-motion: reduce) {
-  .hero-name .cinema-word--play .sig-c {
-    animation: none;
-  }
-  .sig-tilt {
-    transform: none;
-    transition: none;
-  }
-}
-
-/* ── THE MOBILE WORKSTATION — a stack, not a product shot ──────
-   Six slabs in one shared perspective, stacked in dependency order
-   with the Android host at the bottom. The selected slab comes
-   forward and brightens; the rest stay seated and recede.
-
-   CSS 3D only — same language as the signature, no canvas and no
-   WebGL. Depth per slab comes from `--d` (how deep it sits) and
-   `--lift` (0 or 1, whether it is the selected one), both written by
-   the component. Touch and keyboard select; hover is only a shortcut. */
-
-/* Left-aligned with the shared PageHeading above it; the chapter reads
-   as one column rather than a centred block under a left-set title. */
-.ws-intro {
-  color: rgba(228, 226, 223, 0.62);
-  margin: 0 0 1.6rem;
-}
-
-.ws-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.2rem;
-  align-items: start;
-  width: 100%;
+  inset: var(--head-height) 0 var(--chrome-foot, var(--foot-height));
+  z-index: 10;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding: clamp(24px, 7vh, 72px) var(--gutter) calc(clamp(40px, 9vh, 96px) + var(--rail-strip));
+  scrollbar-gutter: stable;
 }
 
 @media (min-width: 900px) {
-  .ws-grid {
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-    gap: 2rem;
+  .page {
+    padding-right: calc(var(--rail-width) + var(--gutter));
   }
 }
 
-.ws-stack {
-  list-style: none;
-  margin: 0;
-  padding: 0.6rem 0;
-  perspective: 1100px;
-  perspective-origin: 50% 40%;
+.chapter {
+  max-width: var(--measure);
+  animation: settle var(--settle) var(--settle-ease) both;
 }
 
-.ws-slab-row {
-  display: block;
-  transform-style: preserve-3d;
+.chapter-body {
+  animation: settle var(--settle) var(--settle-ease) var(--settle-stagger) both;
 }
 
-/* Each slab sits a little further back and a little lower the deeper
-   it is in the stack; the selected one steps toward the viewer. */
-.ws-slab {
-  --slab-z: calc(var(--lift, 0) * 26px - var(--d, 0) * 3px);
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-areas: 'index label' 'index runs';
-  gap: 0 0.85rem;
-  width: 100%;
-  padding: 0.62rem 0.9rem;
-  margin: 0 0 0.3rem;
-  text-align: left;
-  border: 1px solid var(--border);
-  border-left: 2px solid rgba(74, 222, 128, calc(0.18 + var(--lift, 0) * 0.62));
-  background: linear-gradient(
-    90deg,
-    rgba(34, 197, 94, calc(0.03 + var(--lift, 0) * 0.07)),
-    rgba(6, 7, 6, 0.5)
-  );
-  color: var(--fg);
-  transform: translate3d(0, 0, var(--slab-z)) rotateX(calc(var(--lift, 0) * -1.5deg));
-  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.42s ease,
-    background-color 0.42s ease, opacity 0.42s ease;
-  opacity: calc(0.62 + var(--lift, 0) * 0.38);
-  cursor: pointer;
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
-.ws-slab--on {
-  border-color: rgba(74, 222, 128, 0.42);
-}
-
-.ws-slab-index {
-  grid-area: index;
-  align-self: center;
+/* Depth rail — a gauge, not a menu. */
+.rail {
+  position: fixed;
+  z-index: 30;
+  right: var(--gutter);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--rail-width);
+  font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 10px;
-  color: rgba(74, 222, 128, 0.7);
+}
+
+.rail-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.rail-head-value {
+  color: var(--accent-bright);
   letter-spacing: 0.1em;
 }
 
-.ws-slab-label {
-  grid-area: label;
-  font-size: 13px;
-  font-weight: 500;
+.rail-head-total {
+  color: var(--muted);
 }
 
-.ws-slab-runs {
-  grid-area: runs;
+.rail-list {
+  list-style: none;
+}
+
+.rail-item {
+  border-bottom: 1px solid var(--border);
+}
+
+.rail-tick {
+  display: grid;
+  grid-template-columns: 2.2em 1fr;
+  align-items: baseline;
+  gap: 2px 10px;
+  padding: 9px 0 8px 10px;
+  border-left: 1px solid transparent;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.3s ease, border-color 0.3s ease, padding-left 0.3s ease;
+}
+
+.rail-tick:hover,
+.rail-tick:focus-visible {
+  color: var(--fg);
+  border-left-color: var(--accent);
+}
+
+.rail-stratum {
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.rail-label {
+  grid-column: 2;
+  color: rgba(228, 226, 223, 0.3);
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.rail-item[data-state='current'] .rail-tick {
+  padding-left: 14px;
+  border-left-color: var(--accent-bright);
+  color: var(--fg);
+}
+
+.rail-item[data-state='current'] .rail-index {
+  color: var(--accent-bright);
+}
+
+.rail-item[data-state='behind'] .rail-tick {
+  color: rgba(228, 226, 223, 0.26);
+}
+
+/* Phones and short windows: the gauge collapses to one strip of
+   ticks above the footer. The current stratum keeps its name; the
+   others are reduced to their index, which is what a gauge is. */
+@media (max-width: 899px) {
+  :root {
+    --rail-strip: 54px;
+  }
+
+  .journey::before {
+    width: 100%;
+    background: linear-gradient(
+      180deg,
+      rgba(5, 5, 7, 0.92) 0%,
+      rgba(5, 5, 7, 0.82) 46%,
+      rgba(5, 5, 7, 0.9) 100%
+    );
+  }
+
+  .rail {
+    right: 0;
+    left: 0;
+    top: auto;
+    bottom: var(--chrome-foot, var(--foot-height));
+    width: auto;
+    transform: none;
+    padding: 7px var(--gutter) 8px;
+    /* Opaque, not a wash: the chapter scrolls behind it, and a
+       translucent gauge over running text was unreadable. */
+    background: var(--chrome);
+    border-top: 1px solid var(--border);
+  }
+
+  .rail-head {
+    padding-bottom: 5px;
+  }
+
+  .rail-list {
+    display: flex;
+    gap: 2px;
+  }
+
+  .rail-item {
+    flex: 1 1 0;
+    border-bottom: 0;
+  }
+
+  .rail-tick {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 7px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .rail-item[data-state='current'] .rail-tick {
+    padding-left: 0;
+    border-top-color: var(--accent-bright);
+  }
+
+  .rail-stratum,
+  .rail-label {
+    display: none;
+  }
+
+  .rail-item[data-state='current'] .rail-stratum {
+    display: block;
+    color: var(--accent-bright);
+  }
+}
+
+/* Footer — the proof readout. On a narrow phone the two halves each
+   wrapped to three lines side by side, eating a third of the viewport;
+   below 600px they stack, so each is one line of its own. */
+.site-foot {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 20px;
+  min-height: var(--foot-height);
+  padding: 10px var(--gutter);
+  border-top: 1px solid var(--border);
+  background: var(--chrome);
+  color: var(--muted);
+  font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 10px;
-  line-height: 1.5;
-  color: rgba(228, 226, 223, 0.45);
 }
 
-.ws-detail {
-  border: 1px solid var(--border);
-  border-top: 2px solid rgba(74, 222, 128, 0.38);
-  background: var(--card);
-  padding: 1.1rem 1.1rem 1.2rem;
+.site-foot[data-variant='document'] {
+  position: static;
 }
 
-.ws-detail-kicker {
-  margin: 0 0 0.45rem;
-  color: rgba(74, 222, 128, 0.75);
+@media (max-width: 599px) {
+  .site-foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    padding: 8px var(--gutter);
+  }
 }
 
-.ws-detail-title {
-  margin: 0 0 0.6rem;
-  font-size: 1.35rem;
-  line-height: 1.2;
+.site-foot-proof {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.3s ease;
 }
 
-.ws-detail-body {
-  margin: 0 0 0.85rem;
-  font-size: 0.875rem;
-  line-height: 1.65;
-  color: rgba(228, 226, 223, 0.78);
+.site-foot-proof:hover,
+.site-foot-proof:focus-visible {
+  color: var(--accent-bright);
 }
 
-.ws-detail-line {
-  margin: 0 0 0.45rem;
+.site-foot-proof-label {
+  color: rgba(228, 226, 223, 0.62);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* ── 5. the record system ───────────────────────────────────────
+   components/record.tsx. A mono label on a hairline, prose, and one
+   accent reserved for state. No enclosure anywhere. */
+.chapter-head {
+  margin-bottom: clamp(20px, 4vh, 34px);
+}
+
+.chapter-depth {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 10px;
-  line-height: 1.6;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+.chapter-depth-index {
+  color: var(--accent-bright);
+}
+
+.chapter-depth-stratum {
+  margin-left: 6px;
+  padding-left: 10px;
+  border-left: 1px solid var(--border);
+  text-transform: uppercase;
+}
+
+.chapter-eyebrow {
+  margin-bottom: 10px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
   color: rgba(228, 226, 223, 0.55);
 }
 
-.ws-detail-evidence {
-  font-family: var(--font-inter), system-ui, sans-serif;
-  font-size: 0.78rem;
-  color: rgba(228, 226, 223, 0.6);
+.chapter-heading {
+  font-size: clamp(1.9rem, 4.6vw, 3.4rem);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: var(--fg);
 }
 
-.ws-detail-tag {
-  color: rgba(74, 222, 128, 0.8);
+.chapter-heading--name {
+  font-size: clamp(2.6rem, 9vw, 5.6rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
 }
 
-.ws-note {
-  margin: 1.4rem 0 0;
+.chapter-lede {
+  margin-top: 16px;
+  font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+  line-height: 1.62;
+  color: rgba(228, 226, 223, 0.72);
+}
+
+.chapter-lede > * + * {
+  margin-top: 6px;
+}
+
+.lede-role {
+  color: var(--fg);
+}
+
+.lede-line {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.chapter-note {
+  margin-top: 14px;
+  font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 10px;
+  line-height: 1.7;
   color: rgba(228, 226, 223, 0.38);
 }
 
-/* Phones: one column, so the stack and its detail have to share a
-   short viewport. The slabs tighten, the detail is pulled up directly
-   under them, and the column keeps enough bottom room that the fixed
-   pager control never sits on top of the last layer. */
-@media (max-width: 899px) {
-  .ws-grid {
-    gap: 0.75rem;
-    padding-bottom: 4.5rem;
-  }
+.block {
+  margin-top: clamp(26px, 5vh, 44px);
+}
 
-  .ws-stack {
-    padding: 0.2rem 0;
-  }
+.block-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(34, 197, 94, 0.26);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-bright);
+}
 
-  .ws-slab {
-    padding: 0.5rem 0.75rem;
-    margin-bottom: 0.25rem;
-    gap: 0 0.6rem;
-  }
+.block-note {
+  letter-spacing: 0.08em;
+  text-transform: none;
+  color: var(--muted);
+}
 
-  .ws-slab-label {
-    font-size: 12px;
-  }
+.rows {
+  margin-top: 14px;
+}
 
-  .ws-slab-runs {
-    font-size: 9px;
-  }
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 13em) minmax(0, 1fr);
+  gap: 3px 18px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
 
-  .ws-detail {
-    padding: 0.9rem 0.9rem 1rem;
-  }
+.row-label {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(228, 226, 223, 0.58);
+}
 
-  .ws-detail-title {
-    font-size: 1.15rem;
+.row-value {
+  font-size: 13px;
+  line-height: 1.68;
+  color: rgba(228, 226, 223, 0.8);
+}
+
+/* Inside a record the label is a single field name ("My role:"), not a
+   column of them, so it hugs its text instead of reserving the full
+   label column — otherwise the value started a third of the way across
+   the page with nothing between. */
+.record .row {
+  grid-template-columns: minmax(0, 8.5em) minmax(0, 1fr);
+}
+
+@media (max-width: 599px) {
+  .row,
+  .record .row {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
-/* Reduced motion: the stack is a plain list. Selection still works and
-   still reads, it simply does not travel in depth. */
-@media (prefers-reduced-motion: reduce) {
-  .ws-slab {
-    transform: none;
-    transition: none;
-  }
+.record {
+  margin-top: clamp(22px, 4vh, 36px);
+  padding-top: 2px;
 }
 
-/* ── keyboard focus ── */
-:focus-visible {
-  outline: 2px solid rgba(34, 197, 94, 0.8);
-  outline-offset: 3px;
-  border-radius: 4px;
+.record-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
 }
 
-/* tactile press on plain buttons */
-button:active {
-  transform: scale(0.95);
+.record-name {
+  font-size: clamp(1.05rem, 2vw, 1.4rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--fg);
 }
 
-/* ── Bangla typography ──
-   A real Bengali webfont, loaded through next/font as
-   `--font-bengali`, replaces the old system-fallback stack (which
-   named 'Noto Sans Bengali' while nothing ever loaded it, so Bangla
-   fell through to a Latin-only face on most devices).
+.record-stamp {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
 
-   Indic metrics differ from Latin: matras above and descenders
-   below need more leading than the tight Latin line-heights, and wide
-   letter-spacing breaks Indic shaping. So when Bangla is active the
-   tracking collapses and the leading opens up — deliberately, not as
-   a side effect. */
+.record-body {
+  margin-top: 10px;
+}
+
+.record-evidence,
+.record-tools {
+  margin-top: 10px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  line-height: 1.75;
+  color: rgba(228, 226, 223, 0.5);
+}
+
+.record-evidence-label {
+  margin-right: 8px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.record-refs {
+  margin-top: 10px;
+}
+
+/* State marks. The only use of colour as information in the build. */
+.mark {
+  font-size: 9px;
+  line-height: 1;
+  color: var(--muted);
+}
+
+.mark[data-state='verified'] {
+  color: var(--accent);
+}
+.mark[data-state='live'] {
+  color: var(--accent-bright);
+}
+.mark[data-state='now'] {
+  color: var(--signal);
+}
+.mark[data-state='experimental'],
+.mark[data-state='investigating'] {
+  color: rgba(74, 222, 128, 0.55);
+}
+
+/* Links. One treatment for every outbound reference in the site. */
+.ref {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: rgba(228, 226, 223, 0.74);
+  text-decoration: underline;
+  text-decoration-color: rgba(34, 197, 94, 0.4);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition: color 0.3s ease, text-decoration-color 0.3s ease;
+}
+
+.ref:hover,
+.ref:focus-visible {
+  color: var(--accent-bright);
+  text-decoration-color: var(--accent-bright);
+}
+
+.ref--strong {
+  color: var(--fg);
+  text-decoration-color: var(--accent);
+}
+
+.ref-arrow {
+  font-size: 9px;
+}
+
+.refs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+}
+
+.record-refs .refs,
+.chapter-body > .refs {
+  margin-top: 2px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 0;
+  margin-top: 12px;
+  list-style: none;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: rgba(228, 226, 223, 0.52);
+}
+
+.tag + .tag::before {
+  content: '·';
+  margin: 0 8px;
+  color: rgba(34, 197, 94, 0.5);
+}
+
+.prose {
+  font-size: clamp(0.875rem, 1.1vw, 0.95rem);
+  line-height: 1.75;
+  color: rgba(228, 226, 223, 0.74);
+}
+
+.prose p + p {
+  margin-top: 10px;
+}
+
+/* ── 6. type ────────────────────────────────────────────────────
+   Display headings are an editorial serif (Instrument Serif; Noto
+   Serif Bengali for Bangla). Body is Inter / Noto Sans Bengali.
+   Labels, stamps and references are JetBrains Mono. */
+.chapter-heading,
+.record-name,
+.lede-role,
+.services-doc main h1,
+.services-doc main h2 {
+  font-family: var(--font-serif), 'Times New Roman', serif;
+  font-weight: 400;
+}
+
+/* Indic metrics: matras above and descenders below need more
+   leading than a Latin line, and wide tracking breaks shaping. So
+   Bangla opens the leading and collapses the tracking — on purpose,
+   not as a side effect of a fallback face. */
 body.lang-bn {
   font-family: var(--font-bengali), var(--font-inter), system-ui, sans-serif;
   line-height: 1.85;
 }
 
-body.lang-bn .font-mono{
+body.lang-bn .chapter-heading,
+body.lang-bn .record-name,
+body.lang-bn .lede-role,
+body.lang-bn .services-doc main h1,
+body.lang-bn .services-doc main h2 {
+  font-family: var(--font-serif-bn), var(--font-bengali), system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+body.lang-bn .chapter-heading--name {
+  font-size: clamp(2.1rem, 7vw, 4.4rem);
+}
+
+body.lang-bn .chapter-depth,
+body.lang-bn .chapter-eyebrow,
+body.lang-bn .block-label,
+body.lang-bn .row-label,
+body.lang-bn .record-stamp,
+body.lang-bn .record-evidence,
+body.lang-bn .record-tools,
+body.lang-bn .chapter-note,
+body.lang-bn .rail,
+body.lang-bn .masthead,
+body.lang-bn .site-foot,
+body.lang-bn .ref,
+body.lang-bn .tags,
+body.lang-bn .lede-line {
   font-family: var(--font-bengali), var(--font-inter), system-ui, sans-serif;
+  letter-spacing: 0.02em;
 }
 
-body.lang-bn [class*="tracking-"] {
-  letter-spacing: 0.01em !important;
+body.lang-bn .prose,
+body.lang-bn .row-value {
+  line-height: 1.95;
 }
-
-body.lang-bn h1,
-body.lang-bn h2,
-body.lang-bn h3 {
-  line-height: 1.34;
-  letter-spacing: 0 !important;
-}
-
-body.lang-bn .hero-status { letter-spacing: 0.12em !important; }
 
 body.lang-bn p,
 body.lang-bn li,
-body.lang-bn span {
+body.lang-bn span,
+body.lang-bn dd {
   overflow-wrap: break-word;
 }
 
-/* ── editorial display type ──
-   Headings are set in an editorial serif (Instrument Serif; Noto Serif
-   Bengali for Bengali) for a film-title tone. Body stays Inter / Noto
-   Sans Bengali, technical labels JetBrains Mono. */
-.hero-name,
-.page-content h1,
-.page-content h2,
-.services-doc main h1,
-.services-doc main h2 {
-  font-family: var(--font-serif), 'Times New Roman', serif;
-  font-weight: 400;
-  letter-spacing: -0.012em;
-}
-
-body.lang-bn .hero-name,
-body.lang-bn .page-content h1,
-body.lang-bn .page-content h2,
-body.lang-bn .services-doc main h1,
-body.lang-bn .services-doc main h2 {
-  font-family: var(--font-serif-bn), var(--font-bengali), var(--font-inter), system-ui, sans-serif;
-  font-weight: 500;
-  letter-spacing: 0 !important;
-}
-
-.hero-name {
-  font-size: clamp(3.4rem, 11.5vw, 8.5rem);
-  line-height: 1.02;
-  margin: 0 0 1.1rem;
-  text-wrap: balance;
-  color: var(--fg);
-}
-
-body.lang-bn .hero-name {
-  font-size: clamp(2.9rem, 9.5vw, 7rem);
-  line-height: 1.25;
-}
-
-/* The leading status line sits above the name and is the only place
-   the location appears. `.hero-kicker` was retired with the duplicate. */
-.hero-status--lead {
-  margin: 0 0 1.2rem;
-  opacity: 0.9;
-}
-
-/* phones: the identity mark borrows 8px of the page gutter per side
-   (viewport margins stay 16px), so the larger mobile name never wraps
-   or touches the screen edge */
-@media (max-width: 479px) {
-  .hero-name {
-    margin-inline: -0.5rem;
-  }
-}
-
-/* ── hero hierarchy ──
-   One identity: status line → name → single professional descriptor
-   → what/why → where to explore. Nothing repeats. */
-.hero-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6em;
-  color: var(--accent);
-}
-
-.hero-status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 9999px;
-  background: var(--accent);
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
-  animation: statusPulse 3.4s ease-in-out infinite;
-}
-
-@keyframes statusPulse {
-  0%, 100% { opacity: 0.45; transform: scale(0.85); }
-  50% { opacity: 1; transform: scale(1); }
-}
-
-.hero-role {
-  color: rgba(228, 226, 223, 0.92);
-  letter-spacing: -0.01em;
-}
-
-/* ── navigation overlay ──
-   The pager's index as a dialog. Real anchors to real routes. */
-.nav-overlay-root {
-  position: fixed;
-  inset: 0;
-  z-index: 100001;
-  pointer-events: none;
-  /* Hidden from the tab order once closed (the delay lets the exit
-     animation play first). Without this the rows would still be
-     focusable behind an aria-hidden dialog — an axe violation. */
-  visibility: hidden;
-  transition: visibility 0s linear 0.5s;
-}
-
-.nav-overlay-root[data-open='true'] {
-  visibility: visible;
-  transition-delay: 0s;
-}
-
-.nav-overlay-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(3, 4, 3, 0.74);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-/* The panel is physically anchored above the bottom bar — the HUD
-   grows upward out of the bar and contracts back into it (motion in
-   NavOverlay.tsx, transform-origin at the panel's bottom edge). The
-   seam connector below and the bar's own data-nav-open glow keep the
-   origin relationship obvious. Sized to fit inside a phone viewport
-   with room for the bar and footer; the list scrolls internally. */
-.nav-overlay-panel {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(106px + env(safe-area-inset-bottom));
-  margin: 0 auto;
-  width: min(430px, calc(100% - 1.5rem));
-  max-height: min(64dvh, 560px);
-  display: flex;
-  flex-direction: column;
-  padding: 0.9rem 1rem 1.15rem;
-  border: 1px solid rgba(34, 197, 94, 0.16);
-  border-radius: 16px;
-  background: rgba(8, 9, 8, 0.94);
-  /* layered depth: a faint green wash from the top edge and an inner
-     hairline ring, so the surface reads as an instrument layer */
-  background-image: linear-gradient(180deg, rgba(34, 197, 94, 0.05), rgba(34, 197, 94, 0) 24%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 26px rgba(34, 197, 94, 0.1),
-    inset 0 0 0 1px rgba(34, 197, 94, 0.05);
-}
-
-/* the seam: a short light trace from the panel's bottom edge toward
-   the bar control it emerged from — it scales in from the bar end as
-   the panel grows, so the emergence stays physically connected */
-.nav-overlay-panel::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -20px;
-  width: 1px;
-  height: 20px;
-  transform: translateX(-50%);
-  transform-origin: 50% 100%;
-  background: linear-gradient(180deg, rgba(34, 197, 94, 0.55), transparent);
-  pointer-events: none;
-}
-
-.nav-overlay-root[data-open='true'] .nav-overlay-panel::after {
-  animation: hud-seam-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes hud-seam-in {
-  from { transform: translateX(-50%) scaleY(0); }
-  to { transform: translateX(-50%) scaleY(1); }
-}
-
-/* technical framing — segmented corner brackets over the panel's
-   hairline border, one asymmetric edge tick, a short top-edge segment
-   and a one-shot scan sweep: HUD geometry that keeps the surface from
-   reading as a conventional dialog box */
-.nav-overlay-frame {
-  position: absolute;
-  inset: 5px;
-  border-radius: 11px;
-  pointer-events: none;
-  opacity: 0.75;
-  background-repeat: no-repeat;
-  background-image:
-    linear-gradient(#4ade80, #4ade80),
-    linear-gradient(#4ade80, #4ade80),
-    linear-gradient(#4ade80, #4ade80),
-    linear-gradient(#4ade80, #4ade80),
-    linear-gradient(#4ade80, #4ade80),
-    linear-gradient(#4ade80, #4ade80),
-    linear-gradient(#4ade80, #4ade80),
-    linear-gradient(#4ade80, #4ade80),
-    linear-gradient(90deg, transparent, rgba(74, 222, 128, 0.7), transparent),
-    linear-gradient(rgba(74, 222, 128, 0.4), rgba(74, 222, 128, 0.4));
-  background-size:
-    22px 1px, 1px 22px,
-    22px 1px, 1px 22px,
-    22px 1px, 1px 22px,
-    22px 1px, 1px 22px,
-    54px 1px,
-    1px 8%;
-  background-position:
-    left top, left top,
-    right top, right top,
-    left bottom, left bottom,
-    right bottom, right bottom,
-    34% top,
-    right 62%;
-  overflow: hidden;
-}
-
-.nav-overlay-frame::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 34%;
-  width: 1px;
-  height: 13%;
-  background: rgba(74, 222, 128, 0.55);
-}
-
-/* one-shot scan sweep along the frame's top edge as the HUD expands —
-   clipped to the frame, transform-only */
-.nav-overlay-root[data-open='true'] .nav-overlay-frame::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 46px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #4ade80, transparent);
-  animation: hud-scan 1.1s cubic-bezier(0.4, 0, 0.2, 1) 0.12s both;
-}
-
-@keyframes hud-scan {
-  from {
-    transform: translateX(-46px);
-    opacity: 0;
-  }
-  18% {
-    opacity: 1;
-  }
-  to {
-    transform: translateX(430px);
-    opacity: 0;
-  }
-}
-
-/* content resolves after the frame expands upward — rows stagger in */
-.nav-overlay-root[data-open='true'] .nav-overlay-list li {
-  animation: hud-row-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.nav-overlay-list li:nth-child(1) { animation-delay: 0.1s; }
-.nav-overlay-list li:nth-child(2) { animation-delay: 0.12s; }
-.nav-overlay-list li:nth-child(3) { animation-delay: 0.14s; }
-.nav-overlay-list li:nth-child(4) { animation-delay: 0.16s; }
-.nav-overlay-list li:nth-child(5) { animation-delay: 0.18s; }
-.nav-overlay-list li:nth-child(6) { animation-delay: 0.2s; }
-.nav-overlay-list li:nth-child(7) { animation-delay: 0.22s; }
-.nav-overlay-list li:nth-child(8) { animation-delay: 0.24s; }
-.nav-overlay-list li:nth-child(9) { animation-delay: 0.26s; }
-.nav-overlay-list li:nth-child(10) { animation-delay: 0.28s; }
-
-@keyframes hud-row-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: none; }
-}
-
-/* the control sparks once when the HUD it generates opens */
-.pager-hud[data-nav-open='true'] {
-  animation: hud-spark 0.5s ease-out;
-}
-
-@keyframes hud-spark {
-  from { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
-  to { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nav-overlay-root[data-open='true'] .nav-overlay-list li,
-  .nav-overlay-root[data-open='true'] .nav-overlay-panel::after,
-  .nav-overlay-root[data-open='true'] .nav-overlay-frame::after,
-  .pager-hud[data-nav-open='true'] {
-    animation: none;
-  }
-}
-
-.nav-overlay-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.55rem;
-  padding: 0 0.2rem;
-}
-
-.nav-overlay-headtext {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.6rem;
-  min-width: 0;
-}
-
-.nav-overlay-eyebrow {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 9px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.32em;
-  color: var(--accent);
-  margin: 0;
-}
-
-/* the current page, named once, quietly — the HUD carries no large
-   page number; the page itself already does */
-.nav-overlay-current {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 9.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(228, 226, 223, 0.45);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.nav-overlay-close {
-  flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
-  border-radius: 9999px;
-  border: 1px solid rgba(34, 197, 94, 0.35);
-  color: #4ade80;
-  background: transparent;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: border-color 0.25s ease, background 0.25s ease;
-}
-
-.nav-overlay-close:hover {
-  border-color: rgba(74, 222, 128, 0.6);
-  background: rgba(34, 197, 94, 0.08);
-}
-
-.nav-overlay-scroll {
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-/* bottom-edge progress — the same instrument as the bar's track:
-   fixed start anchor at the left, fill = index / (total − 1), so
-   page 1 = 0% and page 7 completes the cycle on the HUD's border */
-.nav-overlay-progress {
-  position: absolute;
-  left: 14px;
-  right: 14px;
-  bottom: 6px;
-  height: 1px;
-  background: rgba(34, 197, 94, 0.14);
-  border-radius: 1px;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.nav-overlay-progress-fill {
-  display: block;
-  height: 100%;
-  transform-origin: left center;
-  transform: scaleX(0);
-  background: linear-gradient(90deg, var(--accent), var(--accent-bright));
-  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
-}
-
-.nav-overlay-list ol {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.nav-row {
-  display: grid;
-  grid-template-columns: 2.1rem 1fr auto 0.7rem;
-  align-items: center;
-  gap: 0.7rem;
-  padding: 0.62rem 0.7rem;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  color: rgba(228, 226, 223, 0.66);
-  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
-}
-
-.nav-row:hover,
-.nav-row:focus-visible {
-  background: rgba(228, 226, 223, 0.035);
-  border-color: rgba(228, 226, 223, 0.1);
-  color: var(--fg);
-  transform: translateX(2px);
-}
-
-.nav-row-current {
-  background: rgba(34, 197, 94, 0.07);
-  border-color: rgba(34, 197, 94, 0.28);
-  color: var(--fg);
-}
-
-.nav-row-num {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  color: rgba(228, 226, 223, 0.35);
-}
-
-.nav-row-current .nav-row-num { color: var(--accent-bright); }
-
-.nav-row-label { font-size: 0.94rem; }
-
-.nav-row-here {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--accent-bright);
-  white-space: nowrap;
-}
-
-.nav-row-mark {
-  justify-self: end;
-  width: 6px;
-  height: 6px;
-  border-radius: 9999px;
-  background: rgba(228, 226, 223, 0.15);
-}
-
-.nav-row-current .nav-row-mark {
-  background: var(--accent);
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
-}
-
-.nav-overlay-hint {
-  margin-top: 0.85rem;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 9.5px;
-  letter-spacing: 0.05em;
-  text-align: center;
-  color: rgba(228, 226, 223, 0.32);
-}
-
-/* ── pull-to-refresh indicator ──
-   Sits below the header and slides out from under the chrome. */
-.ptr-host {
-  position: fixed;
-  left: 50%;
-  top: calc(60px + env(safe-area-inset-top));
-  z-index: 9996;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.22s ease;
-}
-
-.ptr-host[data-visible='true'] { opacity: 1; }
-
-.ptr-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.3rem 0.75rem 0.3rem 0.4rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(228, 226, 223, 0.1);
-  background: rgba(8, 10, 8, 0.86);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.ptr-ring { flex: 0 0 auto; }
-
-.ptr-label {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 9.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(228, 226, 223, 0.72);
-  white-space: nowrap;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════════ */
-
-/* Touch / coarse pointers: native behavior, no custom cursor. */
-@media (hover: none), (pointer: coarse) {
-  body { cursor: auto; }
-  a, button { cursor: pointer; }
-  .cursor-pos { display: none; }
-}
-
-@media (max-width: 768px) {
-  body { cursor: auto; }
-  a, button { cursor: pointer; }
-  .cursor-pos { display: none; }
-
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   REDUCED MOTION
-   ═══════════════════════════════════════════════════════════════ */
-
-/* ── A project's name is the link to its live site ────────────────
-   The underline is present from the start, so the affordance does not
-   depend on a hover the touch platforms never fire; it only gains
-   colour and weight on hover. Keyboard focus is already covered by the
-   global :focus-visible ring, and the reduced-motion block below
-   neutralises the transition. */
-.project-name-link {
-  color: inherit;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-decoration-color: rgba(228, 226, 223, 0.22);
-  text-underline-offset: 4px;
-  transition: color 0.35s cubic-bezier(0.16, 1, 0.3, 1), text-decoration-color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.project-name-link:hover {
-  color: #4ade80;
-  text-decoration-color: rgba(34, 197, 94, 0.55);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-
-  /* the environment is static: the origin ring stops too, and holds a
-     calm mid opacity rather than freezing wherever it happened to be */
-  .hero-status-dot {
-    animation: none !important;
-  }
-
-  /* the clock is readable first, decorative second: no colon pulse,
-     no digit roll — lit dots simply are */
-  
-  
-  
-  
-
-  /* the name stays fully legible and still. No construction runs — the
-     static multi-tone wordmark keeps its colour, typography and
-     accessibility, and the canvas never exists. */
-  
-  
-}
-
-/* ── service-intent pages (/services/*) ──
-   Plain, scrollable documents that share the tokens and fonts but
-   live outside the pager. The pager owns `overflow:hidden` and the
-   custom cursor on <body>; these pages opt back into normal document
-   behaviour without touching any pager rule. Scoped by class, so the
-   seven sections are unaffected. */
+/* ── 7. documents (/services/*, /verification/) ─────────────────
+   Long-form documents outside the machine's depth axis. They share
+   the tokens, the chrome and the type, and opt back into normal
+   document scrolling without touching a journey rule. */
 html:has(body > .services-doc) {
   overflow-y: auto;
 }
+
 body:has(> .services-doc) {
   overflow: auto;
   overscroll-behavior: auto;
-  cursor: auto;
 }
-body:has(> .services-doc) a,
-body:has(> .services-doc) button {
-  cursor: pointer;
-}
+
 .services-doc {
   position: relative;
   isolation: isolate;
   min-height: 100vh;
   background:
-    radial-gradient(90% 58% at 74% 13%, rgba(34, 197, 94, 0.11) 0%, transparent 69%),
-    radial-gradient(64% 48% at 9% 72%, rgba(16, 185, 129, 0.045) 0%, transparent 78%),
+    radial-gradient(96% 60% at 72% 8%, rgba(34, 197, 94, 0.08) 0%, transparent 66%),
+    radial-gradient(64% 48% at 8% 76%, rgba(16, 185, 129, 0.04) 0%, transparent 78%),
     var(--bg);
-}
-
-.services-doc::before {
-  content: '';
-  position: fixed;
-  inset: -30% -20%;
-  z-index: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse at 72% 26%, rgba(34, 197, 94, 0.09), transparent 38%);
-  animation: cinematic-document-light 18s ease-in-out infinite alternate;
-}
-
-@keyframes cinematic-document-light {
-  from { opacity: 0.5; transform: translate3d(-3%, 2%, 0) scale(1); }
-  to { opacity: 1; transform: translate3d(3%, -2%, 0) scale(1.08); }
 }
 
 .services-doc main {
   position: relative;
   z-index: 1;
-  animation: cinematic-document-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.services-doc header,
-.services-doc footer {
-  animation: cinematic-chrome-in 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+.services-doc main h1,
+.services-doc main h2 {
+  letter-spacing: -0.015em;
 }
 
-@keyframes cinematic-chrome-in {
-  from { opacity: 0; transform: translate3d(0, -12px, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
-}
-
-@keyframes cinematic-document-in {
-  from { opacity: 0; transform: perspective(1200px) translate3d(0, 24px, -50px) rotateX(2deg); }
-  to { opacity: 1; transform: perspective(1200px) translate3d(0, 0, 0) rotateX(0); }
-}
-
-/* Each document heading, line and card joins the story as it enters view. */
-.services-doc .cinema-enter {
-  animation: cinematic-beat-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) var(--cinema-delay, 0ms) backwards;
-}
-
-.page-content .cinema-enter {
-  --cinema-distance: 12px;
-  animation: cinematic-beat-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) var(--cinema-delay, 0ms) backwards;
-}
-
-@keyframes cinematic-beat-in {
-  from { opacity: 0; transform: perspective(1100px) translate3d(0, var(--cinema-distance, 22px), -24px) rotateX(2deg); }
-  to { opacity: 1; transform: perspective(1100px) translate3d(0, 0, 0) rotateX(0); }
-}
-
-.services-doc main a,
-.services-doc main button {
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease, box-shadow 0.35s ease, color 0.35s ease;
-}
-
-.services-doc main a:hover,
-.services-doc main button:hover {
-  transform: translate3d(0, -3px, 0);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
-}
-
-.services-doc main a:active,
-.services-doc main button:active { transform: translate3d(0, 0, 0) scale(0.98); }
-
-.page-content .rounded-full:not(a):not(button) {
-  transition: border-color 0.4s ease, background-color 0.4s ease, color 0.4s ease;
-}
-
-.page-content .rounded-full:not(a):not(button):hover {
-  border-color: rgba(74, 222, 128, 0.38) !important;
-  background-color: rgba(34, 197, 94, 0.1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .services-doc main,
-  .services-doc header,
-  .services-doc footer,
-  .services-doc::before,
-  .services-doc .cinema-enter { animation: none; }
-  .page-content .cinema-enter { animation: none; }
-  .services-doc main a,
-  .services-doc main button,
-  .page-content .rounded-full:not(a):not(button) { transition: none; }
-  .services-doc main a:hover,
-  .services-doc main button:hover,
-  .services-doc main a:active,
-  .services-doc main button:active { transform: none; box-shadow: none; }
-}
 .services-doc .prose-list li + li {
   margin-top: 0.45rem;
 }
 
-/* Identity copy stack — the dense rhythm under the signature. */
-.hero-copy {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  gap: 0;
-  padding-bottom: 0.15rem;
-}
+/* ── 8. reduced motion ──────────────────────────────────────────
+   One block, last, so it wins. Under this preference the site is a
+   still document: the camera holds one frame per stratum (handled in
+   components/Stage.tsx) and nothing here animates at all. */
+@media (prefers-reduced-motion: reduce) {
+  .chapter,
+  .chapter-body {
+    animation: none;
+  }
 
-.hero-copy .hero-role {
-  margin: 0 0 0.4rem;
-}
+  .masthead-link,
+  .rail-tick,
+  .ref,
+  .site-foot-proof {
+    transition: none;
+  }
 
-.hero-copy .hero-tagline {
-  margin: 0 0 0.55rem;
-}
-
-.hero-copy .hero-intro {
-  margin: 0 0 0.8rem;
-}
-
-.hero-copy .hero-ctas {
-  margin: 0;
-}
-
-/* Short phones: still two lines, no giant empty band. */
-@media (max-width: 767px) and (max-height: 700px) {
-  
-  
-  .hero-copy .hero-intro {
-    margin-bottom: 0.6rem;
+  * {
+    scroll-behavior: auto;
   }
 }
-
-@media (max-width: 767px) and (max-height: 640px) {
-  
-  .page-fill--hero {
-    padding-top: clamp(52px, 8dvh, 64px);
-    padding-bottom: var(--chrome-clearance);
-  }
-}
-
-/* Desktop — preserve approved cinematic composition (do not inherit mobile compact). */
-@media (min-width: 768px) {
-  
-  
-  .hero-copy .hero-role {
-    margin-bottom: 0.55rem;
-  }
-  .hero-copy .hero-intro {
-    margin-bottom: 1.05rem;
-  }
-}
-
-/* the probe: an invisible element whose computed font-family IS the
-   identity face stack for the active language — JS reads it instead
-   of hardcoding next/font's hashed family names (same pattern as
-   SignatureName's stage) */
-
-.idclock {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-/* digit change = a vertical roll: the outgoing digit exits upward
-   while the incoming one enters from below, both clipped to the
-   slot. Only the changed digit remounts, so unchanged digits never
-   move and the clock block never shifts. */
-
-/* Bengali digits are wide glyphs: their slots are wider, so every
-   grid keeps real horizontal breathing room between neighbours while
-   the roll still clips inside a fixed viewport (English untouched) */
-
-/* pre-sampling fallback: the identity face as plain text — never a
-   generic system monospace */
-
-/* ── Contact: compact icon row ─────────────────────────────────
-   Icon-only, equal touch targets, currentColor — the portfolio's
-   identity stays dominant; no brand colours, no giant cards.      */
-.social-icons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-}
-.soc-btn {
-  width: 40px;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(228, 226, 223, 0.1);
-  border-radius: 10px;
-  background: rgba(6, 7, 6, 0.5);
-  color: rgba(228, 226, 223, 0.62);
-  transition: color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
-}
-.soc-btn:hover,
-.soc-btn:focus-visible {
-  color: #4ade80;
-  border-color: rgba(74, 222, 128, 0.4);
-}
-
-/* Keep the last scrollable content above the measured footer and index
-   control, including when Bengali footer text wraps on a narrow phone. */
-@media (max-width: 767px) {
-  .page-fill,
-  .page-fill--hero {
-    padding-bottom: var(--chrome-clearance);
-  }
-}
-
-/* ═══ Per-chapter compositions ═══════════════════════════════════
-   Each chapter has its own layout instead of one repeated card:
-   Focus & Tools = layered stack, About = editorial, Work = plates,
-   Research = lab notebook, Experience = year rail, Contact = a
-   typographic closing scene. No blur surfaces anywhere. */
-
-.plate {
-  position: relative;
-  border-radius: 2px;
-}
-.plate::before,
-.plate::after {
-  content: '';
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  pointer-events: none;
-  border: 0 solid rgba(74, 222, 128, 0.55);
-}
-.plate::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
-.plate::after { right: -1px; bottom: -1px; border-width: 0 1px 1px 0; }
-
-/* Focus & Tools — layered system diagram */
-.stack-layers { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(74, 222, 128, 0.28); }
-.stack-layer {
-  display: grid;
-  grid-template-columns: 2.4rem minmax(0, 1.2fr) minmax(0, 1fr);
-  align-items: baseline;
-  gap: 0.25rem 1.25rem;
-  padding: 0.95rem 0.25rem;
-  border-bottom: 1px solid rgba(228, 226, 223, 0.09);
-  text-align: left;
-}
-.stack-layer-index { font-size: 10px; color: var(--accent); letter-spacing: 0.16em; }
-.stack-layer-label {
-  display: block;
-  font-family: var(--font-serif), serif;
-  font-size: clamp(1.2rem, 3vw, 1.75rem);
-  line-height: 1.15;
-  color: var(--fg);
-}
-body.lang-bn .stack-layer-label { font-family: var(--font-serif-bn), var(--font-bengali), sans-serif; font-weight: 500; line-height: 1.35; }
-.stack-layer-detail { display: block; margin-top: 0.3rem; font-size: 10px; line-height: 1.6; color: rgba(228, 226, 223, 0.55); }
-.stack-layer-tools { font-size: 12px; line-height: 1.65; color: rgba(228, 226, 223, 0.5); }
-@media (max-width: 767px) {
-  .stack-layer { grid-template-columns: 1.8rem minmax(0, 1fr); }
-  .stack-layer-tools { grid-column: 2; }
-}
-
-/* About — editorial lead and hairline facts */
-.about-lead {
-  font-family: var(--font-serif), serif;
-  font-size: clamp(1.2rem, 2.6vw, 1.65rem);
-  line-height: 1.38;
-  color: var(--fg);
-  text-align: left;
-}
-body.lang-bn .about-lead { font-family: var(--font-serif-bn), var(--font-bengali), sans-serif; line-height: 1.7; }
-.fact-grid { border-top: 1px solid rgba(74, 222, 128, 0.28); }
-.fact-cell { padding: 0.8rem 0.25rem; border-bottom: 1px solid rgba(228, 226, 223, 0.09); }
-
-/* Research — lab notebook */
-.lab-legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; margin: 0 0 1rem; padding: 0; list-style: none; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(228, 226, 223, 0.45); }
-.lab-legend li { display: inline-flex; align-items: center; gap: 0.45rem; }
-.lab-dot { display: inline-block; width: 7px; height: 7px; border-radius: 9999px; background: rgba(228, 226, 223, 0.3); }
-.lab-dot[data-status='validated'] { background: #22c55e; }
-.lab-dot[data-status='experimental'] { background: #4ade80; box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.2); }
-.lab-notebook { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(74, 222, 128, 0.28); }
-.lab-entry {
-  display: grid;
-  grid-template-columns: 9rem minmax(0, 1fr);
-  gap: 0.35rem 1.5rem;
-  padding: 0.9rem 0.25rem;
-  border-bottom: 1px solid rgba(228, 226, 223, 0.09);
-  text-align: left;
-}
-.lab-status { display: inline-flex; align-items: baseline; gap: 0.5rem; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(228, 226, 223, 0.5); }
-.lab-title { font-size: 1rem; font-weight: 600; color: var(--fg); margin-bottom: 0.25rem; }
-.lab-desc { font-size: 12px; line-height: 1.7; color: rgba(228, 226, 223, 0.6); }
-@media (max-width: 639px) { .lab-entry { grid-template-columns: minmax(0, 1fr); } }
-
-/* Experience — year rail */
-.rail { position: relative; }
-.rail-entry {
-  display: grid;
-  grid-template-columns: 7.5rem 1rem minmax(0, 1fr);
-  gap: 0 1rem;
-  padding-bottom: 1rem;
-  position: relative;
-}
-.rail-entry::before {
-  content: '';
-  position: absolute;
-  left: calc(7.5rem + 1rem + 3.5px);
-  top: 0.35rem;
-  bottom: -0.35rem;
-  width: 1px;
-  background: rgba(74, 222, 128, 0.25);
-}
-.rail-period { font-size: 10px; letter-spacing: 0.08em; color: var(--accent); text-align: right; padding-top: 0.2rem; }
-.rail-node { width: 8px; height: 8px; margin-top: 0.3rem; border-radius: 9999px; border: 1.5px solid var(--accent); background: var(--bg); position: relative; z-index: 1; }
-.rail-role { font-family: var(--font-serif), serif; font-weight: 400; font-size: 1.2rem; line-height: 1.2; color: var(--fg); margin-bottom: 0.15rem; }
-body.lang-bn .rail-role { font-family: var(--font-serif-bn), var(--font-bengali), sans-serif; font-weight: 500; line-height: 1.4; }
-
-/* Contact — typographic closing scene */
-.contact-title {
-  font-size: clamp(2.4rem, 8vw, 5.4rem);
-  line-height: 1.02;
-  color: var(--fg);
-}
-body.lang-bn .contact-title { line-height: 1.3; font-size: clamp(2rem, 6.5vw, 4.2rem); }
-.contact-primary { width: fit-content; padding-bottom: 0.35rem; border-bottom: 1px solid rgba(74, 222, 128, 0.5); transition: border-color 0.3s; }
-.contact-primary:hover { border-color: #4ade80; }
-.contact-primary span:first-child { font-family: var(--font-serif), serif; font-weight: 400; font-size: 1.6rem; }
-body.lang-bn .contact-primary span:first-child { font-family: var(--font-serif-bn), var(--font-bengali), sans-serif; font-weight: 500; }
-
-/* WORLD STORY — each inscription follows a projected pin on the model.
-   The active beat and camera reveal one physical system at a time. */
-.cinematic-world::after { background: linear-gradient(0deg, rgba(3,10,7,.35), transparent 27%); }
-.silicon-grade { background: linear-gradient(0deg, rgba(3,10,7,.55), transparent 45%); }
-.pager-vignette { background: radial-gradient(ellipse at 50% 48%, transparent 55%, rgba(1,7,4,.33) 100%); }
-.page-scroll { mask-image: none; -webkit-mask-image: none; }
-.world-story {
-  position: relative; min-height: 100dvh; padding: 0 0 calc(var(--site-footer-height, 76px) + 86px);
-  color: #f2f8ed;
-}
-.world-beat { position: relative; max-width: min(34vw, 550px); margin-left: 62vw; padding-top: clamp(122px, 19dvh, 210px); padding-right: 3vw; text-shadow: 0 2px 14px #061009, 0 1px 3px #061009; }
-.world-beat + .world-beat { margin-top: 50px; }
-html[data-story-ready='true'] .world-beat:not([data-active='true']) { display: none; }
-html[data-story-ready='true'] .world-story::before {
-  content: ''; position: absolute; left: var(--anchor-x); top: var(--anchor-y);
-  width: 9px; height: 9px; border: 1px solid #d8ffe1; border-radius: 50%;
-  background: #22c55e; box-shadow: 0 0 0 6px rgba(34,197,94,.13), 0 0 22px #22c55e;
-  transform: translate(-50%, -50%); pointer-events: none;
-}
-html[data-story-ready='true'] .world-story::after {
-  content: ''; position: absolute; left: var(--anchor-x); top: var(--anchor-y);
-  width: max(0px, calc(62vw - var(--anchor-x))); height: 1px;
-  background: linear-gradient(90deg, rgba(124,244,161,.7), rgba(124,244,161,.12)); pointer-events: none;
-}
-html[data-scene-mode='fallback'] .world-story::before,
-html[data-scene-mode='fallback'] .world-story::after { display: none; }
-.world-beat-number { display: block; color: #a6f0b7; font: 600 11px/1.4 var(--font-mono), monospace; letter-spacing: .16em; margin-bottom: 17px; }
-.world-beat h2 { font: 400 clamp(2rem, 3.2vw, 3.6rem)/1.07 var(--font-serif), serif; letter-spacing: -.035em; text-wrap: balance; margin: 0 0 15px; }
-.world-beat-body { color: #dbeadb; font: 400 clamp(15px, 1.08vw, 18px)/1.56 var(--font-sans), sans-serif; }
-.world-beat-body p { margin: 0 0 11px; }
-.world-beat-signal, .world-beat-evidence { color: #afe6b9; font: 500 12px/1.55 var(--font-mono), monospace; margin: 14px 0 0; }
-.world-beat-evidence { color: #bad3bc; }
-.world-beat-links { display: flex; flex-wrap: wrap; gap: 7px 19px; margin-top: 19px; font: 600 12px/1.5 var(--font-mono), monospace; }
-.world-beat-links a { color: #c4ffcd; text-decoration: underline; text-underline-offset: 5px; text-decoration-color: rgba(196,255,205,.55); }
-.world-beat-links a:hover, .world-beat-links a:focus-visible { color: #fff; text-decoration-color: #fff; }
-.world-beat-nav { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; width: min(34vw, 550px); margin: 32px 3vw 0 62vw; color: #baf8c6; font: 600 11px/1.4 var(--font-mono), monospace; }
-.world-beat-nav > button { width: 35px; height: 35px; border: 1px solid rgba(186,248,198,.55); color: inherit; background: rgba(6,28,15,.8); cursor: pointer; }
-.world-beat-nav > button:disabled { opacity: .28; cursor: default; }
-.world-beat-dots { display: flex; gap: 5px; flex-wrap: wrap; }
-.world-beat-dots button { width: 8px; height: 8px; padding: 0; border: 1px solid #9ccdab; background: transparent; border-radius: 50%; cursor: pointer; }
-.world-beat-dots button[aria-current='step'] { background: #9ff5b4; box-shadow: 0 0 9px #22c55e; }
-.world-story--0 .hero-name { font: 400 clamp(2.9rem, 5.5vw, 6rem)/1 var(--font-serif), serif; letter-spacing: -.05em; margin: 0 0 16px; text-wrap: balance; }
-.world-story--0 .sig-word, .world-story--0 .sig-c { display: inline-block; }
-.world-story--0 .sig-word { margin-right: .14em; }
-html[data-scene-mode='webgl'] body:not(.lang-bn) .world-story--0 .hero-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-body.lang-bn .world-beat h2, body.lang-bn .world-story--0 .hero-name { font-family: var(--font-serif-bn), var(--font-bengali), serif; letter-spacing: 0; line-height: 1.27; }
-body.lang-bn .world-beat-number, body.lang-bn .world-beat-signal, body.lang-bn .world-beat-evidence, body.lang-bn .world-beat-links, body.lang-bn .world-beat-nav { font-family: var(--font-bengali), sans-serif; letter-spacing: 0; }
-@media (max-width: 767px) {
-  .cinematic-world::after, .silicon-grade { background: linear-gradient(0deg, #07110d 0%, rgba(7,17,13,.96) 27%, rgba(7,17,13,.45) 43%, transparent 66%); }
-  .pager-vignette { background: linear-gradient(0deg, rgba(3,9,6,.25), transparent 54%); }
-  .world-story { padding-bottom: calc(var(--site-footer-height, 76px) + 100px); }
-  .world-beat { max-width: none; margin-left: 0; padding: 55dvh 23px 0; }
-  .world-beat + .world-beat { margin-top: 0; padding-top: 65px; }
-  html[data-story-ready='true'] .world-beat + .world-beat { padding-top: 55dvh; }
-  .world-beat h2 { font-size: clamp(1.85rem, 7.5vw, 2.55rem); margin-bottom: 9px; }
-  .world-beat-body { font-size: 14px; line-height: 1.5; }
-  .world-beat-body p { margin-bottom: 7px; }
-  .world-beat-number { margin-bottom: 9px; }
-  .world-beat-signal, .world-beat-evidence { font-size: 11px; margin-top: 8px; }
-  .world-beat-links { margin-top: 11px; font-size: 11px; gap: 5px 14px; }
-  .world-beat-nav { margin: 19px 23px 0; width: calc(100% - 46px); }
-  html[data-story-ready='true'] .world-story::after { width: 1px; height: max(0px, calc(53dvh - var(--anchor-y))); left: var(--anchor-x); top: var(--anchor-y); background: linear-gradient(rgba(124,244,161,.65), transparent); }
-  .world-story--0 .hero-name { font-size: clamp(2.5rem, 11vw, 4rem); }
-}
-@media (max-width: 390px) { .world-beat { padding-left: 17px; padding-right: 17px; } .world-beat-nav { margin-left: 17px; margin-right: 17px; width: calc(100% - 34px); } }

@@ -1,5 +1,9 @@
 # 3D motion handoff
 
+> **SUPERSEDED on 2026-10-14.** The system described below was removed in the
+> "Inside One Device" rebuild; see [`docs/STAGE.md`](STAGE.md) for the shipped
+> architecture. This file is kept as history — do not implement from it.
+
 I continued the existing `feat/motion-3d-depth` implementation from `db4eecc`,
 with a recovery branch at `snapshot/2026-10-06-motion-review`.
 

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { Pager } from '@/components/Pager';
+import { Journey } from '@/components/Journey';
 import { SECTION_IDS, indexForSlug } from '@/app/sections';
 import { sectionMetadata } from '@/app/route-seo';
 
@@ -42,5 +42,5 @@ export default async function SectionPage({
   const { section } = await params;
   const i = indexForSlug(section);
   if (i === null) notFound();
-  return <Pager initialIndex={i} />;
+  return <Journey initialIndex={i} />;
 }

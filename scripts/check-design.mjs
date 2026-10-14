@@ -18,7 +18,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { execSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -144,25 +144,40 @@ try {
     fail(`app/${layoutPath} must import its theme colour from design-tokens.ts rather than hard-coding it`);
   }
 
-  /* ── 4. the environment: one procedural world, WebGL first ──
-     The stock plates/footage, the world map and the particle name were
-     retired (docs/CINEMATIC_AUDIT.md). These checks assert the removals
-     stay removed and that the replacement is wired in.
-
-     2026-10-12: the environment became a real-time WebGL scene
-     (docs/CINEMATIC_3D.md). components/CinematicWorld.tsx returns as a
-     NEW file — a procedural three.js world with zero stock media — so
-     it left the retired list; the stock-media motif checks below still
-     apply to it. SiliconWorld stays as the WebGL-unavailable fallback
-     and keeps its own contract. */
+  /* ── 4. the environment: ONE subject, WebGL first ──
+     The 2026-10 rebuild ("Inside One Device", docs/STAGE.md) replaced
+     three coexisting visual systems with a single environment. These
+     checks are the structural guarantee that it stays single: the
+     retired systems must stay deleted, exactly one module may import
+     three.js, and the host must mount exactly one stage. The older
+     stock-media prohibitions (docs/CINEMATIC_AUDIT.md) still apply —
+     the environment is drawn from numbers, never downloaded. */
   const tryRead = (rel) => (existsSync(join(ROOT, rel)) ? readFileSync(join(ROOT, rel), 'utf8') : '');
   const removed = [
+    /* stock media, map and particle name — retired 2026-10-11 */
     'components/WorldMap.tsx', 'components/LivingAtmosphere.tsx',
     'components/SignatureName.tsx', 'components/IdentityClock.tsx', 'public/cinema',
+    /* the three overlapping systems and their hosts — retired 2026-10-14 */
+    'components/CinematicWorld.tsx', 'components/cinematic-scene.ts', 'app/cinematic.ts',
+    'components/SiliconWorld.tsx', 'components/SiliconDocumentBackdrop.tsx', 'app/silicon.ts',
+    'components/WorldStory.tsx', 'components/sections.tsx',
+    'components/Pager.tsx', 'components/NavOverlay.tsx',
+    'components/TiltCard.tsx', 'components/DocumentMotion.tsx', 'components/PullToRefresh.tsx',
+    'components/ui.tsx',
   ];
   for (const rel of removed) {
-    if (existsSync(join(ROOT, rel))) fail(`${rel} was retired — stock media / map / particle name must not return`);
+    if (existsSync(join(ROOT, rel))) {
+      fail(`${rel} was retired — it must not return (one environment, one presentation system)`);
+    }
   }
+  /* The new surface area. Anything here referencing the old vocabulary
+     means a retired layer is growing back inside a new file. */
+  const SURFACE = [
+    'app/globals.css', 'app/stage.ts',
+    'components/Journey.tsx', 'components/Stage.tsx', 'components/StageFallback.tsx',
+    'components/stage-scene.ts', 'components/chapters.tsx', 'components/record.tsx',
+    'components/chrome.tsx', 'components/DepthRail.tsx',
+  ];
   const removedMotifs = [
     ['.grid-bg', 'the 60px square grid'],
     ['pager-grid', 'the grid overlay behind the pages'],
@@ -173,48 +188,97 @@ try {
     ['.worldmap', 'the retired world map'],
     ['cinema-world', 'the retired stock-footage world'],
     ['/cinema/', 'stock media paths'],
+    ['world-beat', 'the retired story-overlay beats'],
+    ['cinema-word', 'the retired per-word name construction'],
+    ['sig-sweep', 'the retired light band behind the name'],
+    ['silicon-world', 'the retired Canvas 2D chip floorplan'],
+    ['cinematic-world', 'the retired WebGL district map'],
+    ['backdrop-filter', 'blurred chrome surfaces'],
+    ['backdrop-blur', 'blurred chrome surfaces'],
   ];
-  for (const rel of ['app/globals.css', 'components/Pager.tsx', 'components/sections.tsx', 'components/ui.tsx', 'components/CinematicWorld.tsx', 'components/cinematic-scene.ts']) {
+  for (const rel of SURFACE) {
     const text = tryRead(rel);
     for (const [needle, what] of removedMotifs) {
       if (text.includes(needle)) fail(`${rel} still references ${what} ("${needle}")`);
     }
   }
-  const world = tryRead('components/SiliconWorld.tsx');
-  if (!world) fail('components/SiliconWorld.tsx is missing — the WebGL-unavailable fallback environment');
+
+  /* 4a. exactly one module may import three.js. This is the whole
+     "one subject" rule, expressed as something a script can prove. */
+  const componentFiles = readdirSync(join(ROOT, 'components'), { withFileTypes: true })
+    .filter((e) => e.isFile() && /\.(ts|tsx)$/.test(e.name))
+    .map((e) => `components/${e.name}`);
+  const threeImporters = componentFiles.filter((rel) => /from 'three'|from "three"/.test(tryRead(rel)));
+  if (threeImporters.length !== 1 || threeImporters[0] !== 'components/stage-scene.ts') {
+    fail(`exactly one module may import three.js (components/stage-scene.ts); found: ${threeImporters.join(', ') || 'none'}`);
+  }
+
+  /* 4b. the host */
+  const stage = tryRead('components/Stage.tsx');
+  if (!stage) fail('components/Stage.tsx is missing — the one environment host');
   else {
-    if (!/document\.hidden|visibilitychange/.test(world)) fail('SiliconWorld must pause when the tab is hidden');
-    if (!/reducedMotion/.test(world)) fail('SiliconWorld must accept a reduced-motion path');
-    if (!/Math\.min\(window\.devicePixelRatio/.test(world)) fail('SiliconWorld must cap the device pixel ratio');
-    if (!/ResizeObserver/.test(world)) fail('SiliconWorld must redraw at native resolution on resize');
+    if (!/webgl2|webgl/.test(stage)) fail('Stage must probe for a WebGL context before loading three.js');
+    if (!/import\(['"]@\/components\/stage-scene['"]\)/.test(stage)) {
+      fail('Stage must lazy-load the three.js scene module (no route pays for it up front)');
+    }
+    if (!/StageFallback/.test(stage)) fail('Stage must fall back to StageFallback when WebGL is unavailable');
+    if (!/document\.hidden|visibilitychange/.test(stage)) fail('Stage must pause when the tab is hidden');
+    if (!/IntersectionObserver/.test(stage)) fail('Stage must pause while the environment is off-screen');
+    if (!/reducedMotion/.test(stage)) fail('Stage must accept a reduced-motion path');
+    if (!/ResizeObserver/.test(stage)) fail('Stage must resize at native resolution');
+    if (!/verifiedCount|verificationSummary/.test(stage)) {
+      fail('Stage must feed the generated evidence summary into the scene — the world is a readout, not decoration');
+    }
   }
-  /* The primary environment: the WebGL world and its discipline. */
-  const cine = tryRead('components/CinematicWorld.tsx');
-  if (!cine) fail('components/CinematicWorld.tsx is missing — the WebGL environment host');
+
+  /* 4c. the scene */
+  const scene = tryRead('components/stage-scene.ts');
+  if (!scene) fail('components/stage-scene.ts is missing — the three.js environment');
   else {
-    if (!/webgl2|webgl/.test(cine)) fail('CinematicWorld must probe for a WebGL context before loading three.js');
-    if (!/import\(['"]@\/components\/cinematic-scene['"]\)/.test(cine)) fail('CinematicWorld must lazy-load the three.js scene module (no route pays for it up front)');
-    if (!/SiliconWorld/.test(cine)) fail('CinematicWorld must fall back to SiliconWorld when WebGL is unavailable');
-    if (!/document\.hidden|visibilitychange/.test(cine)) fail('CinematicWorld must pause when the tab is hidden');
-    if (!/reducedMotion/.test(cine)) fail('CinematicWorld must accept a reduced-motion path');
-    if (!/ResizeObserver/.test(cine)) fail('CinematicWorld must resize at native resolution');
+    if (!/from '@\/app\/stage'/.test(scene)) fail('stage-scene must take its geometry from app/stage.ts (the unit-tested numbers)');
+    if (!/pixelRatioFor3D/.test(scene)) fail('stage-scene must apply the unit-tested DPR policy (pixelRatioFor3D)');
+    if (!/ratchetScale/.test(scene)) fail('stage-scene must apply the one-way quality ratchet');
+    if (!/dispose\(\)/.test(scene)) fail('stage-scene must dispose renderer, geometries and materials on unmount');
+    if (/\.(glb|gltf|hdr|ktx2|webm|mp4|webp|jpe?g|png)['"]/i.test(scene)) {
+      fail('stage-scene must stay fully procedural — no downloaded models, textures or media');
+    }
   }
-  const scene3d = tryRead('components/cinematic-scene.ts');
-  if (!scene3d) fail('components/cinematic-scene.ts is missing — the three.js world');
+
+  /* 4d. the WebGL-unavailable fallback: the SAME machine, drawn in 2D */
+  const fallback = tryRead('components/StageFallback.tsx');
+  if (!fallback) fail('components/StageFallback.tsx is missing — the WebGL-unavailable environment');
   else {
-    if (!/pixelRatioFor3D/.test(scene3d)) fail('cinematic-scene must apply the unit-tested DPR policy (pixelRatioFor3D)');
-    if (!/ratchetScale/.test(scene3d)) fail('cinematic-scene must apply the one-way quality ratchet');
-    if (!/dispose\(\)/.test(scene3d)) fail('cinematic-scene must dispose renderer, geometries and materials on unmount');
-    if (/\.(glb|gltf|hdr|ktx2|webm|mp4|webp|jpe?g|png)['"]/i.test(scene3d)) fail('cinematic-scene must stay fully procedural — no downloaded models, textures or media');
+    if (!/from '@\/app\/stage'/.test(fallback)) fail('StageFallback must draw the same strata from app/stage.ts');
+    if (!/document\.hidden|visibilitychange/.test(fallback)) fail('StageFallback must pause when the tab is hidden');
+    if (!/reducedMotion/.test(fallback)) fail('StageFallback must accept a reduced-motion path');
+    if (!/Math\.min\(window\.devicePixelRatio/.test(fallback)) fail('StageFallback must cap the device pixel ratio');
+    if (!/ResizeObserver/.test(fallback)) fail('StageFallback must redraw at native resolution on resize');
   }
-  if (!/Math\.min\(window\.devicePixelRatio/.test(tryRead('app/cinematic.ts') + scene3d)) {
-    fail('the 3D environment must cap the device pixel ratio (app/cinematic.ts pixelRatioFor3D)');
+
+  /* 4e. the journey mounts exactly one of it */
+  const journey = tryRead('components/Journey.tsx');
+  if (!journey) fail('components/Journey.tsx is missing — the journey host');
+  else {
+    const mounts = (journey.match(/<Stage\s/g) || []).length;
+    if (mounts !== 1) fail(`components/Journey.tsx mounts ${mounts} stages — "Inside One Device" allows exactly one`);
+    if (!/from '@\/components\/chapters'/.test(journey)) fail('Journey must render the chapters from components/chapters.tsx');
+    if (!/from '@\/components\/chrome'/.test(journey)) fail('Journey must use the shared masthead/footer (components/chrome.tsx)');
   }
-  if (!/from '@\/components\/CinematicWorld'/.test(tryRead('components/Pager.tsx'))) {
-    fail('components/Pager.tsx must mount CinematicWorld as the page environment');
+
+  /* 4f. the environment and its no-JS state have to be styled */
+  if (!/\.stage\s*\{/.test(css)) fail('app/globals.css must style .stage (including its no-JS gradient fallback)');
+  if (!/\.stage-canvas\s*\{/.test(css)) fail('app/globals.css must style .stage-canvas');
+  if (!/\.rail\s*\{/.test(css)) fail('app/globals.css must style .rail (the depth navigation)');
+  if (!/\.chapter\s*\{/.test(css)) fail('app/globals.css must style .chapter (the record system)');
+
+  /* 4g. one masthead and one footer for the whole site */
+  for (const rel of ['components/services/ServicesShell.tsx', 'components/verification/VerificationShell.tsx']) {
+    const shell = tryRead(rel);
+    if (!/from '@\/components\/chrome'/.test(shell)) {
+      fail(`${rel} must use the shared chrome (components/chrome.tsx) rather than its own header and footer`);
+    }
   }
-  if (!/\.silicon-world\s*\{/.test(css)) fail('app/globals.css must style .silicon-world (including its no-JS gradient fallback)');
-  if (!/\.cinematic-world\s*\{/.test(css)) fail('app/globals.css must style .cinematic-world (including its no-JS gradient fallback)');
+
   const fontsSrc = tryRead('app/site-layout.tsx');
   for (const gone of ['Space_Grotesk', 'Chakra_Petch', 'Anek_Bangla']) {
     if (fontsSrc.includes(gone)) fail(`app/site-layout.tsx still loads ${gone} — the type system is serif + sans + mono`);
@@ -231,5 +295,5 @@ if (failures > 0) {
   process.exit(1);
 }
 console.log(
-  'check-design PASS (design-tokens.ts = DESIGN_SYSTEM.md = globals.css :root = themeColor · environment: procedural WebGL world + silicon fallback, no stock media)'
+  'check-design PASS (design-tokens.ts = DESIGN_SYSTEM.md = globals.css :root = themeColor · environment: ONE procedural WebGL stage + 2D fallback from the same numbers, one masthead, no stock media)'
 );

@@ -1,5 +1,9 @@
 # Pocket Systems — portfolio direction (2026-10-12)
 
+> **SUPERSEDED on 2026-10-14.** The system described below was removed in the
+> "Inside One Device" rebuild; see [`docs/STAGE.md`](STAGE.md) for the shipped
+> architecture. This file is kept as history — do not implement from it.
+
 ## Evidence and concept
 
 The portfolio follows a documented phone-first development chain: Android,

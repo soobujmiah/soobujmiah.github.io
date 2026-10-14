@@ -18,10 +18,17 @@ created to satisfy a checklist.
 
 ## What exists here
 
-- `CINEMATIC_AUDIT.md` — why the old cinematic layer looked low quality, and what replaced it
+- `STAGE.md` — **the shipped architecture**: "Inside One Device", the one
+  environment, the record system, the camera and the budgets
+- `CINEMATIC_AUDIT.md` — why the old cinematic layer looked low quality, and
+  why no stock raster or video may ship (still enforced by the gates)
 - `ASSETS.md` — provenance of every shipped asset
-- `SEO.md/`
-- `SEO_STANDARD.md/`
+- `SEO.md` — the audit and the discovery contract
+- `SEO_STANDARD.md` — the reusable standard for project sites
+
+Superseded, kept only as history (each carries a banner saying so):
+`ENVIRONMENT.md`, `CINEMATIC_3D.md`, `SPATIAL_PORTFOLIO.md`,
+`MOTION_HANDOFF.md`.
 
 ## Rules
 
