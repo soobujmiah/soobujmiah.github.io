@@ -1,7 +1,7 @@
 {
   "schema": "skb.verification-projection/v1",
   "schema_version": 1,
-  "as_of": "2026-10-14T14:59:01Z",
+  "as_of": "2026-10-14T15:12:04Z",
   "summary": {
     "verified": 16,
     "failed": 1,
@@ -15,14 +15,14 @@
       "id": "portfolio.source.public",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-10-14T14:59:01Z",
+      "verified_at": "2026-10-14T15:12:04Z",
       "public": true,
       "evidence": {
         "type": "public_repository",
         "repository": "soobujmiah/soobujmiah.github.io",
         "value": "public",
         "public": true,
-        "at": "2026-10-14T14:59:01Z",
+        "at": "2026-10-14T15:12:04Z",
         "url": "https://github.com/soobujmiah/soobujmiah.github.io"
       }
     },
@@ -30,7 +30,7 @@
       "id": "portfolio.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-10-14T09:46:54Z",
+      "verified_at": "2026-10-14T15:01:18Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -38,9 +38,9 @@
         "repository": "soobujmiah/soobujmiah.github.io",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-10-14T09:46:54Z",
-        "commit": "a82f1bb7ac9ebc68cf2bb9de8b7973f9c295ee42",
-        "run_id": "38544624094",
+        "at": "2026-10-14T15:01:18Z",
+        "commit": "b78aa6947726988ecbc1c29cc1f93b0ce36c70d9",
+        "run_id": "38585370134",
         "public": true,
         "url": "https://github.com/soobujmiah/soobujmiah.github.io/blob/main/.repo/project.yaml"
       }
@@ -49,7 +49,7 @@
       "id": "portfolio.export.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-10-14T09:46:32Z",
+      "verified_at": "2026-10-14T15:00:26Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -57,9 +57,9 @@
         "repository": "soobujmiah/soobujmiah.github.io",
         "field": "test.status",
         "value": "passed",
-        "at": "2026-10-14T09:46:32Z",
-        "commit": "a82f1bb7ac9ebc68cf2bb9de8b7973f9c295ee42",
-        "run_id": "38544624094",
+        "at": "2026-10-14T15:00:26Z",
+        "commit": "b78aa6947726988ecbc1c29cc1f93b0ce36c70d9",
+        "run_id": "38585370134",
         "public": true,
         "url": "https://github.com/soobujmiah/soobujmiah.github.io/blob/main/.repo/project.yaml"
       }
@@ -106,7 +106,7 @@
       "id": "repo.ternux.build.passing",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-10-14T14:51:45Z",
+      "verified_at": "2026-10-14T15:04:56Z",
       "public": true,
       "evidence": {
         "type": "repository_state",
@@ -114,9 +114,9 @@
         "repository": "soobujmiah/ternux",
         "field": "build.status",
         "value": "passed",
-        "at": "2026-10-14T14:51:45Z",
-        "commit": "579168a853c27b3e12201aac91a7ed1ad1a8b167",
-        "run_id": "38584143223",
+        "at": "2026-10-14T15:04:56Z",
+        "commit": "8dfedc00b64d41d9ce15105f96d08de938c83c7b",
+        "run_id": "38586070102",
         "public": true,
         "url": "https://github.com/soobujmiah/ternux/blob/main/.repo/project.yaml"
       }
@@ -315,7 +315,7 @@
       "id": "showcase.live_sites.published",
       "class": "evidence_backed",
       "status": "verified",
-      "verified_at": "2026-10-14T14:51:47Z",
+      "verified_at": "2026-10-14T15:04:58Z",
       "public": true,
       "evidence": {
         "type": "github_pages",
@@ -338,7 +338,7 @@
         ],
         "value": "published",
         "public": true,
-        "at": "2026-10-14T14:51:47Z",
+        "at": "2026-10-14T15:04:58Z",
         "url": "https://api.github.com/repos/soobujmiah/ternux"
       }
     },
