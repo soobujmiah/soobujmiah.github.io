@@ -156,15 +156,24 @@ Gate ceilings in `check-build.mjs` were lowered to sit just above what ships.
    the live site on the phone and confirm `components/stage-scene.ts` renders the
    strata, the aperture and the evidence marks as intended. Everything verified so
    far was the Canvas 2D fallback.
-2. **`repo.apiloop.build.passing` is failing**, so the footer reads "16/17 checks
+2. **The CV generators do not read the verification registry.** Closing PR #42
+   (`chore/verification-cv-sync`, opened 2026-09-26) left exactly one idea alive:
+   `tools/make_cv_en.py` and `tools/make_cv_bn.py` still carry their own project
+   evidence text instead of generating it from `verification/claims.json`, and no
+   gate compares the two. Everything else that PR proposed now ships from a better
+   implementation — the vendored canonical registry, `/verification/` in both
+   languages, the footer proof line, the sitemap entries and
+   `scripts/check-verification.mjs` in CI. The PR itself could not be revived: it
+   edits `components/ui.tsx`, which no longer exists.
+3. **`repo.apiloop.build.passing` is failing**, so the footer reads "16/17 checks
    passing" publicly. **That is correct, not a bug** — apiloop's CI genuinely failed
    2026-09-29. Fixing it means fixing `soobujmiah/apiloop`.
-3. **Phase 4 of the brief — project case studies.** Still not done. Projects now
+4. **Phase 4 of the brief — project case studies.** Still not done. Projects now
    carry status, role, evidence, topics and both links in one record shape, which is
    the structure a case study would extend.
-4. **`profile.title`** still reads "Independent Software & AI Systems Engineer" and
+5. **`profile.title`** still reads "Independent Software & AI Systems Engineer" and
    is gate-locked as `CANONICAL_TITLE`. Changing it is the owner's call.
-5. **`/3d-prototype/` carries `noindex,follow`** plus a canonical to the real site.
+6. **`/3d-prototype/` carries `noindex,follow`** plus a canonical to the real site.
 
 ---
 
@@ -197,7 +206,7 @@ Last full local run on this branch: all five gates PASS (100 logic checks),
 typecheck clean, lint clean, `check-build` PASS (40 routes, home 868 visible chars,
 heaviest route 185 KB gz against a 200 KB ceiling, site-wide 422 KB against 440 KB).
 
-36 stale remote branches remain, each one the head of an already-merged (squashed)
-PR, so their content is on `main` and the refs are dead weight. They are listed with
-their PR numbers in the session log; deleting them is one `git push origin --delete`
-per branch and needs the owner's explicit go-ahead.
+Branch state after this session: `origin` carries `main` alone. The 37 refs whose
+PRs had already been squash-merged were deleted on the owner's explicit go-ahead,
+with their tip SHAs recorded first; `chore/verification-cv-sync` went with PR #42
+when that was closed as superseded (see §6 item 2).
