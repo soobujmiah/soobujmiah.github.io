@@ -1,0 +1,7 @@
+event_id: commit-b78aa6947726-2ad52da27a6bcdb1
+repository: soobujmiah/soobujmiah.github.io
+commit: b78aa6947726988ecbc1c29cc1f93b0ce36c70d9
+kind: commit
+occurred_at: '2026-10-14T14:59:00Z'
+status: completed
+summary: 'feat: rebuild the portfolio as one device, from scratch (#74)'
