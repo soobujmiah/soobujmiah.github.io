@@ -104,7 +104,19 @@ export function StageFallback({ chapter, reducedMotion }: { chapter: number; red
            puts a stray hairline across the composition (measured at
            x=389 on a 1440×900 frame before this guard). Only its
            aperture and marks belong on screen. */
-        const framed = outer < Math.max(width, height);
+        /* A rectangle that is only PARTLY on screen contributes one or
+           two straight edges and nothing else, which reads as a UI rule
+           ruled across the page rather than as depth. (Measured on the
+           home chapter: the rim of stratum 0 drew a single green line
+           down x=389 of a 1440-wide frame, because its right edge fell
+           at 1453.) So a plane's face and its aperture are drawn only
+           while their whole rectangle is inside the frame; once the
+           camera is standing in the doorway, the strata ahead are what
+           carries the depth. */
+        const inFrame = (half: number) =>
+          cx - half > -1 && cx + half < width + 1 && cy - half > -1 && cy + half < height + 1;
+        const framed = inFrame(outer);
+        const rimFramed = inFrame(inner);
 
         if (framed) {
           /* The plane's face, as a filled frame between the two rects. */
@@ -121,9 +133,11 @@ export function StageFallback({ chapter, reducedMotion }: { chapter: number; red
         }
 
         /* The aperture rim — the brightest line in the frame. */
-        ctx.strokeStyle = `rgba(74,222,128,${(0.1 + presence * 0.6).toFixed(4)})`;
-        ctx.lineWidth = presence > 0.6 ? 1.4 : 1;
-        ctx.strokeRect(cx - inner, cy - inner, inner * 2, inner * 2);
+        if (rimFramed) {
+          ctx.strokeStyle = `rgba(74,222,128,${(0.1 + presence * 0.6).toFixed(4)})`;
+          ctx.lineWidth = presence > 0.6 ? 1.4 : 1;
+          ctx.strokeRect(cx - inner, cy - inner, inner * 2, inner * 2);
+        }
 
         /* A few etch rules, enough to read as machinery. */
         ctx.strokeStyle = `rgba(228,226,223,${(0.02 + presence * 0.09).toFixed(4)})`;
@@ -139,7 +153,7 @@ export function StageFallback({ chapter, reducedMotion }: { chapter: number; red
 
         /* The evidence marks for this stratum. */
         for (const m of marks) {
-          if (m.stratum !== i) continue;
+          if (m.stratum !== i || !rimFramed) continue;
           const r = (s.aperture + 0.95) * scale;
           const mx = cx + Math.cos(m.angle) * r;
           const my = cy + Math.sin(m.angle) * r;
