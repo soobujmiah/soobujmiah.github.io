@@ -90,8 +90,14 @@ const MIN_VISIBLE_CHARS = 220;
     that load only after a successful WebGL probe — no pager route
     references them from its HTML, so every per-route ceiling below is
     unchanged. Measured site-wide sum with the 3D world: 494 KB. The
-    typeface JSON (61 KB raw) is a /fonts/ asset, not JS. */
-const MAX_TOTAL_JS_GZIP = 500 * 1024;
+    typeface JSON (61 KB raw) is a /fonts/ asset, not JS.
+    440 KB after the 2026-10-14 rebuild (docs/STAGE.md): framer-motion
+    and four presentation systems (pager springs, tilt cards, the story
+    overlay, the HUD overlay) were deleted outright, and the measured
+    site-wide sum fell to 422 KB. The ceiling is set just above what
+    actually ships, so the next regression is caught rather than
+    absorbed by headroom left over from a heavier build. */
+const MAX_TOTAL_JS_GZIP = 440 * 1024;
 /** Per-route payload ceiling: the gzipped sum of every script a single
     HTML page references. The home page measured ~250 KB before the
     service layer; this holds every route — pager and services — there.
@@ -105,10 +111,14 @@ const MAX_TOTAL_JS_GZIP = 500 * 1024;
     measured home route is just above 270 KB. The 2026-10 living-motion pass
     adds camera parallax and pointer response to the initial route; measured
     route JS is 272 KB, so the ceiling is 274 KB with 2 KB of headroom.
-    The site-wide 388 KB limit and single-chunk ceiling still apply. */
-const MAX_ROUTE_JS_GZIP = 274 * 1024;
+    200 KB after the 2026-10-14 rebuild: the chapters are plain server
+    markup and the journey host carries no animation library, so the
+    heaviest route (/services/, which never loads the 3D stage at all)
+    measures 186 KB. The largest single chunk fell from 190 KB to
+    82 KB, so that ceiling is now 96 KB. */
+const MAX_ROUTE_JS_GZIP = 200 * 1024;
 /** Per-route ceiling on the largest single gzipped chunk group. */
-const MAX_PAGE_JS_GZIP = 190 * 1024;
+const MAX_PAGE_JS_GZIP = 96 * 1024;
 
 let failures = 0;
 const fail = (msg) => {
@@ -159,13 +169,15 @@ for (const [sceneIndex, slug] of SECTIONS.entries()) {
   textByRoute[slug] = text;
   if (!/<html[^>]*lang="en"/.test(html)) fail(`route "${slug}" does not declare lang=en`);
   if ((html.match(/<h1(?:\s|>)/g) || []).length !== 1) fail(`route "${slug}" must render exactly one h1`);
-  if (html.includes('cinematic-chapter')) fail(`route "${slug}" still renders a second chapter title`);
-  /* 2026-10-12: the primary environment is the WebGL world
-     (docs/CINEMATIC_3D.md); SiliconWorld remains the client-side
-     WebGL-unavailable fallback, so the server artifact ships the
-     cinematic host with its per-route shot index. */
-  if (!html.includes(`class="cinematic-world" aria-hidden="true" data-shot="${sceneIndex}"`)) {
-    fail(`route "${slug}" has no server-rendered cinematic environment`);
+  if ((html.match(/class="chapter-heading/g) || []).length !== 1) {
+    fail(`route "${slug}" must render exactly one chapter title`);
+  }
+  /* 2026-10-14 ("Inside One Device", docs/STAGE.md): one environment,
+     server-rendered empty at the route's own depth. The stratum index
+     in the markup is what proves the route is addressable INTO the
+     machine rather than always opening at its mouth. */
+  if (!html.includes(`class="stage" aria-hidden="true" data-stratum="${sceneIndex}"`)) {
+    fail(`route "${slug}" has no server-rendered environment at its own depth`);
   }
 
   if (text.length < MIN_VISIBLE_CHARS) {
@@ -207,7 +219,7 @@ for (const [sceneIndex, slug] of SECTIONS.entries()) {
   if (!og) fail(`route "${slug}" has no og:image`);
 }
 ok(`${SECTIONS.length} section routes present with server-rendered HTML`);
-ok('pager routes contain no duplicate chapter caption');
+ok('chapter routes render exactly one chapter title each');
 if (!/Delivery\s+Verification/.test(textByRoute.presence ?? '')) {
   fail('merged /presence/ route is missing the former technical-stack content');
 }
@@ -378,7 +390,7 @@ const localizedRoutes = [
 /* GitHub Pages serves these separate project sites on this same hostname;
    their paths intentionally do not live in this portfolio's export. */
 const SAME_HOST_PROJECT_PATHS = new Set(['/arms', '/iqra-online-mart', '/ternux', '/adt']);
-for (const [route] of localizedRoutes) {
+for (const [route, source] of localizedRoutes) {
   const file = join(OUT, ...route.split('/').filter(Boolean), 'index.html');
   if (!existsSync(file)) {
     fail(`missing static Bengali route ${route}`);
@@ -388,7 +400,13 @@ for (const [route] of localizedRoutes) {
   const text = visibleText(html);
   if (text.length < MIN_VISIBLE_CHARS) fail(`Bengali route ${route} ships only ${text.length} visible chars`);
   if ((html.match(/<h1(?:\s|>)/g) || []).length !== 1) fail(`Bengali route ${route} must render exactly one h1`);
-  if (html.includes('cinematic-chapter')) fail(`Bengali route ${route} still renders a second chapter title`);
+  /* Chapters carry the record system's heading; the service and
+     verification documents are their own documents, so the `source`
+     (a section id for a chapter, a path for a document) selects. */
+  const isChapter = !source.startsWith('/');
+  if (isChapter && (html.match(/class="chapter-heading/g) || []).length !== 1) {
+    fail(`Bengali route ${route} must render exactly one chapter title`);
+  }
   if (!/<html[^>]*lang="bn"/.test(html)) fail(`Bengali route ${route} does not declare lang=bn`);
   if (!/[\u0980-\u09FF]/.test(text)) fail(`Bengali route ${route} contains no Bengali visible text`);
   const title = html.match(/<title>([^<]*)<\/title>/)?.[1];
@@ -646,20 +664,29 @@ if (existsSync(chunksDir)) {
    would otherwise slip through. */
 const homeHtml = textByRoute && existsSync(join(OUT, 'index.html')) ? readFileSync(join(OUT, 'index.html'), 'utf8') : '';
 if (homeHtml) {
-  /* The name is real text and the only <h1>; the environment is scaffolding. */
-  if (!/<h1 class="hero-name">/.test(homeHtml)) fail('out/index.html: the hero name must be the h1.hero-name');
-  const words = (homeHtml.match(/class="cinema-word(?: cinema-word--play)?"/g) || []).length;
-  if (words < 2) fail(`out/index.html ships only ${words} name word(s) as real text`);
-  else ok(`hero name ships as real DOM text (${words} words), no canvas or image`);
+  /* The name is real text and the only <h1>; the environment is
+     scaffolding. It is one heading element now, not a per-word
+     construction: the retired build split it into animated spans,
+     which is what `cinema-word` below bans from coming back. */
+  const h1 = homeHtml.match(/<h1 class="chapter-heading[^"]*">([\s\S]*?)<\/h1>/);
+  if (!h1) fail('out/index.html: the identity must be the surface chapter heading (h1.chapter-heading)');
+  else {
+    const name = h1[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    if (name !== 'Sobuj Miah') fail(`out/index.html: the h1 reads "${name}", expected the canonical name as plain text`);
+    else ok('the identity ships as plain DOM text in one h1, no canvas, image or per-word spans');
+  }
   if (/<canvas[^>]*>\s*[^<\s]/.test(homeHtml)) fail('a canvas ships content — the environment must ship empty');
   for (const slug of SECTIONS) {
     const html = existsSync(routeFile(slug)) ? readFileSync(routeFile(slug), 'utf8') : '';
-    /* One WebGL canvas per chapter (2026-10-12); the 2D fallback's two
-       canvases are client-mounted only when the probe fails. */
+    /* One canvas per chapter. The Canvas 2D fallback mounts its own
+       only on the client, and only when the WebGL probe fails, so the
+       artifact must never carry a second one. */
     if ((html.match(/<canvas/g) || []).length !== 1) fail(`route "${slug}" must ship exactly the one environment canvas`);
-    if (/cinema-world|worldmap|sig-cell/.test(html)) fail(`route "${slug}" still ships retired environment markup`);
+    if (/cinema-world|worldmap|sig-cell|world-beat|cinema-word|hero-name|pager-/.test(html)) {
+      fail(`route "${slug}" still ships retired environment or pager markup`);
+    }
   }
-  ok('every chapter ships the cinematic environment (1 empty canvas + no-JS gradient) and no retired markup');
+  ok('every chapter ships the one environment (1 empty canvas + no-JS gradient) and no retired markup');
 }
 
 const cssDir = join(OUT, '_next', 'static', 'css');

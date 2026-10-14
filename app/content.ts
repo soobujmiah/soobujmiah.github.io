@@ -253,6 +253,11 @@ export interface Content {
     proofLink: string;
   };
   ui: {
+    /* The eight strata of the machine, in SECTION_IDS order — the
+       name of the layer the reader is standing in. See app/stage.ts. */
+    strata: string[];
+    /** Accessible name for the depth navigation rail. */
+    depthLabel: string;
     carouselPrev: string;
     carouselNext: string;
     pageLabels: string[];
@@ -717,6 +722,8 @@ const en: Content = {
   ],
   header: { homeLabel: 'Back to home', githubLabel: 'GitHub', langLabel: 'Bangla', langAria: 'Switch to Bangla', githubAria: 'GitHub profile', cvLabel: 'CV', cvAria: 'Download CV (PDF)', servicesLabel: 'How I Can Help' },
   ui: {
+    strata: ['Surface', 'Display', 'Silicon', 'Userland', 'Toolchain', 'Frontier', 'Bus', 'Port'],
+    depthLabel: 'Depth',
     carouselPrev: 'Previous',
     carouselNext: 'Next',
     pageLabels: ['Home', 'Focus & tools', 'About', 'Workstation', 'Work', 'Research', 'Experience', 'Contact'],
@@ -1241,6 +1248,8 @@ const bn: Content = {
     servicesLabel: 'আমি যেভাবে সহযোগিতা করতে পারি',
   },
   ui: {
+    strata: ['উপরিতল', 'ডিসপ্লে', 'সিলিকন', 'ইউজারল্যান্ড', 'টুলচেইন', 'প্রান্তসীমা', 'বাস', 'পোর্ট'],
+    depthLabel: 'গভীরতা',
     carouselPrev: 'আগের',
     carouselNext: 'পরের',
     pageLabels: ['হোম', 'ফোকাস ও টুলিং', 'পরিচিতি', 'ওয়ার্কস্টেশন', 'কাজ', 'গবেষণা', 'অভিজ্ঞতা', 'যোগাযোগ'],

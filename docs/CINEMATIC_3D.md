@@ -1,5 +1,9 @@
 # Cinematic 3D environment — research, architecture and decisions
 
+> **SUPERSEDED on 2026-10-14.** The system described below was removed in the
+> "Inside One Device" rebuild; see [`docs/STAGE.md`](STAGE.md) for the shipped
+> architecture. This file is kept as history — do not implement from it.
+
 > Historical record for the first WebGL environment. Its silicon-city
 > compositions and verification screenshots were superseded by the
 > [Pocket Systems redesign](SPATIAL_PORTFOLIO.md) on 2026-10-12.

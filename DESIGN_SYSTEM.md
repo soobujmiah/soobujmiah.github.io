@@ -26,6 +26,14 @@ advertised a page-turn spring of `170/27/0.9` with `±7%` / `rotateX ±5°` /
 silently drifted from the portfolio. The values below are the **shipped**
 values; the prose was corrected to match, not the other way round.
 
+The 2026-10-14 rebuild replaced the motion tokens outright. Nine groups
+(page turn, reveal, magnetic, tilt, depth, count-up, camera drift, signature,
+pull-to-refresh) described a stack of coexisting animation systems; the site
+now has one moving thing, so there are four groups. `check-units.mjs` asserts
+each retired group is gone, so a half-finished revert cannot leave both
+vocabularies in the file at once. The colour tokens are unchanged: they are
+the canonical ecosystem palette and ARMS, Ternux and ADT inherit them.
+
 ### Token block (source of truth)
 
 A project site may import `app/design-tokens.ts` directly, or copy the block
@@ -46,86 +54,25 @@ below verbatim. Both stay correct — the gate guarantees it.
       "cardBg": "rgba(6,7,6,0.66)",
       "chrome": "#060608"
     },
-    "pageTurn": {
-      "spring": {
-        "stiffness": 140,
-        "damping": 22,
-        "mass": 1
-      },
-      "yPercent": 10,
-      "rotateX": 6,
-      "rotateY": 7,
-      "scale": 0.955,
-      "perspective": 1300,
-      "opacitySeconds": 0.58,
-      "flipLockMs": 1000
+    "flight": {
+      "depth": 1.5,
+      "lateral": 1.05,
+      "lift": 1.05,
+      "roll": 1.2
     },
-    "reveal": {
-      "seconds": 0.7,
-      "ease": "cubic-bezier(0.16, 1, 0.3, 1)"
+    "parallax": {
+      "lateral": 1.5,
+      "lift": 0.9
     },
-    "magnetic": {
-      "followSeconds": 0.12,
-      "releaseSeconds": 0.5,
-      "pressSeconds": 0.1
-    },
-    "tilt": {
-      "maxRotateDeg": 5,
-      "perspective": 900,
-      "popZ": 14,
-      "cornerScale": 1.015,
-      "followSpring": {
-        "stiffness": 150,
-        "damping": 20,
-        "mass": 1
-      }
-    },
-    "depth": {
-      "zRecede": 90,
-      "zRise": 80,
-      "contentLagMs": 40,
-      "numeralParallax": 0.07,
-      "revealRotateX": 4,
-      "revealPerspective": 1200,
-      "revealSpring": {
-        "stiffness": 130,
-        "damping": 18,
-        "mass": 1
-      }
-    },
-    "countUp": {
-      "seconds": 1.1,
-      "ease": "cubic-bezier(0.16, 1, 0.3, 1)"
-    },
-    "cameraDrift": {
-      "maxOffsetHw": 0.02,
-      "followSpring": {
-        "stiffness": 60,
-        "damping": 18,
-        "mass": 1
-      }
-    },
-    "signature": {
-      "perspective": 1500,
-      "enterZ": -220,
-      "enterRotateY": -28,
-      "enterRotateX": 14,
-      "enterRiseEm": 0.42,
-      "clusterSeconds": 0.92,
-      "clusterStaggerSeconds": 0.055,
-      "leadSeconds": 0.35,
+    "settle": {
+      "seconds": 0.72,
       "ease": "cubic-bezier(0.16, 1, 0.3, 1)",
-      "gleamSeconds": 1.15,
-      "gleamStaggerSeconds": 0.042,
-      "gleamLeadSeconds": 0.62,
-      "pointerTiltDeg": 3.5,
-      "pointerFollowSeconds": 0.45
+      "staggerSeconds": 0.05
     },
-    "pullToRefresh": {
-      "armPx": 12,
-      "thresholdPx": 76,
-      "resistance": 2.2,
-      "maxPx": 118
+    "input": {
+      "lockMs": 900,
+      "wheelDelta": 24,
+      "swipePx": 60
     }
   }
 ```
@@ -152,12 +99,19 @@ recognizable but never flood the interface — no neon cyberpunk.
 
 ## 2. Surfaces & borders
 
-- Cards: 12px radius (`rounded-xl`), 1px border at 8–10% white, translucent
-  fill (`--card`) + backdrop blur so the living background shows through.
-- Accent surfaces (now-building, route cards): 1px border at 20–35% green,
-  6–7% green fill.
-- Separation comes from **depth** (layering, blur, vignette) more than from
-  heavy borders.
+**There is no card.** In the eight chapters, separation comes from a single
+hairline rule (`--border`, 7% white), indentation and leading. Nothing is
+enclosed, nothing is blurred, nothing is translucent over the environment:
+`backdrop-filter` is gate-banned from the new surface area, because stacking
+translucent plates over a live background is what made the previous build
+read as overlapping layers rather than one place.
+
+- A label sits **on** a hairline: `.block-label` carries a green-tinted rule
+  (26% accent) under it; `.row` and `.record-title` use the neutral hairline.
+- `--card` survives as a token for the service and verification documents and
+  for inheriting project sites, which are long-form pages rather than strata.
+- The chrome (`--chrome`) is a flat surface with a 1px top or bottom rule. It
+  does not blur what passes behind it.
 
 ## 3. Typography
 
@@ -193,181 +147,168 @@ English tree. Neither language borrows the other's script.
 
 ## 4. Spacing & layout
 
-- Page padding: desktop `92px / 76px`, mobile `80px / 108px`.
-- Content width: `max-w-5xl` (64rem); dense pages `max-w-6xl` (72rem).
-- Card padding `p-4 / sm:p-5`; section gaps scale down on small screens.
-- Breakpoints: `sm / md / lg` + `min-[1400px]`; short-height queries compact
-  type/padding instead of clipping.
-- Desktop editorial pattern: heading rail + content column. Dense collections:
-  fitted grids on desktop, snap carousels below `lg`, accordion below `md`.
+One reading column, one gutter, one gauge. The tokens live in
+`app/globals.css :root` next to the colours:
+
+| Token | Value | What it is |
+|---|---|---|
+| `--measure` | `64ch` | the reading column; prose never exceeds it |
+| `--gutter` | `clamp(18px, 5vw, 56px)` | the page gutter, phone → desktop |
+| `--rail-width` | `232px` | the depth gauge's column (desktop only) |
+| `--head-height` / `--foot-height` | `52px` / `46px` | the chrome the chapter page sits between |
+
+- The chapter is the only scroller. It never clips, truncates or shrinks
+  content to preserve a composition.
+- Desktop reserves the right field for the depth gauge; below `900px` the
+  gauge becomes one strip of ticks above the footer.
+- Hierarchy comes from **indentation, leading and one hairline rule**. There
+  are no cards, no rounded panels, no translucent plates and no blurred
+  surfaces anywhere in the chapters — that vocabulary is what made the
+  previous build read as stacked layers.
 
 ## 5. Motion language
 
-- **Chapter change** (portfolio): direction-aware spring on content depth
-  with a `1000ms` gesture lock; the environment carries the larger camera
-  move and crossfade. Values are in the token block.
-- Reveals: `0.7s cubic-bezier(0.16, 1, 0.3, 1)` fade-up; pages remount, so
-  reveals replay on each entry.
-- Micro: 0.1–0.5s; magnetic links ease-out 0.12s, release 0.5s expo.
-- Environment responds to paging: the camera flies to the chapter's shot over
-  1.5s (velocity-continuous if paged again mid-flight) and the chapter light
-  crossfades over 1.1s; progress advances.
-- Animate **transform + opacity only** (compositor-friendly). The identity
-  mark's continuous life is pure CSS; its pointer loop writes CSS variables
-  and stops itself the moment nothing is moving.
-- `prefers-reduced-motion`: instant transitions, a fully static environment
-  (no camera flight, no packets), no auto-advance, and the identity name
-  becomes a calm static wordmark. Reduced motion removes animation, never
+There is **one** moving thing: the camera travelling into the machine.
+Everything else is the text settling after it. The token block has four
+groups and no more.
+
+- **Flight** (`MOTION.flight`) — the camera's four axes, critically damped:
+  depth `1.5s`, lateral/lift `1.05s`, roll `1.2s`. Depth is deliberately the
+  slowest: entering a stratum must read as travel, not as a cut. A retarget
+  mid-flight inherits velocity, so paging again bends the path instead of
+  snapping it.
+- **Input** (`MOTION.input`) — `lockMs: 900`, so one wheel tick, swipe or
+  arrow press is worth exactly one stratum; `wheelDelta: 24` ignores trackpad
+  jitter; `swipePx: 60` requires a deliberate gesture. Gestures yield to the
+  chapter's own scroller until its edges.
+- **Settle** (`MOTION.settle`) — `0.72s cubic-bezier(0.16, 1, 0.3, 1)`, one
+  entrance per chapter with a `0.05s` stagger between the head and the body.
+  It is a CSS animation keyed on the stratum, so it costs no JavaScript.
+- **Parallax** (`MOTION.parallax`) — a small camera nudge from the pointer,
+  fine pointers only. Touch never gets it: a finger is already the thing
+  being tracked.
+
+Rules that outlive any particular number:
+
+- Animate **transform and opacity only**.
+- No animation library. The site ships none; the camera is rAF over damped
+  scalars, the settle is CSS.
+- `prefers-reduced-motion`: no animation loop at all — one static frame per
+  stratum, no settle, no transitions. Reduced motion removes animation, never
   functionality.
 
-## 5b. Signature name
+## 5b. The identity
 
-The canonical name — `Sobuj Miah` / `সবুজ মিয়া` — is the brand's signature
-object, and it is **real DOM text in the page's only `h1`** (`.hero-name`).
-Depth is CSS 3D, never canvas, never WebGL, never an image.
+The canonical name — `Sobuj Miah` / `সবুজ মিয়া` — is the first stratum's
+heading, and it is **real DOM text in the page's only `h1`**
+(`h1.chapter-heading.chapter-heading--name`), set in Instrument Serif
+(Noto Serif Bengali for Bangla).
 
-**Structure.** `NameReveal` (`components/sections.tsx`) splits the name into
-words, then splits each word into **grapheme clusters** via
-`app/graphemes.ts`. Each cluster becomes one `.sig-c` box carrying its own
-index. `.hero-name` holds the single `perspective`; `.sig-stage` holds the
-pointer tilt; the cluster boxes hold the depth. One perspective, three
-layers.
+It is **one element**, not a per-grapheme construction. The retired build
+split it into animated cluster boxes with a travelling gleam; that machinery,
+its `.sig-*` classes and its near-white `#86efac` ink are gate-banned by
+`check-design.mjs` and `check-build.mjs`, which also assert the `h1` reads
+exactly the canonical name as plain text.
 
-**Motion.** Three designed states, driven entirely by
-`MOTION.signature` (the component writes the `--sig-*` custom properties, so
-CSS cannot drift from the tokens):
-
-1. **Emergence** — each cluster rises from `enterZ` with `enterRotateX` /
-   `enterRotateY`, in a left-to-right stagger of `clusterStaggerSeconds`.
-2. **Gleam** — a green halo crosses the letterforms, one cluster at a time
-   (`gleamStaggerSeconds`). The ink itself never changes colour: the glyphs
-   stay `--fg` and only gain a brand-green `text-shadow`. One pass, with a
-   defined end. Not a cycle, and no blend modes. This is explicitly *not*
-   the retired `.sig-sweep` band — that was a near-white light band behind
-   the name, and `check-build` bans both it and its `#86efac` ink.
-3. **Rest** — crisp, fully legible typography. On fine pointers only, the
-   whole signature tilts up to `pointerTiltDeg` (3.5°) with the pointer.
-
-**Bengali is first-class.** Clusters, not code points, so a conjunct
-(`ক্ষ`, `স্ট্র`) or a consonant carrying a matra (`মি`, `বু`, `য়া`) is one
-indivisible box whose shaping is never torn apart. A pre-base vowel sign
-still renders in its correct position because the whole cluster shapes
-inside a single box. `scripts/check-units.mjs` proves the canonical names
-segment as expected on both the `Intl.Segmenter` and the fallback path.
-
-**Degradation.** Without JavaScript the name is present and animates from
-server-rendered markup. Under `prefers-reduced-motion: reduce` every
-signature animation is off and the name is simply there, at full opacity and
-zero transform. The accessible name never depends on motion.
-
-The retired particle construction, service-keyword morph and dot-matrix
-clock are gone and gate-guarded (see `docs/CINEMATIC_AUDIT.md`).
+Bengali is still first-class, and `app/graphemes.ts` still exists with its
+unit checks: the name is set as one line, so its conjuncts (`ক্ষ`, `স্ট্র`)
+and matra-carrying consonants (`মি`, `বু`, `য়া`) must never be split by
+tracking or by a line break. `body.lang-bn` collapses the tracking for
+exactly that reason.
 
 ## 6. Interaction states
 
 | State | Treatment |
 |---|---|
-| Hover | subtle lift (`translateY(-2..-4px)`), border brightening, glow |
-| Press | compression (`scale(0.95–0.96)`) on buttons and magnetic links |
-| Focus | visible green outline (`:focus-visible`, 2px + 3px offset) |
-| Active nav | accent dot glows (colour only — dot geometry never changes, so the track never re-centres); tabs get accent border + wash |
-| Disabled | `opacity-25`, no pointer events |
+| Hover | colour only — a link's ink and underline move to `--accent-bright`; nothing lifts, scales or glows |
+| Focus | `:focus-visible` — 1px `--accent-bright` outline, 3px offset |
+| Current chapter | the rail tick keeps the accent border, index and full-strength ink; its geometry never changes, so the gauge never re-centres |
+| State marks | `◆` filled for verified/live/now, `◇` hollow for experimental/investigating, `·` for neutral. Colour is information here and nowhere else |
+
+The custom cursor is gone: the site uses the system cursor, and
+`cursor: none` no longer appears in the stylesheet.
 
 ## 7. Link language (shared across the ecosystem)
 
+Every outbound reference in the site is one component, `Ref`
+(`components/record.tsx`): mono, underlined with a green underline, with a
+trailing `↗` for external targets and `→` for internal routes. There are no
+buttons, pills or plain anchors competing with it.
+
 | Element | Meaning | Destination |
 |---|---|---|
-| `Explore ↗` pill | verified project/demo website | `websiteUrl` — set **only** for repos with a verified live site, never fabricated |
-| Arrow icon button | source repository | `repo` (aria: `{name} {repoWord}`) |
-| `Code ↗` text | source repository (compact rows) | `repo` |
-| GitHub route card | everything else | profile URL (single route, not a directory) |
-
-External links: `target="_blank" rel="noreferrer"`. When a project gains its
-own website, the portfolio exposes it through the existing `websiteUrl` slot —
-no model change needed.
+| `Ref` with `↗` | leaves the site | an external URL; `rel="noreferrer noopener"`, new tab |
+| `Ref` with `→` | stays in the site | a real static route |
+| `Ref strong` | the one reference a chapter wants read first | e.g. `Explore my work`, a contact channel |
+| `liveSiteWord` / `repoWord` | a verified live site / its source | `websiteUrl` — set **only** for repos with a verified live site, never fabricated — and `repo` |
 
 ## 8. Navigation philosophy
 
-- Portfolio: discrete pager — wheel ticks, vertical swipes, arrows/PageUp/
-  PageDown/Home/End, dots, nav links, and the section index overlay.
-- **Every section is a real route.** `/`, `/presence/`, `/about/`, `/work/`,
-  `/research/`, `/experience/`, `/contact/` are
+- **The navigation is the instrument.** The depth rail
+  (`components/DepthRail.tsx`) is a gauge: eight ticks, the current stratum
+  lit, the ones ahead still legible so the reader can see there is more
+  machine below. There is no overlay, no dialog and no second navigation
+  system — the previous build's HUD panel was a surface on top of the page,
+  which is precisely the layering this rebuild removed.
+- **Every chapter is a real route.** `/`, `/presence/`, `/about/`,
+  `/workstation/`, `/work/`, `/research/`, `/experience/`, `/contact/` are
   static pages with their own server-rendered HTML, title, description,
-  canonical URL and social card. The pager is the *presentation*; the route is
-  the *address*. Legacy `#work`-style links are rewritten on load;
-  `/stack/` and `/open-source/` remain canonicalized entry routes.
-- The **index overlay** opened from the pager control is a view onto the same
-  sections, not a second navigation system. It is a
-  `role="dialog" aria-modal="true"` with focus moved to the current row, focus
-  returned to the trigger on close, Escape/backdrop close, arrow/Home/End
-  movement, and a Tab trap. Rows are real anchors, so middle-click and crawlers
-  work even though a normal click drives the pager.
-- The overlay is a **HUD that emerges from the bottom bar** — the bar is its
-  physical origin and sole control. The panel is anchored above the bar,
-  grows upward out of it (transform-origin at its bottom edge) and contracts
-  back into it on close; a seam connector scales in from the bar end, the
-  trigger sparks once on open, and the bar's `data-nav-open` glow keeps the
-  relationship visible. The panel's hairline border is overlaid with
-  segmented corner brackets and one asymmetric edge tick — instrument
-  framing, never a conventional dialog box. Rows stagger in after the frame
-  expands. It carries no large page number — the page itself already does.
-- **Progress is one instrument with a fixed origin — a border trace, never a
-  dot row.** The bottom control is ONE fixed-size pill button whose perimeter
-  carries the trace: it travels clockwise from a fixed origin at
-  bottom-centre (bottom edge → right cap → top edge → left cap), normalised
-  with `pathLength=1` and animated by `stroke-dashoffset = 1 − progress`.
-  Pressing anywhere on it opens the index HUD; the index glyph is part of
-  the same button — there is no second trigger, no readout and no numbering
-  inside the control. On the open HUD, the same progress travels along the
-  panel's bottom edge. The formula is deterministic —
-  `progress = activeIndex / (totalPages − 1)` — so page 1 = 0% and page 7 =
-  100%. Only the trace's end point moves; the origin never re-centres and no
-  element resizes or shifts.
-- Pages center when they fit and **scroll internally** when they don't.
-  Gestures yield to the inner scroller until its edges, then turn the page.
-  Never clip, truncate, or shrink content to preserve composition.
-- Horizontal gestures always belong to carousels; vertical paging never fights
-  them (dominant-axis detection).
-- **Pull-to-refresh** exists only at the genuine top of the site (first
-  section, inner scroller at `scrollTop 0`), requires an intentional vertical
-  pull, and performs a real `location.reload()`. On every other section a
-  downward pull keeps its original meaning — turn back one page.
+  canonical URL and social card. The journey is the *presentation*; the route
+  is the *address*. Every rail tick is a real anchor, so it works with
+  JavaScript disabled, is crawlable, and middle-clicks into a new tab.
+  Legacy `#work`-style links are rewritten on load; `/stack/` and
+  `/open-source/` remain canonicalized entry routes.
+- **Depth, not pages.** Wheel, swipe, arrows, `PageUp`/`PageDown`,
+  `Home`/`End` and the rail all do one thing: change the stratum. Input
+  yields to the chapter's inner scroller until its edges, then goes deeper.
+  Horizontal gestures are never paging (dominant-axis detection).
+- **Where am I** is answered twice, in the document itself: the chapter's
+  depth line (`04 / 08 · Userland`) and the rail's head (`Depth 04/08`).
+  Nothing floats over the page to say it.
+- Back/forward move the camera, not just the address bar.
 
-## 9. Spatial exhibit — phone silicon as architecture
+## 9. The stage — inside one device
 
-The eight pager chapters form one continuous, invented silicon landscape. The
-primary renderer is `components/cinematic-scene.ts` (Three.js, loaded only
-when WebGL is available). A camera flight connects a distinct district per
-chapter. The workstation has six separated layers; featured work has project
-monuments; Research has solid geometric objects; Experience has a rail;
-Contact has a beacon. Bright physical materials and broad, controlled light
-make forms legible against the dark floor. This is a conceptual environment,
-not a literal chip photograph or a claim about a commercial SoC layout.
+The eight chapters are eight **strata** of one machine, and the reader travels
+into it along the depth axis. `components/stage-scene.ts` (Three.js, loaded
+only after a successful WebGL probe) is the one renderer;
+`components/StageFallback.tsx` draws the same strata from the same numbers in
+Canvas 2D when WebGL is unavailable; `app/globals.css` carries a gradient so
+the no-JavaScript page still has depth. All of it is procedural: no model, no
+texture, no stock raster or video ships, ever.
 
-The content is part of the composition. A slim illuminated line and ground
-sightline tie real, accessible DOM inscriptions to each camera shot. Desktop
-reserves the left reading datum and lets monuments occupy the right field.
-Portrait screens show the world above the inscription; native inner scroll
-reveals the complete chapter. No conventional cards or translucent panels
-appear in the eight pager chapters.
+Two rules are load-bearing, and both are machine-checked:
 
-`components/SiliconWorld.tsx` and `app/silicon.ts` remain the Canvas 2D
-fallback; its line brightness is tuned so the structure remains visible when
-WebGL is unavailable. Without JavaScript, the static route renders every
-chapter's text and a CSS architectural backdrop. Reduced motion keeps the
-scene still; visibility pause, pixel budget and mobile quality policy remain.
-See [`docs/CINEMATIC_3D.md`](docs/CINEMATIC_3D.md) and
-[`docs/SPATIAL_PORTFOLIO.md`](docs/SPATIAL_PORTFOLIO.md).
+1. **One subject.** A chapter changes the camera and what is emphasised. It
+   may never introduce a second environment. `check-design.mjs` allows
+   exactly one module to import `three` and exactly one `<Stage>` mount.
+2. **The world tells the truth.** The marks etched into the strata are the
+   verification state, distributed from `app/verification-summary.json` — the
+   same projection the footer's proof line and `/verification/` read. A
+   failing machine check is a visibly dark mark. The scene cannot flatter the
+   work.
+
+Full architecture, camera maths, quality policy and budgets:
+[`docs/STAGE.md`](docs/STAGE.md).
 
 ## 10. Accessibility
 
-- Full keyboard operation (paging + inner-scroll chunking + carousels +
-  accordion + tabs + the index overlay), labeled scroll regions, localized
-  aria throughout — in Bangla mode the accessibility labels are Bangla too.
-- Readable contrast on all text; touch targets ≥ 32px (dots excepted, they are
-  redundant with swipe).
-- Semantic structure per page; decorative layers `aria-hidden`.
-- Reduced-motion support as specified in §5.
+- Full keyboard operation: `ArrowUp`/`ArrowDown`, `PageUp`/`PageDown`,
+  `Home`/`End` move between strata, and chunk-scroll the chapter first while
+  it still has text in that direction. Every rail tick is a real link, so
+  `Tab` reaches all eight and `Enter` works. Keys are ignored while focus is
+  in a form control.
+- The chapter is the page's `<main>`, labelled with the chapter's own name;
+  the depth rail is a `<nav>` labelled "Depth"; the environment is
+  `aria-hidden`.
+- Real markup for real structure: label → value pairs are a `<dl>`, the rail
+  is an `<ol>`, the current tick carries `aria-current="page"`. A crawler and
+  a screen reader get the structure, not a visual convention.
+- State marks are `aria-hidden` glyphs: the state is always also in the
+  text (`Verified`, `Experimental`, the status label), never colour alone.
+- Readable contrast on all text; touch targets ≥ 32px.
+- Reduced-motion support as specified in §5 — it removes animation, never
+  functionality.
 
 ## 11. Bilingual rules
 
@@ -412,39 +353,36 @@ this document and the CSS in agreement.
 ```text
 app/design-tokens.ts     brand + motion tokens (machine-checked root)
 app/sections.ts          the canonical section list — drives routes, sitemap,
-                         the index overlay and the build validators
+                         the depth rail and the build validators
+app/stage.ts             the stage's pure maths: strata, stations, camera
+                         flight, quality policy, presence, evidence marks
 app/content.ts           bilingual copy + curated structure
 app/language.tsx         provider, persistence, digit localization, title sync
-app/page.tsx             home route (section 0)
-app/[section]/page.tsx   six section routes + two legacy aliases + metadata
+app/graphemes.ts         Bengali-safe grapheme segmentation
+app/verification.ts      the generated evidence projection (+ summary JSON)
+app/(en)/ app/(bn)/      the routes; home, chapters, services, verification
 app/robots.ts            robots.txt
-app/sitemap.ts           sitemap.xml, one line per section
-app/globals.css          tokens (§1), pager, overlay, name, carousels, a11y
-components/Pager.tsx     discrete pager, gestures, paper-turn, route sync
-components/NavOverlay.tsx  the section index HUD, emerging from the bottom bar
-components/PullToRefresh.tsx  real mobile pull-to-refresh gesture
-components/SiliconWorld.tsx  the Canvas 2D environment (§9)
-app/silicon.ts           seeded chip generator, camera poses, projector (pure)
-components/SiliconDocumentBackdrop.tsx  the same scene behind document routes
-components/sections.tsx  the seven curated pages
-components/ui.tsx        cursor, magnetic, reveals, dots, carousel, chrome
+app/sitemap.ts           sitemap.xml, one line per route
+app/globals.css          tokens (§1), stage, journey, record system, type,
+                         documents, reduced motion — in that order
+components/Journey.tsx   the host: input → one depth change, URL sync
+components/Stage.tsx     the one environment host (probe, lazy load, pause)
+components/stage-scene.ts the only module that imports three.js
+components/StageFallback.tsx the same machine in Canvas 2D, no WebGL
+components/record.tsx    the typographic system (§5b, §6, §7)
+components/chapters.tsx  the eight chapters, built only from content.ts
+components/DepthRail.tsx the navigation, which is the depth gauge (§8)
+components/chrome.tsx    one masthead + one footer for the whole site
 scripts/check-content.mjs        bilingual parity + two-way purity gate
 scripts/check-purity-adversarial.mjs  adversarial purity suite
-scripts/check-design.mjs         token/document/CSS drift gate
+scripts/check-design.mjs         token/document/CSS drift + one-subject gate
+scripts/check-units.mjs          100 logic checks (stage, tokens, routing,
+                                 segmentation, digits)
 scripts/check-build.mjs          routes, deep links, SEO assets, JS budget
+scripts/check-verification.mjs   the evidence registry and its copy
+docs/STAGE.md            the shipped architecture, in full
 ```
 
-All shared section reveals now use the depth reveal variant. Presence cards tilt at most five degrees on
-fine pointers; their content lifts fourteen pixels. Touch gestures retain
-native scrolling and cards remain flat. Pointer cancellation, reduced-motion
-changes, and pointer-capability changes reset the card immediately.
-
-The verified
-footer count animates only the generated
-evidence value, preserves the final value in static HTML and its accessible
-label, and restores that value when an animation is interrupted. Reduced
-motion shows final counts and revealed content immediately.
-
-`depth.contentLagMs` is reserved; the current page body moves with its shell.
-This layer requires no additional animation library, WebGL runtime, hosted
-asset, or paid service.
+This layer requires no animation library, no hosted asset and no paid
+service. The only runtime dependency the environment adds is `three`, and it
+is loaded lazily, after a successful WebGL probe, by exactly one module.
