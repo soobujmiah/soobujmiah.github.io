@@ -265,16 +265,37 @@
     let targetStage = 0;
     let currentStage = 0;
     const cameraPositions = mobileDevice
-      ? [new THREE.Vector3(-0.28, 2.85, 9.2), new THREE.Vector3(-0.12, 2.45, 7.6), new THREE.Vector3(0.18, 3.65, 9.7), new THREE.Vector3(-0.3, 3.9, 10.1)]
-      : [new THREE.Vector3(0, 3.15, 10.7), new THREE.Vector3(0, 3.25, 9.4), new THREE.Vector3(0, 4.0, 11.4), new THREE.Vector3(0, 4.7, 12.5)];
+      ? [new THREE.Vector3(-0.5, 2.8, 9.6), new THREE.Vector3(-0.15, 2.1, 6.2), new THREE.Vector3(0.45, 3.9, 10.8), new THREE.Vector3(-0.55, 4.4, 12.2)]
+      : [new THREE.Vector3(0.3, 3.15, 12.4), new THREE.Vector3(-0.35, 2.35, 7.5), new THREE.Vector3(0.65, 4.45, 13.2), new THREE.Vector3(-0.5, 5.1, 15.2)];
     const cameraTargets = mobileDevice
-      ? [new THREE.Vector3(0.15, 0.25, 0), new THREE.Vector3(0.05, 0.35, 0), new THREE.Vector3(0, 0.15, 0), new THREE.Vector3(0, 0, 0)]
-      : [new THREE.Vector3(1.0, 0.25, 0), new THREE.Vector3(0.3, 0.35, 0), new THREE.Vector3(0, 0.15, 0), new THREE.Vector3(0, 0, 0)];
+      ? [new THREE.Vector3(-0.65, 0.2, 0), new THREE.Vector3(-0.2, 0.35, 0), new THREE.Vector3(0.5, 0.1, -0.3), new THREE.Vector3(-0.6, -0.1, 0)]
+      : [new THREE.Vector3(1.2, 0.25, 0), new THREE.Vector3(-0.2, 0.35, 0), new THREE.Vector3(0.5, 0.15, -0.5), new THREE.Vector3(-0.8, 0, -1)];
     const phonePositions = mobileDevice
-      ? [new THREE.Vector3(2.1, 1.25, 1.0), new THREE.Vector3(1.8, 1.3, 0.8), new THREE.Vector3(1.45, 0.98, 0.6), new THREE.Vector3(2.0, 1.25, 0.2)]
-      : [new THREE.Vector3(3.25, 1.12, 0.1), new THREE.Vector3(2.2, 1.32, 0.1), new THREE.Vector3(1.5, 1.0, 0.2), new THREE.Vector3(2.75, 1.25, -0.7)];
-    const phoneRotations = [new THREE.Euler(0.04, -0.18, -0.045), new THREE.Euler(-0.03, -0.08, 0.02), new THREE.Euler(0.06, 0.18, 0.04), new THREE.Euler(0.02, -0.12, 0.015)];
-    const phoneScales = mobileDevice ? [1.85, 2.0, 1.62, 1.55] : [0.92, 1.08, 0.88, 0.78];
+      ? [new THREE.Vector3(2.05, 1.35, 1.1), new THREE.Vector3(1.8, 1.25, 0.8), new THREE.Vector3(1.35, 1.0, 0.7), new THREE.Vector3(1.9, 1.35, 0.1)]
+      : [new THREE.Vector3(4.0, 1.2, 0.1), new THREE.Vector3(1.7, 1.2, 0.1), new THREE.Vector3(2.0, 1.0, 0.3), new THREE.Vector3(4.1, 1.3, -0.7)];
+    const phoneRotations = [new THREE.Euler(0.12, -0.34, -0.08), new THREE.Euler(-0.15, 0.08, 0.06), new THREE.Euler(0.2, 0.48, 0.09), new THREE.Euler(-0.08, -0.4, -0.04)];
+    const phoneScales = mobileDevice ? [1.85, 2.05, 1.72, 1.5] : [1.8, 2.15, 1.65, 1.48];
+    const cameraFovs = mobileDevice ? [61, 49, 58, 66] : [39, 34, 43, 52];
+    const route = document.querySelector('.world-route');
+    const routeTitle = document.getElementById('world-route-title');
+    const routeTitles = [
+      { en: '01 — FIELD NOTES', bn: '০১ — ফিল্ড নোট' },
+      { en: '02 — MOBILE WORKSTATION', bn: '০২ — মোবাইল কর্মপরিবেশ' },
+      { en: '03 — SELECTED SYSTEMS', bn: '০৩ — বাছাই করা সিস্টেম' },
+      { en: '04 — LIVING KNOWLEDGE', bn: '০৪ — জীবন্ত জ্ঞান' }
+    ];
+    let displayedRoute = -1;
+
+    function updateRoute() {
+      if (!route || !routeTitle) return;
+      const next = Math.max(0, Math.min(routeTitles.length - 1, Math.round(targetStage)));
+      if (next === displayedRoute) return;
+      displayedRoute = next;
+      const language = document.body.classList.contains('lang-bn') ? 'bn' : 'en';
+      routeTitle.textContent = routeTitles[next][language];
+      route.querySelector('.world-route-index').textContent = `${String(next + 1).padStart(2, '0')} / 04`;
+      route.querySelectorAll('.world-route-markers i').forEach((marker, index) => marker.classList.toggle('is-active', index === next));
+    }
 
     function updateTargetStage() {
       const middle = window.innerHeight * 0.52;
@@ -293,6 +314,7 @@
         if (distance < bestDistance) { bestDistance = distance; bestIndex = index; }
       });
       targetStage = bestIndex;
+      updateRoute();
     }
     window.addEventListener('scroll', updateTargetStage, { passive: true });
     window.addEventListener('resize', updateTargetStage, { passive: true });
@@ -327,19 +349,22 @@
       const delta = Math.min(clock.getDelta(), 0.05);
       const motion = reducedMotion.matches;
       currentStage = motion ? targetStage : THREE.MathUtils.damp(currentStage, targetStage, 3.0, delta);
+      const low = Math.floor(currentStage);
+      const high = Math.min(cameraFovs.length - 1, low + 1);
+      const nextFov = THREE.MathUtils.lerp(cameraFovs[low], cameraFovs[high], currentStage - low);
+      if (Math.abs(camera.fov - nextFov) > 0.08) { camera.fov = nextFov; camera.updateProjectionMatrix(); }
       mixVector(camera.position, cameraPositions, currentStage);
       const look = new THREE.Vector3();
       mixVector(look, cameraTargets, currentStage);
       camera.lookAt(look);
       mixVector(phone.position, phonePositions, currentStage);
-      const low = Math.floor(currentStage);
-      const high = Math.min(phoneRotations.length - 1, low + 1);
+      const phoneHigh = Math.min(phoneRotations.length - 1, low + 1);
       phone.rotation.set(
-        THREE.MathUtils.lerp(phoneRotations[low].x, phoneRotations[high].x, currentStage - low),
-        THREE.MathUtils.lerp(phoneRotations[low].y, phoneRotations[high].y, currentStage - low),
-        THREE.MathUtils.lerp(phoneRotations[low].z, phoneRotations[high].z, currentStage - low)
+        THREE.MathUtils.lerp(phoneRotations[low].x, phoneRotations[phoneHigh].x, currentStage - low),
+        THREE.MathUtils.lerp(phoneRotations[low].y, phoneRotations[phoneHigh].y, currentStage - low),
+        THREE.MathUtils.lerp(phoneRotations[low].z, phoneRotations[phoneHigh].z, currentStage - low)
       );
-      const scale = THREE.MathUtils.lerp(phoneScales[low], phoneScales[high], currentStage - low);
+      const scale = THREE.MathUtils.lerp(phoneScales[low], phoneScales[phoneHigh], currentStage - low);
       phone.scale.setScalar(scale);
       const nodeAmount = THREE.MathUtils.smoothstep(currentStage, 1.15, 2.15);
       projectNodes.visible = nodeAmount > 0.01;
