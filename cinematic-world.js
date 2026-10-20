@@ -8,6 +8,76 @@
   const lowMemory = Boolean(navigator.deviceMemory && navigator.deviceMemory <= 2);
   const constrainedDevice = saveData || lowMemory || mobileDevice;
 
+  // Paint the authored CSS field scene immediately. It stays useful on devices
+  // without WebGL, and fades only after the 3D scene has actually initialized.
+  document.body.classList.add('world-fallback');
+
+  const stageNames = ['opening', 'notes', 'workstation', 'systems', 'practice', 'knowledge', 'experience', 'capabilities', 'closing'];
+  const stageSections = Array.from(document.querySelectorAll('[data-world-stage]'));
+  const route = document.querySelector('.world-route');
+  const routeTitle = document.getElementById('world-route-title');
+  const routeTitles = [
+    { en: '01 — ARRIVAL', bn: '০১ — পরিচয়' },
+    { en: '02 — FIELD NOTES', bn: '০২ — ফিল্ড নোট' },
+    { en: '03 — MOBILE WORKSTATION', bn: '০৩ — মোবাইল কর্মপরিবেশ' },
+    { en: '04 — SELECTED SYSTEMS', bn: '০৪ — বাছাই করা সিস্টেম' },
+    { en: '05 — ENGINEERING PRACTICE', bn: '০৫ — প্রকৌশলচর্চা' },
+    { en: '06 — LIVING KNOWLEDGE', bn: '০৬ — জীবন্ত জ্ঞান' },
+    { en: '07 — EXPERIENCE', bn: '০৭ — অভিজ্ঞতা' },
+    { en: '08 — CAPABILITIES', bn: '০৮ — সক্ষমতা' },
+    { en: '09 — CONTACT', bn: '০৯ — যোগাযোগ' }
+  ];
+  let targetStage = 0;
+  let displayedRoute = -1;
+
+  function updateRoute() {
+    if (!route || !routeTitle) return;
+    const next = Math.max(0, Math.min(routeTitles.length - 1, Math.round(targetStage)));
+    if (next === displayedRoute) return;
+    displayedRoute = next;
+    const language = document.body.classList.contains('lang-bn') ? 'bn' : 'en';
+    routeTitle.textContent = routeTitles[next][language];
+    route.querySelector('.world-route-index').textContent = `${String(next + 1).padStart(2, '0')} / ${String(routeTitles.length).padStart(2, '0')}`;
+    route.querySelectorAll('.world-route-markers i').forEach((marker, index) => marker.classList.toggle('is-active', index === next));
+  }
+
+  function updateTargetStage() {
+    const middle = window.innerHeight * 0.52;
+    let bestDistance = Infinity;
+    let bestIndex = 0;
+    stageSections.forEach((section) => {
+      const rect = section.getBoundingClientRect();
+      const index = stageNames.indexOf(section.dataset.worldStage);
+      if (index < 0) return;
+      if (rect.top <= middle && rect.bottom >= middle) {
+        bestIndex = index;
+        bestDistance = 0;
+        return;
+      }
+      const distance = Math.min(Math.abs(rect.top - middle), Math.abs(rect.bottom - middle));
+      if (distance < bestDistance) { bestDistance = distance; bestIndex = index; }
+    });
+    targetStage = bestIndex;
+    document.body.dataset.worldStage = stageNames[bestIndex];
+    const travel = bestIndex - (stageNames.length - 1) / 2;
+    document.body.style.setProperty('--fallback-x', `${travel * -1.5}vw`);
+    document.body.style.setProperty('--fallback-y', `${Math.abs(travel) * -0.45}vh`);
+    const scrollable = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const progress = window.scrollY / scrollable;
+    document.body.style.setProperty('--journey-progress', `${progress}`);
+    document.body.style.setProperty('--journey-x', `${progress * -4}vw`);
+    document.body.style.setProperty('--journey-phone-x', `${progress * -7}vw`);
+    document.body.style.setProperty('--journey-y', `${progress * -2}vh`);
+    document.body.style.setProperty('--journey-phone-y', `${progress * 3}vh`);
+    document.body.style.setProperty('--journey-rotate', `${progress * 8}deg`);
+    document.body.style.setProperty('--journey-phone-rotate', `${progress * 28}deg`);
+    updateRoute();
+  }
+  window.addEventListener('scroll', updateTargetStage, { passive: true });
+  window.addEventListener('resize', updateTargetStage, { passive: true });
+  window.addEventListener('portfolio:language-change', updateRoute);
+  updateTargetStage();
+
   const schedule = window.requestIdleCallback || ((fn) => window.setTimeout(fn, 900));
   schedule(() => loadWorld().catch(() => {
     document.body.classList.remove('has-world');
@@ -61,7 +131,9 @@
     const terrainWidth = constrainedDevice ? 52 : 90;
     const terrainDepth = constrainedDevice ? 62 : 100;
     const terrainSizeX = 20;
-    const terrainSizeZ = 25;
+    // Give the camera a real route through the portfolio instead of reframing
+    // one isolated hero scene.
+    const terrainSizeZ = 150;
     const positions = [];
     const colors = [];
     const indices = [];
@@ -248,13 +320,13 @@
     });
     const notePaper = new THREE.Mesh(new THREE.BoxGeometry(1.32, 1.68, 0.035), new THREE.MeshStandardMaterial({ map: noteTexture, roughness: 0.92, metalness: 0.01 }));
     noteCard.add(notePaper);
-    noteCard.position.set(1.9, 1.15, -1.1);
+    noteCard.position.set(1.9, 1.15, 5.2);
     noteCard.rotation.set(0.1, 0.23, -0.08);
     world.add(noteCard);
 
     const nodePositions = mobileDevice
-      ? [[-1.65, 0.08, -2.7], [-0.82, 0.12, 1.3], [0, 0.18, -2.5], [0.82, 0.08, 1.1], [1.65, 0.14, -2.3]]
-      : [[-4.0, 0.08, -2.7], [-2.0, 0.12, 1.3], [0.0, 0.18, -2.5], [2.1, 0.08, 1.1], [4.0, 0.14, -2.3]];
+      ? [[-1.1, 0.08, -6], [-0.55, 0.12, -9], [0, 0.18, -12], [0.55, 0.08, -15], [1.1, 0.14, -18]]
+      : [[-2.5, 0.08, -6], [-1.25, 0.12, -9], [0, 0.18, -12], [1.25, 0.08, -15], [2.5, 0.14, -18]];
     const projectNodes = new THREE.Group();
     const projectPoints = [];
     const projectColors = [0xa9bd92, 0x819d75, 0xc5d7b3, 0x79a77a, 0xd7dfc2];
@@ -287,70 +359,141 @@
     projectNodes.visible = false;
     world.add(projectNodes);
 
-    const stageNames = ['notes', 'workstation', 'systems', 'knowledge'];
-    const stageSections = Array.from(document.querySelectorAll('[data-world-stage]'));
-    let targetStage = 0;
+    // Each selected system becomes a distinct physical artifact along the field route.
+    const projectModels = [];
+    const metal = new THREE.MeshStandardMaterial({ color: 0x68806a, roughness: 0.38, metalness: 0.66 });
+    const paper = new THREE.MeshStandardMaterial({ color: 0xd0d8bf, roughness: 0.84, metalness: 0.02, side: THREE.DoubleSide });
+    const glowMaterials = projectColors.map((color) => new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.42, roughness: 0.42, metalness: 0.16 }));
+    const addBox = (group, size, position, material, rotation = [0, 0, 0]) => {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
+      mesh.position.set(...position);
+      mesh.rotation.set(...rotation);
+      group.add(mesh);
+      return mesh;
+    };
+    const addLine = (group, points, color = 0xa9bd92, opacity = 0.86) => {
+      const geometry = new THREE.BufferGeometry().setFromPoints(points.map((point) => new THREE.Vector3(...point)));
+      const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity });
+      const line = new THREE.Line(geometry, material);
+      group.add(line);
+      return line;
+    };
+    nodePositions.forEach((pos, index) => {
+      const artifact = new THREE.Group();
+      const tint = glowMaterials[index];
+      if (index === 0) {
+        // Ternuxx: a small, open native terminal workstation.
+        addBox(artifact, [1.7, 1.14, 0.12], [0, 1.02, 0], metal, [-0.08, -0.16, 0.02]);
+        addBox(artifact, [1.52, 0.91, 0.018], [0, 1.03, 0.071], new THREE.MeshBasicMaterial({ map: phoneScreen }));
+        addBox(artifact, [1.9, 0.1, 0.52], [0, 0.37, 0.03], metal);
+        addLine(artifact, [[-0.67, 0.42, 0.3], [-0.67, 0.24, 0.3], [0.67, 0.24, 0.3]], 0xc5d7b3, 0.74);
+      } else if (index === 1) {
+        // Ternux: layered Linux ground forms above a native Android base.
+        for (let layer = 0; layer < 4; layer++) {
+          const slab = new THREE.Mesh(new THREE.CylinderGeometry(0.92 - layer * 0.13, 1.02 - layer * 0.12, 0.16, 7), layer % 2 ? metal : tint);
+          slab.position.set(0, 0.22 + layer * 0.21, 0);
+          slab.rotation.y = layer * 0.22;
+          artifact.add(slab);
+        }
+        const linuxMark = new THREE.Mesh(new THREE.IcosahedronGeometry(0.27, 1), paper);
+        linuxMark.position.set(0, 1.28, 0);
+        artifact.add(linuxMark);
+      } else if (index === 2) {
+        // ADT: three linked stages of an Android toolchain.
+        const blocks = [[-0.82, 0.45, 0], [0, 1.05, 0], [0.82, 0.45, 0]];
+        blocks.forEach((point, blockIndex) => {
+          addBox(artifact, [0.66, 0.66, 0.66], point, blockIndex === 1 ? tint : metal, [0.18, 0.26, 0.18]);
+          const ring = new THREE.Mesh(new THREE.TorusGeometry(0.39, 0.016, 5, 32), glowMaterials[blockIndex]);
+          ring.position.set(point[0], point[1], 0.38);
+          artifact.add(ring);
+        });
+        addLine(artifact, [[-0.45, 0.48, 0.02], [-0.08, 0.9, 0.02], [0.4, 0.48, 0.02]], 0xc5d7b3, 0.9);
+      } else if (index === 3) {
+        // LAI: a local inference core inside a consent-gated orbit.
+        const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.52, 2), tint);
+        core.position.y = 0.93;
+        artifact.add(core);
+        [0.9, 1.18].forEach((radius, ringIndex) => {
+          const orbit = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.012, 5, 64), new THREE.MeshBasicMaterial({ color: ringIndex ? 0x80976d : 0xc5d7b3, transparent: true, opacity: 0.76 }));
+          orbit.position.y = 0.93;
+          orbit.rotation.set(0.74 + ringIndex * 0.46, 0.2, 0.18);
+          artifact.add(orbit);
+        });
+        for (let point = 0; point < 7; point++) {
+          const angle = point * Math.PI * 2 / 7;
+          const bead = new THREE.Mesh(new THREE.SphereGeometry(0.075, 10, 8), paper);
+          bead.position.set(Math.cos(angle) * 1.08, 0.93 + Math.sin(angle) * 0.48, Math.sin(angle) * 0.72);
+          artifact.add(bead);
+        }
+      } else {
+        // GGEN: a floating folio assembled from editable document layers.
+        for (let sheet = 0; sheet < 3; sheet++) {
+          const page = new THREE.Mesh(new THREE.PlaneGeometry(1.35, 1.72), sheet === 2 ? paper : metal);
+          page.position.set((sheet - 1) * 0.15, 0.88 - sheet * 0.12, (2 - sheet) * 0.09);
+          page.rotation.set(0.08, (sheet - 1) * 0.12, -0.12 + sheet * 0.12);
+          artifact.add(page);
+        }
+        for (let row = 0; row < 5; row++) {
+          addLine(artifact, [[-0.46, 1.35 - row * 0.2, 0.24], [0.28 + (row % 2) * 0.16, 1.35 - row * 0.2, 0.24]], 0x36533b, 0.72);
+        }
+        const mark = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.035, 7, 28), tint);
+        mark.position.set(0.36, 0.52, 0.28);
+        artifact.add(mark);
+      }
+      artifact.position.set(pos[0], groundHeight(pos[0], pos[2]), pos[2]);
+      artifact.scale.setScalar(1.48);
+      artifact.visible = false;
+      world.add(artifact);
+      projectModels.push(artifact);
+    });
+
+    // The non-project chapters each have their own landmark along the route:
+    // a measured rig, an archive, a work timeline, a capability constellation,
+    // then a quiet closing horizon.
+    const chapterLandmarks = new THREE.Group();
+    const addLandmark = (mesh, position, rotation = [0, 0, 0]) => {
+      mesh.position.set(...position);
+      mesh.rotation.set(...rotation);
+      chapterLandmarks.add(mesh);
+      return mesh;
+    };
+    [-3.2, -2.1, -1, 0.1].forEach((x, index) => {
+      addLandmark(new THREE.Mesh(new THREE.BoxGeometry(0.32, 1.05 + index * 0.16, 0.32), index % 2 ? metal : glowMaterials[2]), [x, 0.65 + index * 0.08, -27]);
+    });
+    addLine(chapterLandmarks, [[-3.2, 0.2, -27], [-2.1, 0.4, -27], [-1, 0.2, -27], [0.1, 0.4, -27]], 0xc5d7b3, 0.8);
+    for (let sheet = 0; sheet < 4; sheet++) {
+      addLandmark(new THREE.Mesh(new THREE.PlaneGeometry(1.45, 1.92), sheet % 2 ? metal : paper), [sheet * 0.5 - 0.8, 0.9 + sheet * 0.18, -38 - sheet * 0.18], [0.08, sheet * 0.12, (sheet - 1.5) * 0.07]);
+    }
+    [-1.2, -0.1, 1, 2.1].forEach((x, index) => {
+      addLandmark(new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 2.1 + (index % 2) * 0.8, 7), glowMaterials[index]), [x, 1.1, -48]);
+      addLandmark(new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.018, 5, 24), paper), [x, 0.3 + index * 0.16, -48], [Math.PI / 2, 0, 0]);
+    });
+    [0.65, 1.1, 1.55].forEach((radius, index) => {
+      addLandmark(new THREE.Mesh(new THREE.TorusGeometry(radius, 0.018, 6, 56), glowMaterials[index + 1]), [0, 1.2, -58], [0.25 + index * 0.55, 0.15, 0.18]);
+    });
+    const closingCore = new THREE.Mesh(new THREE.IcosahedronGeometry(1.15, 2), glowMaterials[0]);
+    closingCore.scale.set(1.15, 0.56, 0.2);
+    addLandmark(closingCore, [0, 1.1, -68], [0.3, -0.4, 0.45]);
+    addLandmark(new THREE.Mesh(new THREE.TorusGeometry(1.9, 0.012, 5, 72), paper), [0, 1, -68], [0.7, 0.1, 0.2]);
+    world.add(chapterLandmarks);
+
     let currentStage = 0;
     let selectedProject = 0;
     window.addEventListener('portfolio:project-change', (event) => {
       selectedProject = Math.max(0, Math.min(projectPoints.length - 1, Number(event.detail?.index) || 0));
     });
     const cameraPositions = mobileDevice
-      ? [new THREE.Vector3(-0.5, 2.8, 9.6), new THREE.Vector3(-0.15, 2.1, 6.2), new THREE.Vector3(0.45, 3.9, 10.8), new THREE.Vector3(-0.55, 4.4, 12.2)]
-      : [new THREE.Vector3(0.3, 3.15, 12.4), new THREE.Vector3(-0.35, 2.35, 7.5), new THREE.Vector3(0.65, 4.45, 13.2), new THREE.Vector3(-0.5, 5.1, 15.2)];
+      ? [[0, 3.2, 17], [-1.6, 3.1, 10], [0.2, 2.6, 4], [0, 3.5, -7], [-1.8, 3.2, -22], [0.4, 4.2, -32], [1.2, 4, -42], [-1.2, 3.1, -52], [0.2, 4.8, -62]].map((p) => new THREE.Vector3(...p))
+      : [[0, 3.4, 19], [-1.5, 2.9, 11], [0.2, 2.3, 5], [0, 4, -7], [-2, 3.3, -23], [0.4, 4.5, -33], [1.2, 4.1, -43], [-1.2, 3.4, -53], [0.2, 5.2, -63]].map((p) => new THREE.Vector3(...p));
     const cameraTargets = mobileDevice
-      ? [new THREE.Vector3(-0.65, 0.2, 0), new THREE.Vector3(-0.2, 0.35, 0), new THREE.Vector3(0.5, 0.1, -0.3), new THREE.Vector3(-0.6, -0.1, 0)]
-      : [new THREE.Vector3(1.2, 0.25, 0), new THREE.Vector3(-0.2, 0.35, 0), new THREE.Vector3(0.5, 0.15, -0.5), new THREE.Vector3(-0.8, 0, -1)];
+      ? [[0, 0, 14], [-1.8, 0.2, 6], [1.5, 0.8, 0], [0, 0.2, -11], [-2, 0.2, -27], [0.3, 0.6, -37], [1.1, 0.2, -47], [-1.2, 0.4, -57], [0, 0, -67]].map((p) => new THREE.Vector3(...p))
+      : [[0, 0, 16], [-1.8, 0.2, 7], [1.8, 0.8, 0], [0, 0.2, -11], [-2.2, 0.2, -28], [0.4, 0.6, -38], [1.4, 0.2, -48], [-1.4, 0.4, -58], [0, 0, -68]].map((p) => new THREE.Vector3(...p));
     const phonePositions = mobileDevice
-      ? [new THREE.Vector3(2.05, 1.35, 1.1), new THREE.Vector3(1.8, 1.25, 0.8), new THREE.Vector3(1.35, 1.0, 0.7), new THREE.Vector3(1.9, 1.35, 0.1)]
-      : [new THREE.Vector3(4.0, 1.2, 0.1), new THREE.Vector3(1.7, 1.2, 0.1), new THREE.Vector3(2.0, 1.0, 0.3), new THREE.Vector3(4.1, 1.3, -0.7)];
-    const phoneRotations = [new THREE.Euler(0.12, -0.34, -0.08), new THREE.Euler(-0.15, 0.08, 0.06), new THREE.Euler(0.2, 0.48, 0.09), new THREE.Euler(-0.08, -0.4, -0.04)];
-    const phoneScales = mobileDevice ? [1.85, 2.05, 1.72, 1.5] : [1.8, 2.15, 1.65, 1.48];
-    const cameraFovs = mobileDevice ? [61, 49, 58, 66] : [39, 34, 43, 52];
-    const route = document.querySelector('.world-route');
-    const routeTitle = document.getElementById('world-route-title');
-    const routeTitles = [
-      { en: '01 — FIELD NOTES', bn: '০১ — ফিল্ড নোট' },
-      { en: '02 — MOBILE WORKSTATION', bn: '০২ — মোবাইল কর্মপরিবেশ' },
-      { en: '03 — SELECTED SYSTEMS', bn: '০৩ — বাছাই করা সিস্টেম' },
-      { en: '04 — LIVING KNOWLEDGE', bn: '০৪ — জীবন্ত জ্ঞান' }
-    ];
-    let displayedRoute = -1;
-
-    function updateRoute() {
-      if (!route || !routeTitle) return;
-      const next = Math.max(0, Math.min(routeTitles.length - 1, Math.round(targetStage)));
-      if (next === displayedRoute) return;
-      displayedRoute = next;
-      const language = document.body.classList.contains('lang-bn') ? 'bn' : 'en';
-      routeTitle.textContent = routeTitles[next][language];
-      route.querySelector('.world-route-index').textContent = `${String(next + 1).padStart(2, '0')} / 04`;
-      route.querySelectorAll('.world-route-markers i').forEach((marker, index) => marker.classList.toggle('is-active', index === next));
-    }
-
-    function updateTargetStage() {
-      const middle = window.innerHeight * 0.52;
-      let bestDistance = Infinity;
-      let bestIndex = 0;
-      stageSections.forEach((section) => {
-        const rect = section.getBoundingClientRect();
-        const index = stageNames.indexOf(section.dataset.worldStage);
-        if (index < 0) return;
-        if (rect.top <= middle && rect.bottom >= middle) {
-          bestIndex = index;
-          bestDistance = 0;
-          return;
-        }
-        const distance = Math.min(Math.abs(rect.top - middle), Math.abs(rect.bottom - middle));
-        if (distance < bestDistance) { bestDistance = distance; bestIndex = index; }
-      });
-      targetStage = bestIndex;
-      updateRoute();
-    }
-    window.addEventListener('scroll', updateTargetStage, { passive: true });
-    window.addEventListener('resize', updateTargetStage, { passive: true });
-    updateTargetStage();
-
+      ? [[2, 1.2, 14.2], [-2, 1.2, 6.5], [1.7, 1.2, 0.6], [3.1, 1.1, -11], [-3, 1.1, -27], [1.8, 1.4, -37], [3.5, 1.2, -47], [-3, 1.2, -57], [3.4, 1.4, -67]].map((p) => new THREE.Vector3(...p))
+      : [[4, 1.2, 16.2], [-2.5, 1.2, 7.5], [1.7, 1.2, 0.6], [4, 1.2, -11], [-3.6, 1.2, -28], [2.3, 1.2, -38], [4.2, 1.3, -48], [-3.5, 1.2, -58], [4.2, 1.4, -68]].map((p) => new THREE.Vector3(...p));
+    const phoneRotations = [[0.12, -0.34, -0.08], [0.1, 0.22, -0.04], [-0.15, 0.08, 0.06], [0.2, 0.48, 0.09], [0.05, -0.42, 0.06], [0.12, 0.35, -0.08], [0.18, -0.1, 0.06], [-0.06, 0.48, -0.05], [-0.08, -0.4, -0.04]].map((r) => new THREE.Euler(...r));
+    const phoneScales = mobileDevice ? [1.8, 1.35, 1.95, 1.25, 1.22, 1.45, 1.3, 1.35, 1.4] : [1.65, 1.25, 2, 1.2, 1.18, 1.35, 1.2, 1.25, 1.3];
+    const cameraFovs = mobileDevice ? [61, 57, 48, 55, 56, 54, 56, 58, 62] : [41, 39, 34, 40, 42, 41, 43, 45, 48];
     const clock = new THREE.Clock();
     let frameId = 0;
     let lastFrame = 0;
@@ -387,8 +530,12 @@
       mixVector(camera.position, cameraPositions, currentStage);
       const look = new THREE.Vector3();
       mixVector(look, cameraTargets, currentStage);
-      const projectFocus = THREE.MathUtils.smoothstep(currentStage, 1.5, 2.5) * 0.52;
-      look.lerp(new THREE.Vector3(nodePositions[selectedProject][0], 0.12, nodePositions[selectedProject][2]), projectFocus);
+      const projectFocus = THREE.MathUtils.smoothstep(currentStage, 2.58, 2.96)
+        * (1 - THREE.MathUtils.smoothstep(currentStage, 3.08, 3.48));
+      const selectedNode = nodePositions[selectedProject];
+      look.lerp(new THREE.Vector3(selectedNode[0], 0.34, selectedNode[2]), projectFocus);
+      camera.position.x = THREE.MathUtils.lerp(camera.position.x, selectedNode[0], projectFocus);
+      camera.position.z = THREE.MathUtils.lerp(camera.position.z, selectedNode[2] + 7, projectFocus);
       camera.lookAt(look);
       mixVector(phone.position, phonePositions, currentStage);
       const phoneHigh = Math.min(phoneRotations.length - 1, low + 1);
@@ -399,17 +546,24 @@
       );
       const scale = THREE.MathUtils.lerp(phoneScales[low], phoneScales[phoneHigh], currentStage - low);
       phone.scale.setScalar(scale);
-      const nodeAmount = THREE.MathUtils.smoothstep(currentStage, 1.15, 2.15);
+      const nodeAmount = projectFocus;
       projectNodes.visible = nodeAmount > 0.01;
       projectNodes.scale.setScalar(THREE.MathUtils.lerp(0.72, 1, nodeAmount));
       projectPoints.forEach((point, index) => point.scale.setScalar(index === selectedProject ? 1.28 : 0.82));
+      projectModels.forEach((model, index) => {
+        model.visible = index === selectedProject && nodeAmount > 0.01;
+        if (model.visible) {
+          model.rotation.y = motion ? 0.12 : Math.sin(now * 0.00025) * 0.13;
+          model.scale.setScalar(1.18 + nodeAmount * 0.3);
+        }
+      });
       projectNodes.traverse((object) => {
         if (object.material && 'opacity' in object.material) {
           object.material.transparent = true;
           object.material.opacity = object === network ? nodeAmount * 0.72 : nodeAmount;
         }
       });
-      const noteAmount = 1 - THREE.MathUtils.smoothstep(currentStage, 0.35, 1.05);
+      const noteAmount = 1 - THREE.MathUtils.smoothstep(currentStage, 0.65, 1.2);
       notePaper.material.transparent = true;
       notePaper.material.opacity = noteAmount;
       notePaper.visible = noteAmount > 0.01;
@@ -418,6 +572,7 @@
         phone.position.y += drift;
         noteCard.rotation.y = 0.23 + Math.sin(now * 0.00028) * 0.035;
         projectNodes.rotation.y = Math.sin(now * 0.00018) * 0.025;
+        chapterLandmarks.rotation.y = Math.sin(now * 0.00007) * 0.012;
         world.rotation.y = Math.sin(now * 0.0001) * 0.025;
       }
       renderer.render(scene, camera);
