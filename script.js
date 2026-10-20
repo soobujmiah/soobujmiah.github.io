@@ -39,6 +39,33 @@
 
   if (toggle) toggle.addEventListener('click', () => setLanguage(language === 'en' ? 'bn' : 'en'));
 
+  const projectButtons = Array.from(document.querySelectorAll('[data-project-select]'));
+  const projectPanels = Array.from(document.querySelectorAll('.project-list .project'));
+  function selectProject(index, focus = false) {
+    if (!projectButtons.length || !projectPanels.length) return;
+    const selected = Math.max(0, Math.min(projectPanels.length - 1, index));
+    projectButtons.forEach((button, i) => {
+      const active = i === selected;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', String(active));
+      if (active && focus) button.focus();
+    });
+    projectPanels.forEach((panel, i) => {
+      panel.hidden = i !== selected;
+      panel.classList.toggle('is-active', i === selected);
+      if (i === selected) panel.classList.add('is-visible');
+    });
+    window.dispatchEvent(new CustomEvent('portfolio:project-change', { detail: { index: selected } }));
+  }
+  projectButtons.forEach((button, index) => {
+    button.addEventListener('click', () => selectProject(index));
+    button.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') { event.preventDefault(); selectProject((index + 1) % projectButtons.length, true); }
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') { event.preventDefault(); selectProject((index - 1 + projectButtons.length) % projectButtons.length, true); }
+    });
+  });
+  if (projectButtons.length) selectProject(0);
+
   if (!motionPreference.matches && 'IntersectionObserver' in window) {
     root.classList.add('js');
     const observer = new IntersectionObserver((entries) => {

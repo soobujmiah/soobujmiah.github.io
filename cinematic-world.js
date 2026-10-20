@@ -231,6 +231,7 @@
       ? [[-1.65, 0.08, -2.7], [-0.82, 0.12, 1.3], [0, 0.18, -2.5], [0.82, 0.08, 1.1], [1.65, 0.14, -2.3]]
       : [[-4.0, 0.08, -2.7], [-2.0, 0.12, 1.3], [0.0, 0.18, -2.5], [2.1, 0.08, 1.1], [4.0, 0.14, -2.3]];
     const projectNodes = new THREE.Group();
+    const projectPoints = [];
     const projectColors = [0xa9bd92, 0x819d75, 0xc5d7b3, 0x79a77a, 0xd7dfc2];
     nodePositions.forEach((pos, i) => {
       const point = new THREE.Group();
@@ -246,6 +247,7 @@
       point.add(ring);
       point.position.set(pos[0], groundHeight(pos[0], pos[2]) - 0.11, pos[2]);
       projectNodes.add(point);
+      projectPoints.push(point);
     });
     const networkPoints = [];
     for (let i = 0; i < nodePositions.length - 1; i++) {
@@ -264,6 +266,10 @@
     const stageSections = Array.from(document.querySelectorAll('[data-world-stage]'));
     let targetStage = 0;
     let currentStage = 0;
+    let selectedProject = 0;
+    window.addEventListener('portfolio:project-change', (event) => {
+      selectedProject = Math.max(0, Math.min(projectPoints.length - 1, Number(event.detail?.index) || 0));
+    });
     const cameraPositions = mobileDevice
       ? [new THREE.Vector3(-0.5, 2.8, 9.6), new THREE.Vector3(-0.15, 2.1, 6.2), new THREE.Vector3(0.45, 3.9, 10.8), new THREE.Vector3(-0.55, 4.4, 12.2)]
       : [new THREE.Vector3(0.3, 3.15, 12.4), new THREE.Vector3(-0.35, 2.35, 7.5), new THREE.Vector3(0.65, 4.45, 13.2), new THREE.Vector3(-0.5, 5.1, 15.2)];
@@ -356,6 +362,8 @@
       mixVector(camera.position, cameraPositions, currentStage);
       const look = new THREE.Vector3();
       mixVector(look, cameraTargets, currentStage);
+      const projectFocus = THREE.MathUtils.smoothstep(currentStage, 1.5, 2.5) * 0.52;
+      look.lerp(new THREE.Vector3(nodePositions[selectedProject][0], 0.12, nodePositions[selectedProject][2]), projectFocus);
       camera.lookAt(look);
       mixVector(phone.position, phonePositions, currentStage);
       const phoneHigh = Math.min(phoneRotations.length - 1, low + 1);
@@ -369,6 +377,7 @@
       const nodeAmount = THREE.MathUtils.smoothstep(currentStage, 1.15, 2.15);
       projectNodes.visible = nodeAmount > 0.01;
       projectNodes.scale.setScalar(THREE.MathUtils.lerp(0.72, 1, nodeAmount));
+      projectPoints.forEach((point, index) => point.scale.setScalar(index === selectedProject ? 1.28 : 0.82));
       projectNodes.traverse((object) => {
         if (object.material && 'opacity' in object.material) {
           object.material.transparent = true;

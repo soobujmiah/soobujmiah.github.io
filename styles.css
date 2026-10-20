@@ -257,6 +257,19 @@ body.has-world .world-route { opacity:1; transform:none; }
 .world-route-kicker { color:var(--sage-400); font:.43rem/1.3 var(--mono); letter-spacing:.11em; }
 .world-route strong,.world-route-index { font:500 .53rem/1.3 var(--mono); letter-spacing:.05em; }
 .world-route-index { padding-left:.55rem; border-left:1px solid var(--border); color:var(--sage-400); }
+.project-index { max-width:var(--content); margin:0 auto 1rem; display:flex; overflow-x:auto; border-top:1px solid var(--border); border-bottom:1px solid var(--border); scrollbar-width:thin; scrollbar-color:var(--moss-700) transparent; }
+.project-index button { position:relative; flex:1 0 auto; min-height:3.2rem; padding:.7rem 1rem; border:0; color:var(--sage-400); background:transparent; font:.64rem/1.3 var(--mono); text-align:left; cursor:pointer; transition:color .25s ease,background .25s ease; }
+.project-index button span { margin-right:.4rem; color:var(--olive-500); font-size:.52rem; }
+.project-index button::after { position:absolute; right:0; bottom:-1px; left:0; height:2px; content:""; background:var(--leaf-300); transform:scaleX(0); transform-origin:left; transition:transform .3s ease; }
+.project-index button:hover,.project-index button.is-active { color:var(--paper-100); background:rgba(169,189,146,.055); }
+.project-index button.is-active::after { transform:scaleX(1); }
+.project-index button:focus-visible { z-index:1; outline:2px solid var(--leaf-300); outline-offset:-3px; }
+.project-list { display:grid; min-height:34rem; margin-top:0; border:0; perspective:1400px; }
+.project-list .project { grid-area:1/1; align-self:stretch; min-height:34rem; padding:1.25rem 0 2rem; border:0; animation:project-arrive .7s cubic-bezier(.2,.7,.2,1) both; }
+.project-list .project[hidden] { display:none; }
+.project-list .project-art { min-height:30rem; }
+.project-list .project-body { align-self:center; max-width:42rem; }
+@keyframes project-arrive { from { opacity:0; transform:translate3d(0,1.5rem,-2rem) rotateX(2deg); } to { opacity:1; transform:translate3d(0,0,0) rotateX(0); } }
 body.has-world .hero-content { width:min(49vw,43rem); margin-left:max(var(--gutter),calc((100vw - var(--content))/2)); margin-right:auto; }
 body.has-world .hero h1 { max-width:11ch; }
 body.has-world .hero-object { display:none; }
@@ -265,4 +278,7 @@ body.has-world .intro { min-height:88svh; display:flex; flex-direction:column; j
 body.has-world .workstation,body.world-fallback .workstation,body.has-world .intro,body.world-fallback .intro,body.has-world .knowledge,body.world-fallback .knowledge { background-image:linear-gradient(90deg,rgba(7,19,15,.35),rgba(7,19,15,.08)); }
 @media(max-width:900px){body.has-world .hero-content{width:min(82vw,38rem);margin-left:var(--gutter);margin-right:auto}}
 @media(max-width:620px){.world-route{right:var(--gutter);bottom:1.1rem;gap:.5rem;padding:.5rem .55rem}.world-route-markers{gap:.14rem}.world-route-markers i{width:.7rem}.world-route-markers i.is-active{width:1.1rem}.world-route-kicker{font-size:.39rem}.world-route strong,.world-route-index{font-size:.45rem}.world-route-index{padding-left:.4rem}body.has-world .hero-content,body.world-fallback .hero-content{width:68%;margin-left:var(--gutter);margin-right:auto}body.has-world .hero h1,body.world-fallback .hero h1{font-size:clamp(2.45rem,10vw,3.2rem);max-width:10ch}body.has-world .hero-lede,body.world-fallback .hero-lede{max-width:18rem;font-size:.82rem;line-height:1.6}body.has-world .hero-cta,body.world-fallback .hero-cta{align-items:flex-start;gap:.85rem}body.has-world .hero-proof,body.world-fallback .hero-proof{max-width:15rem;margin-top:1.3rem;font-size:.47rem}body.has-world .hero,body.world-fallback .hero{min-height:58rem}body.has-world .hero::before,body.world-fallback .hero::before{background:linear-gradient(90deg,rgba(7,19,15,.97) 0%,rgba(7,19,15,.86) 53%,rgba(7,19,15,.12) 100%),linear-gradient(0deg,rgba(7,19,15,.72),transparent 36%)}body.has-world .intro,body.has-world .workstation,body.has-world .knowledge{min-height:auto;padding-top:7rem;padding-bottom:7rem}}
+@media(max-width:900px){.project-list,.project-list .project{min-height:0}.project-list .project-art{min-height:23rem}.project-index button{padding-inline:.75rem}}
+@media(max-width:620px){.project-index{margin-bottom:.4rem}.project-index button{min-height:2.9rem;padding:.55rem .7rem;font-size:.58rem}.project-list .project{padding-top:.8rem}.project-list .project-art{min-height:15rem}.project-list .project-body{width:100%}}
 @media(prefers-reduced-motion:reduce){.world-route{transition:none}.world-route-markers i{transition:none}}
+@media(prefers-reduced-motion:reduce){.project-list .project{animation:none}}
