@@ -33,7 +33,8 @@
     renderer.toneMappingExposure = 1.18;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(mobileDevice ? 53 : 37, window.innerWidth / window.innerHeight, 0.1, 80);
+    // Wider mobile framing leaves a clear visual lane beside the hero copy.
+    const camera = new THREE.PerspectiveCamera(mobileDevice ? 61 : 39, window.innerWidth / window.innerHeight, 0.1, 80);
     camera.position.set(0, 3.1, 10.8);
 
     scene.add(new THREE.HemisphereLight(0xdcebd0, 0x07130f, 1.6));
@@ -263,15 +264,17 @@
     const stageSections = Array.from(document.querySelectorAll('[data-world-stage]'));
     let targetStage = 0;
     let currentStage = 0;
-    const cameraPositions = [new THREE.Vector3(0, 3.15, 10.7), new THREE.Vector3(0, 3.25, 9.4), new THREE.Vector3(0, 4.0, 11.4), new THREE.Vector3(0, 4.7, 12.5)];
+    const cameraPositions = mobileDevice
+      ? [new THREE.Vector3(-0.28, 2.85, 9.2), new THREE.Vector3(-0.12, 2.45, 7.6), new THREE.Vector3(0.18, 3.65, 9.7), new THREE.Vector3(-0.3, 3.9, 10.1)]
+      : [new THREE.Vector3(0, 3.15, 10.7), new THREE.Vector3(0, 3.25, 9.4), new THREE.Vector3(0, 4.0, 11.4), new THREE.Vector3(0, 4.7, 12.5)];
     const cameraTargets = mobileDevice
       ? [new THREE.Vector3(0.15, 0.25, 0), new THREE.Vector3(0.05, 0.35, 0), new THREE.Vector3(0, 0.15, 0), new THREE.Vector3(0, 0, 0)]
       : [new THREE.Vector3(1.0, 0.25, 0), new THREE.Vector3(0.3, 0.35, 0), new THREE.Vector3(0, 0.15, 0), new THREE.Vector3(0, 0, 0)];
     const phonePositions = mobileDevice
-      ? [new THREE.Vector3(1.42, 1.05, 0.1), new THREE.Vector3(0.95, 1.22, 0.1), new THREE.Vector3(0.45, 0.95, 0.2), new THREE.Vector3(1.05, 1.15, -0.7)]
+      ? [new THREE.Vector3(2.1, 1.25, 1.0), new THREE.Vector3(1.8, 1.3, 0.8), new THREE.Vector3(1.45, 0.98, 0.6), new THREE.Vector3(2.0, 1.25, 0.2)]
       : [new THREE.Vector3(3.25, 1.12, 0.1), new THREE.Vector3(2.2, 1.32, 0.1), new THREE.Vector3(1.5, 1.0, 0.2), new THREE.Vector3(2.75, 1.25, -0.7)];
     const phoneRotations = [new THREE.Euler(0.04, -0.18, -0.045), new THREE.Euler(-0.03, -0.08, 0.02), new THREE.Euler(0.06, 0.18, 0.04), new THREE.Euler(0.02, -0.12, 0.015)];
-    const phoneScales = mobileDevice ? [1.24, 1.38, 1.06, 0.95] : [0.92, 1.08, 0.88, 0.78];
+    const phoneScales = mobileDevice ? [1.85, 2.0, 1.62, 1.55] : [0.92, 1.08, 0.88, 0.78];
 
     function updateTargetStage() {
       const middle = window.innerHeight * 0.52;
@@ -302,7 +305,7 @@
     function resize() {
       const mobile = window.innerWidth < 700;
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, constrainedDevice ? 0.82 : 1.35));
-      camera.fov = mobile ? 53 : 37;
+      camera.fov = mobile ? 61 : 39;
       renderer.setSize(window.innerWidth, window.innerHeight, false);
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -323,7 +326,7 @@
       lastFrame = now;
       const delta = Math.min(clock.getDelta(), 0.05);
       const motion = reducedMotion.matches;
-      currentStage = motion ? targetStage : THREE.MathUtils.damp(currentStage, targetStage, 2.2, delta);
+      currentStage = motion ? targetStage : THREE.MathUtils.damp(currentStage, targetStage, 3.0, delta);
       mixVector(camera.position, cameraPositions, currentStage);
       const look = new THREE.Vector3();
       mixVector(look, cameraTargets, currentStage);

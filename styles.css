@@ -221,8 +221,8 @@ body.has-world .hero { background:radial-gradient(ellipse at 80% 48%,rgba(25,58,
 body.has-world .hero::before { background:linear-gradient(90deg,rgba(7,19,15,.97) 1%,rgba(7,19,15,.87) 38%,rgba(7,19,15,.22) 79%),linear-gradient(0deg,rgba(7,19,15,.84),transparent 30%); }
 body.has-world .hero-contours { opacity:.14; }
 body.has-world .hero-object { opacity:0; visibility:hidden; }
-body.has-world .intro,body.has-world .systems,body.has-world .knowledge,body.has-world .capabilities { background:linear-gradient(180deg,rgba(10,26,19,.9),rgba(7,19,15,.89)); }
-body.has-world .scene-dark { background:radial-gradient(ellipse at 82% 50%,rgba(25,58,40,.32),transparent 54%),rgba(11,28,21,.86); }
+body.has-world .intro,body.has-world .systems,body.has-world .knowledge,body.has-world .capabilities { background:linear-gradient(180deg,rgba(10,26,19,.56),rgba(7,19,15,.62)); }
+body.has-world .scene-dark { background:radial-gradient(ellipse at 82% 50%,rgba(25,58,40,.32),transparent 54%),rgba(11,28,21,.58); }
 body.has-world .scene-contact { background:radial-gradient(ellipse at 78% 15%,rgba(23,59,41,.48),transparent 55%),rgba(7,19,15,.84); }
 @media (prefers-reduced-motion:reduce){.cinematic-world{transition:none}body.has-world #cinematic-world{opacity:.52}}
 @media (max-width:620px){body.has-world #cinematic-world{opacity:.56}body.has-world .hero-object{display:none}}
@@ -242,7 +242,7 @@ body.world-fallback .hero-object { opacity:0; visibility:hidden; }
 body.has-world .world-fallback-art { opacity:0; }
 body.has-world #cinematic-world { opacity:.93; }
 body.has-world .hero::before { background:linear-gradient(90deg,rgba(7,19,15,.94) 1%,rgba(7,19,15,.78) 38%,rgba(7,19,15,.08) 79%),linear-gradient(0deg,rgba(7,19,15,.72),transparent 30%); }
-body.has-world .scene-dark { background:radial-gradient(ellipse at 82% 50%,rgba(25,58,40,.26),transparent 54%),rgba(11,28,21,.76); }
-body.has-world .intro,body.has-world .systems,body.has-world .knowledge,body.has-world .capabilities { background:linear-gradient(180deg,rgba(10,26,19,.82),rgba(7,19,15,.8)); }
-@media(max-width:620px){.fallback-terrain{width:130vw;height:54vh;right:-39%;bottom:-12%;}.fallback-phone{top:35%;right:8%;width:7rem;opacity:.75}.fallback-screen-title,.fallback-screen-steps{font-size:.42rem}body.has-world #cinematic-world{opacity:.85}}
+body.has-world .scene-dark { background:radial-gradient(ellipse at 82% 50%,rgba(25,58,40,.26),transparent 54%),rgba(11,28,21,.48); }
+body.has-world .intro,body.has-world .systems,body.has-world .knowledge,body.has-world .capabilities { background:linear-gradient(180deg,rgba(10,26,19,.5),rgba(7,19,15,.58)); }
+@media(max-width:620px){.fallback-terrain{width:130vw;height:54vh;right:-39%;bottom:-12%;}.fallback-phone{top:35%;right:5%;width:8.5rem;opacity:.92}.fallback-screen-title,.fallback-screen-steps{font-size:.42rem}body.has-world #cinematic-world{opacity:.98}body.has-world .hero-content,body.world-fallback .hero-content{width:68%;margin-left:var(--gutter);margin-right:auto}body.has-world .hero h1,body.world-fallback .hero h1{font-size:clamp(2.45rem,10vw,3.2rem);max-width:10ch}body.has-world .hero-lede,body.world-fallback .hero-lede{max-width:18rem;font-size:.82rem;line-height:1.6}body.has-world .hero-cta,body.world-fallback .hero-cta{align-items:flex-start;gap:.85rem}body.has-world .hero-proof,body.world-fallback .hero-proof{max-width:15rem;margin-top:1.3rem;font-size:.47rem}body.has-world .hero,body.world-fallback .hero{min-height:58rem}body.has-world .hero::before,body.world-fallback .hero::before{background:linear-gradient(90deg,rgba(7,19,15,.97) 0%,rgba(7,19,15,.86) 53%,rgba(7,19,15,.12) 100%),linear-gradient(0deg,rgba(7,19,15,.72),transparent 36%)} }
 @media(prefers-reduced-motion:reduce){.world-fallback-art{transition:none}}
