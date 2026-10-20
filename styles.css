@@ -226,3 +226,23 @@ body.has-world .scene-dark { background:radial-gradient(ellipse at 82% 50%,rgba(
 body.has-world .scene-contact { background:radial-gradient(ellipse at 78% 15%,rgba(23,59,41,.48),transparent 55%),rgba(7,19,15,.84); }
 @media (prefers-reduced-motion:reduce){.cinematic-world{transition:none}body.has-world #cinematic-world{opacity:.52}}
 @media (max-width:620px){body.has-world #cinematic-world{opacity:.56}body.has-world .hero-object{display:none}}
+.world-fallback-art { position:fixed; z-index:0; inset:0; overflow:hidden; pointer-events:none; opacity:0; transition:opacity .7s ease; perspective:1100px; }
+body.world-fallback .world-fallback-art { opacity:.78; }
+body.world-fallback main { position:relative; z-index:1; }
+body.world-fallback .hero-object { opacity:0; visibility:hidden; }
+.fallback-terrain { position:absolute; width:min(83vw,74rem); height:66vh; right:-7%; bottom:-25%; border:1px solid rgba(169,189,146,.32); border-radius:48%; transform:rotateX(62deg) rotateZ(-17deg); transform-style:preserve-3d; background:repeating-radial-gradient(ellipse at 43% 48%,transparent 0 17px,rgba(169,189,146,.27) 18px 19px,transparent 20px 31px),linear-gradient(145deg,rgba(27,60,40,.7),rgba(7,19,15,.2)); box-shadow:0 0 0 20px rgba(169,189,146,.025),0 0 0 42px rgba(169,189,146,.025),0 0 0 66px rgba(169,189,146,.02); }
+.fallback-phone { position:absolute; top:20%; right:16%; width:clamp(7rem,15vw,12rem); aspect-ratio:.52; padding:1rem .65rem; display:flex; flex-direction:column; align-items:flex-start; gap:.7rem; border:2px solid rgba(197,215,179,.56); border-radius:1.2rem; color:var(--leaf-300); background:linear-gradient(145deg,#263a2c,#09130e 72%); box-shadow:1.2rem 1.8rem 4rem rgba(0,0,0,.56),inset 0 0 0 3px rgba(0,0,0,.6); transform:rotateY(-23deg) rotateX(10deg) rotateZ(7deg); transform-style:preserve-3d; }
+.fallback-phone::after { content:""; position:absolute; right:-.38rem; top:24%; width:.35rem; height:23%; border-radius:0 .3rem .3rem 0; background:#526c52; transform:translateZ(-.08rem); }
+.fallback-speaker { width:26%; height:3px; align-self:center; border-radius:2px; background:rgba(197,215,179,.65); }
+.fallback-screen-title,.fallback-screen-steps { font:clamp(.35rem,.65vw,.58rem)/1.4 var(--mono); letter-spacing:.04em; }
+.fallback-screen-rule { width:100%; height:1px; background:rgba(197,215,179,.36); }
+.fallback-screen-line { width:88%; height:7px; border-radius:5px; background:linear-gradient(90deg,rgba(197,215,179,.65) 0 28%,rgba(169,189,146,.15) 28%); box-shadow:0 12px 0 rgba(169,189,146,.12); margin:.2rem 0 .35rem; }
+.fallback-screen-line:nth-of-type(5) { width:65%; }
+.fallback-screen-steps { margin-top:auto; color:var(--sage-400); }
+body.has-world .world-fallback-art { opacity:0; }
+body.has-world #cinematic-world { opacity:.93; }
+body.has-world .hero::before { background:linear-gradient(90deg,rgba(7,19,15,.94) 1%,rgba(7,19,15,.78) 38%,rgba(7,19,15,.08) 79%),linear-gradient(0deg,rgba(7,19,15,.72),transparent 30%); }
+body.has-world .scene-dark { background:radial-gradient(ellipse at 82% 50%,rgba(25,58,40,.26),transparent 54%),rgba(11,28,21,.76); }
+body.has-world .intro,body.has-world .systems,body.has-world .knowledge,body.has-world .capabilities { background:linear-gradient(180deg,rgba(10,26,19,.82),rgba(7,19,15,.8)); }
+@media(max-width:620px){.fallback-terrain{width:130vw;height:54vh;right:-39%;bottom:-12%;}.fallback-phone{top:35%;right:8%;width:7rem;opacity:.75}.fallback-screen-title,.fallback-screen-steps{font-size:.42rem}body.has-world #cinematic-world{opacity:.85}}
+@media(prefers-reduced-motion:reduce){.world-fallback-art{transition:none}}

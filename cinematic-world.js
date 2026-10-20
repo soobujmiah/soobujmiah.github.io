@@ -3,13 +3,12 @@
   if (!canvas) return;
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const saveData = navigator.connection && navigator.connection.saveData;
-  const lowMemory = navigator.deviceMemory && navigator.deviceMemory <= 2;
-  if (saveData || lowMemory) return;
+  const constrainedDevice = Boolean((navigator.connection && navigator.connection.saveData) || (navigator.deviceMemory && navigator.deviceMemory <= 2) || window.innerWidth < 700);
 
   const schedule = window.requestIdleCallback || ((fn) => window.setTimeout(fn, 900));
   schedule(() => loadWorld().catch(() => {
     document.body.classList.remove('has-world');
+    document.body.classList.add('world-fallback');
     canvas.hidden = true;
   }), { timeout: 1800 });
 
@@ -25,14 +24,16 @@
     });
     canvas.hidden = false;
     renderer.setClearColor(0x000000, 0);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 1 : 1.35));
+    const mobileDevice = window.innerWidth < 700;
+    const renderScale = constrainedDevice ? 0.82 : 1.35;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, renderScale));
     renderer.setSize(window.innerWidth, window.innerHeight, false);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.18;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(37, window.innerWidth / window.innerHeight, 0.1, 80);
+    const camera = new THREE.PerspectiveCamera(mobileDevice ? 53 : 37, window.innerWidth / window.innerHeight, 0.1, 80);
     camera.position.set(0, 3.1, 10.8);
 
     scene.add(new THREE.HemisphereLight(0xdcebd0, 0x07130f, 1.6));
@@ -53,8 +54,8 @@
         - 0.13;
     }
 
-    const terrainWidth = 90;
-    const terrainDepth = 100;
+    const terrainWidth = constrainedDevice ? 52 : 90;
+    const terrainDepth = constrainedDevice ? 62 : 100;
     const terrainSizeX = 20;
     const terrainSizeZ = 25;
     const positions = [];
@@ -108,7 +109,7 @@
 
     // Isolines are sampled from the terrain itself, giving the field-map its depth cues.
     const contourPoints = [];
-    const contourCount = 14;
+    const contourCount = constrainedDevice ? 8 : 14;
     const sample = (x, z) => groundHeight((x / terrainWidth - 0.5) * terrainSizeX, (z / terrainDepth - 0.5) * terrainSizeZ);
     for (let levelIndex = 1; levelIndex <= contourCount; levelIndex++) {
       const level = minHeight + (maxHeight - minHeight) * levelIndex / (contourCount + 1);
@@ -225,9 +226,9 @@
     noteCard.rotation.set(0.1, 0.23, -0.08);
     world.add(noteCard);
 
-    const nodePositions = [
-      [-4.0, 0.08, -2.7], [-2.0, 0.12, 1.3], [0.0, 0.18, -2.5], [2.1, 0.08, 1.1], [4.0, 0.14, -2.3]
-    ];
+    const nodePositions = mobileDevice
+      ? [[-1.65, 0.08, -2.7], [-0.82, 0.12, 1.3], [0, 0.18, -2.5], [0.82, 0.08, 1.1], [1.65, 0.14, -2.3]]
+      : [[-4.0, 0.08, -2.7], [-2.0, 0.12, 1.3], [0.0, 0.18, -2.5], [2.1, 0.08, 1.1], [4.0, 0.14, -2.3]];
     const projectNodes = new THREE.Group();
     const projectColors = [0xa9bd92, 0x819d75, 0xc5d7b3, 0x79a77a, 0xd7dfc2];
     nodePositions.forEach((pos, i) => {
@@ -263,10 +264,14 @@
     let targetStage = 0;
     let currentStage = 0;
     const cameraPositions = [new THREE.Vector3(0, 3.15, 10.7), new THREE.Vector3(0, 3.25, 9.4), new THREE.Vector3(0, 4.0, 11.4), new THREE.Vector3(0, 4.7, 12.5)];
-    const cameraTargets = [new THREE.Vector3(1.0, 0.25, 0), new THREE.Vector3(0.3, 0.35, 0), new THREE.Vector3(0, 0.15, 0), new THREE.Vector3(0, 0, 0)];
-    const phonePositions = [new THREE.Vector3(3.25, 1.12, 0.1), new THREE.Vector3(2.2, 1.32, 0.1), new THREE.Vector3(1.5, 1.0, 0.2), new THREE.Vector3(2.75, 1.25, -0.7)];
+    const cameraTargets = mobileDevice
+      ? [new THREE.Vector3(0.15, 0.25, 0), new THREE.Vector3(0.05, 0.35, 0), new THREE.Vector3(0, 0.15, 0), new THREE.Vector3(0, 0, 0)]
+      : [new THREE.Vector3(1.0, 0.25, 0), new THREE.Vector3(0.3, 0.35, 0), new THREE.Vector3(0, 0.15, 0), new THREE.Vector3(0, 0, 0)];
+    const phonePositions = mobileDevice
+      ? [new THREE.Vector3(1.42, 1.05, 0.1), new THREE.Vector3(0.95, 1.22, 0.1), new THREE.Vector3(0.45, 0.95, 0.2), new THREE.Vector3(1.05, 1.15, -0.7)]
+      : [new THREE.Vector3(3.25, 1.12, 0.1), new THREE.Vector3(2.2, 1.32, 0.1), new THREE.Vector3(1.5, 1.0, 0.2), new THREE.Vector3(2.75, 1.25, -0.7)];
     const phoneRotations = [new THREE.Euler(0.04, -0.18, -0.045), new THREE.Euler(-0.03, -0.08, 0.02), new THREE.Euler(0.06, 0.18, 0.04), new THREE.Euler(0.02, -0.12, 0.015)];
-    const phoneScales = [0.92, 1.08, 0.88, 0.78];
+    const phoneScales = mobileDevice ? [1.24, 1.38, 1.06, 0.95] : [0.92, 1.08, 0.88, 0.78];
 
     function updateTargetStage() {
       const middle = window.innerHeight * 0.52;
@@ -295,7 +300,9 @@
     let lastFrame = 0;
     let resizeTimer;
     function resize() {
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 1 : 1.35));
+      const mobile = window.innerWidth < 700;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, constrainedDevice ? 0.82 : 1.35));
+      camera.fov = mobile ? 53 : 37;
       renderer.setSize(window.innerWidth, window.innerHeight, false);
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -312,7 +319,7 @@
     }
     function render(now) {
       frameId = window.requestAnimationFrame(render);
-      if (document.hidden || now - lastFrame < 32) return;
+      if (document.hidden || now - lastFrame < (constrainedDevice ? 42 : 32)) return;
       lastFrame = now;
       const delta = Math.min(clock.getDelta(), 0.05);
       const motion = reducedMotion.matches;
@@ -353,6 +360,7 @@
       }
       renderer.render(scene, camera);
     }
+    document.body.classList.remove('world-fallback');
     document.body.classList.add('has-world');
     frameId = window.requestAnimationFrame(render);
     window.addEventListener('pagehide', () => {
