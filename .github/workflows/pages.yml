@@ -28,7 +28,7 @@ jobs:
       - name: Assemble public site
         run: |
           mkdir -p site
-          cp index.html styles.css script.js favicon.svg robots.txt sitemap.xml site/
+          cp index.html styles.css script.js favicon.svg robots.txt sitemap.xml google7974d87a16aa1b38.html site/
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
