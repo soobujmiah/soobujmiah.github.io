@@ -27,8 +27,9 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Assemble public site
         run: |
-          mkdir -p site/about
-          cp index.html styles.css script.js favicon.svg robots.txt sitemap.xml google7974d87a16aa1b38.html site/
+          mkdir -p site/about site/vendor
+          cp index.html styles.css script.js cinematic-world.js favicon.svg robots.txt sitemap.xml google7974d87a16aa1b38.html site/
+          cp vendor/three.module.js vendor/THREE-LICENSE.txt site/vendor/
           cp about/index.html site/about/index.html
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

@@ -211,3 +211,18 @@ h2 { margin-bottom:0; font-size:clamp(2.55rem,5.1vw,5rem); line-height:1.02; }
 body.lang-bn .about-hero-index,body.lang-bn .about-focus-list article>span,body.lang-bn .about-service-grid article>span { letter-spacing:0; }
 @media(max-width:900px){.about-two-col{grid-template-columns:1fr;gap:1.6rem}.about-focus-heading,.about-history-head{grid-template-columns:1fr;gap:1.3rem}}
 @media(max-width:620px){.about-hero{min-height:48rem;padding-top:11rem;padding-bottom:5rem}.about-hero h1{font-size:clamp(2.7rem,12vw,4.1rem)}.about-hero h1 em{max-width:15ch;font-size:.52em}.about-contours{width:120vw;right:-39%;top:22%;opacity:.72}.about-hero-index{font-size:.46rem;letter-spacing:.04em}.about-section .section-index{margin-bottom:2rem}.about-two-col h2,.about-focus-heading h2,.about-history-head h2,.about-contact h2{font-size:clamp(2.2rem,10vw,3.5rem)}.about-copy .about-lead{font-size:1rem}.about-focus-list{grid-template-columns:1fr}.about-focus-list article,.about-focus-list article:nth-child(even){padding:1.25rem 0}.about-focus-list article:nth-child(odd){border-right:0}.about-focus-list h3{margin-top:.7rem}.about-history li{grid-template-columns:1fr;gap:.4rem;padding:1.1rem 0}.about-history time{font-size:.6rem}.about-history li>div>p{font-size:.77rem}.about-service-grid{grid-template-columns:1fr}.about-service-grid article{min-height:auto;padding:1.25rem}.about-services-note{font-size:.68rem}.about-contact-inner{padding-bottom:3rem}}
+
+/* Scroll-linked cinematic field world; the existing document remains the fallback. */
+.cinematic-world[hidden] { display:none; }
+.cinematic-world { position:fixed; z-index:0; inset:0; display:block; width:100%; height:100%; pointer-events:none; opacity:0; transition:opacity 900ms ease; }
+body.has-world #cinematic-world { opacity:.8; }
+body.has-world main { position:relative; z-index:1; }
+body.has-world .hero { background:radial-gradient(ellipse at 80% 48%,rgba(25,58,40,.28),rgba(11,32,23,.25) 32%,rgba(7,19,15,.35) 72%); }
+body.has-world .hero::before { background:linear-gradient(90deg,rgba(7,19,15,.97) 1%,rgba(7,19,15,.87) 38%,rgba(7,19,15,.22) 79%),linear-gradient(0deg,rgba(7,19,15,.84),transparent 30%); }
+body.has-world .hero-contours { opacity:.14; }
+body.has-world .hero-object { opacity:0; visibility:hidden; }
+body.has-world .intro,body.has-world .systems,body.has-world .knowledge,body.has-world .capabilities { background:linear-gradient(180deg,rgba(10,26,19,.9),rgba(7,19,15,.89)); }
+body.has-world .scene-dark { background:radial-gradient(ellipse at 82% 50%,rgba(25,58,40,.32),transparent 54%),rgba(11,28,21,.86); }
+body.has-world .scene-contact { background:radial-gradient(ellipse at 78% 15%,rgba(23,59,41,.48),transparent 55%),rgba(7,19,15,.84); }
+@media (prefers-reduced-motion:reduce){.cinematic-world{transition:none}body.has-world #cinematic-world{opacity:.52}}
+@media (max-width:620px){body.has-world #cinematic-world{opacity:.56}body.has-world .hero-object{display:none}}
