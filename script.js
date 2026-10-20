@@ -41,6 +41,7 @@
 
   const projectButtons = Array.from(document.querySelectorAll('[data-project-select]'));
   const projectPanels = Array.from(document.querySelectorAll('.project-list .project'));
+  const projectList = document.querySelector('.project-list');
   function selectProject(index, focus = false) {
     if (!projectButtons.length || !projectPanels.length) return;
     const selected = Math.max(0, Math.min(projectPanels.length - 1, index));
@@ -64,7 +65,10 @@
       if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') { event.preventDefault(); selectProject((index - 1 + projectButtons.length) % projectButtons.length, true); }
     });
   });
-  if (projectButtons.length) selectProject(0);
+  if (projectButtons.length) {
+    if (projectList) projectList.classList.add('interactive');
+    selectProject(0);
+  }
 
   if (!motionPreference.matches && 'IntersectionObserver' in window) {
     root.classList.add('js');

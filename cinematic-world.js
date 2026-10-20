@@ -3,7 +3,10 @@
   if (!canvas) return;
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const constrainedDevice = Boolean((navigator.connection && navigator.connection.saveData) || (navigator.deviceMemory && navigator.deviceMemory <= 2) || window.innerWidth < 700);
+  const mobileDevice = window.innerWidth < 700;
+  const saveData = Boolean(navigator.connection && navigator.connection.saveData);
+  const lowMemory = Boolean(navigator.deviceMemory && navigator.deviceMemory <= 2);
+  const constrainedDevice = saveData || lowMemory || mobileDevice;
 
   const schedule = window.requestIdleCallback || ((fn) => window.setTimeout(fn, 900));
   schedule(() => loadWorld().catch(() => {
@@ -24,8 +27,7 @@
     });
     canvas.hidden = false;
     renderer.setClearColor(0x000000, 0);
-    const mobileDevice = window.innerWidth < 700;
-    const renderScale = constrainedDevice ? 0.82 : 1.35;
+    const renderScale = saveData ? 0.8 : lowMemory ? 0.9 : mobileDevice ? 1.18 : 1.35;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, renderScale));
     renderer.setSize(window.innerWidth, window.innerHeight, false);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -33,6 +35,7 @@
     renderer.toneMappingExposure = 1.18;
 
     const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x081810, 0.018);
     // Wider mobile framing leaves a clear visual lane beside the hero copy.
     const camera = new THREE.PerspectiveCamera(mobileDevice ? 61 : 39, window.innerWidth / window.innerHeight, 0.1, 80);
     camera.position.set(0, 3.1, 10.8);
@@ -191,11 +194,33 @@
       ctx.fillText('BUILD · TEST · LEARN', 32, height - 62);
     }, 512, 1024);
 
+    function roundedRect(width, height, radius) {
+      const shape = new THREE.Shape();
+      const x = -width / 2;
+      const y = -height / 2;
+      shape.moveTo(x + radius, y);
+      shape.lineTo(x + width - radius, y);
+      shape.absarc(x + width - radius, y + radius, radius, -Math.PI / 2, 0, false);
+      shape.lineTo(x + width, y + height - radius);
+      shape.absarc(x + width - radius, y + height - radius, radius, 0, Math.PI / 2, false);
+      shape.lineTo(x + radius, y + height);
+      shape.absarc(x + radius, y + height - radius, radius, Math.PI / 2, Math.PI, false);
+      shape.lineTo(x, y + radius);
+      shape.absarc(x + radius, y + radius, radius, Math.PI, Math.PI * 1.5, false);
+      shape.closePath();
+      return shape;
+    }
+
     const phone = new THREE.Group();
-    const frame = new THREE.Mesh(new THREE.BoxGeometry(0.92, 1.8, 0.12), new THREE.MeshStandardMaterial({ color: 0x101b15, roughness: 0.36, metalness: 0.58 }));
+    const frameGeometry = new THREE.ExtrudeGeometry(roundedRect(0.92, 1.8, 0.11), { depth: 0.12, bevelEnabled: true, bevelSegments: 5, steps: 1, bevelSize: 0.018, bevelThickness: 0.025, curveSegments: 10 });
+    frameGeometry.translate(0, 0, -0.06);
+    const frame = new THREE.Mesh(frameGeometry, new THREE.MeshStandardMaterial({ color: 0x18251d, roughness: 0.28, metalness: 0.72 }));
     phone.add(frame);
-    const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.82, 1.64), new THREE.MeshBasicMaterial({ map: phoneScreen }));
-    screen.position.z = 0.066;
+    const glass = new THREE.Mesh(new THREE.ShapeGeometry(roundedRect(0.82, 1.64, 0.075), 12), new THREE.MeshBasicMaterial({ color: 0x07120d }));
+    glass.position.z = 0.067;
+    phone.add(glass);
+    const screen = new THREE.Mesh(new THREE.ShapeGeometry(roundedRect(0.78, 1.58, 0.065), 12), new THREE.MeshBasicMaterial({ map: phoneScreen }));
+    screen.position.z = 0.069;
     phone.add(screen);
     const earpiece = new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.025, 0.012), new THREE.MeshStandardMaterial({ color: 0x15271c, roughness: 0.4 }));
     earpiece.position.set(0, 0.83, 0.074);
@@ -332,7 +357,7 @@
     let resizeTimer;
     function resize() {
       const mobile = window.innerWidth < 700;
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, constrainedDevice ? 0.82 : 1.35));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, renderScale));
       camera.fov = mobile ? 61 : 39;
       renderer.setSize(window.innerWidth, window.innerHeight, false);
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -350,7 +375,7 @@
     }
     function render(now) {
       frameId = window.requestAnimationFrame(render);
-      if (document.hidden || now - lastFrame < (constrainedDevice ? 42 : 32)) return;
+      if (document.hidden || now - lastFrame < (saveData || lowMemory ? 50 : mobileDevice ? 33 : 32)) return;
       lastFrame = now;
       const delta = Math.min(clock.getDelta(), 0.05);
       const motion = reducedMotion.matches;
