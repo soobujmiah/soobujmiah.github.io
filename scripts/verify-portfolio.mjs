@@ -17,15 +17,20 @@ assert('No numeric vanity achievement widgets', !/stars?\s*[:=]|downloads?\s*[:=
 assert('Accessible project details retain evidence and limits', ['verified', 'limits', 'purpose', 'built'].every(key => read('src/App.tsx').includes(`id: '${key}'`) || read('src/App.tsx').includes(`t.${key}`)) && read('src/data/content.ts').includes('limits:'));
 assert('Semantic no-JS crawlable baseline', /<h1[\s\S]*?Sobuj Miah/.test(read('index.html')) && /<a href="https:\/\/github.com\/soobujmiah\/ternux"/.test(read('index.html')));
 assert('Reduced-motion & WebGL fallback', read('src/App.tsx').includes('prefers-reduced-motion') && read('src/App.tsx').includes('Schematic') && read('src/styles.css').includes('prefers-reduced-motion: reduce'));
-assert('SEO, public sitemap & branded share preview present', fs.existsSync(path.join(root, 'public/sitemap.xml')) && fs.existsSync(path.join(root, 'public/robots.txt')) && fs.existsSync(path.join(root, 'public/og.png')) && read('index.html').includes('application/ld+json') && read('index.html').includes('og:image'));
+assert('SEO, public sitemap & branded share preview present', fs.existsSync(path.join(root, 'public/sitemap.xml')) && fs.existsSync(path.join(root, 'public/robots.txt')) && fs.existsSync(path.join(root, 'public/og.png')) && read('public/sitemap.xml').includes('https://soobujmiah.github.io/about/') && read('index.html').includes('application/ld+json') && read('index.html').includes('og:image'));
 const pagesWorkflow = path.join(root, '.github/workflows/deploy.yml');
 assert('GitHub Pages workflow deploys on main pushes', fs.existsSync(pagesWorkflow) && /push:\s*\n\s*branches:\s*\[main\]/.test(fs.readFileSync(pagesWorkflow, 'utf8')) && /actions\/deploy-pages@v4/.test(fs.readFileSync(pagesWorkflow, 'utf8')));
+assert('Direct section URLs, including /about/, are generated', read('scripts/create-routes.mjs').includes("'about'") && read('scripts/create-routes.mjs').includes("'contact'"));
+assert('Story sections scroll vertically and are not clipped', read('src/App.tsx').includes('navItems.map(item => {') && read('src/App.tsx').includes('data-story-station={item.id}') && read('src/styles.css').includes('.story-stop {') && read('src/styles.css').includes('overflow: visible;') && !/\.app-shell\s*\{[^}]*overflow:\s*clip/.test(read('src/styles.css')));
 
 if (!sourceOnly) {
   const dist = path.join(root, 'dist');
   assert('Production output exists', fs.existsSync(path.join(dist, 'index.html')));
   if (fs.existsSync(dist)) {
     for (const file of ['icon.svg', 'robots.txt', 'sitemap.xml', 'og.png']) assert(`Built asset: ${file}`, fs.existsSync(path.join(dist, file)));
+    for (const route of ['work', 'process', 'services', 'about', 'notes', 'contact', 'work/ternux', 'work/ternuxx', 'work/adt', 'work/lai', 'work/ggen', 'work/songjog']) {
+      assert(`Direct route: /${route}/`, fs.existsSync(path.join(dist, route, 'index.html')));
+    }
     const html = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
     assert('Built HTML has a title and one crawlable h1', /<title>[^<]+<\/title>/.test(html) && /<h1[^>]*>/.test(html));
     const assets = path.join(dist, 'assets');

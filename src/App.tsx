@@ -13,12 +13,21 @@ type RenderMode = '3d' | 'schematic';
 const validStations = new Set(navItems.map(item => item.id));
 function readRoute(): RouteState {
   const params = new URLSearchParams(window.location.search);
-  const station = params.get('station') as Station | null;
-  const project = params.get('project');
+  const segments = window.location.pathname.split('/').filter(Boolean);
+  const pathStation = segments[0] as Station | undefined;
+  const queryStation = params.get('station') as Station | null;
+  const station = pathStation && validStations.has(pathStation) ? pathStation : queryStation;
+  const pathProject = station === 'work' ? segments[1] : null;
+  const project = pathProject ?? params.get('project');
   return {
     station: station && validStations.has(station) ? station : 'home',
     project: project && projects.some(item => item.id === project) ? project : null,
   };
+}
+
+function routePath(station: Station, project: string | null = null) {
+  if (station === 'home' && !project) return '/';
+  return `/${station}/${project ? `${project}/` : ''}`;
 }
 
 function idle(callback: () => void) {
@@ -110,7 +119,7 @@ function App() {
     try { return localStorage.getItem('pocket-lab-language') === 'bn' ? 'bn' : 'en'; } catch { return 'en'; }
   });
   const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const [mode, setMode] = useState<RenderMode>(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'schematic' : '3d');
+  const [mode, setMode] = useState<RenderMode>('3d');
   const [paused, setPaused] = useState(false);
   const [scene, setScene] = useState<LabScene | null>(null);
   const [webglFailed, setWebglFailed] = useState(false);
@@ -125,9 +134,11 @@ function App() {
   useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dataset.language = language;
-    const pageTitle = language === 'bn'
+    const homeTitle = language === 'bn'
       ? 'সবুজ মিয়া — স্বতন্ত্র সফটওয়্যার ও এআই সিস্টেম নির্মাতা | পকেট সিস্টেমস ল্যাব'
       : 'Sobuj Miah — Independent Software & AI Systems Builder | The Pocket Systems Lab';
+    const sectionName = navItems.find(item => item.id === route.station)?.label[language] ?? 'Lab';
+    const pageTitle = route.station === 'home' ? homeTitle : `${sectionName} — Sobuj Miah | The Pocket Systems Lab`;
     const description = language === 'bn'
       ? 'হাতের মুঠোয় শুরু হয় এই কর্মশালা। অ্যান্ড্রয়েড-প্রথম সিস্টেম ল্যাব থেকে ব্যবহারিক সফটওয়্যার, ARM64 Android/Linux toolchain, লোকাল AI ও কাজের workflow তৈরি করেন সবুজ মিয়া।'
       : 'The workshop begins in your hand. Sobuj Miah builds practical software, ARM64 Android/Linux toolchains, on-device AI runtimes, and bilingual workflows from an Android-first systems lab in Dhaka, Bangladesh.';
@@ -142,20 +153,51 @@ function App() {
     if (twitterTitle) twitterTitle.setAttribute('content', pageTitle);
     const twitterDescription = document.querySelector('meta[name="twitter:description"]');
     if (twitterDescription) twitterDescription.setAttribute('content', description);
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.setAttribute('href', `https://soobujmiah.github.io${routePath(route.station, route.project)}`);
     try { localStorage.setItem('pocket-lab-language', language); } catch { /* storage is optional */ }
-  }, [language]);
+  }, [language, route]);
+
+  const activeStationRef = useRef(route.station);
+  const scrollDrivenRef = useRef(false);
 
   useEffect(() => {
-    const handlePop = () => setRoute(readRoute());
+    const initial = readRoute();
+    if (initial.station !== 'home') {
+      requestAnimationFrame(() => document.getElementById(`station-${initial.station}`)?.scrollIntoView({ block: 'start' }));
+    }
+    const handlePop = () => {
+      const next = readRoute();
+      activeStationRef.current = next.station;
+      setRoute(next);
+      requestAnimationFrame(() => document.getElementById(`station-${next.station}`)?.scrollIntoView({ block: 'start' }));
+    };
     window.addEventListener('popstate', handlePop);
     return () => window.removeEventListener('popstate', handlePop);
+  }, []);
+
+  useEffect(() => {
+    const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-story-station]'));
+    const observer = new IntersectionObserver(entries => {
+      const current = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!current || current.intersectionRatio < 0.38) return;
+      const station = (current.target as HTMLElement).dataset.storyStation as Station;
+      if (!station || activeStationRef.current === station) return;
+      activeStationRef.current = station;
+      scrollDrivenRef.current = true;
+      setRoute({ station, project: null });
+      window.history.replaceState({ pocketLab: true, scrollDriven: true }, '', `${routePath(station)}${window.location.hash}`);
+    }, { threshold: [0.38, 0.55, 0.72] });
+    sections.forEach(section => observer.observe(section));
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
     const previous = previousRoute.current;
     previousRoute.current = route;
     if (previous.station === route.station && previous.project === route.project) return;
-    const frame = requestAnimationFrame(() => document.getElementById('station-heading')?.focus({ preventScroll: true }));
+    if (scrollDrivenRef.current) { scrollDrivenRef.current = false; return; }
+    const frame = requestAnimationFrame(() => document.getElementById(`station-heading-${route.station}`)?.focus({ preventScroll: true }));
     return () => cancelAnimationFrame(frame);
   }, [route]);
 
@@ -172,15 +214,12 @@ function App() {
 
   const navigate = useCallback((station: Station, project: string | null = null, replace = false) => {
     const next: RouteState = { station, project };
-    const params = new URLSearchParams();
-    if (station !== 'home' || project) params.set('station', station);
-    if (project) params.set('project', project);
-    const query = params.toString();
-    const url = `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`;
+    activeStationRef.current = station;
+    const url = `${routePath(station, project)}${window.location.hash}`;
     window.history[replace ? 'replaceState' : 'pushState']({ ...next, pocketLab: true }, '', url);
     setRoute(next);
     setMobileMenuOpen(false);
-    window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
+    requestAnimationFrame(() => document.getElementById(`station-${station}`)?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' }));
   }, [reducedMotion]);
 
   useEffect(() => {
@@ -242,26 +281,31 @@ function App() {
         </div>
       </header>
 
-      <main className={`main-content station-${route.station}`}>
-        <div className="scene-meta" aria-label={`${t.environment} · ${t.scene} ${navItems.find(item => item.id === route.station)?.number}`}>
-          <span className="live-indicator"><i />{t.environment}</span>
-          <span className="meta-separator" />
-          <span>{t.wayfinding} <b>{navItems.find(item => item.id === route.station)?.number}</b></span>
-        </div>
-        {(webglFailed || reducedMotion) && <p className="mode-notice" role="status">{webglFailed ? t.notWebgl : t.reduced}</p>}
+      {(webglFailed || reducedMotion) && <p className="mode-notice" role="status">{webglFailed ? t.notWebgl : t.reduced}</p>}
+      <div className="scene-meta" aria-label={`${t.environment} · ${t.scene} ${navItems.find(item => item.id === route.station)?.number}`}>
+        <span className="live-indicator"><i />{t.environment}</span>
+        <span className="meta-separator" />
+        <span>{t.wayfinding} <b>{navItems.find(item => item.id === route.station)?.number}</b></span>
+      </div>
 
-        <section className={`content-panel content-${route.station} ${activeProject ? 'has-project' : ''}`} key={`${route.station}-${route.project ?? 'index'}`} aria-labelledby="station-heading">
-          {route.station === 'home' && <HomeView language={language} t={t} onExplore={goExplore} onContact={startConversation} />}
-          {route.station === 'work' && <WorkView language={language} t={t} project={activeProject} onSelect={id => navigate('work', id)} onBack={() => navigate('home')} onNext={() => {
-            const index = activeProject ? projects.findIndex(item => item.id === activeProject.id) : 0;
-            navigate('work', projects[(index + 1) % projects.length].id);
-          }} />}
-          {route.station === 'process' && <ProcessView language={language} t={t} />}
-          {route.station === 'services' && <ServicesView language={language} t={t} onContact={startConversation} />}
-          {route.station === 'about' && <AboutView language={language} t={t} />}
-          {route.station === 'notes' && <NotesView language={language} t={t} />}
-          {route.station === 'contact' && <ContactView language={language} t={t} />}
-        </section>
+      <main className="story-scroll">
+        {navItems.map(item => {
+          const showProject = item.id === 'work' && route.station === 'work' ? activeProject : null;
+          return <section id={`station-${item.id}`} data-story-station={item.id} className={`story-stop story-${item.id}`} key={item.id} aria-label={item.label[language]}>
+            <div className={`content-panel content-${item.id} ${showProject ? 'has-project' : ''}`} key={`${item.id}-${showProject?.id ?? 'index'}`}>
+              {item.id === 'home' && <HomeView language={language} t={t} onExplore={goExplore} onContact={startConversation} />}
+              {item.id === 'work' && <WorkView language={language} t={t} project={showProject} onSelect={id => navigate('work', id)} onBack={() => navigate('home')} onNext={() => {
+                const index = showProject ? projects.findIndex(project => project.id === showProject.id) : 0;
+                navigate('work', projects[(index + 1) % projects.length].id);
+              }} />}
+              {item.id === 'process' && <ProcessView language={language} t={t} />}
+              {item.id === 'services' && <ServicesView language={language} t={t} onContact={startConversation} />}
+              {item.id === 'about' && <AboutView language={language} t={t} />}
+              {item.id === 'notes' && <NotesView language={language} t={t} />}
+              {item.id === 'contact' && <ContactView language={language} t={t} />}
+            </div>
+          </section>;
+        })}
       </main>
 
       <div className="bottom-controls">
@@ -286,7 +330,7 @@ function HomeView({ language, t, onExplore, onContact }: { language: Language; t
     <div className="hero-view">
       <div className="hero-copy">
         <div className="eyebrow"><span className="eyebrow-line" />{t.eyebrow}</div>
-        <h1 id="station-heading" tabIndex={-1} className="hero-title">{language === 'en' ? <>The workshop<br /><em>begins in your hand.</em></> : <>হাতের মুঠোয়<br /><em>শুরু হয় এই কর্মশালা।</em></>}</h1>
+        <h1 id="station-heading-home" tabIndex={-1} className="hero-title">{language === 'en' ? <>The workshop<br /><em>begins in your hand.</em></> : <>হাতের মুঠোয়<br /><em>শুরু হয় এই কর্মশালা।</em></>}</h1>
         <p className="hero-name">Sobuj Miah <span>· {t.role}</span></p>
         <p className="hero-support">{t.support}</p>
         <div className="hero-actions">
@@ -314,7 +358,7 @@ function WorkView({ language, t, project, onSelect, onBack, onNext }: { language
       <div className="project-detail-view">
         <div className="detail-toolbar"><button className="back-link" type="button" onClick={onBack}><ArrowLeft size={15} />{t.back}</button><span className="detail-path">{language === 'en' ? 'WORK' : 'কাজ'} / {project.id.toUpperCase()}</span></div>
         <div className="project-detail-heading">
-          <div><div className="eyebrow"><span className="eyebrow-line" />{language === 'en' ? 'PROJECT STATION' : 'প্রকল্প স্টেশন'}</div><h1 id="station-heading" tabIndex={-1} className="section-title">{project.name}<span className="title-period">.</span></h1><p className="project-strapline">{project.strapline[language]}</p></div>
+          <div><div className="eyebrow"><span className="eyebrow-line" />{language === 'en' ? 'PROJECT STATION' : 'প্রকল্প স্টেশন'}</div><h1 id="station-heading-work" tabIndex={-1} className="section-title">{project.name}<span className="title-period">.</span></h1><p className="project-strapline">{project.strapline[language]}</p></div>
           <StatusPill kind={project.status} label={t[project.status]} />
         </div>
         <div className="detail-status-note"><ShieldCheck size={14} />{t[project.status === 'verified' ? 'statusVerified' : project.status === 'experimental' ? 'statusExperimental' : 'statusBoundary']}</div>
@@ -336,7 +380,7 @@ function WorkView({ language, t, project, onSelect, onBack, onNext }: { language
   return (
     <div className="work-index-view">
       <div className="eyebrow"><span className="eyebrow-line" />{t.work} / 01</div>
-      <div className="section-heading-row"><h1 id="station-heading" tabIndex={-1} className="section-title">{t.projects}<span className="title-period">.</span></h1><span className="heading-mark"><Cpu size={16} />{language === 'en' ? 'SOURCE-GROUNDED' : 'তথ্যসূত্র-ভিত্তিক'}</span></div>
+      <div className="section-heading-row"><h1 id="station-heading-work" tabIndex={-1} className="section-title">{t.projects}<span className="title-period">.</span></h1><span className="heading-mark"><Cpu size={16} />{language === 'en' ? 'SOURCE-GROUNDED' : 'তথ্যসূত্র-ভিত্তিক'}</span></div>
       <p className="section-intro">{t.projectsIntro}</p>
       <div className="project-list" aria-label={t.selectProject}>
         {projects.map((item, index) => <button className="project-row" type="button" key={item.id} onClick={() => onSelect(item.id)}>
@@ -353,7 +397,7 @@ function ProcessView({ language, t }: { language: Language; t: typeof copy.en | 
   const [activeStep, setActiveStep] = useState(0);
   return <div className="section-view">
     <div className="eyebrow"><span className="eyebrow-line" />{language === 'en' ? 'WORKFLOW / 02' : 'কাজের ধারা / ০২'}</div>
-    <h1 id="station-heading" tabIndex={-1} className="section-title">{t.processTitle}<span className="title-period">.</span></h1>
+    <h1 id="station-heading-process" tabIndex={-1} className="section-title">{t.processTitle}<span className="title-period">.</span></h1>
     <p className="section-intro">{t.processIntro}</p>
     <div className="process-layout">
       <div className="process-rail" role="tablist" aria-label={t.processTitle}>
@@ -373,7 +417,7 @@ function ProcessView({ language, t }: { language: Language; t: typeof copy.en | 
 function ServicesView({ language, t, onContact }: { language: Language; t: typeof copy.en | typeof copy.bn; onContact: () => void }) {
   return <div className="section-view">
     <div className="eyebrow"><span className="eyebrow-line" />{language === 'en' ? 'TOOL STATION / 03' : 'টুল স্টেশন / ০৩'}</div>
-    <h1 id="station-heading" tabIndex={-1} className="section-title">{t.servicesTitle}<span className="title-period">.</span></h1>
+    <h1 id="station-heading-services" tabIndex={-1} className="section-title">{t.servicesTitle}<span className="title-period">.</span></h1>
     <p className="section-intro">{t.servicesIntro}</p>
     <div className="service-bench">
       {services.map((service, index) => <article className="service-tool" key={service.id}>
@@ -387,7 +431,7 @@ function ServicesView({ language, t, onContact }: { language: Language; t: typeo
 function AboutView({ language, t }: { language: Language; t: typeof copy.en | typeof copy.bn }) {
   return <div className="section-view about-view">
     <div className="eyebrow"><span className="eyebrow-line" />{language === 'en' ? 'FIELD NOTEBOOK / 04' : 'কাজের নোটবই / ০৪'}</div>
-    <h1 id="station-heading" tabIndex={-1} className="section-title">{t.aboutTitle}<span className="title-period">.</span></h1>
+    <h1 id="station-heading-about" tabIndex={-1} className="section-title">{t.aboutTitle}<span className="title-period">.</span></h1>
     <p className="about-lede">{t.aboutIntro}</p>
     <div className="about-columns">
       <div className="notebook-card">
@@ -404,7 +448,7 @@ function AboutView({ language, t }: { language: Language; t: typeof copy.en | ty
 function NotesView({ language, t }: { language: Language; t: typeof copy.en | typeof copy.bn }) {
   return <div className="section-view notes-view">
     <div className="eyebrow"><span className="eyebrow-line" />{language === 'en' ? 'ARCHIVE / 05' : 'আর্কাইভ / ০৫'}</div>
-    <h1 id="station-heading" tabIndex={-1} className="section-title">{t.notesTitle}<span className="title-period">.</span></h1>
+    <h1 id="station-heading-notes" tabIndex={-1} className="section-title">{t.notesTitle}<span className="title-period">.</span></h1>
     <div className="archive-room"><div className="archive-orbit"><span /><span /><span /><BookOpen size={25} /></div><p>{t.notesEmpty}</p><span className="archive-stamp">{language === 'en' ? 'NO PUBLIC NOTES INDEXED' : 'পাবলিক নোট তালিকাভুক্ত নয়'}</span></div>
   </div>;
 }
@@ -419,7 +463,7 @@ function ContactView({ language, t }: { language: Language; t: typeof copy.en | 
   return <div className="section-view contact-view">
     <div className="eyebrow"><span className="eyebrow-line" />{language === 'en' ? 'COMMUNICATIONS / 06' : 'যোগাযোগ / ০৬'}</div>
     <div className="contact-beacon"><span /><span /><span /><Radio size={19} /></div>
-    <h1 id="station-heading" tabIndex={-1} className="section-title">{t.contactTitle}<span className="title-period">.</span></h1>
+    <h1 id="station-heading-contact" tabIndex={-1} className="section-title">{t.contactTitle}<span className="title-period">.</span></h1>
     <p className="section-intro">{t.contactIntro}</p>
     <a className="email-signal" href="mailto:soobujmiah@gmail.com"><span className="email-icon"><Mail size={17} /></span><span><small>{t.email}</small><strong>soobujmiah@gmail.com</strong></span><ArrowUpRight size={17} /></a>
     <div className="contact-links">{links.map(link => <a href={link.href} target="_blank" rel="noreferrer" key={link.label}>{link.icon}<span>{link.label}</span><ArrowUpRight className="link-arrow" size={13} /></a>)}</div>

@@ -6,7 +6,7 @@
   "description": "Sobuj Miah — The Pocket Systems Lab: Cinematic 3D Portfolio (EN / বাংলা)",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 4173",
-    "build": "tsc --noEmit && vite build && node scripts/verify-portfolio.mjs",
+    "build": "tsc --noEmit && vite build && node scripts/create-routes.mjs && node scripts/verify-portfolio.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "node scripts/lint-source.mjs",
     "test": "node scripts/verify-portfolio.mjs --source-only",
