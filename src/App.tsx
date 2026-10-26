@@ -78,7 +78,7 @@ function Schematic({ station, project, language }: { station: Station; project: 
   );
 }
 
-function ScenePanel({ config, renderMode, language, onFailure, onReady }: { config: SceneConfig; renderMode: RenderMode; language: Language; onFailure: () => void; onReady: (instance: LabScene) => void }) {
+function ScenePanel({ config, renderMode, language, onFailure, onReady, onAction }: { config: SceneConfig; renderMode: RenderMode; language: Language; onFailure: () => void; onReady: (instance: LabScene) => void; onAction: (station: Station, project: string | null) => void }) {
   const host = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const latest = useRef(config);
@@ -92,7 +92,7 @@ function ScenePanel({ config, renderMode, language, onFailure, onReady }: { conf
       try {
         const module = await import('./scene/LabScene');
         if (cancelled || !host.current) return;
-        const scene = new module.LabScene(host.current, latest.current, () => onFailure());
+        const scene = new module.LabScene(host.current, latest.current, () => onFailure(), onAction);
         instanceRef.current = scene;
         setReady(true);
         onReady(scene);
@@ -106,7 +106,7 @@ function ScenePanel({ config, renderMode, language, onFailure, onReady }: { conf
       instanceRef.current?.dispose();
       instanceRef.current = null;
     };
-  }, [renderMode, onFailure, onReady]);
+  }, [renderMode, onFailure, onReady, onAction]);
 
   useEffect(() => { instanceRef.current?.update(config); }, [config]);
   return <div className={`scene-host ${ready ? 'scene-ready' : ''}`} ref={host} aria-hidden="true"><Schematic station={config.view} project={config.project} language={language} /></div>;
@@ -126,7 +126,7 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const t = copy[language];
   const activeProject = route.project ? projects.find(project => project.id === route.project) ?? null : null;
-  const sceneConfig: SceneConfig = { view: route.station, project: route.project, paused, reducedMotion, };
+  const sceneConfig: SceneConfig = { view: route.station, project: route.project, language, paused, reducedMotion, };
   const setSceneRef = useCallback((instance: LabScene) => setScene(instance), []);
   const failScene = useCallback(() => { setWebglFailed(true); setMode('schematic'); setScene(null); }, []);
   const use3D = mode === '3d' && !webglFailed;
@@ -221,6 +221,7 @@ function App() {
     setMobileMenuOpen(false);
     requestAnimationFrame(() => document.getElementById(`station-${station}`)?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' }));
   }, [reducedMotion]);
+  const handleSceneAction = useCallback((station: Station, project: string | null) => navigate(station, project), [navigate]);
 
   useEffect(() => {
     const handleMotion = (event: MediaQueryListEvent) => {
@@ -250,10 +251,10 @@ function App() {
   const startConversation = () => navigate('contact');
 
   return (
-    <div className={`app-shell lang-${language} ${mode === 'schematic' ? 'mode-schematic' : ''}`}>
+    <div className={`app-shell lang-${language} ${mode === 'schematic' ? 'mode-schematic' : ''}`} data-world-mode={use3D ? '3d' : 'fallback'}>
       <div className="world-backdrop" aria-hidden="true" />
       <div className="world-viewport" aria-hidden="true">
-        {use3D ? <ScenePanel config={sceneConfig} renderMode={mode} language={language} onFailure={failScene} onReady={setSceneRef} /> : <Schematic station={route.station} project={route.project} language={language} />}
+        {use3D ? <ScenePanel config={sceneConfig} renderMode={mode} language={language} onFailure={failScene} onReady={setSceneRef} onAction={handleSceneAction} /> : <Schematic station={route.station} project={route.project} language={language} />}
         <div className="world-vignette" />
         <div className="world-label world-label-left"><span>PSL / 01</span><i />{activeProject?.name ?? 'POCKET SYSTEMS'}</div>
         <div className="world-label world-label-right">{t.scene} {navItems.find(item => item.id === route.station)?.number ?? '00'}</div>

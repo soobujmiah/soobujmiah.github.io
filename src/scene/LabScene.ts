@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import { MATERIALS_3D, MOTION } from '../design-tokens';
+import { copy, navItems, processSteps, projects, services, type Language } from '../data/content';
 
 export type SceneView = 'home' | 'work' | 'process' | 'services' | 'about' | 'notes' | 'contact';
-export interface SceneConfig { view: SceneView; project: string | null; paused: boolean; reducedMotion: boolean; }
+export interface SceneConfig { view: SceneView; project: string | null; language: Language; paused: boolean; reducedMotion: boolean; }
 
 const COLOR = MATERIALS_3D;
 const stationPositions: Record<SceneView, THREE.Vector3> = {
@@ -14,6 +15,8 @@ const stationPositions: Record<SceneView, THREE.Vector3> = {
   notes: new THREE.Vector3(-3.2, 3.4, 10.8),
   contact: new THREE.Vector3(3.2, 3.0, 10.2),
 };
+
+const languageSafeLabel = (language: Language, en: string, bn: string) => language === 'en' ? en : bn;
 
 const projectColors: Record<string, number> = {
   ternux: COLOR.emeraldSignal,
@@ -37,8 +40,14 @@ function roundedBox(width: number, height: number, depth: number, radius: number
   return new THREE.Mesh(geometry, material);
 }
 
+type PanelAction = { x: number; y: number; width: number; height: number; station: SceneView; project?: string | null; href?: string };
+
 export class LabScene {
   private renderer: THREE.WebGLRenderer;
+  private raycaster = new THREE.Raycaster();
+  private pointer = new THREE.Vector2();
+  private infoActions: PanelAction[] = [];
+  private onInfoAction: (station: SceneView, project: string | null) => void;
   private scene = new THREE.Scene();
   private camera = new THREE.PerspectiveCamera(38, 1, 0.1, 80);
   private frame = 0;
@@ -48,6 +57,13 @@ export class LabScene {
   private wingTargets = { left: -0.62, right: 0.62 };
   private config: SceneConfig;
   private phone: THREE.Group;
+  private infoPanel!: THREE.Group;
+  private infoTexture!: THREE.CanvasTexture;
+  private infoCanvas!: HTMLCanvasElement;
+  private infoContext!: CanvasRenderingContext2D;
+  private infoFrame!: THREE.Mesh;
+  private infoDisplay!: THREE.Mesh;
+  private portraitPanel = false;
   private wingLeft: THREE.Group;
   private wingRight: THREE.Group;
   private signal: THREE.Mesh[] = [];
@@ -60,10 +76,11 @@ export class LabScene {
   private lastDraw = 0;
   private lowPower: boolean;
 
-  constructor(host: HTMLElement, initial: SceneConfig, onFailure: (message: string) => void) {
+  constructor(host: HTMLElement, initial: SceneConfig, onFailure: (message: string) => void, onInfoAction: (station: SceneView, project: string | null) => void) {
     this.host = host;
     this.config = initial;
     this.onFailure = onFailure;
+    this.onInfoAction = onInfoAction;
     this.lowPower = matchMedia('(pointer: coarse)').matches || (navigator as Navigator & { deviceMemory?: number }).deviceMemory !== undefined && (navigator as Navigator & { deviceMemory?: number }).deviceMemory! <= 4;
     this.renderer = new THREE.WebGLRenderer({ antialias: !this.lowPower, alpha: false, powerPreference: 'low-power', stencil: false, depth: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.lowPower ? MOTION.maxMobilePixelRatio : MOTION.maxDesktopPixelRatio));
@@ -78,6 +95,7 @@ export class LabScene {
     this.renderer.domElement.className = 'lab-canvas';
     host.appendChild(this.renderer.domElement);
     this.renderer.domElement.addEventListener('webglcontextlost', this.onContextLost, false);
+    this.renderer.domElement.addEventListener('click', this.onCanvasClick);
 
     this.scene.background = new THREE.Color(COLOR.voidBg);
     this.scene.fog = new THREE.FogExp2(COLOR.fogColor, this.lowPower ? 0.043 : 0.035);
@@ -109,6 +127,7 @@ export class LabScene {
     this.scene.add(this.wingLeft, this.wingRight);
     this.makeSignalPaths();
     this.addWorkArtifacts();
+    this.makeInfoPanel();
     this.addStationBeacon();
     this.addBackWall();
     this.resize();
@@ -116,6 +135,170 @@ export class LabScene {
     this.update(initial);
     this.drawStatic();
     if (!initial.paused && !initial.reducedMotion) this.animate();
+  }
+
+  private makeInfoPanel() {
+    this.infoCanvas = document.createElement('canvas');
+    this.infoCanvas.width = 2048;
+    this.infoCanvas.height = 1152;
+    const context = this.infoCanvas.getContext('2d');
+    if (!context) throw new Error('Canvas text surface unavailable');
+    this.infoContext = context;
+    this.infoTexture = new THREE.CanvasTexture(this.infoCanvas);
+    this.infoTexture.colorSpace = THREE.SRGBColorSpace;
+    this.infoTexture.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
+
+    this.infoPanel = new THREE.Group();
+    this.infoPanel.position.set(0, 4.55, -2.65);
+    this.infoFrame = roundedBox(7.35, 4.25, 0.18, 0.12, new THREE.MeshStandardMaterial({ color: 0x11191a, metalness: 0.84, roughness: 0.27, emissive: 0x092015, emissiveIntensity: 0.24 }));
+    this.infoFrame.castShadow = true;
+    this.infoFrame.receiveShadow = true;
+    this.infoPanel.add(this.infoFrame);
+
+    this.infoDisplay = new THREE.Mesh(
+      new THREE.PlaneGeometry(7.08, 3.98),
+      new THREE.MeshBasicMaterial({ map: this.infoTexture, toneMapped: false }),
+    );
+    this.infoDisplay.position.z = 0.096;
+    this.infoDisplay.userData.infoDisplay = true;
+    this.infoPanel.add(this.infoDisplay);
+    const edge = new THREE.Mesh(new THREE.BoxGeometry(6.95, 0.025, 0.025), new THREE.MeshBasicMaterial({ color: COLOR.emeraldSignal }));
+    edge.position.set(0, -2.09, 0.11);
+    this.infoPanel.add(edge);
+    this.scene.add(this.infoPanel);
+    this.renderInfoPanel(this.config);
+  }
+
+  private wrapCanvasText(text: string, x: number, y: number, maxWidth: number, lineHeight: number, maxLines: number) {
+    const words = text.trim().split(/\\s+/);
+    let line = '';
+    let lines = 0;
+    for (const word of words) {
+      const test = line ? `${line} ${word}` : word;
+      if (this.infoContext.measureText(test).width > maxWidth && line) {
+        this.infoContext.fillText(line, x, y + lines * lineHeight);
+        line = word;
+        lines += 1;
+        if (lines >= maxLines) break;
+      } else line = test;
+    }
+    if (lines < maxLines && line) this.infoContext.fillText(line, x, y + lines * lineHeight);
+    return Math.min(lines + 1, maxLines) * lineHeight;
+  }
+
+  private renderInfoPanel(config: SceneConfig) {
+    const ctx = this.infoContext;
+    const width = this.infoCanvas.width;
+    const height = this.infoCanvas.height;
+    const t = copy[config.language];
+    const station = navItems.find(item => item.id === config.view);
+    this.infoActions = [];
+    ctx.clearRect(0, 0, width, height);
+    const backdrop = ctx.createLinearGradient(0, 0, width, height);
+    backdrop.addColorStop(0, '#07100d');
+    backdrop.addColorStop(0.54, '#0a1312');
+    backdrop.addColorStop(1, '#080b12');
+    ctx.fillStyle = backdrop;
+    ctx.fillRect(0, 0, width, height);
+    ctx.strokeStyle = 'rgba(124, 167, 146, .10)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= width; x += 96) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke(); }
+    for (let y = 0; y <= height; y += 96) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke(); }
+    ctx.strokeStyle = 'rgba(109, 214, 155, .34)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(34, 34, width - 68, height - 68);
+
+    const pad = 112;
+    ctx.fillStyle = '#7ee6a4';
+    ctx.font = '600 27px ui-monospace, "Noto Sans Bengali", monospace';
+    ctx.fillText(`POCKET SYSTEMS LAB   /   ${station?.number ?? '00'}   /   ${config.view.toUpperCase()}`, pad, 112);
+    ctx.fillStyle = 'rgba(205, 226, 214, .6)';
+    ctx.font = '400 23px ui-monospace, "Noto Sans Bengali", monospace';
+    ctx.fillText('SOBUJ MIAH  ·  SAVAR, DHAKA', pad, 158);
+    ctx.fillStyle = '#4ade80';
+    ctx.fillRect(pad, 195, 86, 5);
+
+    const project = config.project ? projects.find(item => item.id === config.project) : null;
+    let title = '';
+    let intro = '';
+    let rows: string[] = [];
+    if (config.view === 'home') {
+      title = t.opening;
+      intro = `${t.role}  ·  SOBUJ MIAH`;
+      rows = [t.support, languageSafeLabel(config.language, 'SCROLL TO EXPLORE', 'স্ক্রল করে দেখুন')];
+    } else if (config.view === 'work' && project) {
+      title = project.name;
+      intro = project.strapline[config.language];
+      rows = [project.problem[config.language], ...project.built[config.language].slice(0, 2).map(item => `• ${item}`), `${languageSafeLabel(config.language, 'VERIFIED', 'যাচাই')} · ${project.verified[config.language][0]}`, `${languageSafeLabel(config.language, 'LIMIT', 'সীমা')} · ${project.limits[config.language][0]}`];
+    } else if (config.view === 'work') {
+      title = t.projects;
+      intro = t.projectsIntro;
+      rows = projects.map((item, index) => `${String(index + 1).padStart(2, '0')}  ${item.name}   ·   ${item.strapline[config.language]}`);
+    } else if (config.view === 'process') {
+      title = t.processTitle;
+      intro = t.processIntro;
+      rows = processSteps.map((step, index) => `${String(index + 1).padStart(2, '0')}  ${config.language === 'en' ? step.en : step.bn}  —  ${config.language === 'en' ? step.detailEn : step.detailBn}`);
+    } else if (config.view === 'services') {
+      title = t.servicesTitle;
+      intro = t.servicesIntro;
+      rows = services.map(item => `${item.title[config.language]}  —  ${item.body[config.language]}`);
+    } else if (config.view === 'about') {
+      title = t.aboutTitle;
+      intro = t.aboutIntro;
+      rows = t.principlesList.slice(0, 4).map(item => `•  ${item}`);
+    } else if (config.view === 'notes') {
+      title = t.notesTitle;
+      intro = t.notesEmpty;
+      rows = [];
+    } else {
+      title = t.contactTitle;
+      intro = t.contactIntro;
+      rows = ['soobujmiah@gmail.com', 'GitHub  ·  LinkedIn  ·  DEV.to  ·  Telegram', t.location];
+    }
+
+    ctx.fillStyle = '#f0f2ef';
+    ctx.font = '500 82px "Noto Sans Bengali", Inter, system-ui, sans-serif';
+    const titleHeight = this.wrapCanvasText(title, pad, 310, width - pad * 2, 102, 2);
+    let y = 310 + titleHeight + 14;
+    ctx.fillStyle = 'rgba(229, 237, 231, .82)';
+    ctx.font = '400 31px "Noto Sans Bengali", Inter, system-ui, sans-serif';
+    y += this.wrapCanvasText(intro, pad, y, width - pad * 2, 45, 2) + 24;
+
+    ctx.fillStyle = '#d8e4db';
+    ctx.font = `400 ${width < 1500 ? 24 : 27}px "Noto Sans Bengali", Inter, system-ui, sans-serif`;
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+      const row = rows[rowIndex];
+      const rowTop = y - 30;
+      const maxRowWidth = width - pad * 2;
+      const lines = Math.max(1, Math.ceil(ctx.measureText(row).width / maxRowWidth));
+      const rowHeight = this.wrapCanvasText(row, pad, y, maxRowWidth, width < 1500 ? 34 : 38, Math.min(lines + 1, 2));
+      if (config.view === 'work' && !project && projects[rowIndex]) {
+        ctx.strokeStyle = 'rgba(126, 230, 164, .22)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(pad - 18, rowTop, maxRowWidth + 36, Math.max(52, rowHeight + 12));
+        this.infoActions.push({ x: pad - 18, y: rowTop, width: maxRowWidth + 36, height: Math.max(52, rowHeight + 12), station: 'work', project: projects[rowIndex].id });
+      }
+      y += rowHeight + 18;
+      if (y > height - 145) break;
+    }
+
+    const navY = height - 76;
+    ctx.font = `500 ${width < 1500 ? 19 : 22}px ui-monospace, "Noto Sans Bengali", monospace`;
+    let navX = pad;
+    for (const item of navItems) {
+      const label = `${item.number} ${item.label[config.language]}`;
+      const chipWidth = ctx.measureText(label).width + (width < 1500 ? 20 : 30);
+      const chipHeight = width < 1500 ? 34 : 42;
+      ctx.fillStyle = item.id === config.view ? 'rgba(126, 230, 164, .16)' : 'rgba(205, 226, 214, .035)';
+      ctx.fillRect(navX, navY - chipHeight + 5, chipWidth, chipHeight);
+      ctx.strokeStyle = item.id === config.view ? 'rgba(126, 230, 164, .75)' : 'rgba(205, 226, 214, .20)';
+      ctx.strokeRect(navX, navY - chipHeight + 5, chipWidth, chipHeight);
+      ctx.fillStyle = item.id === config.view ? '#8af0ac' : 'rgba(229, 237, 231, .76)';
+      ctx.fillText(label, navX + (width < 1500 ? 10 : 15), navY - (width < 1500 ? 6 : 5));
+      this.infoActions.push({ x: navX, y: navY - chipHeight, width: chipWidth, height: chipHeight, station: item.id });
+      navX += chipWidth + (width < 1500 ? 8 : 14);
+    }
+    this.infoTexture.needsUpdate = true;
   }
 
   private makePhone() {
@@ -293,6 +476,20 @@ export class LabScene {
     document.addEventListener('visibilitychange', this.onVisibility);
   }
 
+  private onCanvasClick = (event: MouseEvent) => {
+    const bounds = this.renderer.domElement.getBoundingClientRect();
+    this.pointer.set(((event.clientX - bounds.left) / bounds.width) * 2 - 1, -((event.clientY - bounds.top) / bounds.height) * 2 + 1);
+    this.raycaster.setFromCamera(this.pointer, this.camera);
+    const intersection = this.raycaster.intersectObject(this.infoDisplay, false)[0];
+    if (!intersection?.uv) return;
+    const x = intersection.uv.x * this.infoCanvas.width;
+    const y = (1 - intersection.uv.y) * this.infoCanvas.height;
+    const action = this.infoActions.find(item => x >= item.x && x <= item.x + item.width && y >= item.y && y <= item.y + item.height);
+    if (!action) return;
+    if (action.href) { window.location.href = action.href; return; }
+    this.onInfoAction(action.station, action.project ?? null);
+  };
+
   private onVisibility = () => {
     if (document.hidden) this.stop();
     else this.start();
@@ -309,26 +506,41 @@ export class LabScene {
     const width = Math.max(1, this.host.clientWidth);
     const height = Math.max(1, this.host.clientHeight);
     this.camera.aspect = width / height;
-    this.camera.fov = width < 600 ? 45 : 38;
+    this.camera.fov = width < 600 ? 43 : 35;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height, false);
+    const portrait = width < 600;
+    if (this.infoPanel && portrait !== this.portraitPanel) {
+      this.portraitPanel = portrait;
+      this.infoCanvas.width = portrait ? 1200 : 2048;
+      this.infoCanvas.height = portrait ? 1600 : 1152;
+      this.infoFrame.geometry.dispose();
+      this.infoFrame.geometry = roundedBox(portrait ? 4.48 : 7.35, portrait ? 5.95 : 4.25, 0.18, 0.12, this.infoFrame.material as THREE.Material).geometry;
+      this.infoDisplay.geometry.dispose();
+      this.infoDisplay.geometry = new THREE.PlaneGeometry(portrait ? 4.22 : 7.08, portrait ? 5.7 : 3.98);
+      this.infoDisplay.position.z = 0.096;
+      this.renderInfoPanel(this.config);
+    }
     this.drawStatic();
   }
 
   update(next: SceneConfig) {
     this.config = next;
-    this.targetCamera.copy(stationPositions[next.view]);
-    if (next.view === 'home') this.targetLook.set(0, 0.9, 0);
-    else if (next.view === 'work' && next.project) {
+    this.renderInfoPanel(next);
+    const orbit: Record<SceneView, [number, number, number, number]> = {
+      home: [0, 0.05, 9.7, 0], work: [-0.72, 0.18, 9.2, -0.06], process: [0.42, 0.55, 9.7, 0.045],
+      services: [0.82, 0.12, 9.7, 0.07], about: [-0.65, 0.05, 9.7, -0.06], notes: [-0.9, 0.4, 10.2, -0.09], contact: [0.9, 0.22, 9.8, 0.08],
+    };
+    const [x, y, z, yaw] = orbit[next.view];
+    this.targetCamera.set(x, 4.65 + y, this.host.clientWidth < 600 ? 12.7 : z);
+    this.targetLook.set(0, 4.55, -2.65);
+    this.infoPanel.rotation.y = yaw;
+    if (next.view === 'work' && next.project) {
       const idx = ['ternux', 'ternuxx', 'adt', 'lai', 'ggen', 'songjog'].indexOf(next.project);
       const side = idx < 2 ? -1 : idx > 3 ? 1 : 0;
-      this.targetCamera.x = side * 1.6;
-      this.targetLook.set(side * 1.15, 0.58, 0.1);
-    } else if (next.view === 'process') this.targetLook.set(0, 0.4, 0);
-    else if (next.view === 'services') this.targetLook.set(2.2, 0.5, 0);
-    else if (next.view === 'about') this.targetLook.set(-2.4, 0.7, 0);
-    else if (next.view === 'notes') this.targetLook.set(-3.0, 0.8, -0.1);
-    else this.targetLook.set(3.2, 0.7, 0);
+      this.targetCamera.x += side * 0.18;
+      this.infoPanel.rotation.y += side * 0.025;
+    }
     this.scene.traverse(obj => {
       if (!obj.userData.project || !(obj instanceof THREE.Mesh)) return;
       const selected = obj.userData.project === next.project && next.view === 'work';
@@ -411,6 +623,8 @@ export class LabScene {
     this.intersectObserver?.disconnect();
     document.removeEventListener('visibilitychange', this.onVisibility);
     this.renderer.domElement.removeEventListener('webglcontextlost', this.onContextLost);
+    this.renderer.domElement.removeEventListener('click', this.onCanvasClick);
+    this.infoTexture.dispose();
     this.scene.traverse(object => {
       if (object instanceof THREE.Mesh || object instanceof THREE.Line) {
         object.geometry.dispose();

@@ -35,7 +35,7 @@ body { overflow-x: hidden; }
 .scene-host { position: absolute; inset: 0; }
 .scene-host .schematic { transition: opacity .55s ease; }
 .scene-host.scene-ready .schematic { opacity: 0; }
-.lab-canvas { width: 100%; height: 100%; display: block; }
+.lab-canvas { width: 100%; height: 100%; display: block; pointer-events: auto; cursor: crosshair; }
 .world-vignette { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(5,5,7,.77) 0%, rgba(5,5,7,.32) 42%, rgba(5,5,7,.11) 71%, rgba(5,5,7,.28) 100%), linear-gradient(0deg, rgba(5,5,7,.92) 0%, transparent 24%, transparent 72%, rgba(5,5,7,.54) 100%); }
 .mode-schematic .world-vignette { background: linear-gradient(90deg, rgba(5,5,7,.44), rgba(5,5,7,.08) 55%, rgba(5,5,7,.3)), linear-gradient(0deg, rgba(5,5,7,.74), transparent 22%, transparent 82%, rgba(5,5,7,.4)); }
 .schematic { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(ellipse 50% 62% at 52% 50%, rgba(15, 31, 23, .62), transparent 78%); }
@@ -458,3 +458,39 @@ body { overflow-x: hidden; }
   .scene-meta { font-size: 7px; }
   .hero-title { font-size: clamp(45px, 12.5vw, 66px); }
 }
+[data-world-mode='3d'] .story-stop .content-panel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: normal;
+  border: 0;
+}
+[data-world-mode='3d'] .world-label,
+[data-world-mode='3d'] .scene-meta,
+[data-world-mode='3d'] .page-footer,
+[data-world-mode='3d'] .brand-words,
+[data-world-mode='3d'] .menu-trigger,
+[data-world-mode='3d'] .bottom-status,
+[data-world-mode='3d'] .quality-label,
+[data-world-mode='3d'] .control-button span { display: none; }
+[data-world-mode='3d'] .main-nav {
+  position: fixed;
+  left: -10000px;
+  top: calc(78px + var(--safe-top));
+  z-index: 40;
+  max-width: min(94vw, 400px);
+  flex-wrap: wrap;
+  padding: 12px;
+  border: 1px solid rgba(126, 230, 164, .25);
+  border-radius: 14px;
+  background: rgba(5, 10, 8, .94);
+  backdrop-filter: blur(16px);
+}
+[data-world-mode='3d'] .main-nav:focus-within { left: 12px; }
+[data-world-mode='3d'] .control-button { width: 37px; min-width: 37px; padding: 0; }
+[data-world-mode='3d'] .brand-lockup { width: 38px; }

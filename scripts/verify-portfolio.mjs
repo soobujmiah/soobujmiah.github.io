@@ -31,6 +31,8 @@ if (!sourceOnly) {
     for (const route of ['work', 'process', 'services', 'about', 'notes', 'contact', 'work/ternux', 'work/ternuxx', 'work/adt', 'work/lai', 'work/ggen', 'work/songjog']) {
       assert(`Direct route: /${route}/`, fs.existsSync(path.join(dist, route, 'index.html')));
     }
+    const aboutHtml = fs.readFileSync(path.join(dist, 'about/index.html'), 'utf8');
+    assert('About page retains its indexed URL and unique metadata', aboutHtml.includes('https://soobujmiah.github.io/about/') && aboutHtml.includes('<title>About Sobuj Miah | The Pocket Systems Lab</title>') && aboutHtml.includes('<h1 style="font-size: 2.5rem; margin: 0.5rem 0;">About Sobuj Miah</h1>'));
     const html = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
     assert('Built HTML has a title and one crawlable h1', /<title>[^<]+<\/title>/.test(html) && /<h1[^>]*>/.test(html));
     const assets = path.join(dist, 'assets');
