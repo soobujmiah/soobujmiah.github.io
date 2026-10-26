@@ -29,9 +29,9 @@ export const MATERIALS_3D = {
 } as const;
 
 export const MOTION = {
-  cameraDamping: 4.2,
-  unfoldSpeed: 3.4,
+  cameraDamping: 3.0,
+  unfoldSpeed: 2.8,
   revealEasing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-  maxMobilePixelRatio: 1.5,
-  maxDesktopPixelRatio: 2.0,
+  maxMobilePixelRatio: 1.0,
+  maxDesktopPixelRatio: 1.5,
 } as const;

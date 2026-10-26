@@ -532,9 +532,10 @@ export class LabScene {
       services: [0.82, 0.12, 9.7, 0.07], about: [-0.65, 0.05, 9.7, -0.06], notes: [-0.9, 0.4, 10.2, -0.09], contact: [0.9, 0.22, 9.8, 0.08],
     };
     const [x, y, z, yaw] = orbit[next.view];
-    this.targetCamera.set(x, 4.65 + y, this.host.clientWidth < 600 ? 12.7 : z);
+    const mobile = this.host.clientWidth < 600;
+    this.targetCamera.set(mobile ? 0 : x, 4.65 + (mobile ? 0 : y), mobile ? 12.7 : z);
     this.targetLook.set(0, 4.55, -2.65);
-    this.infoPanel.rotation.y = yaw;
+    this.infoPanel.rotation.y = mobile ? 0 : yaw;
     if (next.view === 'work' && next.project) {
       const idx = ['ternux', 'ternuxx', 'adt', 'lai', 'ggen', 'songjog'].indexOf(next.project);
       const side = idx < 2 ? -1 : idx > 3 ? 1 : 0;
@@ -582,14 +583,14 @@ export class LabScene {
       this.wingRight.position.x = THREE.MathUtils.lerp(this.wingRight.position.x, this.wingTargets.right, wingEase);
       this.wingLeft.rotation.z = THREE.MathUtils.lerp(this.wingLeft.rotation.z, -0.018, wingEase);
       this.wingRight.rotation.z = THREE.MathUtils.lerp(this.wingRight.rotation.z, 0.018, wingEase);
-      this.phone.rotation.y = Math.sin(time * 0.22) * 0.025;
+      this.phone.rotation.y = Math.sin(time * 0.12) * 0.008;
     }
     for (const bead of this.signal) {
       const curve = bead.userData.curve as THREE.CatmullRomCurve3;
-      const phase = (time * 0.09 + bead.userData.phase) % 1;
+      const phase = (time * 0.035 + bead.userData.phase) % 1;
       bead.position.copy(curve.getPoint(phase));
     }
-    if (time - this.lastDraw > (this.lowPower ? 1 / 30 : 1 / 45)) {
+    if (time - this.lastDraw > (this.lowPower ? 1 / 24 : 1 / 30)) {
       this.renderer.render(this.scene, this.camera);
       this.lastDraw = time;
     }

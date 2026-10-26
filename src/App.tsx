@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowDownRight, ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, ChevronDown, Cpu,
   ExternalLink, Eye, GitBranch, Languages, Mail, Menu, Monitor, Pause, Play, Radio,
@@ -126,10 +126,11 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const t = copy[language];
   const activeProject = route.project ? projects.find(project => project.id === route.project) ?? null : null;
-  const sceneConfig: SceneConfig = { view: route.station, project: route.project, language, paused, reducedMotion, };
+  const sceneConfig: SceneConfig = useMemo(() => ({ view: route.station, project: route.project, language, paused, reducedMotion }), [route.station, route.project, language, paused, reducedMotion]);
   const setSceneRef = useCallback((instance: LabScene) => setScene(instance), []);
   const failScene = useCallback(() => { setWebglFailed(true); setMode('schematic'); setScene(null); }, []);
-  const use3D = mode === '3d' && !webglFailed;
+  const sceneRequested = mode === '3d' && !webglFailed;
+  const use3D = sceneRequested && scene !== null;
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -178,18 +179,30 @@ function App() {
 
   useEffect(() => {
     const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-story-station]'));
-    const observer = new IntersectionObserver(entries => {
-      const current = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (!current || current.intersectionRatio < 0.38) return;
-      const station = (current.target as HTMLElement).dataset.storyStation as Station;
+    let frame = 0;
+    const updateActiveStation = () => {
+      frame = 0;
+      const marker = Math.min(window.innerHeight * 0.52, window.innerHeight - 90);
+      const current = sections.find(section => {
+        const rect = section.getBoundingClientRect();
+        return rect.top <= marker && rect.bottom > marker;
+      });
+      const station = current?.dataset.storyStation as Station | undefined;
       if (!station || activeStationRef.current === station) return;
       activeStationRef.current = station;
       scrollDrivenRef.current = true;
       setRoute({ station, project: null });
       window.history.replaceState({ pocketLab: true, scrollDriven: true }, '', `${routePath(station)}${window.location.hash}`);
-    }, { threshold: [0.38, 0.55, 0.72] });
-    sections.forEach(section => observer.observe(section));
-    return () => observer.disconnect();
+    };
+    const scheduleUpdate = () => { if (!frame) frame = requestAnimationFrame(updateActiveStation); };
+    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate);
+    scheduleUpdate();
+    return () => {
+      window.removeEventListener('scroll', scheduleUpdate);
+      window.removeEventListener('resize', scheduleUpdate);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
   useEffect(() => {
@@ -254,7 +267,7 @@ function App() {
     <div className={`app-shell lang-${language} ${mode === 'schematic' ? 'mode-schematic' : ''}`} data-world-mode={use3D ? '3d' : 'fallback'}>
       <div className="world-backdrop" aria-hidden="true" />
       <div className="world-viewport" aria-hidden="true">
-        {use3D ? <ScenePanel config={sceneConfig} renderMode={mode} language={language} onFailure={failScene} onReady={setSceneRef} onAction={handleSceneAction} /> : <Schematic station={route.station} project={route.project} language={language} />}
+        {sceneRequested ? <ScenePanel config={sceneConfig} renderMode={mode} language={language} onFailure={failScene} onReady={setSceneRef} onAction={handleSceneAction} /> : <Schematic station={route.station} project={route.project} language={language} />}
         <div className="world-vignette" />
         <div className="world-label world-label-left"><span>PSL / 01</span><i />{activeProject?.name ?? 'POCKET SYSTEMS'}</div>
         <div className="world-label world-label-right">{t.scene} {navItems.find(item => item.id === route.station)?.number ?? '00'}</div>
