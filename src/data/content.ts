@@ -1,0 +1,318 @@
+export type Language = 'en' | 'bn';
+export type Station = 'home' | 'work' | 'process' | 'services' | 'about' | 'notes' | 'contact';
+export type Evidence = 'verified' | 'experimental' | 'boundary';
+
+export interface Project {
+  id: string;
+  name: string;
+  strapline: Record<Language, string>;
+  problem: Record<Language, string>;
+  built: Record<Language, string[]>;
+  verified: Record<Language, string[]>;
+  limits: Record<Language, string[]>;
+  status: Evidence;
+  repo: string;
+  demo?: string;
+  release?: string;
+  metaphor: string;
+}
+
+export const navItems: { id: Station; label: Record<Language, string>; number: string }[] = [
+  { id: 'home', label: { en: 'Lab', bn: 'ল্যাব' }, number: '00' },
+  { id: 'work', label: { en: 'Work', bn: 'কাজ' }, number: '01' },
+  { id: 'process', label: { en: 'Process', bn: 'প্রক্রিয়া' }, number: '02' },
+  { id: 'services', label: { en: 'Services', bn: 'সেবা' }, number: '03' },
+  { id: 'about', label: { en: 'About', bn: 'পরিচিতি' }, number: '04' },
+  { id: 'notes', label: { en: 'Notes', bn: 'নোট' }, number: '05' },
+  { id: 'contact', label: { en: 'Contact', bn: 'যোগাযোগ' }, number: '06' },
+];
+
+export const projects: Project[] = [
+  {
+    id: 'ternux',
+    name: 'Ternux',
+    strapline: { en: 'A Linux workstation, carried in a phone.', bn: 'ফোনের ভেতরে বহনযোগ্য লিনাক্স ওয়ার্কস্টেশন।' },
+    problem: { en: 'Android-first development needs a capable Linux workspace without rooting the device or assuming a desktop PC.', bn: 'অ্যান্ড্রয়েড-প্রথম ডেভেলপমেন্টে রুট ছাড়াই এবং ডেস্কটপ পিসি ছাড়াই কার্যকর লিনাক্স ওয়ার্কস্পেস দরকার।' },
+    built: {
+      en: ['A no-root Termux + PRoot Debian/Xfce workstation installer.', 'Separate graphics routes for Adreno Zink/Turnip and VirGL compatibility.', 'A categorized read-only doctor with system, host, guest, graphics, and extension checks.'],
+      bn: ['রুটবিহীন Termux + PRoot Debian/Xfce ওয়ার্কস্টেশন ইনস্টলার।', 'Adreno Zink/Turnip এবং VirGL সামঞ্জস্যের জন্য আলাদা গ্রাফিক্স পথ।', 'সিস্টেম, হোস্ট, গেস্ট, গ্রাফিক্স ও এক্সটেনশন পরীক্ষা করা শ্রেণিবদ্ধ ডায়াগনস্টিক টুল।'],
+    },
+    verified: {
+      en: ['Public source and v1.4.0 release are available.', 'The English/Bangla documentation site is live.', 'Bash, behavior, documentation, and CI gates are recorded on the public source.'],
+      bn: ['পাবলিক সোর্স ও v1.4.0 রিলিজ পাওয়া যায়।', 'ইংরেজি/বাংলা ডকুমেন্টেশন সাইট চালু আছে।', 'পাবলিক সোর্সে Bash, আচরণ, ডকুমেন্টেশন ও CI যাচাই নথিভুক্ত।'],
+    },
+    limits: {
+      en: ['Hexagon HTP/QNN remains experimental; numerical correctness, fallback, and broad qualification are open.', 'Zink/Turnip is Adreno-specific; VirGL compatibility is not guaranteed across devices.', 'Ternux is distinct from Ternuxx, the separate Native Termux workstation project.'],
+      bn: ['Hexagon HTP/QNN এখনো পরীক্ষামূলক; সংখ্যাগত সঠিকতা, fallback ও বিস্তৃত যাচাই বাকি।', 'Zink/Turnip Adreno-নির্দিষ্ট; সব ডিভাইসে VirGL সামঞ্জস্য নিশ্চিত নয়।', 'Ternux এবং আলাদা Native Termux প্রকল্প Ternuxx এক নয়।'],
+    },
+    status: 'experimental',
+    repo: 'https://github.com/soobujmiah/ternux',
+    demo: 'https://soobujmiah.github.io/ternux/',
+    release: 'https://github.com/soobujmiah/ternux/releases',
+    metaphor: 'guest',
+  },
+  {
+    id: 'ternuxx',
+    name: 'Ternuxx',
+    strapline: { en: 'Native Termux, managed with a careful hand.', bn: 'সতর্ক নিয়ন্ত্রণে Native Termux ওয়ার্কস্টেশন।' },
+    problem: { en: 'A phone workstation needs package changes, desktop sessions, and optional Linux guests to be reviewable before anything changes.', bn: 'ফোন ওয়ার্কস্টেশনে প্যাকেজ, ডেস্কটপ সেশন ও ঐচ্ছিক Linux গেস্ট পরিবর্তনের আগে পর্যালোচনার সুযোগ থাকা দরকার।' },
+    built: {
+      en: ['The `tx` control plane for native Termux and an optional, isolated Debian PRoot guest.', 'Preview-first install and configuration flows that refuse unapproved removals.', 'CLI, TUI, loopback Web UI, and GTK management surfaces.'],
+      bn: ['Native Termux এবং ঐচ্ছিক বিচ্ছিন্ন Debian PRoot গেস্টের জন্য `tx` control plane।', 'পরিবর্তনের আগে preview দেখায়; অননুমোদিত removal প্রত্যাখ্যান করে।', 'CLI, TUI, loopback Web UI ও GTK ব্যবস্থাপনা।'],
+    },
+    verified: {
+      en: ['The public source has a deterministic state contract.', 'The 2026-10-26 project record documents a fresh Debian Trixie XFCE route on :1 and a separate nested :2 route with bounded Vulkan draw; nested GLX remained unverified.', 'The latest source evidence records 1,199 local repository tests passing; CI state differs and is shown under limitations.'],
+      bn: ['পাবলিক source-এ deterministic state contract আছে।', '২০২৬-১০-২৬ নথিতে :1-এ fresh Debian Trixie XFCE route এবং আলাদা nested :2 route-এ সীমিত Vulkan draw নথিভুক্ত; nested GLX যাচাই হয়নি।', 'সর্বশেষ source evidence-এ ১,১৯৯টি local repository test পাস করেছে; CI অবস্থা ভিন্ন এবং সীমাবদ্ধতায় উল্লেখ আছে।'],
+    },
+    limits: {
+      en: ['Current GitHub source-state metadata marks tests failed on run 40249684783; the 1,199-test local pass in the project note does not replace that CI result.', 'Native GPU acceleration is not broadly qualified; nested Vulkan draw is bounded evidence, not a performance qualification.', 'Nested GLX/DRI3 and audio playback remain unverified; Debian GNOME/Cinnamon are not accepted routes. No public redistribution license has been selected.'],
+      bn: ['সর্বশেষ GitHub source-state metadata-তে run 40249684783-এর test failed; প্রকল্প নথির ১,১৯৯টি local test পাস CI ফলের বিকল্প নয়।', 'Native GPU acceleration বিস্তৃতভাবে যাচাই হয়নি; nested Vulkan draw সীমিত প্রমাণ, performance qualification নয়।', 'Nested GLX/DRI3 ও audio playback যাচাই হয়নি; Debian GNOME/Cinnamon গ্রহণযোগ্য route নয়। Public redistribution license নির্বাচিত হয়নি।'],
+    },
+    status: 'experimental',
+    repo: 'https://github.com/soobujmiah/ternuxx',
+    demo: 'https://github.com/soobujmiah/ternuxx/blob/main/CURRENT_STATE.md',
+    metaphor: 'native',
+  },
+  {
+    id: 'adt',
+    name: 'ADT',
+    strapline: { en: 'Android tooling, rebuilt for ARM64 Linux.', bn: 'ARM64 Linux-এর জন্য নতুনভাবে তৈরি Android tooling।' },
+    problem: { en: 'Google’s standard Android SDK host binaries do not provide a complete native ARM64 Linux workstation path.', bn: 'Google-এর সাধারণ Android SDK host binary-তে native ARM64 Linux ওয়ার্কস্টেশন পথ সম্পূর্ণ নয়।' },
+    built: {
+      en: ['AOSP-sourced ARM64 build-tools and platform-tools for Linux glibc.', 'A reproducible install profile with architecture checks and offline artifact hashes.', 'An end-to-end source → APK → sign → install → launch toolchain.'],
+      bn: ['AOSP source থেকে Linux glibc-এর জন্য ARM64 build-tools ও platform-tools।', 'Architecture check এবং offline artifact hash-সহ পুনরুৎপাদনযোগ্য install profile।', 'Source → APK → sign → install → launch সম্পূর্ণ toolchain।'],
+    },
+    verified: {
+      en: ['Three public releases: v35.0.2, v36.0.0, and v37.0.0.', 'CI and Redmi Turbo 4 Pro evidence cover the native ARM64 build/install workflow.', 'Apache-2.0 license is present in the public repository.'],
+      bn: ['তিনটি পাবলিক রিলিজ: v35.0.2, v36.0.0 ও v37.0.0।', 'CI ও Redmi Turbo 4 Pro প্রমাণে native ARM64 build/install workflow আছে।', 'পাবলিক repository-তে Apache-2.0 license রয়েছে।'],
+    },
+    limits: {
+      en: ['Some JVM and compiler pieces still rely on host packages or shims.', 'Broad validation across ARM64 devices remains open.'],
+      bn: ['কিছু JVM ও compiler অংশ এখনো host package বা shim-এর ওপর নির্ভরশীল।', 'বিভিন্ন ARM64 ডিভাইসে বিস্তৃত যাচাই বাকি।'],
+    },
+    status: 'verified',
+    repo: 'https://github.com/soobujmiah/adt',
+    demo: 'https://soobujmiah.github.io/adt/',
+    release: 'https://github.com/soobujmiah/adt/releases',
+    metaphor: 'forge',
+  },
+  {
+    id: 'lai',
+    name: 'LAI',
+    strapline: { en: 'Local AI with a visible permission boundary.', bn: 'স্পষ্ট অনুমতি-সীমাসহ লোকাল AI।' },
+    problem: { en: 'On-device AI should work privately, while powerful Android actions stay explicit, bounded, and reviewable.', bn: 'ডিভাইসের AI ব্যক্তিগতভাবে চলবে, আর শক্তিশালী Android action থাকবে স্পষ্ট, সীমিত ও পর্যালোচনাযোগ্য।' },
+    built: {
+      en: ['An arm64 llama.cpp CPU inference adapter for GGUF models.', 'Consent-bounded Accessibility and Shizuku action proposals.', 'A local hash-chained audit trail and verified model-import path.'],
+      bn: ['GGUF model-এর জন্য arm64 llama.cpp CPU inference adapter।', 'অনুমতি-নির্ভর Accessibility ও Shizuku action proposal।', 'লোকাল hash-chained audit trail ও যাচাইকৃত model import।'],
+    },
+    verified: {
+      en: ['CPU inference and core authority boundaries have device evidence in the project record.', 'A vendor Adreno Vulkan compute crash was symbolized and contained behind a CPU-default policy.', 'v0.9.7 is listed as a public release.'],
+      bn: ['প্রকল্প নথিতে CPU inference ও মূল authority boundary-এর device evidence আছে।', 'Vendor Adreno Vulkan compute crash চিহ্নিত করে CPU-default policy-তে আটকে রাখা হয়েছে।', 'v0.9.7 পাবলিক release হিসেবে তালিকাভুক্ত।'],
+    },
+    limits: {
+      en: ['Vulkan compute remains fail-closed after an uncatchable vendor-driver crash.', 'The OpenCL backend is dormant on the recorded Android linker namespace.', 'OCR, multi-step agent flows, and broader NPU routes remain unfinished or experimental.'],
+      bn: ['ধরা যায় না এমন vendor-driver crash-এর কারণে Vulkan compute fail-closed।', 'নথিভুক্ত Android linker namespace-এ OpenCL backend নিষ্ক্রিয়।', 'OCR, বহু-ধাপ agent flow ও বিস্তৃত NPU পথ অসম্পূর্ণ বা পরীক্ষামূলক।'],
+    },
+    status: 'experimental',
+    repo: 'https://github.com/soobujmiah/lai',
+    release: 'https://github.com/soobujmiah/lai/releases',
+    metaphor: 'ai',
+  },
+  {
+    id: 'ggen',
+    name: 'GGEN',
+    strapline: { en: 'A mobile canvas for vector and document work.', bn: 'ভেক্টর ও ডকুমেন্ট কাজের জন্য মোবাইল ক্যানভাস।' },
+    problem: { en: 'Creative document workflows need precise geometry, linked text, and recoverable edits on a phone.', bn: 'ফোনে creative document workflow-এর জন্য নির্ভুল geometry, linked text ও পুনরুদ্ধারযোগ্য edit দরকার।' },
+    built: {
+      en: ['A pure-Dart document and artboard core with bounded history.', 'Multi-column page geometry and linked text-frame flow.', 'A Flutter canvas with shape tools and atomic project persistence.'],
+      bn: ['সীমিত history-সহ pure-Dart document ও artboard core।', 'Multi-column page geometry ও linked text-frame flow।', 'Shape tool ও atomic project persistence-সহ Flutter canvas।'],
+    },
+    verified: {
+      en: ['Source and project notes document a text-flow conservation invariant and fail-closed link validation.', 'Core interactions have dated physical-device evidence.', 'Public source is Apache-2.0; protected legacy assets are excluded from public builds.'],
+      bn: ['Source ও project note-এ text-flow conservation invariant এবং fail-closed link validation নথিভুক্ত।', 'Core interaction-এর তারিখযুক্ত physical-device evidence আছে।', 'পাবলিক source Apache-2.0; protected RGEN asset আলাদা রাখা হয়েছে।'],
+    },
+    limits: {
+      en: ['The last recorded source-state check reports Flutter widget test failures in a deferred top-bar investigation.', 'Full linked-text-flow device checklist and production release signing remain open.', 'Protected assets are not included in public builds.'],
+      bn: ['সর্বশেষ নথিভুক্ত source-state check-এ স্থগিত top-bar তদন্তে Flutter widget test failure রয়েছে।', 'সম্পূর্ণ linked-text-flow device checklist ও production release signing বাকি।', 'পাবলিক build-এ protected asset নেই।'],
+    },
+    status: 'experimental',
+    repo: 'https://github.com/soobujmiah/ggen',
+    metaphor: 'creative',
+  },
+  {
+    id: 'songjog',
+    name: 'Songjog',
+    strapline: { en: 'Bangla-first records for everyday business work.', bn: 'দৈনন্দিন ব্যবসার কাজের জন্য বাংলা-প্রথম রেকর্ড।' },
+    problem: { en: 'Small-business workflows need quick, understandable records that can keep working offline.', bn: 'ছোট ব্যবসায় দ্রুত, সহজবোধ্য ও offline-এ চলতে পারে এমন রেকর্ডের দরকার।' },
+    built: {
+      en: ['An Owner Edition Flutter app with Bangla/English UI.', 'Fast sale entry with integer Taka calculations, payment status, and due display.', 'Local SQLite persistence and redacted data/diagnostic export.'],
+      bn: ['বাংলা/ইংরেজি UI-সহ Owner Edition Flutter app।', 'Integer Taka হিসাব, payment status ও বাকি প্রদর্শনসহ দ্রুত বিক্রি entry।', 'Local SQLite persistence ও redacted data/diagnostic export।'],
+    },
+    verified: {
+      en: ['Public source and current deterministic state contract are available.', 'The recorded CI state shows build and test passing on the inspected commit.', 'Physical-device evidence covers the core sale and persistence flows, with listed gaps.'],
+      bn: ['পাবলিক source ও deterministic state contract পাওয়া যায়।', 'পরীক্ষিত commit-এ নথিভুক্ত CI build ও test পাস করেছে।', 'মূল বিক্রি ও persistence flow-এর physical-device evidence আছে, সঙ্গে কিছু বাকি gap।'],
+    },
+    limits: {
+      en: ['No release signing, cloud sync, authentication, catalog, expense, customer ledger, reports, or printed receipt is claimed.', 'This is an owner-focused recording increment, not a complete accounting system.'],
+      bn: ['Release signing, cloud sync, authentication, catalog, expense, customer ledger, report বা printed receipt নেই।', 'এটি owner-focused recording increment; সম্পূর্ণ accounting system নয়।'],
+    },
+    status: 'experimental',
+    repo: 'https://github.com/soobujmiah/songjog',
+    metaphor: 'ledger',
+  },
+];
+
+export const copy = {
+  en: {
+    eyebrow: 'THE POCKET SYSTEMS LAB · SAVAR, DHAKA',
+    role: 'Independent Software & AI Systems Builder',
+    opening: 'The workshop begins in your hand.',
+    support: 'I build practical software, tools, and workflows from an Android-first systems lab.',
+    explore: 'Explore the work',
+    conversation: 'Start a conversation',
+    wayfinding: 'WAYFINDING',
+    environment: 'SHARED SPATIAL ENVIRONMENT',
+    scene: 'SCENE',
+    fallback: '2D schematic',
+    pause: 'Pause motion',
+    resume: 'Resume motion',
+    openMenu: 'Open navigation',
+    close: 'Close',
+    back: 'Back to the lab',
+    selectProject: 'Select a project',
+    openProject: 'Open project details',
+    projectDetails: 'Project details',
+    verified: 'VERIFIED',
+    experimental: 'EXPERIMENTAL',
+    boundary: 'BOUNDARY / PLANNED',
+    purpose: 'Purpose',
+    built: 'What is built',
+    evidence: 'Evidence checked',
+    limits: 'Limits & open work',
+    source: 'Source repository',
+    liveDocs: 'Live documentation',
+    releases: 'Releases',
+    alternate: 'Next project',
+    projects: 'Project stations',
+    projectsIntro: 'Separate projects. One phone-first workbench. Each station opens with its evidence and limits in view.',
+    processTitle: 'A practical feedback loop',
+    processIntro: 'The work moves through a loop—not a promise that every project uses the same tooling or pipeline.',
+    servicesTitle: 'Useful outcomes, honestly scoped',
+    servicesIntro: 'Practical support grounded in demonstrated work. Scope, availability, and delivery are agreed together—no invented pricing or guarantees.',
+    aboutTitle: 'A systems builder with an operations lens',
+    aboutIntro: 'My work connects hands-on operations experience with self-directed software and systems building. I work from real constraints: a phone-first setup, careful records, and proof before claims.',
+    principles: 'Working principles',
+    principlesList: ['Evidence before claims', 'Consent and auditability', 'Practical problem-solving', 'Document lessons and limitations', 'Build within real device and resource constraints'],
+    notesTitle: 'Research archive',
+    notesEmpty: 'No approved public notes are indexed here yet. This room stays quiet until published writing can be verified.',
+    contactTitle: 'Open a conversation',
+    contactIntro: 'Have a software, Android/Linux, workflow, or documentation problem to discuss? Send a short note and we can clarify the scope together.',
+    email: 'Email Sobuj',
+    github: 'GitHub',
+    linkedin: 'LinkedIn',
+    devto: 'DEV.to',
+    telegram: 'Telegram',
+    location: 'Savar, Dhaka, Bangladesh',
+    footer: 'A small systems workshop, built from a phone.',
+    statusVerified: 'Evidence-backed in the checked source or project record.',
+    statusExperimental: 'Some paths remain under qualification; see the limits.',
+    statusBoundary: 'Planned, unavailable, or intentionally excluded.',
+    language: 'Language',
+    sceneOf: 'station',
+    reduced: 'Reduced motion is on; the scene is static.',
+    notWebgl: '3D rendering is unavailable here. The same stations remain below in a lightweight schematic.',
+    work: 'WORK',
+  },
+  bn: {
+    eyebrow: 'পকেট সিস্টেমস ল্যাব · সাভার, ঢাকা',
+    role: 'স্বতন্ত্র সফটওয়্যার ও এআই সিস্টেম নির্মাতা',
+    opening: 'হাতের মুঠোয় শুরু হয় এই কর্মশালা।',
+    support: 'অ্যান্ড্রয়েড-প্রথম সিস্টেম ল্যাব থেকে ব্যবহারিক সফটওয়্যার, টুল ও কাজের ধারা তৈরি করি।',
+    explore: 'কাজগুলো দেখুন',
+    conversation: 'কথা শুরু করুন',
+    wayfinding: 'পথনির্দেশ',
+    environment: 'একই স্থানিক কর্মপরিবেশ',
+    scene: 'দৃশ্য',
+    fallback: '২ডি নকশা',
+    pause: 'চলন থামান',
+    resume: 'চলন চালু করুন',
+    openMenu: 'নেভিগেশন খুলুন',
+    close: 'বন্ধ করুন',
+    back: 'ল্যাবে ফিরুন',
+    selectProject: 'প্রকল্প বেছে নিন',
+    openProject: 'প্রকল্পের বিস্তারিত খুলুন',
+    projectDetails: 'প্রকল্পের বিস্তারিত',
+    verified: 'যাচাইকৃত',
+    experimental: 'পরীক্ষাধীন',
+    boundary: 'সীমা / পরিকল্পিত',
+    purpose: 'উদ্দেশ্য',
+    built: 'যা তৈরি হয়েছে',
+    evidence: 'যাচাই করা প্রমাণ',
+    limits: 'সীমাবদ্ধতা ও বাকি কাজ',
+    source: 'সোর্স repository',
+    liveDocs: 'চালু ডকুমেন্টেশন',
+    releases: 'রিলিজ',
+    alternate: 'পরের প্রকল্প',
+    projects: 'প্রকল্পের স্টেশন',
+    projectsIntro: 'আলাদা প্রকল্প, একই ফোন-প্রথম কর্মবেঞ্চ। প্রতিটি স্টেশনে প্রমাণ ও সীমাবদ্ধতা একসঙ্গে দেখা যায়।',
+    processTitle: 'ব্যবহারিক প্রতিক্রিয়া-চক্র',
+    processIntro: 'কাজ একটি চক্রে এগোয়—সব প্রকল্পে একই টুল বা pipeline ব্যবহারের দাবি নয়।',
+    servicesTitle: 'সৎ সীমার মধ্যে কার্যকর সহায়তা',
+    servicesIntro: 'প্রমাণিত কাজের ভিত্তিতে ব্যবহারিক সহায়তা। কাজের পরিধি, সময় ও সরবরাহ একসঙ্গে ঠিক হবে—কাল্পনিক মূল্য বা নিশ্চয়তা নয়।',
+    aboutTitle: 'অপারেশনের দৃষ্টিসম্পন্ন সিস্টেম নির্মাতা',
+    aboutIntro: 'বাস্তব অপারেশন অভিজ্ঞতার সঙ্গে স্বশিক্ষিত সফটওয়্যার ও সিস্টেম নির্মাণকে যুক্ত করি। ফোন-প্রথম পরিবেশ, যত্নশীল নথি এবং দাবি করার আগে প্রমাণ—এই বাস্তব সীমা থেকে কাজ করি।',
+    principles: 'কাজের নীতি',
+    principlesList: ['দাবির আগে প্রমাণ', 'সম্মতি ও নিরীক্ষাযোগ্যতা', 'ব্যবহারিক সমস্যা সমাধান', 'শিক্ষা ও সীমাবদ্ধতা নথিবদ্ধ করা', 'বাস্তব ডিভাইস ও সম্পদের সীমার মধ্যে তৈরি করা'],
+    notesTitle: 'গবেষণা আর্কাইভ',
+    notesEmpty: 'এখানে এখনো অনুমোদিত পাবলিক নোট তালিকাভুক্ত নেই। প্রকাশিত লেখা যাচাই না হওয়া পর্যন্ত এই কক্ষ নীরব থাকবে।',
+    contactTitle: 'আলাপ শুরু করুন',
+    contactIntro: 'সফটওয়্যার, Android/Linux, workflow বা documentation নিয়ে কথা বলতে চান? সংক্ষেপে লিখুন, একসঙ্গে কাজের পরিধি বুঝে নিই।',
+    email: 'ইমেইল করুন',
+    github: 'GitHub',
+    linkedin: 'LinkedIn',
+    devto: 'DEV.to',
+    telegram: 'Telegram',
+    location: 'সাভার, ঢাকা, বাংলাদেশ',
+    footer: 'ফোন থেকে তৈরি ছোট্ট সিস্টেম কর্মশালা।',
+    statusVerified: 'পরীক্ষিত সোর্স বা প্রকল্প নথিতে প্রমাণ রয়েছে।',
+    statusExperimental: 'কিছু পথ এখনো যাচাইাধীন; সীমাবদ্ধতা পড়ুন।',
+    statusBoundary: 'পরিকল্পিত, অনুপলব্ধ বা ইচ্ছাকৃতভাবে বাদ রাখা হয়েছে।',
+    language: 'ভাষা',
+    sceneOf: 'স্টেশন',
+    reduced: 'Reduced motion চালু; দৃশ্য স্থির।',
+    notWebgl: 'এখানে 3D rendering চালু হয়নি। একই স্টেশনগুলো হালকা নকশায় নিচে রয়েছে।',
+    work: 'কাজ',
+  },
+} as const;
+
+export const processSteps = [
+  { id: 'build', icon: '⌘', color: 'green', en: 'Build', bn: 'তৈরি', detailEn: 'Source becomes a reviewable artifact.', detailBn: 'সোর্স থেকে পর্যালোচনাযোগ্য artifact তৈরি হয়।' },
+  { id: 'install', icon: '↧', color: 'green', en: 'Install', bn: 'ইনস্টল', detailEn: 'A build reaches the intended device or environment.', detailBn: 'Build নির্দিষ্ট ডিভাইস বা পরিবেশে যায়।' },
+  { id: 'test', icon: '◉', color: 'green', en: 'Test', bn: 'পরীক্ষা', detailEn: 'Check behavior against a concrete expectation.', detailBn: 'নির্দিষ্ট প্রত্যাশার সঙ্গে আচরণ মিলিয়ে দেখা হয়।' },
+  { id: 'observe', icon: '⌕', color: 'amber', en: 'Observe', bn: 'পর্যবেক্ষণ', detailEn: 'Logs, screens, and outputs become evidence.', detailBn: 'লগ, পর্দা ও ফলাফল প্রমাণে পরিণত হয়।' },
+  { id: 'fix', icon: '↻', color: 'amber', en: 'Fix', bn: 'সংশোধন', detailEn: 'A cause is tested before a change is made.', detailBn: 'পরিবর্তনের আগে সম্ভাব্য কারণ পরীক্ষা করা হয়।' },
+  { id: 'retest', icon: '✓', color: 'green', en: 'Retest', bn: 'আবার পরীক্ষা', detailEn: 'The revised result is checked again.', detailBn: 'সংশোধিত ফল আবার যাচাই করা হয়।' },
+];
+
+export const services = [
+  {
+    id: 'software', icon: '▦',
+    title: { en: 'Practical web & software work', bn: 'ব্যবহারিক web ও software কাজ' },
+    body: { en: 'Small websites, interface improvements, prototypes, and workflow tools—with scope kept clear and support matched to the task.', bn: 'ছোট website, interface উন্নতি, prototype ও workflow tool—কাজের পরিধি স্পষ্ট রেখে।' },
+  },
+  {
+    id: 'android', icon: '▣',
+    title: { en: 'Android & Linux setup support', bn: 'Android ও Linux সেটআপ সহায়তা' },
+    body: { en: 'Termux, PRoot Debian, ARM64 development setup, and evidence-led troubleshooting for supported environments.', bn: 'Termux, PRoot Debian, ARM64 development setup ও সমর্থিত পরিবেশে প্রমাণভিত্তিক troubleshooting।' },
+  },
+  {
+    id: 'workflow', icon: '⤳',
+    title: { en: 'Workflow & office digitization', bn: 'Workflow ও অফিসের কাজ ডিজিটাল করা' },
+    body: { en: 'Records, forms, document handling, and repetitive office processes made easier to follow and maintain.', bn: 'রেকর্ড, ফর্ম, ডকুমেন্ট ও পুনরাবৃত্ত অফিসের কাজ সহজে অনুসরণ ও রক্ষণাবেক্ষণযোগ্য করা।' },
+  },
+  {
+    id: 'docs', icon: '≡',
+    title: { en: 'Technical documentation', bn: 'প্রযুক্তিগত ডকুমেন্টেশন' },
+    body: { en: 'Setup guides, system notes, troubleshooting steps, and handoffs that distinguish what works from what is still being tested.', bn: 'Setup guide, system note, troubleshooting ও handoff—যেখানে কাজ করছে আর পরীক্ষা চলছে তা আলাদা করে।' },
+  },
+];

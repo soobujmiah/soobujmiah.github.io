@@ -1,0 +1,32 @@
+{
+  "name": "pocket-systems-lab-portfolio",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Sobuj Miah — The Pocket Systems Lab: Cinematic 3D Portfolio (EN / বাংলা)",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 4173",
+    "build": "tsc --noEmit && vite build && node scripts/verify-portfolio.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "node scripts/lint-source.mjs",
+    "test": "node scripts/verify-portfolio.mjs --source-only",
+    "check": "npm run typecheck && npm run lint && npm run test",
+    "make:og": "python3 scripts/make-og.py",
+    "preview": "vite preview --host 0.0.0.0 --port 4173"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.6",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/three": "^0.170.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}
