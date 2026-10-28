@@ -521,7 +521,7 @@ export class LabScene {
       this.infoFrame.geometry = roundedBox(portrait ? 4.48 : 7.35, portrait ? 5.95 : 4.25, 0.18, 0.12, this.infoFrame.material as THREE.Material).geometry;
       this.infoDisplay.geometry.dispose();
       this.infoDisplay.geometry = new THREE.PlaneGeometry(portrait ? 4.22 : 7.08, portrait ? 5.7 : 3.98);
-      this.infoDisplay.position.z = 0.096;
+      this.infoDisplay.position.z = 0.13;
       this.renderInfoPanel(this.config);
     }
     this.drawStatic();
