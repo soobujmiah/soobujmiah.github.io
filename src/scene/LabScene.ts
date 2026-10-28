@@ -606,8 +606,11 @@ export class LabScene {
     const width = this.renderer.domElement.width;
     const height = this.renderer.domElement.height;
     const rgba = new Uint8Array(4);
-    const center = new Uint8Array(4);
-    gl.readPixels(Math.floor(width / 2), Math.floor(height / 2), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, center);
+    const projected = this.infoDisplay.getWorldPosition(new THREE.Vector3()).project(this.camera);
+    const displayPixel = new Uint8Array(4);
+    const px = Math.max(0, Math.min(width - 1, Math.floor((projected.x * 0.5 + 0.5) * width)));
+    const py = Math.max(0, Math.min(height - 1, Math.floor((projected.y * 0.5 + 0.5) * height)));
+    gl.readPixels(px, py, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, displayPixel);
     const glError = gl.getError().toString(16);
     let lit = 0;
     let maxLuma = 0;
@@ -618,7 +621,7 @@ export class LabScene {
       maxLuma = Math.max(maxLuma, luma);
     }
     const baseTitle = document.title.replace(/ \[3D:[^\]]+\]$/, '');
-    document.title = `${baseTitle} [3D:${width}x${height};calls:${this.renderer.info.render.calls};tri:${this.renderer.info.render.triangles};center:${center[0]},${center[1]},${center[2]};lit:${lit}/48;max:${maxLuma};err:${glError}]`;
+    document.title = `${baseTitle} [3D:${width}x${height};calls:${this.renderer.info.render.calls};tri:${this.renderer.info.render.triangles};panel:${projected.x.toFixed(2)},${projected.y.toFixed(2)},${projected.z.toFixed(2)}@${px},${py}:${displayPixel[0]},${displayPixel[1]},${displayPixel[2]};lit:${lit}/48;max:${maxLuma};err:${glError}]`;
   }
 
   private drawStatic() {
