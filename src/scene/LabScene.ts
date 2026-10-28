@@ -606,6 +606,9 @@ export class LabScene {
     const width = this.renderer.domElement.width;
     const height = this.renderer.domElement.height;
     const rgba = new Uint8Array(4);
+    const center = new Uint8Array(4);
+    gl.readPixels(Math.floor(width / 2), Math.floor(height / 2), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, center);
+    const glError = gl.getError().toString(16);
     let lit = 0;
     let maxLuma = 0;
     for (let yi = 1; yi <= 6; yi++) for (let xi = 1; xi <= 8; xi++) {
@@ -615,7 +618,7 @@ export class LabScene {
       maxLuma = Math.max(maxLuma, luma);
     }
     const baseTitle = document.title.replace(/ \[3D:[^\]]+\]$/, '');
-    document.title = `${baseTitle} [3D:${this.renderer.domElement.width}x${this.renderer.domElement.height};calls:${this.renderer.info.render.calls};lit:${lit}/48;max:${maxLuma}]`;
+    document.title = `${baseTitle} [3D:${width}x${height};calls:${this.renderer.info.render.calls};tri:${this.renderer.info.render.triangles};center:${center[0]},${center[1]},${center[2]};lit:${lit}/48;max:${maxLuma};err:${glError}]`;
   }
 
   private drawStatic() {
