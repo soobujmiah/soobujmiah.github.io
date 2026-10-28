@@ -251,7 +251,12 @@ function App() {
 
   const toggleLanguage = () => setLanguage(value => value === 'en' ? 'bn' : 'en');
   const toggleRenderMode = () => {
-    if (webglFailed) return;
+    if (webglFailed) {
+      setWebglFailed(false);
+      setMode('3d');
+      setPaused(reducedMotion);
+      return;
+    }
     if (mode === '3d') { setMode('schematic'); setScene(null); }
     else { setMode('3d'); setPaused(reducedMotion); }
   };
@@ -326,7 +331,7 @@ function App() {
         <div className="bottom-status"><span className={`mode-led ${use3D ? 'mode-led-live' : ''}`} />{language === 'en' ? (use3D ? 'WEBGL / ACTIVE' : 'SCHEMATIC / READY') : (use3D ? 'WEBGL / চালু' : '২ডি নকশা / প্রস্তুত')}</div>
         <div className="control-group">
           {!reducedMotion && <button className="control-button" type="button" onClick={togglePause} aria-label={paused ? t.resume : t.pause} title={paused ? t.resume : t.pause}>{paused ? <Play size={15} /> : <Pause size={15} />}<span>{paused ? t.resume : t.pause}</span></button>}
-          {!webglFailed && <button className={`control-button ${mode === 'schematic' ? 'control-active' : ''}`} type="button" onClick={toggleRenderMode} aria-pressed={mode === 'schematic'} aria-label={t.fallback} title={t.fallback}><Monitor size={15} /><span>{t.fallback}</span></button>}
+          <button className={`control-button ${mode === 'schematic' ? 'control-active' : ''}`} type="button" onClick={toggleRenderMode} aria-pressed={mode === 'schematic'} aria-label={webglFailed ? t.retry3D : t.fallback} title={webglFailed ? t.retry3D : t.fallback}><Monitor size={15} /><span>{webglFailed ? t.retry3D : t.fallback}</span></button>
           <span className="quality-label"><span className="quality-bars"><i /><i /><i /></span>{language === 'en' ? (use3D ? 'ADAPTIVE' : 'LOW POWER') : (use3D ? 'মানিয়ে নেওয়া' : 'কম শক্তি')}</span>
         </div>
       </div>

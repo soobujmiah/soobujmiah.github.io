@@ -82,7 +82,9 @@ export class LabScene {
     this.onFailure = onFailure;
     this.onInfoAction = onInfoAction;
     this.lowPower = matchMedia('(pointer: coarse)').matches || (navigator as Navigator & { deviceMemory?: number }).deviceMemory !== undefined && (navigator as Navigator & { deviceMemory?: number }).deviceMemory! <= 4;
-    this.renderer = new THREE.WebGLRenderer({ antialias: !this.lowPower, alpha: false, powerPreference: 'low-power', stencil: false, depth: true });
+    // Let the browser choose its usable adapter. Forcing low-power can select
+    // a disabled/limited adapter in Firefox on Android and fail WebGL setup.
+    this.renderer = new THREE.WebGLRenderer({ antialias: !this.lowPower, alpha: false, powerPreference: 'default', stencil: false, depth: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.lowPower ? MOTION.maxMobilePixelRatio : MOTION.maxDesktopPixelRatio));
     this.renderer.setClearColor(COLOR.voidBg, 1);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
