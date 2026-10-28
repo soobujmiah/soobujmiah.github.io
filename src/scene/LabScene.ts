@@ -160,9 +160,10 @@ export class LabScene {
 
     this.infoDisplay = new THREE.Mesh(
       new THREE.PlaneGeometry(7.08, 3.98),
-      new THREE.MeshBasicMaterial({ map: this.infoTexture, toneMapped: false }),
+      new THREE.MeshBasicMaterial({ map: this.infoTexture, toneMapped: false, side: THREE.DoubleSide, depthTest: false, depthWrite: false }),
     );
-    this.infoDisplay.position.z = 0.096;
+    this.infoDisplay.position.z = 0.13;
+    this.infoDisplay.renderOrder = 20;
     this.infoDisplay.userData.infoDisplay = true;
     this.infoPanel.add(this.infoDisplay);
     const edge = new THREE.Mesh(new THREE.BoxGeometry(6.95, 0.025, 0.025), new THREE.MeshBasicMaterial({ color: COLOR.emeraldSignal }));
