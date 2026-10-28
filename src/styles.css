@@ -458,6 +458,10 @@ body { overflow-x: hidden; }
   .scene-meta { font-size: 7px; }
   .hero-title { font-size: clamp(45px, 12.5vw, 66px); }
 }
+[data-world-mode='3d'] .story-stop::before { display: none; }
+[data-world-mode='3d'] .world-vignette {
+  background: linear-gradient(90deg, rgba(5,5,7,.16), rgba(5,5,7,.04) 42%, rgba(5,5,7,.03) 71%, rgba(5,5,7,.08)), linear-gradient(0deg, rgba(5,5,7,.20), transparent 18%, transparent 84%, rgba(5,5,7,.14));
+}
 [data-world-mode='3d'] .story-stop .content-panel {
   position: absolute;
   width: 1px;
