@@ -75,7 +75,6 @@ export class LabScene {
   private disposed = false;
   private lastDraw = 0;
   private lowPower: boolean;
-  private debug3D = new URLSearchParams(location.search).get('debug3d') === '1';
 
   constructor(host: HTMLElement, initial: SceneConfig, onFailure: (message: string) => void, onInfoAction: (station: SceneView, project: string | null) => void) {
     this.host = host;
@@ -596,34 +595,9 @@ export class LabScene {
     }
     if (time - this.lastDraw > (this.lowPower ? 1 / 24 : 1 / 30)) {
       this.renderer.render(this.scene, this.camera);
-      this.reportRenderDebug();
       this.lastDraw = time;
     }
   };
-
-  private reportRenderDebug() {
-    if (!this.debug3D) return;
-    const gl = this.renderer.getContext();
-    const width = this.renderer.domElement.width;
-    const height = this.renderer.domElement.height;
-    const rgba = new Uint8Array(4);
-    const projected = this.infoDisplay.getWorldPosition(new THREE.Vector3()).project(this.camera);
-    const displayPixel = new Uint8Array(4);
-    const px = Math.max(0, Math.min(width - 1, Math.floor((projected.x * 0.5 + 0.5) * width)));
-    const py = Math.max(0, Math.min(height - 1, Math.floor((projected.y * 0.5 + 0.5) * height)));
-    gl.readPixels(px, py, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, displayPixel);
-    const glError = gl.getError().toString(16);
-    let lit = 0;
-    let maxLuma = 0;
-    for (let yi = 1; yi <= 6; yi++) for (let xi = 1; xi <= 8; xi++) {
-      gl.readPixels(Math.floor(width * xi / 9), Math.floor(height * yi / 7), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, rgba);
-      const luma = Math.round((rgba[0] * 3 + rgba[1] * 6 + rgba[2]) / 10);
-      if (luma > 24) lit++;
-      maxLuma = Math.max(maxLuma, luma);
-    }
-    const baseTitle = document.title.replace(/ \[3D:[^\]]+\]$/, '');
-    document.title = `${baseTitle} [3D:${width}x${height};calls:${this.renderer.info.render.calls};tri:${this.renderer.info.render.triangles};panel:${projected.x.toFixed(2)},${projected.y.toFixed(2)},${projected.z.toFixed(2)}@${px},${py}:${displayPixel[0]},${displayPixel[1]},${displayPixel[2]};lit:${lit}/48;max:${maxLuma};err:${glError}]`;
-  }
 
   private drawStatic() {
     if (this.disposed || !this.renderer) return;
@@ -632,7 +606,6 @@ export class LabScene {
       this.camera.lookAt(this.targetLook);
     }
     this.renderer.render(this.scene, this.camera);
-    this.reportRenderDebug();
   }
 
   private start() {
