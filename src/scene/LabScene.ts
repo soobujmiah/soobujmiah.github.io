@@ -81,7 +81,7 @@ export class LabScene {
     this.config = initial;
     this.onFailure = onFailure;
     this.onInfoAction = onInfoAction;
-    this.lowPower = matchMedia('(pointer: coarse)').matches || (navigator as Navigator & { deviceMemory?: number }).deviceMemory !== undefined && (navigator as Navigator & { deviceMemory?: number }).deviceMemory! <= 4;
+    this.lowPower = matchMedia('(pointer: coarse)').matches || window.innerWidth < 780 || (navigator as Navigator & { deviceMemory?: number }).deviceMemory !== undefined && (navigator as Navigator & { deviceMemory?: number }).deviceMemory! <= 4;
     // Let the browser choose its usable adapter. Forcing low-power can select
     // a disabled/limited adapter in Firefox on Android and fail WebGL setup.
     this.renderer = new THREE.WebGLRenderer({ antialias: !this.lowPower, alpha: false, powerPreference: 'default', stencil: false, depth: true });
@@ -140,9 +140,11 @@ export class LabScene {
   }
 
   private makeInfoPanel() {
+    const portrait = this.host.clientWidth < this.host.clientHeight;
+    this.portraitPanel = portrait;
     this.infoCanvas = document.createElement('canvas');
-    this.infoCanvas.width = 2048;
-    this.infoCanvas.height = 1152;
+    this.infoCanvas.width = portrait ? 1200 : 2048;
+    this.infoCanvas.height = portrait ? 1600 : 1152;
     const context = this.infoCanvas.getContext('2d');
     if (!context) throw new Error('Canvas text surface unavailable');
     this.infoContext = context;
@@ -152,13 +154,13 @@ export class LabScene {
 
     this.infoPanel = new THREE.Group();
     this.infoPanel.position.set(0, 4.55, -2.65);
-    this.infoFrame = roundedBox(7.35, 4.25, 0.18, 0.12, new THREE.MeshStandardMaterial({ color: 0x11191a, metalness: 0.84, roughness: 0.27, emissive: 0x092015, emissiveIntensity: 0.24 }));
+    this.infoFrame = roundedBox(portrait ? 4.48 : 7.35, portrait ? 5.95 : 4.25, 0.18, 0.12, new THREE.MeshStandardMaterial({ color: 0x11191a, metalness: 0.84, roughness: 0.27, emissive: 0x092015, emissiveIntensity: 0.24 }));
     this.infoFrame.castShadow = true;
     this.infoFrame.receiveShadow = true;
     this.infoPanel.add(this.infoFrame);
 
     this.infoDisplay = new THREE.Mesh(
-      new THREE.PlaneGeometry(7.08, 3.98),
+      new THREE.PlaneGeometry(portrait ? 4.22 : 7.08, portrait ? 5.7 : 3.98),
       new THREE.MeshBasicMaterial({ map: this.infoTexture, toneMapped: false, side: THREE.DoubleSide, depthTest: false, depthWrite: false }),
     );
     this.infoDisplay.position.z = 0.13;
@@ -260,21 +262,22 @@ export class LabScene {
     }
 
     ctx.fillStyle = '#f0f2ef';
-    ctx.font = '500 82px "Noto Sans Bengali", Inter, system-ui, sans-serif';
+    const compactPanel = width < 1500;
+    ctx.font = `500 ${compactPanel ? 92 : 82}px "Noto Sans Bengali", Inter, system-ui, sans-serif`;
     const titleHeight = this.wrapCanvasText(title, pad, 310, width - pad * 2, 102, 2);
     let y = 310 + titleHeight + 14;
     ctx.fillStyle = 'rgba(229, 237, 231, .82)';
-    ctx.font = '400 31px "Noto Sans Bengali", Inter, system-ui, sans-serif';
-    y += this.wrapCanvasText(intro, pad, y, width - pad * 2, 45, 2) + 24;
+    ctx.font = `400 ${compactPanel ? 36 : 31}px "Noto Sans Bengali", Inter, system-ui, sans-serif`;
+    y += this.wrapCanvasText(intro, pad, y, width - pad * 2, compactPanel ? 50 : 45, 2) + 24;
 
     ctx.fillStyle = '#d8e4db';
-    ctx.font = `400 ${width < 1500 ? 24 : 27}px "Noto Sans Bengali", Inter, system-ui, sans-serif`;
+    ctx.font = `400 ${compactPanel ? 32 : 27}px "Noto Sans Bengali", Inter, system-ui, sans-serif`;
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       const row = rows[rowIndex];
       const rowTop = y - 30;
       const maxRowWidth = width - pad * 2;
       const lines = Math.max(1, Math.ceil(ctx.measureText(row).width / maxRowWidth));
-      const rowHeight = this.wrapCanvasText(row, pad, y, maxRowWidth, width < 1500 ? 34 : 38, Math.min(lines + 1, 2));
+      const rowHeight = this.wrapCanvasText(row, pad, y, maxRowWidth, compactPanel ? 42 : 38, Math.min(lines + 1, compactPanel ? 3 : 2));
       if (config.view === 'work' && !project && projects[rowIndex]) {
         ctx.strokeStyle = 'rgba(126, 230, 164, .22)';
         ctx.lineWidth = 2;
@@ -286,20 +289,20 @@ export class LabScene {
     }
 
     const navY = height - 76;
-    ctx.font = `500 ${width < 1500 ? 19 : 22}px ui-monospace, "Noto Sans Bengali", monospace`;
+    ctx.font = '500 22px ui-monospace, "Noto Sans Bengali", monospace';
     let navX = pad;
     for (const item of navItems) {
       const label = `${item.number} ${item.label[config.language]}`;
-      const chipWidth = ctx.measureText(label).width + (width < 1500 ? 20 : 30);
-      const chipHeight = width < 1500 ? 34 : 42;
+      const chipWidth = ctx.measureText(label).width + (compactPanel ? 24 : 30);
+      const chipHeight = compactPanel ? 38 : 42;
       ctx.fillStyle = item.id === config.view ? 'rgba(126, 230, 164, .16)' : 'rgba(205, 226, 214, .035)';
       ctx.fillRect(navX, navY - chipHeight + 5, chipWidth, chipHeight);
       ctx.strokeStyle = item.id === config.view ? 'rgba(126, 230, 164, .75)' : 'rgba(205, 226, 214, .20)';
       ctx.strokeRect(navX, navY - chipHeight + 5, chipWidth, chipHeight);
       ctx.fillStyle = item.id === config.view ? '#8af0ac' : 'rgba(229, 237, 231, .76)';
-      ctx.fillText(label, navX + (width < 1500 ? 10 : 15), navY - (width < 1500 ? 6 : 5));
+      ctx.fillText(label, navX + (compactPanel ? 12 : 15), navY - (compactPanel ? 7 : 5));
       this.infoActions.push({ x: navX, y: navY - chipHeight, width: chipWidth, height: chipHeight, station: item.id });
-      navX += chipWidth + (width < 1500 ? 8 : 14);
+      navX += chipWidth + (compactPanel ? 8 : 14);
     }
     this.infoTexture.needsUpdate = true;
   }
@@ -517,6 +520,11 @@ export class LabScene {
       this.portraitPanel = portrait;
       this.infoCanvas.width = portrait ? 1200 : 2048;
       this.infoCanvas.height = portrait ? 1600 : 1152;
+      this.infoTexture.dispose();
+      this.infoTexture = new THREE.CanvasTexture(this.infoCanvas);
+      this.infoTexture.colorSpace = THREE.SRGBColorSpace;
+      this.infoTexture.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
+      (this.infoDisplay.material as THREE.MeshBasicMaterial).map = this.infoTexture;
       this.infoFrame.geometry.dispose();
       this.infoFrame.geometry = roundedBox(portrait ? 4.48 : 7.35, portrait ? 5.95 : 4.25, 0.18, 0.12, this.infoFrame.material as THREE.Material).geometry;
       this.infoDisplay.geometry.dispose();
@@ -536,7 +544,10 @@ export class LabScene {
     };
     const [x, y, z, yaw] = orbit[next.view];
     const mobile = this.host.clientWidth < this.host.clientHeight;
-    this.targetCamera.set(mobile ? 0 : x, 4.65 + (mobile ? 0 : y), mobile ? 12.7 : z);
+    // Portrait viewports need a closer camera: the portrait panel otherwise
+    // occupies too little of the tall screen and leaves the 3D scene stranded
+    // in the middle. Landscape keeps its original wider composition.
+    this.targetCamera.set(mobile ? 0 : x, 4.65 + (mobile ? 0 : y), mobile ? 7.2 : z);
     this.targetLook.set(0, 4.55, -2.65);
     this.infoPanel.rotation.y = mobile ? 0 : yaw;
     if (next.view === 'work' && next.project) {

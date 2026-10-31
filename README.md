@@ -34,7 +34,7 @@ The social preview is a locally generated `public/og.png`, derived only from the
 - Project routes use `?station=work&project=<slug>` and support back/forward.
 - Six public projects have source-linked details and explicit verification/limitations.
 - EN / বাংলা state persists in local storage; route and selected project are preserved on switching.
-- Three.js scene is lazy-loaded and reduces pixel ratio, shadows, and render work on mobile. Portrait view opens in the readable text/schematic mode; landscape view opens in the 3D scene. The mode control lets visitors switch views. When WebGL is unavailable or reduced motion is requested, the same art direction and content remain available in the 2D schematic.
+- Three.js scene is lazy-loaded and reduces pixel ratio, shadows, and render work on compact viewports. Portrait view opens in the readable text/schematic mode; landscape view opens in the 3D scene. Switching portrait to 3D uses closer framing and larger panel text. The mode control lets visitors switch views. When WebGL is unavailable or reduced motion is requested, the same art direction and content remain available in the 2D schematic.
 - Nonessential animation can be paused. No sound, analytics, external API, or contact form.
 
 ## Public assets & privacy
