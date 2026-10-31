@@ -18,10 +18,10 @@ for (const lang of ['en', 'bn']) {
   for (const item of data.projects) routes.push(`${base}/projects/${item.slug}/`);
 }
 const publicSource = ['index.html', 'src/App.tsx', 'src/styles.css', 'src/data/site-content.json', 'scripts/create-routes.mjs'].map(read).join('\n');
-const expectedProjects = ['ternux', 'ternuxx', 'adt', 'lai', 'ggen', 'songjog', 'datakhoj', 'iqra-online-mart'];
+const expectedProjects = ['ternux', 'ternuxx', 'adt', 'lai', 'ggen', 'songjog'];
 
 assert('Bilingual content covers all profile pages', ['en', 'bn'].every(lang => ['home', 'about', 'services', 'experience', 'projects', 'research', 'contact'].every(page => data.pages[lang][page]?.title && data.pages[lang][page]?.description)));
-assert('All approved public projects are represented', expectedProjects.every(slug => data.projects.some(project => project.slug === slug)));
+assert('Requested public projects are represented and removed projects stay absent', expectedProjects.every(slug => data.projects.some(project => project.slug === slug)) && !data.projects.some(project => ['datakhoj', 'iqra-online-mart'].includes(project.slug)));
 assert('Full source-file work history and time zone are represented', data.experience.length === 7 && data.experience.every(item => item.period) && data.site.timezone.en.startsWith('GMT+6'));
 assert('All GitHub profile service links target generated service slugs', ['web-development', 'software-development', 'computer-support', 'android-support', 'business-technology', 'graphics-design', 'office-administration', 'data-entry'].every(slug => data.services.some(service => service.slug === slug)));
 assert('Service and project slugs are unique and route-safe', [...data.services, ...data.projects].every(item => /^[a-z0-9-]+$/.test(item.slug)) && new Set([...data.services, ...data.projects].map(item => item.slug)).size === data.services.length + data.projects.length);
@@ -46,7 +46,7 @@ if (!sourceOnly) {
   const dist = path.join(root, 'dist');
   assert('Production output exists', fs.existsSync(path.join(dist, 'index.html')));
   if (fs.existsSync(dist)) {
-    assert('Generated route count matches bilingual route matrix', routes.length === 2 * (1 + 6 + data.services.length + data.projects.length) && routes.length === 52, `${routes.length} direct-load routes`);
+    assert('Generated route count matches bilingual route matrix', routes.length === 2 * (1 + 6 + data.services.length + data.projects.length) && routes.length === 48, `${routes.length} direct-load routes`);
     const routeHtml = routes.map(route => ({ route, file: path.join(dist, route.replace(/^\//, ''), 'index.html') }));
     assert('Every English and Bangla route has a static HTML entry', routeHtml.every(item => fs.existsSync(item.file)));
     const pages = routeHtml.filter(item => fs.existsSync(item.file)).map(({ route, file }) => ({ route, html: fs.readFileSync(file, 'utf8') }));

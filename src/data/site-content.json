@@ -1042,42 +1042,6 @@
         "en": "Bangla-first business operations app with local SQLite records, auditable corrections, and device-validated export and diagnostics.",
         "bn": "বাংলা-প্রথম business operations app; local SQLite record, audit করা যায় এমন correction, এবং ডিভাইসে যাচাই করা export ও diagnostics রয়েছে।"
       }
-    },
-    {
-      "slug": "datakhoj",
-      "name": "DataKhoj",
-      "category": {
-        "en": "Android · Data tooling",
-        "bn": "অ্যান্ড্রয়েড · ডেটা tool"
-      },
-      "summary": {
-        "en": "A personal data-collection engine for searching, extracting, structuring, transforming, and exporting information.",
-        "bn": "তথ্য খোঁজা, সংগ্রহ, structure, transform ও export করার personal data-collection engine।"
-      },
-      "boundary": {
-        "en": "The current repository is pre-alpha: its extraction and data engine has verified components, while the Android shell and workflows remain incomplete.",
-        "bn": "বর্তমান repository pre-alpha: extraction ও data engine-এর কিছু অংশ যাচাই করা; Android shell ও workflow এখনো অসম্পূর্ণ।"
-      },
-      "url": "https://github.com/soobujmiah/datakhoj-android",
-      "state": "Pre-alpha"
-    },
-    {
-      "slug": "iqra-online-mart",
-      "name": "Iqra Online Mart",
-      "category": {
-        "en": "Web · Storefront prototype",
-        "bn": "ওয়েব · Storefront prototype"
-      },
-      "summary": {
-        "en": "A bilingual browser-only storefront prototype for local retail workflows.",
-        "bn": "স্থানীয় retail workflow-এর জন্য bilingual browser-only storefront prototype।"
-      },
-      "boundary": {
-        "en": "This is a front-end prototype with no production backend or payment processing.",
-        "bn": "এটি front-end prototype; production backend বা payment processing নেই।"
-      },
-      "url": "https://github.com/soobujmiah/iqra-online-mart",
-      "state": "Prototype"
     }
   ],
   "research": {

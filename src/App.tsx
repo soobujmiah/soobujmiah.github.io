@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, BriefcaseBusiness, Code2,
   Cpu, Database, FlaskConical, FolderGit2, Globe2, Home, Mail, Monitor,
-  PenTool, Smartphone, UserRound, Clock3, Moon, Sun,
+  PenTool, Smartphone, UserRound, Clock3, Moon, Sun, Menu, X,
 } from 'lucide-react';
 import rawSite from './data/site-content.json';
 
@@ -70,9 +70,16 @@ function IconFor({ name, size = 18 }: { name: string; size?: number }) {
 
 function Header({ lang, path }: { lang: Lang; path: string }) {
   const [light, setLight] = useState(() => document.documentElement.dataset.theme === 'light');
+  const [menuOpen, setMenuOpen] = useState(false);
   const base = path.replace(/^\/bn(?=\/|$)/, '') || '/';
   const languagePath = lang === 'en' ? `/bn${base === '/' ? '/' : base}` : base;
   const icons: Record<string, typeof Home> = { about: UserRound, services: BriefcaseBusiness, projects: FolderGit2, experience: Clock3, research: FlaskConical, contact: Mail };
+  useEffect(() => {
+    if (!menuOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setMenuOpen(false); };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [menuOpen]);
   const toggleTheme = () => {
     const next = !light;
     document.documentElement.dataset.theme = next ? 'light' : 'dark';
@@ -81,7 +88,20 @@ function Header({ lang, path }: { lang: Lang; path: string }) {
     setLight(next);
   };
   return <>
-    <a className="dock-home" href={routePath('home', lang)} aria-label={lang === 'en' ? 'Sobuj Miah home' : 'সবুজ মিয়ার হোম'}><span className="wordmark-mark" aria-hidden="true"><i /><i /><i /></span></a>
+    <button className="menu-trigger" type="button" aria-label={lang === 'en' ? (menuOpen ? 'Close navigation menu' : 'Open navigation menu') : (menuOpen ? 'মেনু বন্ধ করুন' : 'নেভিগেশন মেনু খুলুন')} aria-expanded={menuOpen} aria-controls="site-menu" onClick={() => setMenuOpen(open => !open)}>
+      {menuOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
+    </button>
+    {menuOpen && <>
+      <button className="menu-backdrop" type="button" aria-label={lang === 'en' ? 'Close navigation menu' : 'মেনু বন্ধ করুন'} onClick={() => setMenuOpen(false)} />
+      <aside className="menu-panel" id="site-menu" role="dialog" aria-modal="true" aria-label={lang === 'en' ? 'Site navigation' : 'সাইট নেভিগেশন'}>
+        <div className="menu-panel-heading"><a href={routePath('home', lang)} onClick={() => setMenuOpen(false)}>{lang === 'en' ? 'Sobuj Miah' : 'সবুজ মিয়া'}<span>{lang === 'en' ? 'Portfolio' : 'পোর্টফোলিও'}</span></a><button type="button" aria-label={lang === 'en' ? 'Close menu' : 'মেনু বন্ধ করুন'} onClick={() => setMenuOpen(false)}><X size={19} /></button></div>
+        <nav className="menu-links" aria-label={lang === 'en' ? 'Pages' : 'পৃষ্ঠাসমূহ'}>
+          <a href={routePath('home', lang)} onClick={() => setMenuOpen(false)}><Home size={17} aria-hidden="true" /><span>{lang === 'en' ? 'Home' : 'হোম'}</span><ArrowUpRight size={15} aria-hidden="true" /></a>
+          {navigation.map(item => { const Icon = icons[item.key]; const target = routePath(item.key, lang); return <a key={item.key} href={target} aria-current={path === target ? 'page' : undefined} onClick={() => setMenuOpen(false)}><Icon size={17} aria-hidden="true" /><span>{item.label[lang]}</span><ArrowUpRight size={15} aria-hidden="true" /></a>; })}
+        </nav>
+        <a className="menu-language" href={languagePath} lang={lang === 'en' ? 'bn' : 'en'} onClick={() => setMenuOpen(false)}><Globe2 size={16} aria-hidden="true" />{lang === 'en' ? 'বাংলা সংস্করণ' : 'English version'}</a>
+      </aside>
+    </>}
     <header className="site-header">
       <nav id="primary-nav" className="primary-nav" aria-label={lang === 'en' ? 'Main navigation' : 'প্রধান নেভিগেশন'}>
         {navigation.map(item => { const Icon = icons[item.key]; return <a key={item.key} href={routePath(item.key, lang)} aria-label={item.label[lang]} title={item.label[lang]}><Icon size={18} strokeWidth={1.7} aria-hidden="true" /><span className="dock-tip">{item.label[lang]}</span></a>; })}

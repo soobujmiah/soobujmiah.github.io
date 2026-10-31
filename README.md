@@ -12,7 +12,7 @@ npm run build
 npm run preview
 ```
 
-`src/data/site-content.json` is the English and Bangla content source. The build generates 52 static route entries under `dist/`, each with a direct-load HTML fallback, unique title and description, canonical URL, language alternates, and route-specific structured data. It also generates a sitemap, robots file, and 404 page for GitHub Pages.
+`src/data/site-content.json` is the English and Bangla content source. The build generates 48 static route entries under `dist/`, each with a direct-load HTML fallback, unique title and description, canonical URL, language alternates, and route-specific structured data. It also generates a sitemap, robots file, and 404 page for GitHub Pages.
 
 The route families include `/about/`, `/bn/about/`, `/services/`, every service detail, `/projects/`, every public project detail, experience, research, and contact pages. Public project notes state evidence boundaries; private repositories and unverified capability claims are excluded.
 
