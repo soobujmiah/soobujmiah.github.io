@@ -24,17 +24,17 @@ npm run build
 npm run preview
 ```
 
-The build creates a static Vite output in `dist/`. It is suitable for GitHub Pages at the repository root. This project deliberately contains no workflow that automatically publishes to production. Review the build, confirm the repository's restore/create state, and authorize remote publication separately.
+The build creates a static Vite output in `dist/`. It is suitable for GitHub Pages at the repository root. `.github/workflows/deploy.yml` builds and deploys after pushes to `main`, and also supports a manual run. Review local changes before pushing to `main`; a push publishes the resulting build to the public site.
 
 The social preview is a locally generated `public/og.png`, derived only from the approved name, positioning, and brand palette. Regenerate it with `npm run make:og` when Python Pillow is available; the PNG is checked into the project so normal builds need no image-generation dependency.
 
 ## Experience
 
-- Shared destinations: Lab, Work, Process, Services, About, Notes, Contact.
+- Shared destinations: Lab, Work, Process, Services, About, Field Notes, Contact.
 - Project routes use `?station=work&project=<slug>` and support back/forward.
 - Six public projects have source-linked details and explicit verification/limitations.
 - EN / বাংলা state persists in local storage; route and selected project are preserved on switching.
-- Three.js scene is lazy-loaded and reduces pixel ratio, shadows, and render work on mobile. When WebGL is unavailable or reduced motion is requested, the same art direction and content remain available in the 2D schematic.
+- Three.js scene is lazy-loaded and reduces pixel ratio, shadows, and render work on mobile. Portrait view opens in the readable text/schematic mode; landscape view opens in the 3D scene. The mode control lets visitors switch views. When WebGL is unavailable or reduced motion is requested, the same art direction and content remain available in the 2D schematic.
 - Nonessential animation can be paused. No sound, analytics, external API, or contact form.
 
 ## Public assets & privacy
@@ -43,6 +43,6 @@ Only approved public repositories and profile links are included. Private reposi
 
 Fonts are requested from Google Fonts in the fully deployed site; the interface has local font fallbacks. In the sandbox preview, external font requests are unavailable, but the fallback is styled intentionally.
 
-## Current status
+## Deployment state
 
-The original GitHub repository `soobujmiah/soobujmiah.github.io` returned 404 during the 2026-10-26 audit, and its Pages root also returned 404. This rebuild is local to `/home/user/portfolio`. It has not been pushed, deployed, or connected to a remote repository. Restore or create the remote deliberately and preserve the original commit history before publishing.
+This is the public repository `soobujmiah/soobujmiah.github.io`, deployed at `https://soobujmiah.github.io/`. The workflow last completed a successful Pages deployment from `main` on 2026-10-28. Local edits remain unpublished until pushed; pushes to `main` deploy automatically. Preserve the existing repository history and review the generated build before publication.

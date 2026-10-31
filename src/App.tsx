@@ -4,7 +4,7 @@ import {
   ExternalLink, Eye, GitBranch, Languages, Mail, Menu, Monitor, Pause, Play, Radio,
   RotateCcw, ShieldCheck, Smartphone, Terminal, X,
 } from 'lucide-react';
-import { copy, navItems, processSteps, projects, services, type Language, type Project, type Station } from './data/content';
+import { copy, fieldNotes, navItems, processSteps, projects, services, type Language, type Project, type Station } from './data/content';
 import type { LabScene, SceneConfig } from './scene/LabScene';
 
 interface RouteState { station: Station; project: string | null; }
@@ -119,7 +119,7 @@ function App() {
     try { return localStorage.getItem('pocket-lab-language') === 'bn' ? 'bn' : 'en'; } catch { return 'en'; }
   });
   const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const [mode, setMode] = useState<RenderMode>('3d');
+  const [mode, setMode] = useState<RenderMode>(() => window.matchMedia('(orientation: portrait)').matches ? 'schematic' : '3d');
   const [paused, setPaused] = useState(false);
   const [scene, setScene] = useState<LabScene | null>(null);
   const [webglFailed, setWebglFailed] = useState(false);
@@ -139,10 +139,20 @@ function App() {
       ? 'সবুজ মিয়া — স্বতন্ত্র সফটওয়্যার ও এআই সিস্টেম নির্মাতা | পকেট সিস্টেমস ল্যাব'
       : 'Sobuj Miah — Independent Software & AI Systems Builder | The Pocket Systems Lab';
     const sectionName = navItems.find(item => item.id === route.station)?.label[language] ?? 'Lab';
-    const pageTitle = route.station === 'home' ? homeTitle : `${sectionName} — Sobuj Miah | The Pocket Systems Lab`;
-    const description = language === 'bn'
-      ? 'হাতের মুঠোয় শুরু হয় এই কর্মশালা। অ্যান্ড্রয়েড-প্রথম সিস্টেম ল্যাব থেকে ব্যবহারিক সফটওয়্যার, ARM64 Android/Linux toolchain, লোকাল AI ও কাজের workflow তৈরি করেন সবুজ মিয়া।'
-      : 'The workshop begins in your hand. Sobuj Miah builds practical software, ARM64 Android/Linux toolchains, on-device AI runtimes, and bilingual workflows from an Android-first systems lab in Dhaka, Bangladesh.';
+    const pageTitle = route.station === 'home' ? homeTitle : activeProject
+      ? `${activeProject.name} — ${t.projectDetails} | Sobuj Miah | The Pocket Systems Lab`
+      : `${sectionName} — Sobuj Miah | The Pocket Systems Lab`;
+    const description = activeProject
+      ? `${activeProject.strapline[language]} ${activeProject.problem[language]}`
+      : route.station === 'notes' ? t.notesIntro
+      : route.station === 'about' ? t.aboutIntro
+      : route.station === 'contact' ? t.contactIntro
+      : route.station === 'work' ? t.projectsIntro
+      : route.station === 'services' ? t.servicesIntro
+      : route.station === 'process' ? t.processIntro
+      : language === 'bn'
+        ? 'হাতের মুঠোয় শুরু হয় এই কর্মশালা। অ্যান্ড্রয়েড-প্রথম সিস্টেম ল্যাব থেকে ব্যবহারিক সফটওয়্যার, ARM64 Android/Linux toolchain, লোকাল AI ও কাজের workflow তৈরি করেন সবুজ মিয়া।'
+        : 'The workshop begins in your hand. Sobuj Miah builds practical software, ARM64 Android/Linux toolchains, on-device AI runtimes, and bilingual workflows from an Android-first systems lab in Dhaka, Bangladesh.';
     document.title = pageTitle;
     const descriptionMeta = document.querySelector('meta[name="description"]');
     if (descriptionMeta) descriptionMeta.setAttribute('content', description);
@@ -155,9 +165,16 @@ function App() {
     const twitterDescription = document.querySelector('meta[name="twitter:description"]');
     if (twitterDescription) twitterDescription.setAttribute('content', description);
     const canonical = document.querySelector('link[rel="canonical"]');
-    if (canonical) canonical.setAttribute('href', `https://soobujmiah.github.io${routePath(route.station, route.project)}`);
+    const pageUrl = `https://soobujmiah.github.io${routePath(route.station, route.project)}`;
+    if (canonical) canonical.setAttribute('href', pageUrl);
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) ogUrl.setAttribute('content', pageUrl);
+    const ogLocale = document.querySelector('meta[property="og:locale"]');
+    if (ogLocale) ogLocale.setAttribute('content', language === 'bn' ? 'bn_BD' : 'en_US');
+    const alternateLocale = document.querySelector('meta[property="og:locale:alternate"]');
+    if (alternateLocale) alternateLocale.setAttribute('content', language === 'bn' ? 'en_US' : 'bn_BD');
     try { localStorage.setItem('pocket-lab-language', language); } catch { /* storage is optional */ }
-  }, [language, route]);
+  }, [language, route, activeProject]);
 
   const activeStationRef = useRef(route.station);
   const scrollDrivenRef = useRef(false);
@@ -209,6 +226,7 @@ function App() {
     const previous = previousRoute.current;
     previousRoute.current = route;
     if (previous.station === route.station && previous.project === route.project) return;
+    if (sceneActionRef.current) { sceneActionRef.current = false; return; }
     if (scrollDrivenRef.current) { scrollDrivenRef.current = false; return; }
     const frame = requestAnimationFrame(() => document.getElementById(`station-heading-${route.station}`)?.focus({ preventScroll: true }));
     return () => cancelAnimationFrame(frame);
@@ -234,7 +252,11 @@ function App() {
     setMobileMenuOpen(false);
     requestAnimationFrame(() => document.getElementById(`station-${station}`)?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' }));
   }, [reducedMotion]);
-  const handleSceneAction = useCallback((station: Station, project: string | null) => navigate(station, project), [navigate]);
+  const sceneActionRef = useRef(false);
+  const handleSceneAction = useCallback((station: Station, project: string | null) => {
+    sceneActionRef.current = true;
+    navigate(station, project);
+  }, [navigate]);
 
   useEffect(() => {
     const handleMotion = (event: MediaQueryListEvent) => {
@@ -246,6 +268,15 @@ function App() {
     query.addEventListener('change', handleMotion);
     return () => query.removeEventListener('change', handleMotion);
   }, [scene]);
+
+  useEffect(() => {
+    const query = window.matchMedia('(orientation: portrait)');
+    const handleOrientation = (event: MediaQueryListEvent) => {
+      if (event.matches) { setMode('schematic'); setScene(null); }
+    };
+    query.addEventListener('change', handleOrientation);
+    return () => query.removeEventListener('change', handleOrientation);
+  }, []);
 
   useEffect(() => { scene?.update(sceneConfig); }, [route, paused, reducedMotion, scene]);
 
@@ -270,6 +301,7 @@ function App() {
 
   return (
     <div className={`app-shell lang-${language} ${mode === 'schematic' ? 'mode-schematic' : ''}`} data-world-mode={use3D ? '3d' : 'fallback'}>
+      <a className="skip-link" href="#main-content" onClick={() => setMode('schematic')}>{t.skipContent}</a>
       <div className="world-backdrop" aria-hidden="true" />
       <div className="world-viewport" aria-hidden="true">
         {sceneRequested ? <ScenePanel config={sceneConfig} renderMode={mode} language={language} onFailure={failScene} onReady={setSceneRef} onAction={handleSceneAction} /> : <Schematic station={route.station} project={route.project} language={language} />}
@@ -294,7 +326,7 @@ function App() {
           <button className="lang-switch" onClick={toggleLanguage} type="button" aria-label={`${t.language}: ${language === 'en' ? 'বাংলা' : 'English'}`} title={t.language}>
             <Languages size={15} /><span>{language === 'en' ? 'EN' : 'বাংলা'}</span>
           </button>
-          <button className="menu-trigger icon-button" onClick={() => setMobileMenuOpen(value => !value)} type="button" aria-label={t.openMenu} aria-expanded={mobileMenuOpen}>
+          <button className="menu-trigger icon-button" onClick={() => setMobileMenuOpen(value => !value)} type="button" aria-label={mobileMenuOpen ? t.closeMenu : t.openMenu} aria-expanded={mobileMenuOpen}>
             {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
@@ -307,7 +339,7 @@ function App() {
         <span>{t.wayfinding} <b>{navItems.find(item => item.id === route.station)?.number}</b></span>
       </div>
 
-      <main className="story-scroll">
+      <main id="main-content" tabIndex={-1} className="story-scroll" onFocusCapture={() => { if (use3D) setMode('schematic'); }}>
         {navItems.map(item => {
           const showProject = item.id === 'work' && route.station === 'work' ? activeProject : null;
           return <section id={`station-${item.id}`} data-story-station={item.id} className={`story-stop story-${item.id}`} key={item.id} aria-label={item.label[language]}>
@@ -331,7 +363,7 @@ function App() {
         <div className="bottom-status"><span className={`mode-led ${use3D ? 'mode-led-live' : ''}`} />{language === 'en' ? (use3D ? 'WEBGL / ACTIVE' : 'SCHEMATIC / READY') : (use3D ? 'WEBGL / চালু' : '২ডি নকশা / প্রস্তুত')}</div>
         <div className="control-group">
           {!reducedMotion && <button className="control-button" type="button" onClick={togglePause} aria-label={paused ? t.resume : t.pause} title={paused ? t.resume : t.pause}>{paused ? <Play size={15} /> : <Pause size={15} />}<span>{paused ? t.resume : t.pause}</span></button>}
-          <button className={`control-button ${mode === 'schematic' ? 'control-active' : ''}`} type="button" onClick={toggleRenderMode} aria-pressed={mode === 'schematic'} aria-label={webglFailed ? t.retry3D : t.fallback} title={webglFailed ? t.retry3D : t.fallback}><Monitor size={15} /><span>{webglFailed ? t.retry3D : t.fallback}</span></button>
+          <button className={`control-button control-readable ${mode === 'schematic' ? 'control-active' : ''}`} type="button" onClick={toggleRenderMode} aria-label={webglFailed ? t.retry3D : mode === '3d' ? t.textView : t.returnToScene} title={webglFailed ? t.retry3D : mode === '3d' ? t.textView : t.returnToScene}><Monitor size={15} /><span>{webglFailed ? t.retry3D : mode === '3d' ? t.textView : t.returnToScene}</span></button>
           <span className="quality-label"><span className="quality-bars"><i /><i /><i /></span>{language === 'en' ? (use3D ? 'ADAPTIVE' : 'LOW POWER') : (use3D ? 'মানিয়ে নেওয়া' : 'কম শক্তি')}</span>
         </div>
       </div>
@@ -419,10 +451,10 @@ function ProcessView({ language, t }: { language: Language; t: typeof copy.en | 
     <h1 id="station-heading-process" tabIndex={-1} className="section-title">{t.processTitle}<span className="title-period">.</span></h1>
     <p className="section-intro">{t.processIntro}</p>
     <div className="process-layout">
-      <div className="process-rail" role="tablist" aria-label={t.processTitle}>
-        {processSteps.map((step, index) => <button role="tab" aria-selected={activeStep === index} className={`process-step ${activeStep === index ? 'step-active' : ''} ${step.color === 'amber' ? 'step-amber' : ''}`} key={step.id} onClick={() => setActiveStep(index)} type="button"><span className="process-index">0{index + 1}</span><span className="process-glyph">{step.icon}</span><span className="process-name">{language === 'en' ? step.en : step.bn}</span><span className="process-node" /></button>)}
+      <div className="process-rail" role="group" aria-label={t.processTitle}>
+        {processSteps.map((step, index) => <button aria-pressed={activeStep === index} aria-controls="process-detail-panel" className={`process-step ${activeStep === index ? 'step-active' : ''} ${step.color === 'amber' ? 'step-amber' : ''}`} key={step.id} onClick={() => setActiveStep(index)} type="button"><span className="process-index">0{index + 1}</span><span className="process-glyph">{step.icon}</span><span className="process-name">{language === 'en' ? step.en : step.bn}</span><span className="process-node" /></button>)}
       </div>
-      <div className={`process-detail detail-${processSteps[activeStep].color}`} role="tabpanel" aria-live="polite">
+      <div id="process-detail-panel" className={`process-detail detail-${processSteps[activeStep].color}`} aria-live="polite" aria-atomic="true">
         <span className="process-detail-index">STEP / 0{activeStep + 1}</span><span className="process-detail-icon">{processSteps[activeStep].icon}</span>
         <h2>{language === 'en' ? processSteps[activeStep].en : processSteps[activeStep].bn}</h2>
         <p>{language === 'en' ? processSteps[activeStep].detailEn : processSteps[activeStep].detailBn}</p>
@@ -466,9 +498,18 @@ function AboutView({ language, t }: { language: Language; t: typeof copy.en | ty
 
 function NotesView({ language, t }: { language: Language; t: typeof copy.en | typeof copy.bn }) {
   return <div className="section-view notes-view">
-    <div className="eyebrow"><span className="eyebrow-line" />{language === 'en' ? 'ARCHIVE / 05' : 'আর্কাইভ / ০৫'}</div>
+    <div className="eyebrow"><span className="eyebrow-line" />{language === 'en' ? 'FIELD NOTES / 05' : 'কাজের নোট / ০৫'}</div>
     <h1 id="station-heading-notes" tabIndex={-1} className="section-title">{t.notesTitle}<span className="title-period">.</span></h1>
-    <div className="archive-room"><div className="archive-orbit"><span /><span /><span /><BookOpen size={25} /></div><p>{t.notesEmpty}</p><span className="archive-stamp">{language === 'en' ? 'NO PUBLIC NOTES INDEXED' : 'পাবলিক নোট তালিকাভুক্ত নয়'}</span></div>
+    <p className="section-intro">{t.notesIntro}</p>
+    <div className="field-note-grid">
+      {fieldNotes.map((note, index) => <article className="field-note" key={note.id}>
+        <div className="field-note-top"><span>FIELD NOTE / 0{index + 1}</span><span className="field-note-mark" aria-hidden="true" /></div>
+        <h2>{note.title[language]}</h2>
+        <p>{note.finding[language]}</p>
+        <div className="field-note-boundary"><span>{language === 'en' ? 'BOUNDARY' : 'সীমা'}</span><p>{note.boundary[language]}</p></div>
+        <a href={note.source} target="_blank" rel="noreferrer">{t.sourceNote}<ArrowUpRight size={13} /></a>
+      </article>)}
+    </div>
   </div>;
 }
 

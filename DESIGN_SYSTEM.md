@@ -3,7 +3,7 @@
 **Project:** Sobuj Miah — “The Pocket Systems Lab”  
 **Opening Line:** “The workshop begins in your hand.”  
 **Professional Positioning:** Independent Software & AI Systems Builder  
-**Alignment:** The last retained ecosystem tokens (`skb/architecture/WEB_DESIGN_SYSTEM.md`) extended for The Pocket Systems Lab. On 2026-10-26 the former live portfolio repository and Pages root returned 404, so this rebuild follows the retained SKB spec and the owner's attached master prompt; it is not a source-code comparison to a currently accessible deployed portfolio.
+**Alignment:** The retained ecosystem tokens (`skb/architecture/WEB_DESIGN_SYSTEM.md`) extended for The Pocket Systems Lab. **Project-start note (2026-10-26):** the former repository URL and Pages root returned 404 at the beginning of this rebuild, so the initial direction followed the retained SKB spec and the owner's brief. The project was then created in the existing public repository and deployed through its GitHub Pages workflow; the design and implementation below describe that current source tree.
 
 ## 1. Brand Tokens (`src/design-tokens.ts` & `:root`)
 

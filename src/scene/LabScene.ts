@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { MATERIALS_3D, MOTION } from '../design-tokens';
-import { copy, navItems, processSteps, projects, services, type Language } from '../data/content';
+import { copy, fieldNotes, navItems, processSteps, projects, services, type Language } from '../data/content';
 
 export type SceneView = 'home' | 'work' | 'process' | 'services' | 'about' | 'notes' | 'contact';
 export interface SceneConfig { view: SceneView; project: string | null; language: Language; paused: boolean; reducedMotion: boolean; }
@@ -173,7 +173,7 @@ export class LabScene {
   }
 
   private wrapCanvasText(text: string, x: number, y: number, maxWidth: number, lineHeight: number, maxLines: number) {
-    const words = text.trim().split(/\\s+/);
+    const words = text.trim().split(/\s+/);
     let line = '';
     let lines = 0;
     for (const word of words) {
@@ -251,8 +251,8 @@ export class LabScene {
       rows = t.principlesList.slice(0, 4).map(item => `•  ${item}`);
     } else if (config.view === 'notes') {
       title = t.notesTitle;
-      intro = t.notesEmpty;
-      rows = [];
+      intro = t.notesIntro;
+      rows = fieldNotes.map(note => `${note.title[config.language]} — ${note.finding[config.language]}`);
     } else {
       title = t.contactTitle;
       intro = t.contactIntro;
@@ -509,10 +509,10 @@ export class LabScene {
     const width = Math.max(1, this.host.clientWidth);
     const height = Math.max(1, this.host.clientHeight);
     this.camera.aspect = width / height;
-    this.camera.fov = width < 600 ? 43 : 35;
+    this.camera.fov = width < height ? 43 : 35;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height, false);
-    const portrait = width < 600;
+    const portrait = width < height;
     if (this.infoPanel && portrait !== this.portraitPanel) {
       this.portraitPanel = portrait;
       this.infoCanvas.width = portrait ? 1200 : 2048;
@@ -535,7 +535,7 @@ export class LabScene {
       services: [0.82, 0.12, 9.7, 0.07], about: [-0.65, 0.05, 9.7, -0.06], notes: [-0.9, 0.4, 10.2, -0.09], contact: [0.9, 0.22, 9.8, 0.08],
     };
     const [x, y, z, yaw] = orbit[next.view];
-    const mobile = this.host.clientWidth < 600;
+    const mobile = this.host.clientWidth < this.host.clientHeight;
     this.targetCamera.set(mobile ? 0 : x, 4.65 + (mobile ? 0 : y), mobile ? 12.7 : z);
     this.targetLook.set(0, 4.55, -2.65);
     this.infoPanel.rotation.y = mobile ? 0 : yaw;
