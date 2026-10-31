@@ -1,534 +1,306 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ArrowDownRight, ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, ChevronDown, Cpu,
-  ExternalLink, Eye, GitBranch, Languages, Mail, Menu, Monitor, Pause, Play, Radio,
-  RotateCcw, ShieldCheck, Smartphone, Terminal, X,
+  ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, BriefcaseBusiness, Code2,
+  Cpu, Database, Menu, Monitor, PenTool, Smartphone, X,
 } from 'lucide-react';
-import { copy, fieldNotes, navItems, processSteps, projects, services, type Language, type Project, type Station } from './data/content';
-import type { LabScene, SceneConfig } from './scene/LabScene';
+import rawSite from './data/site-content.json';
 
-interface RouteState { station: Station; project: string | null; }
-type RenderMode = '3d' | 'schematic';
-
-const validStations = new Set(navItems.map(item => item.id));
-function readRoute(): RouteState {
-  const params = new URLSearchParams(window.location.search);
-  const segments = window.location.pathname.split('/').filter(Boolean);
-  const pathStation = segments[0] as Station | undefined;
-  const queryStation = params.get('station') as Station | null;
-  const station = pathStation && validStations.has(pathStation) ? pathStation : queryStation;
-  const pathProject = station === 'work' ? segments[1] : null;
-  const project = pathProject ?? params.get('project');
-  return {
-    station: station && validStations.has(station) ? station : 'home',
-    project: project && projects.some(item => item.id === project) ? project : null,
+type Lang = 'en' | 'bn';
+type Localized = Record<Lang, string>;
+type Kind = 'home' | 'about' | 'services' | 'service' | 'experience' | 'projects' | 'project' | 'research' | 'contact';
+interface PageText { title: string; description: string; eyebrow: string; headline: string; lede?: string; visualCaption?: string; [key: string]: string | string[] | undefined; }
+interface SiteData {
+  site: {
+    name: string; url: string; email: string; phone: string; phoneHref: string;
+    location: Localized;
+    languages: Array<{ en: string; bn: string; levelEn: string; levelBn: string }>;
+    social: Array<{ label: string; href: string }>;
   };
+  pages: Record<Lang, Record<'home' | 'about' | 'services' | 'experience' | 'projects' | 'research' | 'contact', PageText>>;
+  services: Array<{
+    slug: string; icon: string; title: Localized; summary: Localized; detail: Localized;
+    deliverables: Record<Lang, string[]>;
+  }>;
+  experience: Array<{ role: Localized; organisation: string; location: Localized; work: Record<Lang, string[]> }>;
+  skills: Array<{ title: Localized; items: Record<Lang, string[]> }>;
+  projects: Array<{ slug: string; name: string; category: Localized; summary: Localized; boundary: Localized; url: string; state: string }>;
+  research: Record<Lang, { verified: string[]; experimental: string[]; notClaimed: string[] }>;
 }
 
-function routePath(station: Station, project: string | null = null) {
-  if (station === 'home' && !project) return '/';
-  return `/${station}/${project ? `${project}/` : ''}`;
+const site = rawSite as unknown as SiteData;
+const navigation: Array<{ key: 'about' | 'services' | 'projects' | 'experience' | 'research' | 'contact'; label: Localized }> = [
+  { key: 'about', label: { en: 'About', bn: 'পরিচিতি' } },
+  { key: 'services', label: { en: 'Services', bn: 'সেবা' } },
+  { key: 'projects', label: { en: 'Projects', bn: 'প্রকল্প' } },
+  { key: 'experience', label: { en: 'Experience', bn: 'অভিজ্ঞতা' } },
+  { key: 'research', label: { en: 'Research', bn: 'গবেষণা' } },
+  { key: 'contact', label: { en: 'Contact', bn: 'যোগাযোগ' } },
+];
+const routePath = (kind: string, lang: Lang, slug?: string) => {
+  const suffix = kind === 'home' ? '' : kind === 'service' ? `services/${slug}/` : kind === 'project' ? `projects/${slug}/` : `${kind}/`;
+  return lang === 'bn' ? `/bn/${suffix}` : `/${suffix}`;
+};
+function readRoute() {
+  const pathname = `/${window.location.pathname.split('/').filter(Boolean).join('/')}${window.location.pathname.endsWith('/') ? '' : '/'}`;
+  const parts = pathname.split('/').filter(Boolean);
+  const lang: Lang = parts[0] === 'bn' ? 'bn' : 'en';
+  const path = parts[0] === 'bn' ? parts.slice(1) : parts;
+  if (!path.length) return { lang, kind: 'home' as Kind, path: lang === 'bn' ? '/bn/' : '/' };
+  if (path[0] === 'services' && path[1]) return { lang, kind: 'service' as Kind, slug: path[1], path: routePath('service', lang, path[1]) };
+  if (path[0] === 'services') return { lang, kind: 'services' as Kind, path: routePath('services', lang) };
+  if (path[0] === 'projects' && path[1]) return { lang, kind: 'project' as Kind, slug: path[1], path: routePath('project', lang, path[1]) };
+  const allowed = new Set(['about', 'experience', 'projects', 'research', 'contact']);
+  if (allowed.has(path[0])) return { lang, kind: path[0] as Kind, path: routePath(path[0], lang) };
+  return { lang, kind: 'home' as Kind, path: lang === 'bn' ? '/bn/' : '/' };
 }
-
-function idle(callback: () => void) {
-  const win = window as Window & {
-    requestIdleCallback?: (cb: () => void, options?: { timeout: number }) => number;
-    cancelIdleCallback?: (id: number) => void;
+function setMeta(selector: string, attribute: string, value: string) {
+  const element = document.head.querySelector<HTMLMetaElement | HTMLLinkElement>(selector);
+  if (element) element.setAttribute(attribute, value);
+}
+function IconFor({ name, size = 18 }: { name: string; size?: number }) {
+  const icons: Record<string, typeof Code2> = {
+    web: Monitor, software: Code2, computer: Monitor, android: Smartphone,
+    business: BriefcaseBusiness, design: PenTool, office: BriefcaseBusiness,
+    data: Database, marketing: ArrowUpRight, linux: Cpu, ai: Cpu,
   };
-  if (win.requestIdleCallback) {
-    const id = win.requestIdleCallback(callback, { timeout: 1400 });
-    return () => win.cancelIdleCallback?.(id);
-  }
-  const id = window.setTimeout(callback, 160);
-  return () => window.clearTimeout(id);
+  const Icon = icons[name] ?? Code2;
+  return <Icon size={size} strokeWidth={1.6} aria-hidden="true" />;
 }
 
-function StatusPill({ kind, label }: { kind: Project['status']; label: string }) {
-  return <span className={`status-pill status-${kind}`}><span className="status-dot" />{label}</span>;
+function Header({ lang, path }: { lang: Lang; path: string }) {
+  const [open, setOpen] = useState(false);
+  const base = path.replace(/^\/bn(?=\/|$)/, '') || '/';
+  const languagePath = lang === 'en' ? `/bn${base === '/' ? '/' : base}` : base;
+  const text = lang === 'en'
+    ? { menu: 'Open navigation', home: 'Sobuj Miah home', language: 'বাংলা' }
+    : { menu: 'নেভিগেশন খুলুন', home: 'সবুজ মিয়ার হোম', language: 'English' };
+  return <header className="site-header">
+    <a className="wordmark" href={routePath('home', lang)} aria-label={text.home}>
+      <span className="wordmark-mark" aria-hidden="true"><i /><i /><i /></span>
+      <span><strong>{lang === 'bn' ? 'সবুজ মিয়া' : 'SOBUJ MIAH'}</strong><small>{lang === 'bn' ? 'সফটওয়্যার · সিস্টেম · পরিচালনা' : 'SOFTWARE · SYSTEMS · OPERATIONS'}</small></span>
+    </a>
+    <button className="menu-toggle" type="button" aria-label={text.menu} aria-expanded={open} aria-controls="primary-nav" onClick={() => setOpen(!open)}>{open ? <X size={19} /> : <Menu size={19} />}</button>
+    <nav id="primary-nav" className={`primary-nav ${open ? 'is-open' : ''}`} aria-label={lang === 'en' ? 'Main navigation' : 'প্রধান নেভিগেশন'}>
+      {navigation.map(item => <a key={item.key} href={routePath(item.key, lang)} onClick={() => setOpen(false)}>{item.label[lang]}</a>)}
+      <a className="nav-contact" href={routePath('contact', lang)} onClick={() => setOpen(false)}>{lang === 'en' ? 'Let’s talk' : 'কথা বলুন'}<ArrowUpRight size={14} /></a>
+    </nav>
+    <a className="language-switch" href={languagePath} lang={lang === 'en' ? 'bn' : 'en'} aria-label={lang === 'en' ? 'View this page in Bangla' : 'এই পৃষ্ঠাটি ইংরেজিতে দেখুন'}>{text.language}</a>
+  </header>;
 }
 
-function Schematic({ station, project, language }: { station: Station; project: string | null; language: Language }) {
-  const selected = project ? projects.find(item => item.id === project) : null;
-  const stationLabel = navItems.find(item => item.id === station)?.label[language] ?? station;
-  return (
-    <div className={`schematic schematic-${station}`} aria-hidden="true">
-      <div className="schematic-grid" />
-      <svg className="schematic-svg" viewBox="0 0 780 420" role="presentation">
-        <defs>
-          <linearGradient id="wire" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#22c55e" stopOpacity=".78"/><stop offset="1" stopColor="#22c55e" stopOpacity=".06"/></linearGradient>
-          <radialGradient id="die"><stop stopColor="#173126"/><stop offset="1" stopColor="#08100d"/></radialGradient>
-          <filter id="glow"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        </defs>
-        <path d="M76 210H195L240 165H310M704 210H585L540 165H470M195 210L248 263H310M585 210L532 263H470M390 55V132M390 288V365" fill="none" stroke="url(#wire)" strokeWidth="2" />
-        <path d="M85 142V278M696 142V278M246 52H534M246 369H534" fill="none" stroke="#34423b" strokeWidth="1" strokeDasharray="5 8" />
-        <rect x="310" y="115" width="160" height="182" rx="22" fill="url(#die)" stroke="#46544c" strokeWidth="2" />
-        <rect x="328" y="135" width="124" height="143" rx="14" fill="#050807" stroke="#22c55e" strokeOpacity=".56" />
-        <path d="M350 176H430M350 192H414M350 208H426" stroke="#4ade80" strokeWidth="3" strokeLinecap="round" opacity=".75" />
-        <circle cx="390" cy="250" r="5" fill="#22c55e" filter="url(#glow)" />
-        {[['T',100,210],['X',680,210],['A',250,90],['L',530,90],['G',250,330],['S',530,330]].map(([label,x,y])=> (
-          <g key={label as string} transform={`translate(${x} ${y})`}>
-            <circle r="27" fill="#0b100e" stroke={selected && selected.id === ({T:'ternux',X:'ternuxx',A:'adt',L:'lai',G:'ggen',S:'songjog'} as Record<string,string>)[label as string] ? '#4ade80' : '#314039'} strokeWidth="2" />
-            <text textAnchor="middle" dominantBaseline="central" fill="#dce8df" fontFamily="monospace" fontSize="16">{label}</text>
-          </g>
-        ))}
-      </svg>
-      <div className="schematic-caption"><span className="caption-dot" />{selected ? selected.name : station === 'home' ? 'POCKET WORKSTATION / SPATIAL MAP' : `${stationLabel.toUpperCase()} / WORKBENCH`}</div>
-      <span className="schematic-coord coord-one">ARM64 · ANDROID FIRST</span><span className="schematic-coord coord-two">SIGNAL PATH · EVIDENCE LEDGER</span>
-    </div>
-  );
+function Footer({ lang }: { lang: Lang }) {
+  return <footer className="site-footer">
+    <a href={routePath('home', lang)} className="footer-name">{lang === 'bn' ? 'সবুজ মিয়া' : 'Sobuj Miah'}</a>
+    <span>{site.site.location[lang]}</span>
+    <nav aria-label={lang === 'en' ? 'Footer navigation' : 'ফুটার নেভিগেশন'}>
+      {navigation.map(item => <a key={item.key} href={routePath(item.key, lang)}>{item.label[lang]}</a>)}
+    </nav>
+    <span>© {new Date().getFullYear()} Sobuj Miah</span>
+  </footer>;
 }
 
-function ScenePanel({ config, renderMode, language, onFailure, onReady, onAction }: { config: SceneConfig; renderMode: RenderMode; language: Language; onFailure: () => void; onReady: (instance: LabScene) => void; onAction: (station: Station, project: string | null) => void }) {
+function HeroScene({ lang, label }: { lang: Lang; label: string }) {
   const host = useRef<HTMLDivElement>(null);
-  const [ready, setReady] = useState(false);
-  const latest = useRef(config);
-  const instanceRef = useRef<LabScene | null>(null);
-  latest.current = config;
-
+  const scene = useRef<{ setPaused: (value: boolean) => void; dispose: () => void } | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [reduced, setReduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   useEffect(() => {
-    if (renderMode !== '3d' || !host.current || instanceRef.current) return;
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = (event: MediaQueryListEvent) => setReduced(event.matches);
+    query.addEventListener('change', update);
     let cancelled = false;
-    const cancelIdle = idle(async () => {
-      try {
-        const module = await import('./scene/LabScene');
-        if (cancelled || !host.current) return;
-        const scene = new module.LabScene(host.current, latest.current, () => onFailure(), onAction);
-        instanceRef.current = scene;
-        setReady(true);
-        onReady(scene);
-      } catch {
-        if (!cancelled) onFailure();
-      }
-    });
-    return () => {
-      cancelled = true;
-      cancelIdle();
-      instanceRef.current?.dispose();
-      instanceRef.current = null;
-    };
-  }, [renderMode, onFailure, onReady, onAction]);
+    void import('./scene/WorkbenchScene').then(({ WorkbenchScene }) => {
+      if (cancelled || !host.current) return;
+      scene.current = new WorkbenchScene(host.current, reduced || paused);
+      scene.current.setPaused(reduced || paused);
+    }).catch(() => { if (!cancelled) setFailed(true); });
+    return () => { cancelled = true; query.removeEventListener('change', update); scene.current?.dispose(); scene.current = null; };
+  }, []);
+  useEffect(() => { scene.current?.setPaused(reduced || paused); }, [reduced, paused]);
+  const pauseLabel = reduced ? (lang === 'en' ? 'Reduced motion enabled' : 'Reduced motion চালু') : paused ? (lang === 'en' ? 'Resume scene motion' : 'দৃশ্যের গতি চালু করুন') : (lang === 'en' ? 'Pause scene motion' : 'দৃশ্যের গতি থামান');
+  return <div className={`hero-art ${failed ? 'art-fallback' : ''}`}>
+    <div className="scene-wash" aria-hidden="true" />
+    {!failed ? <div className="scene-host" ref={host} /> : <div className="scene-fallback"><div className="fallback-board"><div className="fallback-phone"><span>SOBUJ / SYSTEMS</span><i /><i /><i /><b>ARM64 · AI · WEB</b></div><div className="fallback-chip">WORK<br />BENCH</div><span className="fallback-line line-a" /><span className="fallback-line line-b" /><span className="fallback-node node-a">01 / SYSTEMS</span><span className="fallback-node node-b">02 / WORKFLOWS</span></div></div>}
+    <div className="scene-caption" aria-hidden="true"><span className="caption-signal" />{label}</div>
+    {!failed && <button className="scene-motion" type="button" aria-hidden="false" aria-label={pauseLabel} title={pauseLabel} onClick={() => setPaused(!paused)} disabled={reduced}><span>{paused || reduced ? 'II' : '↗'}</span><span className="sr-only">{pauseLabel}</span></button>}
+  </div>;
+}
 
-  useEffect(() => { instanceRef.current?.update(config); }, [config]);
-  return <div className={`scene-host ${ready ? 'scene-ready' : ''}`} ref={host} aria-hidden="true"><Schematic station={config.view} project={config.project} language={language} /></div>;
+function PageHeading({ copy }: { copy: PageText }) {
+  return <header className="page-heading"><p className="eyebrow"><span />{copy.eyebrow}</p><h1>{copy.headline}</h1>{copy.lede && <p className="page-lede">{copy.lede}</p>}</header>;
+}
+
+function ServiceCard({ service, lang, index }: { service: SiteData['services'][number]; lang: Lang; index: number }) {
+  return <a className="service-card" href={routePath('service', lang, service.slug)}>
+    <span className="card-top"><span className="card-index">{String(index + 1).padStart(2, '0')}</span><span className="card-icon"><IconFor name={service.icon} /></span><ArrowUpRight className="card-arrow" size={17} /></span>
+    <h2>{service.title[lang]}</h2><p>{service.summary[lang]}</p><span className="card-more">{lang === 'en' ? 'Explore service' : 'সেবাটি দেখুন'}<ArrowRight size={14} /></span>
+  </a>;
+}
+
+function ProjectCard({ project, lang, index }: { project: SiteData['projects'][number]; lang: Lang; index: number }) {
+  return <article className="project-card">
+    <div className="project-top"><span className="project-index">PROJECT / {String(index + 1).padStart(2, '0')}</span><span className="project-state">{project.state}</span></div>
+    <p className="project-category">{project.category[lang]}</p><h2>{project.name}</h2><p className="project-summary">{project.summary[lang]}</p>
+    <div className="project-boundary"><span>{lang === 'en' ? 'BOUNDARY' : 'সীমা'}</span><p>{project.boundary[lang]}</p></div>
+    <a href={routePath('project', lang, project.slug)} className="text-link">{lang === 'en' ? 'Project details' : 'প্রকল্পের বিবরণ'}<ArrowRight size={14} /></a>
+    <a href={project.url} target="_blank" rel="noopener noreferrer" className="text-link">{lang === 'en' ? 'Open source repository' : 'Source repository খুলুন'}<ArrowUpRight size={14} /></a>
+  </article>;
+}
+
+function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['home'] }) {
+  const home = copy;
+  return <>
+    <section className="hero" aria-labelledby="hero-title">
+      <HeroScene lang={lang} label={home.visualCaption ?? home.eyebrow} />
+      <div className="hero-inner">
+        <p className="eyebrow hero-eyebrow"><span />{home.eyebrow}</p>
+        <p className="hero-name">{site.site.name}<span> / {lang === 'en' ? 'INDEPENDENT BUILDER' : 'স্বতন্ত্র নির্মাতা'}</span></p>
+        <h1 id="hero-title">{home.headline.split('. ').map((line, index, all) => <span key={line}>{line}{index < all.length - 1 ? '.' : ''}{index === 0 && all.length > 1 ? <br /> : ' '}</span>)}</h1>
+        <p className="hero-deck">{home.deck}</p>
+        <p className="hero-identity">{home.identity}</p>
+        <div className="hero-actions"><a className="button button-primary" href={routePath('projects', lang)}>{home.primary}<ArrowRight size={16} /></a><a className="button button-quiet" href={routePath('services', lang)}>{home.secondary}<ArrowDown size={15} /></a></div>
+        <div className="hero-bottom"><span>23.81° N · 90.26° E</span><span>{home.visualLabel}</span></div>
+      </div>
+      <div className="hero-edge" aria-hidden="true"><span>FIELD NOTES / 01</span><i /></div>
+    </section>
+
+    <section className="section about-teaser" aria-labelledby="home-about-title">
+      <div className="section-meta"><span>01</span><span>{lang === 'en' ? 'PROFILE' : 'পরিচিতি'}</span></div>
+      <div className="about-teaser-copy"><h2 id="home-about-title">{home.aboutTitle}</h2><p>{home.aboutIntro}</p><a className="text-link" href={routePath('about', lang)}>{lang === 'en' ? 'Read my story' : 'আমার পরিচিতি পড়ুন'}<ArrowRight size={15} /></a></div>
+      <div className="principle-note"><span className="principle-mark">“</span><p>{lang === 'en' ? 'Document the work. Verify before reporting. Own the outcome.' : 'কাজ নথিবদ্ধ করি। রিপোর্টের আগে যাচাই করি। ফলাফলের দায় নিই।'}</p><span>{lang === 'en' ? 'A WORKING PRINCIPLE' : 'কাজের নীতি'}</span></div>
+    </section>
+
+    <section className="section section-tint" aria-labelledby="home-services-title">
+      <div className="section-meta"><span>02</span><span>{lang === 'en' ? 'SERVICES' : 'সেবা'}</span></div>
+      <div className="section-head"><div><p className="eyebrow"><span />{lang === 'en' ? 'PRACTICAL SUPPORT' : 'ব্যবহারিক সহায়তা'}</p><h2 id="home-services-title">{home.servicesTitle}</h2></div><p>{home.servicesIntro}</p></div>
+      <div className="service-grid home-service-grid">{site.services.slice(0, 4).map((service, index) => <ServiceCard key={service.slug} service={service} lang={lang} index={index} />)}</div>
+      <a className="text-link section-link" href={routePath('services', lang)}>{lang === 'en' ? 'Browse every service' : 'সব সেবা দেখুন'}<ArrowRight size={15} /></a>
+    </section>
+
+    <section className="section" aria-labelledby="home-projects-title">
+      <div className="section-meta"><span>03</span><span>{lang === 'en' ? 'SELECTED WORK' : 'বাছাই করা কাজ'}</span></div>
+      <div className="section-head"><div><p className="eyebrow"><span />{lang === 'en' ? 'PUBLIC SOURCE · REAL BOUNDARIES' : 'পাবলিক সোর্স · বাস্তব সীমা'}</p><h2 id="home-projects-title">{home.selectedTitle}</h2></div><p>{home.selectedIntro}</p></div>
+      <div className="project-grid">{site.projects.slice(0, 3).map((project, index) => <ProjectCard key={project.slug} project={project} lang={lang} index={index} />)}</div>
+      <a className="text-link section-link" href={routePath('projects', lang)}>{lang === 'en' ? 'See all public projects' : 'সব পাবলিক প্রকল্প দেখুন'}<ArrowRight size={15} /></a>
+    </section>
+
+    <ContactBand lang={lang} copy={site.pages[lang].contact} />
+  </>;
+}
+
+function AboutPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['about'] }) {
+  const c = copy;
+  return <div className="page-wrap"><PageHeading copy={c} />
+    <section className="about-layout"><div className="prose">{(c.paragraphs as string[]).map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
+      <aside className="profile-aside"><p className="eyebrow"><span />{c.factsTitle as string}</p><dl>
+        <div><dt>{lang === 'en' ? 'Based in' : 'অবস্থান'}</dt><dd>{site.site.location[lang]}</dd></div>
+        <div><dt>{c.experienceLabel as string}</dt><dd>{c.experienceValue as string}</dd></div>
+        <div><dt>{c.educationLabel as string}</dt><dd>{c.educationValue as string}</dd></div>
+        <div><dt>{c.availabilityLabel as string}</dt><dd>{c.availabilityValue as string}</dd></div>
+      </dl><div className="principle-aside"><span>{c.principleTitle as string}</span><p>{c.principle as string}</p></div></aside>
+    </section>
+    <section className="subsection"><div className="subsection-heading"><p className="eyebrow"><span />{lang === 'en' ? 'CAPABILITIES' : 'দক্ষতা'}</p><h2>{lang === 'en' ? 'A wide, practical toolkit.' : 'ব্যবহারিক দক্ষতার বিস্তৃত পরিসর।'}</h2></div><div className="skill-grid">{site.skills.map((group, i) => <article className="skill-card" key={group.title.en}><span className="skill-number">0{i + 1}</span><h3>{group.title[lang]}</h3><ul>{group.items[lang].map(item => <li key={item}>{item}</li>)}</ul></article>)}</div></section>
+    <section className="subsection"><div className="subsection-heading"><p className="eyebrow"><span />{c.languagesTitle as string}</p></div><div className="language-list">{site.site.languages.map(item => <div key={item.en}><span>{item[lang]}</span><span>{lang === 'en' ? item.levelEn : item.levelBn}</span></div>)}</div></section>
+  </div>;
+}
+
+function ServicesPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['services'] }) {
+  return <div className="page-wrap"><PageHeading copy={copy} /><div className="service-grid">{site.services.map((service, index) => <ServiceCard key={service.slug} service={service} lang={lang} index={index} />)}</div></div>;
+}
+
+function ServiceDetail({ lang, copy, slug }: { lang: Lang; copy: SiteData['pages'][Lang]['services']; slug: string }) {
+  const service = site.services.find(item => item.slug === slug);
+  if (!service) return <NotFound lang={lang} />;
+  const index = site.services.indexOf(service);
+  return <div className="page-wrap detail-wrap"><a className="back-link" href={routePath('services', lang)}><ArrowLeft size={15} />{copy.backLabel as string}</a>
+    <PageHeading copy={{ title: service.title[lang], description: service.summary[lang], eyebrow: `${copy.eyebrow} · ${String(index + 1).padStart(2, '0')}`, headline: service.title[lang], lede: service.summary[lang] }} />
+    <div className="service-detail-layout"><section className="prose"><p>{service.detail[lang]}</p></section><aside className="deliverables"><p className="eyebrow"><span />{copy.deliverablesLabel as string}</p><ul>{service.deliverables[lang].map(item => <li key={item}>{item}</li>)}</ul></aside></div>
+    <div className="detail-cta"><a className="button button-primary" href={routePath('contact', lang)}>{copy.contactLabel as string}<ArrowRight size={16} /></a></div>
+  </div>;
+}
+
+function ExperiencePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['experience'] }) {
+  return <div className="page-wrap"><PageHeading copy={copy} /><div className="experience-list">{site.experience.map((item, index) => <article className="experience-item" key={`${item.role.en}-${item.organisation}`}>
+    <span className="experience-index">0{index + 1}</span><div><p className="experience-place">{item.organisation} · {item.location[lang]}</p><h2>{item.role[lang]}</h2><ul>{item.work[lang].map(task => <li key={task}>{task}</li>)}</ul></div>
+  </article>)}</div><p className="quiet-note">{copy.experienceNote as string}</p></div>;
+}
+
+function ProjectsPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['projects'] }) {
+  return <div className="page-wrap"><PageHeading copy={copy} /><div className="project-grid all-projects">{site.projects.map((project, index) => <ProjectCard key={project.slug} project={project} lang={lang} index={index} />)}</div></div>;
+}
+
+function ProjectDetail({ lang, copy, slug }: { lang: Lang; copy: SiteData['pages'][Lang]['projects']; slug: string }) {
+  const project = site.projects.find(item => item.slug === slug);
+  if (!project) return <NotFound lang={lang} />;
+  return <div className="page-wrap detail-wrap"><a className="back-link" href={routePath('projects', lang)}><ArrowLeft size={15} />{lang === 'en' ? 'All projects' : 'সব প্রকল্প'}</a>
+    <PageHeading copy={{ title: `${project.name} — ${copy.title}`, description: project.summary[lang], eyebrow: `${copy.eyebrow} · ${project.category[lang]}`, headline: project.name, lede: project.summary[lang] }} />
+    <div className="project-detail-box"><p className="eyebrow"><span />{copy.statusLabel as string}</p><p>{project.boundary[lang]}</p><a className="button button-primary" href={project.url} target="_blank" rel="noopener noreferrer">{copy.repoLabel as string}<ArrowUpRight size={16} /></a></div>
+  </div>;
+}
+
+function ResearchPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['research'] }) {
+  const data = site.research[lang];
+  const groups = [
+    { title: copy.verifiedTitle as string, items: data.verified, className: 'research-verified' },
+    { title: copy.experimentalTitle as string, items: data.experimental, className: 'research-experimental' },
+    { title: copy.plannedTitle as string, items: data.notClaimed, className: 'research-boundary' },
+  ];
+  return <div className="page-wrap"><PageHeading copy={copy} /><div className="research-grid">{groups.map(group => <section className={`research-card ${group.className}`} key={group.title}><h2>{group.title}</h2><ul>{group.items.map(item => <li key={item}>{item}</li>)}</ul></section>)}</div></div>;
+}
+
+function ContactPage({ copy }: { lang: Lang; copy: SiteData['pages'][Lang]['contact'] }) {
+  return <div className="page-wrap contact-page"><PageHeading copy={copy} /><p className="contact-lede">{copy.lede}</p><div className="contact-grid">
+    <a href={`mailto:${site.site.email}`}><span>{copy.emailLabel as string}</span><strong>{site.site.email}</strong><ArrowUpRight size={17} /></a>
+    <a href={`tel:${site.site.phoneHref}`}><span>{copy.phoneLabel as string}</span><strong>{site.site.phone}</strong><ArrowUpRight size={17} /></a>
+    <a href="https://t.me/soobujmiah" target="_blank" rel="noopener noreferrer"><span>{copy.telegramLabel as string}</span><strong>@soobujmiah</strong><ArrowUpRight size={17} /></a>
+  </div><div className="social-list">{site.site.social.filter(link => !['WhatsApp', 'Telegram'].includes(link.label)).map(link => <a href={link.href} target="_blank" rel="noopener noreferrer" key={link.label}>{link.label}<ArrowUpRight size={14} /></a>)}</div></div>;
+}
+
+function ContactBand({ lang, copy }: { lang: Lang; copy: PageText }) {
+  return <section className="contact-band"><p className="eyebrow"><span />{copy.eyebrow}</p><div><h2>{copy.headline}</h2><p>{copy.lede}</p></div><a className="button button-primary" href={routePath('contact', lang)}>{lang === 'en' ? 'Get in touch' : 'যোগাযোগ করুন'}<ArrowRight size={16} /></a></section>;
+}
+
+function NotFound({ lang }: { lang: Lang }) {
+  return <div className="page-wrap not-found"><p className="eyebrow"><span />404 · {lang === 'en' ? 'PAGE NOT FOUND' : 'পেজ পাওয়া যায়নি'}</p><h1>{lang === 'en' ? 'This path has moved.' : 'এই ঠিকানাটি আর নেই।'}</h1><a className="button button-primary" href={routePath('home', lang)}>{lang === 'en' ? 'Return home' : 'হোমে ফিরুন'}<ArrowRight size={16} /></a></div>;
 }
 
 function App() {
-  const [route, setRoute] = useState<RouteState>(readRoute);
-  const previousRoute = useRef(route);
-  const [language, setLanguage] = useState<Language>(() => {
-    try { return localStorage.getItem('pocket-lab-language') === 'bn' ? 'bn' : 'en'; } catch { return 'en'; }
-  });
-  const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const [mode, setMode] = useState<RenderMode>(() => window.matchMedia('(orientation: portrait)').matches ? 'schematic' : '3d');
-  const [paused, setPaused] = useState(false);
-  const [scene, setScene] = useState<LabScene | null>(null);
-  const [webglFailed, setWebglFailed] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const t = copy[language];
-  const activeProject = route.project ? projects.find(project => project.id === route.project) ?? null : null;
-  const sceneConfig: SceneConfig = useMemo(() => ({ view: route.station, project: route.project, language, paused, reducedMotion }), [route.station, route.project, language, paused, reducedMotion]);
-  const setSceneRef = useCallback((instance: LabScene) => setScene(instance), []);
-  const failScene = useCallback(() => { setWebglFailed(true); setMode('schematic'); setScene(null); }, []);
-  const sceneRequested = mode === '3d' && !webglFailed;
-  const use3D = sceneRequested && scene !== null;
-
+  const route = useMemo(readRoute, []);
+  const { lang, kind } = route;
+  const locale = site.pages[lang];
+  const homeCopy = locale.home;
+  const meta = kind === 'service'
+    ? (() => { const service = site.services.find(item => item.slug === route.slug); return service ? { title: `${service.title[lang]} | ${locale.services.title}`, description: service.summary[lang] } : { title: '404 | Sobuj Miah', description: 'Page not found.' }; })()
+    : kind === 'project'
+      ? (() => { const project = site.projects.find(item => item.slug === route.slug); return project ? { title: `${project.name} | ${locale.projects.title}`, description: project.summary[lang] } : { title: '404 | Sobuj Miah', description: 'Page not found.' }; })()
+      : locale[kind];
   useEffect(() => {
-    document.documentElement.lang = language;
-    document.documentElement.dataset.language = language;
-    const homeTitle = language === 'bn'
-      ? 'সবুজ মিয়া — স্বতন্ত্র সফটওয়্যার ও এআই সিস্টেম নির্মাতা | পকেট সিস্টেমস ল্যাব'
-      : 'Sobuj Miah — Independent Software & AI Systems Builder | The Pocket Systems Lab';
-    const sectionName = navItems.find(item => item.id === route.station)?.label[language] ?? 'Lab';
-    const pageTitle = route.station === 'home' ? homeTitle : activeProject
-      ? `${activeProject.name} — ${t.projectDetails} | Sobuj Miah | The Pocket Systems Lab`
-      : `${sectionName} — Sobuj Miah | The Pocket Systems Lab`;
-    const description = activeProject
-      ? `${activeProject.strapline[language]} ${activeProject.problem[language]}`
-      : route.station === 'notes' ? t.notesIntro
-      : route.station === 'about' ? t.aboutIntro
-      : route.station === 'contact' ? t.contactIntro
-      : route.station === 'work' ? t.projectsIntro
-      : route.station === 'services' ? t.servicesIntro
-      : route.station === 'process' ? t.processIntro
-      : language === 'bn'
-        ? 'হাতের মুঠোয় শুরু হয় এই কর্মশালা। অ্যান্ড্রয়েড-প্রথম সিস্টেম ল্যাব থেকে ব্যবহারিক সফটওয়্যার, ARM64 Android/Linux toolchain, লোকাল AI ও কাজের workflow তৈরি করেন সবুজ মিয়া।'
-        : 'The workshop begins in your hand. Sobuj Miah builds practical software, ARM64 Android/Linux toolchains, on-device AI runtimes, and bilingual workflows from an Android-first systems lab in Dhaka, Bangladesh.';
-    document.title = pageTitle;
-    const descriptionMeta = document.querySelector('meta[name="description"]');
-    if (descriptionMeta) descriptionMeta.setAttribute('content', description);
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute('content', pageTitle);
-    const ogDescription = document.querySelector('meta[property="og:description"]');
-    if (ogDescription) ogDescription.setAttribute('content', description);
-    const twitterTitle = document.querySelector('meta[name="twitter:title"]');
-    if (twitterTitle) twitterTitle.setAttribute('content', pageTitle);
-    const twitterDescription = document.querySelector('meta[name="twitter:description"]');
-    if (twitterDescription) twitterDescription.setAttribute('content', description);
-    const canonical = document.querySelector('link[rel="canonical"]');
-    const pageUrl = `https://soobujmiah.github.io${routePath(route.station, route.project)}`;
-    if (canonical) canonical.setAttribute('href', pageUrl);
-    const ogUrl = document.querySelector('meta[property="og:url"]');
-    if (ogUrl) ogUrl.setAttribute('content', pageUrl);
-    const ogLocale = document.querySelector('meta[property="og:locale"]');
-    if (ogLocale) ogLocale.setAttribute('content', language === 'bn' ? 'bn_BD' : 'en_US');
-    const alternateLocale = document.querySelector('meta[property="og:locale:alternate"]');
-    if (alternateLocale) alternateLocale.setAttribute('content', language === 'bn' ? 'en_US' : 'bn_BD');
-    try { localStorage.setItem('pocket-lab-language', language); } catch { /* storage is optional */ }
-  }, [language, route, activeProject]);
+    document.documentElement.lang = lang;
+    document.documentElement.dataset.locale = lang;
+    document.title = meta.title;
+    setMeta('meta[name="description"]', 'content', meta.description);
+    setMeta('meta[property="og:title"]', 'content', meta.title);
+    setMeta('meta[property="og:description"]', 'content', meta.description);
+    setMeta('meta[property="og:url"]', 'content', `${site.site.url}${route.path}`);
+    setMeta('meta[name="twitter:title"]', 'content', meta.title);
+    setMeta('meta[name="twitter:description"]', 'content', meta.description);
+    setMeta('link[rel="canonical"]', 'href', `${site.site.url}${route.path}`);
+  }, [lang, meta, route.path]);
 
-  const activeStationRef = useRef(route.station);
-  const scrollDrivenRef = useRef(false);
+  let content;
+  if (kind === 'home') content = <HomePage lang={lang} copy={homeCopy} />;
+  else if (kind === 'about') content = <div className="page-shell"><AboutPage lang={lang} copy={locale.about} /></div>;
+  else if (kind === 'services') content = <div className="page-shell"><ServicesPage lang={lang} copy={locale.services} /></div>;
+  else if (kind === 'service') content = <div className="page-shell"><ServiceDetail lang={lang} copy={locale.services} slug={route.slug ?? ''} /></div>;
+  else if (kind === 'experience') content = <div className="page-shell"><ExperiencePage lang={lang} copy={locale.experience} /></div>;
+  else if (kind === 'projects') content = <div className="page-shell"><ProjectsPage lang={lang} copy={locale.projects} /></div>;
+  else if (kind === 'project') content = <div className="page-shell"><ProjectDetail lang={lang} copy={locale.projects} slug={route.slug ?? ''} /></div>;
+  else if (kind === 'research') content = <div className="page-shell"><ResearchPage lang={lang} copy={locale.research} /></div>;
+  else if (kind === 'contact') content = <div className="page-shell"><ContactPage lang={lang} copy={locale.contact} /></div>;
+  else content = <div className="page-shell"><NotFound lang={lang} /></div>;
 
-  useEffect(() => {
-    const initial = readRoute();
-    if (initial.station !== 'home') {
-      requestAnimationFrame(() => document.getElementById(`station-${initial.station}`)?.scrollIntoView({ block: 'start' }));
-    }
-    const handlePop = () => {
-      const next = readRoute();
-      activeStationRef.current = next.station;
-      setRoute(next);
-      requestAnimationFrame(() => document.getElementById(`station-${next.station}`)?.scrollIntoView({ block: 'start' }));
-    };
-    window.addEventListener('popstate', handlePop);
-    return () => window.removeEventListener('popstate', handlePop);
-  }, []);
-
-  useEffect(() => {
-    const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-story-station]'));
-    let frame = 0;
-    const updateActiveStation = () => {
-      frame = 0;
-      const marker = Math.min(window.innerHeight * 0.52, window.innerHeight - 90);
-      const current = sections.find(section => {
-        const rect = section.getBoundingClientRect();
-        return rect.top <= marker && rect.bottom > marker;
-      });
-      const station = current?.dataset.storyStation as Station | undefined;
-      if (!station || activeStationRef.current === station) return;
-      activeStationRef.current = station;
-      scrollDrivenRef.current = true;
-      setRoute({ station, project: null });
-      window.history.replaceState({ pocketLab: true, scrollDriven: true }, '', `${routePath(station)}${window.location.hash}`);
-    };
-    const scheduleUpdate = () => { if (!frame) frame = requestAnimationFrame(updateActiveStation); };
-    window.addEventListener('scroll', scheduleUpdate, { passive: true });
-    window.addEventListener('resize', scheduleUpdate);
-    scheduleUpdate();
-    return () => {
-      window.removeEventListener('scroll', scheduleUpdate);
-      window.removeEventListener('resize', scheduleUpdate);
-      if (frame) cancelAnimationFrame(frame);
-    };
-  }, []);
-
-  useEffect(() => {
-    const previous = previousRoute.current;
-    previousRoute.current = route;
-    if (previous.station === route.station && previous.project === route.project) return;
-    if (sceneActionRef.current) { sceneActionRef.current = false; return; }
-    if (scrollDrivenRef.current) { scrollDrivenRef.current = false; return; }
-    const frame = requestAnimationFrame(() => document.getElementById(`station-heading-${route.station}`)?.focus({ preventScroll: true }));
-    return () => cancelAnimationFrame(frame);
-  }, [route]);
-
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        if (mobileMenuOpen) setMobileMenuOpen(false);
-        else if (route.project) navigate(route.station, null);
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [mobileMenuOpen, route]);
-
-  const navigate = useCallback((station: Station, project: string | null = null, replace = false) => {
-    const next: RouteState = { station, project };
-    activeStationRef.current = station;
-    const url = `${routePath(station, project)}${window.location.hash}`;
-    window.history[replace ? 'replaceState' : 'pushState']({ ...next, pocketLab: true }, '', url);
-    setRoute(next);
-    setMobileMenuOpen(false);
-    requestAnimationFrame(() => document.getElementById(`station-${station}`)?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' }));
-  }, [reducedMotion]);
-  const sceneActionRef = useRef(false);
-  const handleSceneAction = useCallback((station: Station, project: string | null) => {
-    sceneActionRef.current = true;
-    navigate(station, project);
-  }, [navigate]);
-
-  useEffect(() => {
-    const handleMotion = (event: MediaQueryListEvent) => {
-      setReducedMotion(event.matches);
-      if (event.matches) { setMode('schematic'); setPaused(true); scene?.setReducedMotion(true); }
-      else { setPaused(false); }
-    };
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    query.addEventListener('change', handleMotion);
-    return () => query.removeEventListener('change', handleMotion);
-  }, [scene]);
-
-  useEffect(() => {
-    const query = window.matchMedia('(orientation: portrait)');
-    const handleOrientation = (event: MediaQueryListEvent) => {
-      if (event.matches) { setMode('schematic'); setScene(null); }
-    };
-    query.addEventListener('change', handleOrientation);
-    return () => query.removeEventListener('change', handleOrientation);
-  }, []);
-
-  useEffect(() => { scene?.update(sceneConfig); }, [route, paused, reducedMotion, scene]);
-
-  const toggleLanguage = () => setLanguage(value => value === 'en' ? 'bn' : 'en');
-  const toggleRenderMode = () => {
-    if (webglFailed) {
-      setWebglFailed(false);
-      setMode('3d');
-      setPaused(reducedMotion);
-      return;
-    }
-    if (mode === '3d') { setMode('schematic'); setScene(null); }
-    else { setMode('3d'); setPaused(reducedMotion); }
-  };
-  const togglePause = () => {
-    const next = !paused;
-    setPaused(next);
-    scene?.setPaused(next);
-  };
-  const goExplore = () => navigate('work');
-  const startConversation = () => navigate('contact');
-
-  return (
-    <div className={`app-shell lang-${language} ${mode === 'schematic' ? 'mode-schematic' : ''}`} data-world-mode={use3D ? '3d' : 'fallback'}>
-      <a className="skip-link" href="#main-content" onClick={() => setMode('schematic')}>{t.skipContent}</a>
-      <div className="world-backdrop" aria-hidden="true" />
-      <div className="world-viewport" aria-hidden="true">
-        {sceneRequested ? <ScenePanel config={sceneConfig} renderMode={mode} language={language} onFailure={failScene} onReady={setSceneRef} onAction={handleSceneAction} /> : <Schematic station={route.station} project={route.project} language={language} />}
-        <div className="world-vignette" />
-        <div className="world-label world-label-left"><span>PSL / 01</span><i />{activeProject?.name ?? 'POCKET SYSTEMS'}</div>
-        <div className="world-label world-label-right">{t.scene} {navItems.find(item => item.id === route.station)?.number ?? '00'}</div>
-      </div>
-
-      <header className="topbar">
-        <button className="brand-lockup" type="button" onClick={() => navigate('home')} aria-label={language === 'en' ? 'Return to Pocket Systems Lab' : 'পকেট সিস্টেমস ল্যাবে ফিরুন'}>
-          <span className="brand-mark"><Smartphone size={17} strokeWidth={1.65} /><span /></span>
-          <span className="brand-words"><strong>SOBUJ MIAH</strong><small>POCKET SYSTEMS LAB</small></span>
-        </button>
-        <nav className={`main-nav ${mobileMenuOpen ? 'nav-open' : ''}`} aria-label={language === 'en' ? 'Main navigation' : 'মূল নেভিগেশন'}>
-          {navItems.map(item => (
-            <button key={item.id} type="button" className={`nav-link ${route.station === item.id ? 'is-active' : ''}`} aria-current={route.station === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}>
-              <span className="nav-index">{item.number}</span>{item.label[language]}
-            </button>
-          ))}
-        </nav>
-        <div className="topbar-actions">
-          <button className="lang-switch" onClick={toggleLanguage} type="button" aria-label={`${t.language}: ${language === 'en' ? 'বাংলা' : 'English'}`} title={t.language}>
-            <Languages size={15} /><span>{language === 'en' ? 'EN' : 'বাংলা'}</span>
-          </button>
-          <button className="menu-trigger icon-button" onClick={() => setMobileMenuOpen(value => !value)} type="button" aria-label={mobileMenuOpen ? t.closeMenu : t.openMenu} aria-expanded={mobileMenuOpen}>
-            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
-          </button>
-        </div>
-      </header>
-
-      {(webglFailed || reducedMotion) && <p className="mode-notice" role="status">{webglFailed ? t.notWebgl : t.reduced}</p>}
-      <div className="scene-meta" aria-label={`${t.environment} · ${t.scene} ${navItems.find(item => item.id === route.station)?.number}`}>
-        <span className="live-indicator"><i />{t.environment}</span>
-        <span className="meta-separator" />
-        <span>{t.wayfinding} <b>{navItems.find(item => item.id === route.station)?.number}</b></span>
-      </div>
-
-      <main id="main-content" tabIndex={-1} className="story-scroll" onFocusCapture={() => { if (use3D) setMode('schematic'); }}>
-        {navItems.map(item => {
-          const showProject = item.id === 'work' && route.station === 'work' ? activeProject : null;
-          return <section id={`station-${item.id}`} data-story-station={item.id} className={`story-stop story-${item.id}`} key={item.id} aria-label={item.label[language]}>
-            <div className={`content-panel content-${item.id} ${showProject ? 'has-project' : ''}`} key={`${item.id}-${showProject?.id ?? 'index'}`}>
-              {item.id === 'home' && <HomeView language={language} t={t} onExplore={goExplore} onContact={startConversation} />}
-              {item.id === 'work' && <WorkView language={language} t={t} project={showProject} onSelect={id => navigate('work', id)} onBack={() => navigate('home')} onNext={() => {
-                const index = showProject ? projects.findIndex(project => project.id === showProject.id) : 0;
-                navigate('work', projects[(index + 1) % projects.length].id);
-              }} />}
-              {item.id === 'process' && <ProcessView language={language} t={t} />}
-              {item.id === 'services' && <ServicesView language={language} t={t} onContact={startConversation} />}
-              {item.id === 'about' && <AboutView language={language} t={t} />}
-              {item.id === 'notes' && <NotesView language={language} t={t} />}
-              {item.id === 'contact' && <ContactView language={language} t={t} />}
-            </div>
-          </section>;
-        })}
-      </main>
-
-      <div className="bottom-controls">
-        <div className="bottom-status"><span className={`mode-led ${use3D ? 'mode-led-live' : ''}`} />{language === 'en' ? (use3D ? 'WEBGL / ACTIVE' : 'SCHEMATIC / READY') : (use3D ? 'WEBGL / চালু' : '২ডি নকশা / প্রস্তুত')}</div>
-        <div className="control-group">
-          {!reducedMotion && <button className="control-button" type="button" onClick={togglePause} aria-label={paused ? t.resume : t.pause} title={paused ? t.resume : t.pause}>{paused ? <Play size={15} /> : <Pause size={15} />}<span>{paused ? t.resume : t.pause}</span></button>}
-          <button className={`control-button control-readable ${mode === 'schematic' ? 'control-active' : ''}`} type="button" onClick={toggleRenderMode} aria-label={webglFailed ? t.retry3D : mode === '3d' ? t.textView : t.returnToScene} title={webglFailed ? t.retry3D : mode === '3d' ? t.textView : t.returnToScene}><Monitor size={15} /><span>{webglFailed ? t.retry3D : mode === '3d' ? t.textView : t.returnToScene}</span></button>
-          <span className="quality-label"><span className="quality-bars"><i /><i /><i /></span>{language === 'en' ? (use3D ? 'ADAPTIVE' : 'LOW POWER') : (use3D ? 'মানিয়ে নেওয়া' : 'কম শক্তি')}</span>
-        </div>
-      </div>
-
-      <footer className="page-footer">
-        <span>© 2026 SOBUJ MIAH · {t.footer}</span>
-        <a href="https://github.com/soobujmiah" target="_blank" rel="noreferrer">GITHUB <ArrowUpRight size={12} /></a>
-      </footer>
-    </div>
-  );
-}
-
-function HomeView({ language, t, onExplore, onContact }: { language: Language; t: typeof copy.en | typeof copy.bn; onExplore: () => void; onContact: () => void }) {
-  return (
-    <div className="hero-view">
-      <div className="hero-copy">
-        <div className="eyebrow"><span className="eyebrow-line" />{t.eyebrow}</div>
-        <h1 id="station-heading-home" tabIndex={-1} className="hero-title">{language === 'en' ? <>The workshop<br /><em>begins in your hand.</em></> : <>হাতের মুঠোয়<br /><em>শুরু হয় এই কর্মশালা।</em></>}</h1>
-        <p className="hero-name">Sobuj Miah <span>· {t.role}</span></p>
-        <p className="hero-support">{t.support}</p>
-        <div className="hero-actions">
-          <button className="button-primary" type="button" onClick={onExplore}>{t.explore}<ArrowRight size={16} /></button>
-          <button className="button-quiet" type="button" onClick={onContact}><Radio size={15} />{t.conversation}</button>
-        </div>
-      </div>
-      <div className="hero-side-note"><span className="side-note-rule" /><span>ANDROID-FIRST<br />SYSTEMS BUILDER</span><span className="side-note-index">PSL—01</span></div>
-      <div className="hero-floor-label"><span>01 / 07</span><span>SCROLL OR CHOOSE A STATION</span><ArrowDownRight size={14} /></div>
-    </div>
-  );
-}
-
-function WorkView({ language, t, project, onSelect, onBack, onNext }: { language: Language; t: typeof copy.en | typeof copy.bn; project: Project | null; onSelect: (id: string) => void; onBack: () => void; onNext: () => void }) {
-  const [expanded, setExpanded] = useState<'purpose'|'built'|'verified'|'limits'>('purpose');
-  useEffect(() => setExpanded('purpose'), [project?.id]);
-  if (project) {
-    const sections = [
-      { id: 'purpose' as const, title: t.purpose, content: <p>{project.problem[language]}</p> },
-      { id: 'built' as const, title: t.built, content: <ul>{project.built[language].map(text => <li key={text}>{text}</li>)}</ul> },
-      { id: 'verified' as const, title: t.evidence, content: <ul>{project.verified[language].map(text => <li key={text}>{text}</li>)}</ul> },
-      { id: 'limits' as const, title: t.limits, content: <ul>{project.limits[language].map(text => <li key={text}>{text}</li>)}</ul> },
-    ];
-    return (
-      <div className="project-detail-view">
-        <div className="detail-toolbar"><button className="back-link" type="button" onClick={onBack}><ArrowLeft size={15} />{t.back}</button><span className="detail-path">{language === 'en' ? 'WORK' : 'কাজ'} / {project.id.toUpperCase()}</span></div>
-        <div className="project-detail-heading">
-          <div><div className="eyebrow"><span className="eyebrow-line" />{language === 'en' ? 'PROJECT STATION' : 'প্রকল্প স্টেশন'}</div><h1 id="station-heading-work" tabIndex={-1} className="section-title">{project.name}<span className="title-period">.</span></h1><p className="project-strapline">{project.strapline[language]}</p></div>
-          <StatusPill kind={project.status} label={t[project.status]} />
-        </div>
-        <div className="detail-status-note"><ShieldCheck size={14} />{t[project.status === 'verified' ? 'statusVerified' : project.status === 'experimental' ? 'statusExperimental' : 'statusBoundary']}</div>
-        <div className="detail-sections">
-          {sections.map(section => <div className={`detail-section ${expanded === section.id ? 'detail-section-open' : ''}`} key={section.id}>
-            <button className="detail-section-button" type="button" aria-expanded={expanded === section.id} onClick={() => setExpanded(current => current === section.id ? 'purpose' : section.id)}><span>{section.title}</span><ChevronDown size={15} /></button>
-            {expanded === section.id && <div className="detail-section-content">{section.content}</div>}
-          </div>)}
-        </div>
-        <div className="detail-links">
-          <a href={project.repo} target="_blank" rel="noreferrer"><GitBranch size={14} />{t.source}<ExternalLink size={12} /></a>
-          {project.demo && <a href={project.demo} target="_blank" rel="noreferrer"><Eye size={14} />{t.liveDocs}<ExternalLink size={12} /></a>}
-          {project.release && <a href={project.release} target="_blank" rel="noreferrer"><ArrowDownRight size={14} />{t.releases}<ExternalLink size={12} /></a>}
-        </div>
-        <div className="detail-next-row"><span>STATION / {String(projects.findIndex(item => item.id === project.id) + 1).padStart(2, '0')}</span><button type="button" className="next-project" onClick={onNext}>{t.alternate}<ArrowRight size={15} /></button></div>
-      </div>
-    );
-  }
-  return (
-    <div className="work-index-view">
-      <div className="eyebrow"><span className="eyebrow-line" />{t.work} / 01</div>
-      <div className="section-heading-row"><h1 id="station-heading-work" tabIndex={-1} className="section-title">{t.projects}<span className="title-period">.</span></h1><span className="heading-mark"><Cpu size={16} />{language === 'en' ? 'SOURCE-GROUNDED' : 'তথ্যসূত্র-ভিত্তিক'}</span></div>
-      <p className="section-intro">{t.projectsIntro}</p>
-      <div className="project-list" aria-label={t.selectProject}>
-        {projects.map((item, index) => <button className="project-row" type="button" key={item.id} onClick={() => onSelect(item.id)}>
-          <span className="project-row-index">0{index + 1}</span><span className={`project-token token-${item.id}`}><span className="token-core">{item.name.slice(0, 1)}</span><span className="token-orbit" /></span>
-          <span className="project-row-copy"><strong>{item.name}</strong><small>{item.strapline[language]}</small></span><span className="project-row-status"><i className={`status-dot dot-${item.status}`} />{t[item.status]}</span><ArrowUpRight className="project-row-arrow" size={17} />
-        </button>)}
-      </div>
-      <p className="list-footnote"><ShieldCheck size={13} />{language === 'en' ? 'Private repositories and unapproved project material are not shown.' : 'ব্যক্তিগত repository ও অনুমোদনহীন প্রকল্পের তথ্য এখানে দেখানো হয়নি।'}</p>
-    </div>
-  );
-}
-
-function ProcessView({ language, t }: { language: Language; t: typeof copy.en | typeof copy.bn }) {
-  const [activeStep, setActiveStep] = useState(0);
-  return <div className="section-view">
-    <div className="eyebrow"><span className="eyebrow-line" />{language === 'en' ? 'WORKFLOW / 02' : 'কাজের ধারা / ০২'}</div>
-    <h1 id="station-heading-process" tabIndex={-1} className="section-title">{t.processTitle}<span className="title-period">.</span></h1>
-    <p className="section-intro">{t.processIntro}</p>
-    <div className="process-layout">
-      <div className="process-rail" role="group" aria-label={t.processTitle}>
-        {processSteps.map((step, index) => <button aria-pressed={activeStep === index} aria-controls="process-detail-panel" className={`process-step ${activeStep === index ? 'step-active' : ''} ${step.color === 'amber' ? 'step-amber' : ''}`} key={step.id} onClick={() => setActiveStep(index)} type="button"><span className="process-index">0{index + 1}</span><span className="process-glyph">{step.icon}</span><span className="process-name">{language === 'en' ? step.en : step.bn}</span><span className="process-node" /></button>)}
-      </div>
-      <div id="process-detail-panel" className={`process-detail detail-${processSteps[activeStep].color}`} aria-live="polite" aria-atomic="true">
-        <span className="process-detail-index">STEP / 0{activeStep + 1}</span><span className="process-detail-icon">{processSteps[activeStep].icon}</span>
-        <h2>{language === 'en' ? processSteps[activeStep].en : processSteps[activeStep].bn}</h2>
-        <p>{language === 'en' ? processSteps[activeStep].detailEn : processSteps[activeStep].detailBn}</p>
-        <div className="process-current"><span /><span>{language === 'en' ? 'EVIDENCE LOOP' : 'প্রমাণের চক্র'}</span><RotateCcw size={14} /></div>
-      </div>
-    </div>
-    <p className="process-note"><span className="status-dot dot-experimental" />{language === 'en' ? 'Project-specific tools, build authority, and device acceptance differ. This is a working principle—not a live process monitor.' : 'প্রকল্পভেদে tool, build authority ও device acceptance আলাদা। এটি কাজের নীতি—live process monitor নয়।'}</p>
-  </div>;
-}
-
-function ServicesView({ language, t, onContact }: { language: Language; t: typeof copy.en | typeof copy.bn; onContact: () => void }) {
-  return <div className="section-view">
-    <div className="eyebrow"><span className="eyebrow-line" />{language === 'en' ? 'TOOL STATION / 03' : 'টুল স্টেশন / ০৩'}</div>
-    <h1 id="station-heading-services" tabIndex={-1} className="section-title">{t.servicesTitle}<span className="title-period">.</span></h1>
-    <p className="section-intro">{t.servicesIntro}</p>
-    <div className="service-bench">
-      {services.map((service, index) => <article className="service-tool" key={service.id}>
-        <span className="service-index">0{index + 1} / TOOL</span><span className="service-icon">{service.icon}</span><h2>{service.title[language]}</h2><p>{service.body[language]}</p><span className="service-endline" />
-      </article>)}
-    </div>
-    <button className="button-primary service-contact" onClick={onContact} type="button">{t.conversation}<ArrowRight size={15} /></button>
-  </div>;
-}
-
-function AboutView({ language, t }: { language: Language; t: typeof copy.en | typeof copy.bn }) {
-  return <div className="section-view about-view">
-    <div className="eyebrow"><span className="eyebrow-line" />{language === 'en' ? 'FIELD NOTEBOOK / 04' : 'কাজের নোটবই / ০৪'}</div>
-    <h1 id="station-heading-about" tabIndex={-1} className="section-title">{t.aboutTitle}<span className="title-period">.</span></h1>
-    <p className="about-lede">{t.aboutIntro}</p>
-    <div className="about-columns">
-      <div className="notebook-card">
-        <div className="notebook-top"><BookOpen size={15} /><span>NOTE / 01</span><span className="notebook-dot" /></div>
-        <p className="notebook-quote">{language === 'en' ? '“Document everything, verify before reporting, own the outcome.”' : '“সব নথিবদ্ধ করো, রিপোর্টের আগে যাচাই করো, ফলাফলের দায় নাও।”'}</p>
-        <div className="notebook-signature">S. MIAH <span>· SAVAR / DHAKA</span></div>
-        <div className="notebook-lines" />
-      </div>
-      <div className="principles-panel"><h2>{t.principles}</h2><ul>{t.principlesList.map((item, index) => <li key={item}><span>0{index + 1}</span>{item}</li>)}</ul><p className="education-note"><span className="status-dot dot-verified" />{language === 'en' ? 'Self-educated; no formal engineering degree or certification is claimed.' : 'স্বশিক্ষিত; কোনো আনুষ্ঠানিক engineering degree বা certification দাবি করা হয় না।'}</p></div>
-    </div>
-  </div>;
-}
-
-function NotesView({ language, t }: { language: Language; t: typeof copy.en | typeof copy.bn }) {
-  return <div className="section-view notes-view">
-    <div className="eyebrow"><span className="eyebrow-line" />{language === 'en' ? 'FIELD NOTES / 05' : 'কাজের নোট / ০৫'}</div>
-    <h1 id="station-heading-notes" tabIndex={-1} className="section-title">{t.notesTitle}<span className="title-period">.</span></h1>
-    <p className="section-intro">{t.notesIntro}</p>
-    <div className="field-note-grid">
-      {fieldNotes.map((note, index) => <article className="field-note" key={note.id}>
-        <div className="field-note-top"><span>FIELD NOTE / 0{index + 1}</span><span className="field-note-mark" aria-hidden="true" /></div>
-        <h2>{note.title[language]}</h2>
-        <p>{note.finding[language]}</p>
-        <div className="field-note-boundary"><span>{language === 'en' ? 'BOUNDARY' : 'সীমা'}</span><p>{note.boundary[language]}</p></div>
-        <a href={note.source} target="_blank" rel="noreferrer">{t.sourceNote}<ArrowUpRight size={13} /></a>
-      </article>)}
-    </div>
-  </div>;
-}
-
-function ContactView({ language, t }: { language: Language; t: typeof copy.en | typeof copy.bn }) {
-  const links = [
-    { label: t.github, href: 'https://github.com/soobujmiah', icon: <GitBranch size={16} /> },
-    { label: t.linkedin, href: 'https://linkedin.com/in/soobujmiah', icon: <ExternalLink size={15} /> },
-    { label: t.devto, href: 'https://dev.to/soobujmiah', icon: <Terminal size={15} /> },
-    { label: t.telegram, href: 'https://t.me/soobujmiah', icon: <Radio size={15} /> },
-  ];
-  return <div className="section-view contact-view">
-    <div className="eyebrow"><span className="eyebrow-line" />{language === 'en' ? 'COMMUNICATIONS / 06' : 'যোগাযোগ / ০৬'}</div>
-    <div className="contact-beacon"><span /><span /><span /><Radio size={19} /></div>
-    <h1 id="station-heading-contact" tabIndex={-1} className="section-title">{t.contactTitle}<span className="title-period">.</span></h1>
-    <p className="section-intro">{t.contactIntro}</p>
-    <a className="email-signal" href="mailto:soobujmiah@gmail.com"><span className="email-icon"><Mail size={17} /></span><span><small>{t.email}</small><strong>soobujmiah@gmail.com</strong></span><ArrowUpRight size={17} /></a>
-    <div className="contact-links">{links.map(link => <a href={link.href} target="_blank" rel="noreferrer" key={link.label}>{link.icon}<span>{link.label}</span><ArrowUpRight className="link-arrow" size={13} /></a>)}</div>
-    <div className="contact-location"><span className="location-pulse" />{t.location}<span>GMT+6</span></div>
-  </div>;
+  return <><a className="skip-link" href="#main">{lang === 'en' ? 'Skip to content' : 'মূল কনটেন্টে যান'}</a><Header lang={lang} path={route.path} /><main id="main">{content}</main><Footer lang={lang} /></>;
 }
 
 export default App;

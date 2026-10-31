@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the local, dependency-free Pocket Systems Lab social preview image."""
+"""Build the local, dependency-free Sobuj Miah portfolio social preview image."""
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
@@ -60,15 +60,15 @@ for x, y, label in [(1084, 170, "01"), (1097, 256, "02"), (1082, 346, "03"), (10
 # Approved name, positioning, and concept line.
 draw.rounded_rectangle((78, 86, 311, 116), radius=15, fill=(34, 197, 94, 20), outline=(74, 222, 128, 83), width=1)
 draw.ellipse((94, 98, 102, 106), fill=(74, 222, 128, 255))
-draw.text((114, 94), "THE POCKET SYSTEMS LAB", font=font("mono", 13), fill=(153, 224, 174, 245))
+draw.text((114, 94), "SOFTWARE · ANDROID · OPERATIONS", font=font("mono", 13), fill=(153, 224, 174, 245))
 draw.text((78, 167), "Sobuj Miah", font=font("serif", 78), fill=(232, 231, 225, 255))
-draw.text((80, 266), "The workshop begins", font=font("serif", 43), fill=(228, 226, 223, 242))
-draw.text((80, 314), "in your hand.", font=font("serif", 43), fill=(74, 222, 128, 255))
+draw.text((80, 266), "Systems made useful.", font=font("serif", 43), fill=(228, 226, 223, 242))
+draw.text((80, 314), "Work, in order.", font=font("serif", 43), fill=(74, 222, 128, 255))
 draw.line((81, 386, 146, 386), fill=(74, 222, 128, 220), width=2)
-draw.text((81, 410), "INDEPENDENT SOFTWARE & AI SYSTEMS BUILDER", font=font("mono", 12), fill=(174, 184, 177, 238))
-draw.text((81, 454), "ANDROID-FIRST  /  EVIDENCE-LED  /  BILINGUAL", font=font("mono", 10), fill=(126, 140, 131, 223))
+draw.text((81, 410), "INDEPENDENT SOFTWARE & AI SYSTEMS ENGINEER", font=font("mono", 12), fill=(174, 184, 177, 238))
+draw.text((81, 454), "SOFTWARE  /  SYSTEMS  /  PRACTICAL SUPPORT", font=font("mono", 10), fill=(126, 140, 131, 223))
 draw.text((81, 566), "SAVAR, DHAKA, BANGLADESH", font=font("mono", 10), fill=(107, 123, 113, 210))
-draw.text((1018, 574), "PSL / 01", font=font("mono", 9), fill=(110, 151, 122, 210))
+draw.text((1018, 574), "SM / 01", font=font("mono", 9), fill=(110, 151, 122, 210))
 
 image.save(OUT, format="PNG", optimize=True)
 print(f"Wrote {OUT} ({OUT.stat().st_size} bytes; {W}x{H})")

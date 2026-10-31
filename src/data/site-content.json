@@ -1,0 +1,404 @@
+{
+  "site": {
+    "name": "Sobuj Miah",
+    "url": "https://soobujmiah.github.io",
+    "email": "soobujmiah@gmail.com",
+    "phone": "+880 1617 040846",
+    "phoneHref": "+8801617040846",
+    "location": { "en": "Savar, Dhaka, Bangladesh", "bn": "সাভার, ঢাকা, বাংলাদেশ" },
+    "languages": [
+      { "en": "Bangla", "bn": "বাংলা", "levelEn": "Native", "levelBn": "মাতৃভাষা" },
+      { "en": "English", "bn": "ইংরেজি", "levelEn": "Fluent", "levelBn": "সাবলীল" },
+      { "en": "Hindi", "bn": "হিন্দি", "levelEn": "Fluent conversational", "levelBn": "কথোপকথনে সাবলীল" },
+      { "en": "Urdu", "bn": "উর্দু", "levelEn": "Fluent conversational", "levelBn": "কথোপকথনে সাবলীল" },
+      { "en": "Arabic", "bn": "আরবি", "levelEn": "Conversational", "levelBn": "কথোপকথন পর্যায়ে" }
+    ],
+    "social": [
+      { "label": "GitHub", "href": "https://github.com/soobujmiah" },
+      { "label": "LinkedIn", "href": "https://linkedin.com/in/soobujmiah" },
+      { "label": "Telegram", "href": "https://t.me/soobujmiah" },
+      { "label": "WhatsApp", "href": "https://wa.me/8801617040846" }
+    ]
+  },
+  "pages": {
+    "en": {
+      "home": {
+        "title": "Sobuj Miah — Software, AI & Operations",
+        "description": "Sobuj Miah is an independent software and AI systems builder in Savar, Dhaka, combining practical engineering with dependable office and digital operations.",
+        "eyebrow": "INDEPENDENT ENGINEER · SAVAR, DHAKA",
+        "headline": "Operations, made reliable. Systems, made useful.",
+        "deck": "I bring office operations and hands-on engineering together: practical software, Android and Linux systems, and digital support grounded in real work.",
+        "identity": "Independent Software & AI Systems Engineer · Web Developer · Operations Support",
+        "primary": "Explore the work",
+        "secondary": "View services",
+        "visualLabel": "A working systems bench",
+        "visualCaption": "SOFTWARE · ANDROID · OPERATIONS",
+        "selectedTitle": "Selected work",
+        "selectedIntro": "Public projects with clear evidence and honest boundaries.",
+        "servicesTitle": "Practical services",
+        "servicesIntro": "Technical and operational support shaped around the work that needs doing.",
+        "aboutTitle": "Two sides of useful work",
+        "aboutIntro": "My background spans office and site operations, alongside self-directed engineering across Linux, Android, local AI, and software tools.",
+        "contactTitle": "Have a real problem to solve?",
+        "contactIntro": "Tell me what is getting in the way. We can work out a practical next step."
+      },
+      "about": {
+        "title": "About Sobuj Miah — Operations & Engineering",
+        "description": "Meet Sobuj Miah: an office administrator and self-taught software and systems builder based in Savar, Dhaka.",
+        "eyebrow": "ABOUT · OPERATIONS MEET ENGINEERING",
+        "headline": "Operations discipline. Engineering curiosity.",
+        "lede": "Someone who can keep the back office moving—and build the tools that make the work clearer.",
+        "paragraphs": [
+          "I’m Sobuj Miah, an office administrator and self-taught systems builder based in Savar, Dhaka. My professional work has taken me from industrial project sites in Saudi Arabia to the daily administration of an education organisation in Bangladesh.",
+          "On project sites, I worked across fire watch, progress reporting, electrical work, and coordination. Accuracy mattered: information had to be collected carefully, checked, and reported clearly.",
+          "That same approach now guides my administrative and digital operations work: keep records organised, follow through on details, and improve the workflow where a practical tool can help.",
+          "Alongside that work, I have taught myself Linux, Android, and software engineering by building and documenting real systems with an Android phone as my main workstation. I keep measured results separate from experiments and plans."
+        ],
+        "principleTitle": "How I work",
+        "principle": "Document the work. Verify before reporting. Own the outcome.",
+        "factsTitle": "At a glance",
+        "educationLabel": "Education",
+        "educationValue": "Self-educated",
+        "availabilityLabel": "Availability",
+        "availabilityValue": "Open to freelance and remote work",
+        "experienceLabel": "Experience",
+        "experienceValue": "8+ years, self-reported",
+        "languagesTitle": "Languages"
+      },
+      "services": {
+        "title": "Services — Software, Technology & Operations Support",
+        "description": "Website and software development, computer and Android support, design, SEO, office administration, and data services by Sobuj Miah.",
+        "eyebrow": "SERVICES · PRACTICAL SUPPORT",
+        "headline": "What can I take off your plate?",
+        "lede": "Choose a service to see the work it covers. Scope and deliverables are agreed around your actual workflow.",
+        "detailLabel": "Service details",
+        "deliverablesLabel": "Typical work",
+        "contactLabel": "Discuss this service",
+        "backLabel": "All services"
+      },
+      "experience": {
+        "title": "Experience — Office Operations & Technical Work",
+        "description": "Professional experience in office administration, coordination, electrical work, progress reporting, fire safety, and email marketing.",
+        "eyebrow": "EXPERIENCE · BANGLADESH & SAUDI ARABIA",
+        "headline": "Eight years of work across two countries.",
+        "lede": "From industrial sites to day-to-day office operations, with accuracy and follow-through at the centre.",
+        "experienceNote": "Role descriptions are drawn from my own work history; dates are omitted where the source record does not provide them."
+      },
+      "projects": {
+        "title": "Projects — Software, Android & Linux Systems",
+        "description": "Selected public software and technology projects by Sobuj Miah, with implementation status and links to their source repositories.",
+        "eyebrow": "PROJECTS · SOURCE-LINKED",
+        "headline": "Built to solve actual constraints.",
+        "lede": "A selection of public projects across Android, ARM64 Linux, AI, software tooling, and practical digital work.",
+        "repoLabel": "Open repository",
+        "statusLabel": "Project boundary"
+      },
+      "research": {
+        "title": "Research & Experiments — Sobuj Miah",
+        "description": "A clear view of Sobuj Miah’s engineering research: what is verified, what is experimental, and what remains a qualification target.",
+        "eyebrow": "RESEARCH · EVIDENCE BEFORE CLAIMS",
+        "headline": "Experiments, with the boundaries in view.",
+        "lede": "I document what worked, what failed, and what still needs proof. Experimental paths are not presented as shipped capabilities.",
+        "verifiedTitle": "Verified in project evidence",
+        "experimentalTitle": "Experimental or still in qualification",
+        "plannedTitle": "Not claimed as working"
+      },
+      "contact": {
+        "title": "Contact Sobuj Miah — Software & Operations Support",
+        "description": "Contact Sobuj Miah about software, Android and Linux systems, AI tooling, web development, or operations support.",
+        "eyebrow": "CONTACT · SAVAR, DHAKA",
+        "headline": "Let’s make the next step practical.",
+        "lede": "Share the task, the constraints, and the outcome you need. I’m open to freelance and remote work.",
+        "emailLabel": "Email",
+        "phoneLabel": "Phone / WhatsApp",
+        "telegramLabel": "Telegram"
+      }
+    },
+    "bn": {
+      "home": {
+        "title": "সবুজ মিয়া — সফটওয়্যার, এআই ও পরিচালনা",
+        "description": "সবুজ মিয়া ঢাকার সাভারভিত্তিক একজন স্বতন্ত্র সফটওয়্যার ও এআই সিস্টেম নির্মাতা; ব্যবহারিক প্রকৌশলের সঙ্গে নির্ভরযোগ্য অফিস ও ডিজিটাল পরিচালনা মিলিয়ে কাজ করেন।",
+        "eyebrow": "স্বতন্ত্র প্রকৌশলী · সাভার, ঢাকা",
+        "headline": "পরিচালনায় নির্ভরযোগ্যতা। সিস্টেমে কাজের সমাধান।",
+        "deck": "অফিস পরিচালনা ও হাতে-কলমে প্রকৌশলকে একসঙ্গে আনি: ব্যবহারিক সফটওয়্যার, অ্যান্ড্রয়েড ও লিনাক্স সিস্টেম, আর বাস্তব কাজভিত্তিক ডিজিটাল সহায়তা।",
+        "identity": "স্বতন্ত্র সফটওয়্যার ও এআই সিস্টেম প্রকৌশলী · ওয়েব ডেভেলপার · পরিচালনা সহায়তা",
+        "primary": "কাজগুলো দেখুন",
+        "secondary": "সেবাগুলো দেখুন",
+        "visualLabel": "কাজের উপযোগী সিস্টেম বেঞ্চ",
+        "visualCaption": "সফটওয়্যার · অ্যান্ড্রয়েড · পরিচালনা",
+        "selectedTitle": "বাছাই করা কাজ",
+        "selectedIntro": "প্রতিটি প্রকল্পে তথ্যসূত্র ও কাজের সীমা স্পষ্ট রাখা হয়েছে।",
+        "servicesTitle": "ব্যবহারিক সেবা",
+        "servicesIntro": "যে কাজটি করতে হবে, তার ভিত্তিতে প্রযুক্তি ও পরিচালনার সহায়তা।",
+        "aboutTitle": "ব্যবহারিক কাজের দুই দিক",
+        "aboutIntro": "অফিস ও সাইট পরিচালনার পাশাপাশি লিনাক্স, অ্যান্ড্রয়েড, লোকাল এআই এবং সফটওয়্যার টুলে নিজে হাতে কাজ করেছি।",
+        "contactTitle": "বাস্তব কোনো সমস্যার সমাধান দরকার?",
+        "contactIntro": "কোন কাজটি আটকে আছে বলুন। আমরা বাস্তবসম্মত পরবর্তী ধাপ ঠিক করতে পারি।"
+      },
+      "about": {
+        "title": "সবুজ মিয়া সম্পর্কে — পরিচালনা ও প্রকৌশল",
+        "description": "সবুজ মিয়ার পরিচয়: ঢাকার সাভারভিত্তিক অফিস প্রশাসক ও স্বশিক্ষিত সফটওয়্যার এবং সিস্টেম নির্মাতা।",
+        "eyebrow": "পরিচিতি · পরিচালনা ও প্রকৌশল",
+        "headline": "পরিচালনার শৃঙ্খলা। প্রকৌশলের কৌতূহল।",
+        "lede": "দাপ্তরিক কাজ সামলানোর পাশাপাশি কাজকে সহজ করে এমন টুলও তৈরি করি।",
+        "paragraphs": [
+          "আমি সবুজ মিয়া—ঢাকার সাভারে বসবাসকারী একজন অফিস প্রশাসক ও স্বশিক্ষিত সিস্টেম নির্মাতা। সৌদি আরবের শিল্প প্রকল্পের সাইট থেকে বাংলাদেশের একটি শিক্ষা প্রতিষ্ঠানের দৈনন্দিন প্রশাসনিক কাজ—দুই ধরনের পরিবেশেই কাজ করেছি।",
+          "প্রকল্প সাইটে অগ্নিনিরাপত্তা পর্যবেক্ষণ, অগ্রগতি প্রতিবেদন, বৈদ্যুতিক কাজ ও সমন্বয়ের দায়িত্ব ছিল। নির্ভুলতা জরুরি ছিল: তথ্য যত্ন করে সংগ্রহ, যাচাই এবং পরিষ্কারভাবে জানাতে হতো।",
+          "একই পদ্ধতি এখন আমার প্রশাসনিক ও ডিজিটাল পরিচালনার কাজে অনুসরণ করি: নথি গুছিয়ে রাখা, কাজের খুঁটিনাটি শেষ করা, আর ব্যবহারিক টুলে workflow সহজ করা।",
+          "এর পাশাপাশি অ্যান্ড্রয়েড ফোনকে প্রধান কর্মযন্ত্র হিসেবে ব্যবহার করে বাস্তব সিস্টেম তৈরি ও নথিবদ্ধ করতে করতে লিনাক্স, অ্যান্ড্রয়েড ও সফটওয়্যার প্রকৌশল শিখেছি। মাপা ফলাফলকে পরীক্ষা-নিরীক্ষা ও ভবিষ্যৎ পরিকল্পনা থেকে আলাদা রাখি।"
+        ],
+        "principleTitle": "কাজের নীতি",
+        "principle": "কাজ নথিবদ্ধ করি। রিপোর্টের আগে যাচাই করি। ফলাফলের দায় নিই।",
+        "factsTitle": "সংক্ষেপে",
+        "educationLabel": "শিক্ষা",
+        "educationValue": "স্বশিক্ষিত",
+        "availabilityLabel": "কাজের সুযোগ",
+        "availabilityValue": "ফ্রিল্যান্স ও রিমোট কাজের জন্য উন্মুক্ত",
+        "experienceLabel": "অভিজ্ঞতা",
+        "experienceValue": "৮ বছরের বেশি, স্ব-প্রতিবেদিত",
+        "languagesTitle": "ভাষা"
+      },
+      "services": {
+        "title": "সেবা — সফটওয়্যার, প্রযুক্তি ও পরিচালনা সহায়তা",
+        "description": "সবুজ মিয়ার ওয়েব ও সফটওয়্যার ডেভেলপমেন্ট, কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, ডিজাইন, এসইও, অফিস প্রশাসন এবং ডেটা সেবা।",
+        "eyebrow": "সেবা · ব্যবহারিক সহায়তা",
+        "headline": "কোন কাজের দায়িত্ব আমি নিতে পারি?",
+        "lede": "কাজের ধরন জানতে প্রতিটি সেবা দেখুন। আপনার workflow অনুযায়ী পরিধি ও deliverable ঠিক হবে।",
+        "detailLabel": "সেবার বিবরণ",
+        "deliverablesLabel": "যে কাজগুলো করা যায়",
+        "contactLabel": "এই সেবা নিয়ে কথা বলুন",
+        "backLabel": "সব সেবা"
+      },
+      "experience": {
+        "title": "অভিজ্ঞতা — অফিস পরিচালনা ও কারিগরি কাজ",
+        "description": "অফিস প্রশাসন, সমন্বয়, বৈদ্যুতিক কাজ, অগ্রগতি প্রতিবেদন, অগ্নিনিরাপত্তা এবং ইমেইল মার্কেটিংয়ে সবুজ মিয়ার পেশাগত অভিজ্ঞতা।",
+        "eyebrow": "অভিজ্ঞতা · বাংলাদেশ ও সৌদি আরব",
+        "headline": "দুই দেশে আট বছরের কাজের অভিজ্ঞতা।",
+        "lede": "শিল্প প্রকল্প সাইট থেকে দৈনন্দিন অফিস পরিচালনা—কাজের কেন্দ্রে নির্ভুলতা ও follow-through।",
+        "experienceNote": "পদের বিবরণ আমার দেওয়া কাজের ইতিহাস থেকে নেওয়া। মূল তথ্যসূত্রে তারিখ না থাকায় এখানে তারিখ যোগ করা হয়নি।"
+      },
+      "projects": {
+        "title": "প্রকল্প — সফটওয়্যার, অ্যান্ড্রয়েড ও লিনাক্স সিস্টেম",
+        "description": "সবুজ মিয়ার বাছাই করা পাবলিক সফটওয়্যার ও প্রযুক্তি প্রকল্প; বাস্তবায়নের সীমা ও সোর্স repository-র লিংকসহ।",
+        "eyebrow": "প্রকল্প · সোর্স-লিংকসহ",
+        "headline": "বাস্তব সীমাবদ্ধতা মেটাতে তৈরি।",
+        "lede": "অ্যান্ড্রয়েড, ARM64 লিনাক্স, এআই, সফটওয়্যার টুল এবং ব্যবহারিক ডিজিটাল কাজের কয়েকটি পাবলিক প্রকল্প।",
+        "repoLabel": "Repository দেখুন",
+        "statusLabel": "প্রকল্পের সীমা"
+      },
+      "research": {
+        "title": "গবেষণা ও পরীক্ষা — সবুজ মিয়া",
+        "description": "সবুজ মিয়ার প্রকৌশল গবেষণার পরিষ্কার চিত্র: কোনটি যাচাই করা, কোনটি পরীক্ষামূলক, আর কোনটির আরও যোগ্যতা যাচাই দরকার।",
+        "eyebrow": "গবেষণা · দাবির আগে প্রমাণ",
+        "headline": "সীমা স্পষ্ট রেখে পরীক্ষা করি।",
+        "lede": "কী কাজ করেছে, কোথায় ব্যর্থ হয়েছে, আর কী এখনো প্রমাণ করা বাকি—সব নথিবদ্ধ করি। পরীক্ষামূলক পথকে তৈরি পণ্য বলে দেখাই না।",
+        "verifiedTitle": "প্রকল্পে যাচাই করা",
+        "experimentalTitle": "পরীক্ষামূলক বা যাচাই চলছে",
+        "plannedTitle": "কাজ করছে বলে দাবি করা হয় না"
+      },
+      "contact": {
+        "title": "যোগাযোগ — সফটওয়্যার ও পরিচালনা সহায়তা",
+        "description": "সফটওয়্যার, অ্যান্ড্রয়েড ও লিনাক্স সিস্টেম, এআই টুলিং, ওয়েব ডেভেলপমেন্ট বা পরিচালনা সহায়তার জন্য সবুজ মিয়ার সঙ্গে যোগাযোগ করুন।",
+        "eyebrow": "যোগাযোগ · সাভার, ঢাকা",
+        "headline": "পরবর্তী ধাপটা বাস্তবসম্মত করি।",
+        "lede": "কাজটি, সীমাবদ্ধতা এবং আপনার দরকারি ফলাফলটি জানান। ফ্রিল্যান্স ও রিমোট কাজের জন্য আমি উন্মুক্ত।",
+        "emailLabel": "ইমেইল",
+        "phoneLabel": "ফোন / হোয়াটসঅ্যাপ",
+        "telegramLabel": "টেলিগ্রাম"
+      }
+    }
+  },
+  "services": [
+    {
+      "slug": "web-development", "icon": "web",
+      "title": { "en": "Website Development", "bn": "ওয়েবসাইট ডেভেলপমেন্ট" },
+      "summary": { "en": "Fast, responsive websites that explain the work and make the next step clear.", "bn": "দ্রুত, responsive ওয়েবসাইট—যা কাজটি পরিষ্কারভাবে তুলে ধরে এবং পরবর্তী পদক্ষেপ সহজ করে।" },
+      "detail": { "en": "Plan and build a focused website for a person, service, or small organisation. Work can include content structure, responsive layouts, accessible interactions, search metadata, and GitHub Pages deployment.", "bn": "ব্যক্তি, সেবা বা ছোট প্রতিষ্ঠানের জন্য লক্ষ্যভিত্তিক ওয়েবসাইট পরিকল্পনা ও তৈরি। কাজের মধ্যে content structure, responsive layout, accessible interaction, search metadata এবং GitHub Pages deployment থাকতে পারে।" },
+      "deliverables": { "en": ["Page and navigation structure", "Responsive implementation", "Page titles, descriptions, and social metadata", "Build and deployment guidance"], "bn": ["পেজ ও navigation structure", "Responsive implementation", "পেজের title, description ও social metadata", "Build ও deployment নির্দেশনা"] }
+    },
+    {
+      "slug": "software-development", "icon": "software",
+      "title": { "en": "Custom Software Development", "bn": "কাস্টম সফটওয়্যার ডেভেলপমেন্ট" },
+      "summary": { "en": "Small, purpose-built software and workflow tools around a clearly defined need.", "bn": "স্পষ্ট প্রয়োজনকে কেন্দ্র করে ছোট, নির্দিষ্ট সফটওয়্যার ও workflow tool।" },
+      "detail": { "en": "Shape a problem into a practical software feature, prototype, or internal tool. Requirements, supported platforms, data boundaries, and what is not included are made explicit before implementation.", "bn": "সমস্যাকে ব্যবহারিক software feature, prototype বা internal tool-এ রূপ দেওয়া। implementation-এর আগে requirement, supported platform, data boundary এবং কোন কাজ scope-এর বাইরে তা স্পষ্ট করা হয়।" },
+      "deliverables": { "en": ["Requirements and feature scope", "Prototype or focused implementation", "Source and operating instructions", "Checks for the agreed workflow"], "bn": ["Requirement ও feature scope", "Prototype বা লক্ষ্যভিত্তিক implementation", "Source code ও ব্যবহার নির্দেশনা", "নির্ধারিত workflow-এর check"] }
+    },
+    {
+      "slug": "computer-support", "icon": "computer",
+      "title": { "en": "Computer Support", "bn": "কম্পিউটার সহায়তা" },
+      "summary": { "en": "Practical diagnosis and setup help for everyday computer and office workflows.", "bn": "দৈনন্দিন কম্পিউটার ও অফিস workflow-এর ব্যবহারিক diagnosis এবং setup সহায়তা।" },
+      "detail": { "en": "Troubleshoot common operating-system, software, file-management, and office-application problems. The work starts from observed symptoms and ends with clear notes on what was changed and how to verify it.", "bn": "সাধারণ operating-system, software, file management এবং office application-এর সমস্যা খুঁজে সমাধান করা। লক্ষণ পর্যবেক্ষণ দিয়ে কাজ শুরু হয়; কী বদলানো হয়েছে এবং কীভাবে যাচাই করবেন—তা লিখে শেষ হয়।" },
+      "deliverables": { "en": ["Issue triage and reproduction notes", "Setup or configuration assistance", "File and office workflow guidance", "Clear handover notes"], "bn": ["সমস্যা বাছাই ও পুনরায় দেখার নোট", "Setup বা configuration সহায়তা", "ফাইল ও অফিস workflow নির্দেশনা", "পরিষ্কার handover note"] }
+    },
+    {
+      "slug": "android-support", "icon": "android",
+      "title": { "en": "Android Support", "bn": "অ্যান্ড্রয়েড সহায়তা" },
+      "summary": { "en": "Device, app, and mobile-workflow troubleshooting with clear limits and consent.", "bn": "স্পষ্ট সীমা ও সম্মতিসহ ডিভাইস, অ্যাপ এবং mobile workflow-এর সমস্যা সমাধান।" },
+      "detail": { "en": "Help diagnose Android application and device-workflow issues, organise files and settings for a task, or assess a phone-based development setup. Any device change is discussed first and kept within the agreed scope.", "bn": "অ্যান্ড্রয়েড অ্যাপ ও device workflow-এর সমস্যা diagnosis, কাজের জন্য ফাইল ও setting গুছানো, অথবা ফোনভিত্তিক development setup পর্যালোচনায় সহায়তা। ডিভাইসে পরিবর্তনের আগে আলোচনা হয় এবং তা নির্ধারিত scope-এ সীমিত থাকে।" },
+      "deliverables": { "en": ["Scoped troubleshooting", "App and workflow setup notes", "Compatibility findings", "A repeatable checklist"], "bn": ["নির্ধারিত সীমায় troubleshooting", "অ্যাপ ও workflow setup note", "সামঞ্জস্যের ফলাফল", "পুনরায় ব্যবহারযোগ্য checklist"] }
+    },
+    {
+      "slug": "business-technology", "icon": "business",
+      "title": { "en": "Business Technology", "bn": "ব্যবসায়িক প্রযুক্তি" },
+      "summary": { "en": "Connect a real office workflow to the right tools, records, and handover process.", "bn": "বাস্তব অফিস workflow-কে উপযুক্ত tool, record ও handover পদ্ধতির সঙ্গে যুক্ত করা।" },
+      "detail": { "en": "Review a recurring business task and find a manageable way to organise it with available digital tools. The aim is reliable follow-through and understandable records—not adding technology for its own sake.", "bn": "বারবার করা ব্যবসায়িক কাজ পর্যালোচনা করে বিদ্যমান digital tool দিয়ে কীভাবে গুছিয়ে নেওয়া যায় তা খোঁজা। লক্ষ্য নির্ভরযোগ্য follow-through ও বোঝার মতো record—শুধু প্রযুক্তি যোগ করা নয়।" },
+      "deliverables": { "en": ["Workflow map and friction points", "Tool and record structure", "Simple automation where appropriate", "Staff-facing instructions"], "bn": ["Workflow map ও বাধার জায়গা", "Tool ও record structure", "প্রযোজ্য হলে সহজ automation", "ব্যবহারকারীর জন্য নির্দেশনা"] }
+    },
+    {
+      "slug": "graphics-design", "icon": "design",
+      "title": { "en": "Graphics Design", "bn": "গ্রাফিক্স ডিজাইন" },
+      "summary": { "en": "Clear promotional graphics built for a specific audience and channel.", "bn": "নির্দিষ্ট দর্শক ও প্রচারমাধ্যমের জন্য পরিষ্কার promotional graphic।" },
+      "detail": { "en": "Create practical social and promotional graphics with a clear message, consistent layout, and delivery sizes suited to the selected channel. Visual assets and copy are reviewed together so the final material is ready to use.", "bn": "স্পষ্ট বার্তা, সঙ্গত layout এবং বেছে নেওয়া channel অনুযায়ী মাপসহ ব্যবহারিক social ও promotional graphic তৈরি। চূড়ান্ত উপকরণ ব্যবহারের উপযোগী করতে visual asset ও copy একসঙ্গে পর্যালোচনা করা হয়।" },
+      "deliverables": { "en": ["Campaign or post graphics", "Channel-ready exports", "Reusable layout variants", "Basic visual consistency notes"], "bn": ["Campaign বা post graphic", "Channel-উপযোগী export", "পুনরায় ব্যবহারযোগ্য layout variant", "মৌলিক visual consistency note"] }
+    },
+    {
+      "slug": "office-administration", "icon": "office",
+      "title": { "en": "Office Administration", "bn": "অফিস প্রশাসন" },
+      "summary": { "en": "Reliable back-office support for records, documents, registration, and coordination.", "bn": "Record, document, registration ও সমন্বয়ে নির্ভরযোগ্য দাপ্তরিক সহায়তা।" },
+      "detail": { "en": "Support recurring administrative work such as document processing, filing, registration records, inbox follow-up, scheduling, and coordination. Access and handling stay limited to the records and tools required for the agreed task.", "bn": "Document processing, filing, registration record, inbox follow-up, scheduling এবং coordination-এর মতো নিয়মিত প্রশাসনিক কাজে সহায়তা। access ও তথ্যের ব্যবহার নির্ধারিত কাজের প্রয়োজনীয় record ও tool-এ সীমিত থাকে।" },
+      "deliverables": { "en": ["Document preparation and filing", "Registration and record updates", "Inbox and schedule follow-up", "Coordination and status summaries"], "bn": ["Document প্রস্তুতি ও filing", "Registration ও record update", "Inbox ও schedule follow-up", "সমন্বয় ও কাজের অবস্থা সংক্ষেপ"] }
+    },
+    {
+      "slug": "data-entry", "icon": "data",
+      "title": { "en": "Data Entry & Data Work", "bn": "ডেটা এন্ট্রি ও ডেটা-সংক্রান্ত কাজ" },
+      "summary": { "en": "Careful entry, cleanup, digitisation, and structured records with checks.", "bn": "যাচাইসহ সতর্ক data entry, পরিষ্কারকরণ, digitisation ও structured record।" },
+      "detail": { "en": "Enter or convert information into a clear structure, clean inconsistencies without hiding source values, and check a sample or full set according to the agreed requirements. Reporting experience informs a verify-before-submit workflow.", "bn": "তথ্যকে পরিষ্কার structure-এ আনা, মূল তথ্য আড়াল না করে অসঙ্গতি পরিষ্কার করা, এবং নির্ধারিত শর্ত অনুযায়ী sample বা পুরো dataset যাচাই করা। অগ্রগতি প্রতিবেদনের অভিজ্ঞতা থেকে submit-এর আগে যাচাইয়ের পদ্ধতি অনুসরণ করি।" },
+      "deliverables": { "en": ["Structured spreadsheet or records", "Data cleanup and format conversion", "Validation notes and exceptions", "Progress reporting"], "bn": ["গুছানো spreadsheet বা record", "Data cleanup ও format conversion", "যাচাইয়ের নোট ও ব্যতিক্রম", "অগ্রগতি প্রতিবেদন"] }
+    },
+    {
+      "slug": "digital-marketing", "icon": "marketing",
+      "title": { "en": "SEO & Digital Operations", "bn": "এসইও ও ডিজিটাল পরিচালনা" },
+      "summary": { "en": "Search-friendly content updates and steady social or email operations.", "bn": "Search-উপযোগী content update এবং নিয়মিত social বা email পরিচালনা।" },
+      "detail": { "en": "Maintain website content, page metadata, and social or email publishing workflows. SEO work focuses on technical and editorial basics; search positions and traffic outcomes are not guaranteed.", "bn": "ওয়েবসাইটের content, page metadata এবং social বা email publishing workflow গুছিয়ে রাখা। SEO-তে technical ও editorial-এর মৌলিক বিষয়গুলো দেখা হয়; search ranking বা traffic-এর নিশ্চয়তা দেওয়া হয় না।" },
+      "deliverables": { "en": ["Page title and description review", "Content updates and publishing checklist", "Social page and group support", "Email list and campaign coordination"], "bn": ["Page title ও description পর্যালোচনা", "Content update ও publishing checklist", "Social page ও group সহায়তা", "Email list ও campaign coordination"] }
+    },
+    {
+      "slug": "linux-systems", "icon": "linux",
+      "title": { "en": "Linux & Android Workstation Setup", "bn": "লিনাক্স ও অ্যান্ড্রয়েড ওয়ার্কস্টেশন সেটআপ" },
+      "summary": { "en": "Linux environments and phone-based workstations configured for a defined device and task.", "bn": "নির্দিষ্ট ডিভাইস ও কাজ অনুযায়ী Linux environment এবং ফোনভিত্তিক workstation setup।" },
+      "detail": { "en": "Plan or troubleshoot Termux and Linux-on-Android environments, desktop sessions, developer tools, and graphics compatibility. Capabilities depend on the device and software stack; installation and graphics results are checked rather than assumed.", "bn": "Termux ও Android-এ Linux environment, desktop session, developer tool এবং graphics compatibility পরিকল্পনা বা troubleshooting। সক্ষমতা ডিভাইস ও software stack-এর ওপর নির্ভরশীল; installation ও graphics ফল অনুমান না করে যাচাই করা হয়।" },
+      "deliverables": { "en": ["Device and requirement assessment", "Scoped setup or repair plan", "Repeatable commands and diagnostics", "Verified compatibility notes"], "bn": ["ডিভাইস ও requirement মূল্যায়ন", "নির্ধারিত setup বা repair plan", "পুনরায় চালানোর command ও diagnostic", "যাচাইকৃত compatibility note"] }
+    },
+    {
+      "slug": "local-ai", "icon": "ai",
+      "title": { "en": "Local AI & LLM Setup", "bn": "লোকাল এআই ও এলএলএম সেটআপ" },
+      "summary": { "en": "Private, device-local AI experiments with hardware limits documented up front.", "bn": "হার্ডওয়্যারের সীমা আগে নথিবদ্ধ করে ব্যক্তিগত, device-local AI পরীক্ষা।" },
+      "detail": { "en": "Assess a local inference use case, choose an appropriate model and runtime, and configure a CPU-first baseline where practical. GPU and NPU paths require device-specific validation and are never presented as working without evidence.", "bn": "লোকাল inference-এর ব্যবহার যাচাই, উপযুক্ত model ও runtime নির্বাচন, এবং সম্ভব হলে CPU-first baseline configure করা। GPU ও NPU path ডিভাইসভিত্তিক যাচাই দাবি করে; প্রমাণ ছাড়া এগুলোকে সচল বলা হয় না।" },
+      "deliverables": { "en": ["Use-case and device assessment", "Model and runtime shortlist", "Local setup and test notes", "Known limits and fallback path"], "bn": ["ব্যবহার ও ডিভাইস মূল্যায়ন", "Model ও runtime shortlist", "Local setup ও test note", "পরিচিত সীমা ও fallback পদ্ধতি"] }
+    }
+  ],
+  "experience": [
+    {
+      "role": { "en": "Office Administrator", "bn": "অফিস প্রশাসক" },
+      "organisation": "Rabeya Education Family",
+      "location": { "en": "Savar, Dhaka", "bn": "সাভার, ঢাকা" },
+      "work": { "en": ["Oversee daily administrative operations.", "Maintain student registration records and office documents.", "Coordinate social pages, groups, and routine communication.", "Support website SEO and content updates; prepare promotional graphics and video."], "bn": ["দৈনন্দিন প্রশাসনিক কাজ তদারকি।", "শিক্ষার্থী registration record ও অফিসের document সংরক্ষণ।", "Social page, group ও নিয়মিত যোগাযোগ সমন্বয়।", "ওয়েবসাইটের SEO ও content update-এ সহায়তা; প্রচারমূলক graphic ও video তৈরি।"] }
+    },
+    {
+      "role": { "en": "Computer Operator", "bn": "কম্পিউটার অপারেটর" },
+      "organisation": "Monika Enterprise",
+      "location": { "en": "Savar, Dhaka", "bn": "সাভার, ঢাকা" },
+      "work": { "en": ["Handled online activities and digital presence.", "Processed office documents and maintained filing."], "bn": ["Online activity ও digital presence পরিচালনা।", "অফিসের document প্রক্রিয়াকরণ ও filing বজায় রাখা।"] }
+    },
+    {
+      "role": { "en": "Coordinator", "bn": "সমন্বয়কারী" },
+      "organisation": "Abdullah Trading Pvt Ltd",
+      "location": { "en": "Jubail, Saudi Arabia", "bn": "জুবাইল, সৌদি আরব" },
+      "work": { "en": ["Coordinated site operations, logistics, and team communication."], "bn": ["সাইটের পরিচালনা, logistics ও দলের যোগাযোগ সমন্বয়।"] }
+    },
+    {
+      "role": { "en": "Electrician", "bn": "ইলেকট্রিশিয়ান" },
+      "organisation": "Saudi Electricity Company & Khaled Juffali Company",
+      "location": { "en": "Jeddah, Saudi Arabia", "bn": "জেদ্দা, সৌদি আরব" },
+      "work": { "en": ["Worked on electrical installation and maintenance in industrial and residential settings."], "bn": ["শিল্প ও আবাসিক পরিবেশে বৈদ্যুতিক installation ও maintenance-এর কাজ।"] }
+    },
+    {
+      "role": { "en": "Progress Reporter", "bn": "অগ্রগতি প্রতিবেদক" },
+      "organisation": "Fadhli Gas Plant Project · PCMC",
+      "location": { "en": "Saudi Arabia", "bn": "সৌদি আরব" },
+      "work": { "en": ["Collected daily progress information from the site.", "Digitised field information into structured records.", "Checked and submitted reports to project management."], "bn": ["সাইট থেকে দৈনিক কাজের অগ্রগতির তথ্য সংগ্রহ।", "মাঠের তথ্য digitise করে structured record তৈরি।", "যাচাই করে project management-এ প্রতিবেদন জমা।"] }
+    },
+    {
+      "role": { "en": "Fire Watcher", "bn": "ফায়ার ওয়াচার" },
+      "organisation": "Fadhli Gas Plant Project · Saudi Aramco",
+      "location": { "en": "Saudi Arabia", "bn": "সৌদি আরব" },
+      "work": { "en": ["Monitored work areas and equipment for fire hazards.", "Maintained fire-prevention watch in high-risk work environments."], "bn": ["কাজের এলাকা ও যন্ত্রপাতিতে অগ্নিঝুঁকি পর্যবেক্ষণ।", "উচ্চ ঝুঁকির কর্মপরিবেশে আগুন প্রতিরোধে নজরদারি।"] }
+    },
+    {
+      "role": { "en": "Email Marketing Specialist", "bn": "ইমেইল মার্কেটিং বিশেষজ্ঞ" },
+      "organisation": "Freelance",
+      "location": { "en": "Independent / Remote", "bn": "স্বাধীন / রিমোট" },
+      "work": { "en": ["Prepared targeted email campaigns and managed subscriber lists.", "Developed digital-marketing skills through structured self-study."], "bn": ["লক্ষ্যভিত্তিক email campaign তৈরি ও subscriber list পরিচালনা।", "পরিকল্পিতভাবে নিজে শিখে digital-marketing দক্ষতা গড়ে তোলা।"] }
+    }
+  ],
+  "skills": [
+    { "title": { "en": "Administration & Operations", "bn": "প্রশাসন ও পরিচালনা" }, "items": { "en": ["Office administration", "Document processing", "Records and filing", "Data entry", "Progress reporting", "Online registration", "Logistics coordination", "Team communication"], "bn": ["অফিস প্রশাসন", "Document processing", "Record ও filing", "Data entry", "অগ্রগতি প্রতিবেদন", "Online registration", "Logistics সমন্বয়", "দলের যোগাযোগ"] } },
+    { "title": { "en": "Computer & Office", "bn": "কম্পিউটার ও অফিস" }, "items": { "en": ["Microsoft Office", "Google Workspace", "File management", "Windows", "macOS", "Android", "iOS", "OS troubleshooting"], "bn": ["Microsoft Office", "Google Workspace", "File management", "Windows", "macOS", "Android", "iOS", "OS troubleshooting"] } },
+    { "title": { "en": "Digital & Marketing", "bn": "ডিজিটাল ও মার্কেটিং" }, "items": { "en": ["Social media management", "Facebook pages and groups", "Website SEO", "Content updates", "Email marketing", "List management", "Graphics design", "Video creation"], "bn": ["Social media পরিচালনা", "Facebook page ও group", "Website SEO", "Content update", "Email marketing", "List management", "Graphics design", "Video তৈরি"] } },
+    { "title": { "en": "Linux & Systems", "bn": "লিনাক্স ও সিস্টেম" }, "items": { "en": ["Linux administration", "Debian", "Shell scripting", "Termux", "PRoot and Termux:X11", "Xfce", "D-Bus", "PulseAudio", "GPU configuration", "Zink / VirGL", "Freedreno / Turnip"], "bn": ["Linux administration", "Debian", "Shell scripting", "Termux", "PRoot ও Termux:X11", "Xfce", "D-Bus", "PulseAudio", "GPU configuration", "Zink / VirGL", "Freedreno / Turnip"] } },
+    { "title": { "en": "AI & Development", "bn": "এআই ও ডেভেলপমেন্ট" }, "items": { "en": ["llama.cpp", "Local LLMs", "Vulkan backend experiments", "GGUF models", "Git and GitHub", "Kotlin", "Python", "HTML and CSS"], "bn": ["llama.cpp", "Local LLM", "Vulkan backend পরীক্ষা", "GGUF model", "Git ও GitHub", "Kotlin", "Python", "HTML ও CSS"] } },
+    { "title": { "en": "Technical Work", "bn": "কারিগরি কাজ" }, "items": { "en": ["Electrical installation", "Equipment maintenance", "Duct and AC fitting", "Fire-safety monitoring", "Site coordination", "Technical documentation"], "bn": ["বৈদ্যুতিক installation", "যন্ত্রপাতি maintenance", "Duct ও AC fitting", "অগ্নিনিরাপত্তা পর্যবেক্ষণ", "Site coordination", "Technical documentation"] } }
+  ],
+  "projects": [
+    {
+      "slug": "ternux", "name": "Ternux", "category": { "en": "Android · Linux", "bn": "অ্যান্ড্রয়েড · লিনাক্স" },
+      "summary": { "en": "A no-root Debian and Xfce Linux desktop environment running on an Android phone through Termux and PRoot.", "bn": "Termux ও PRoot ব্যবহার করে Android ফোনে no-root Debian ও Xfce Linux desktop environment।" },
+      "boundary": { "en": "Graphics paths depend on the device. Zink/Turnip results apply to supported Adreno hardware; VirGL is a compatibility route, not a universal guarantee.", "bn": "Graphics path ডিভাইসভেদে আলাদা। Zink/Turnip ফল supported Adreno hardware-এ প্রযোজ্য; VirGL compatibility route, সর্বজনীন নিশ্চয়তা নয়।" },
+      "url": "https://github.com/soobujmiah/ternux", "state": "Public source"
+    },
+    {
+      "slug": "ternuxx", "name": "Ternuxx", "category": { "en": "Native Termux · Workstation tools", "bn": "Native Termux · Workstation tool" },
+      "summary": { "en": "A native Termux workstation control plane managed with the tx command. Optional PRoot guests remain separate providers.", "bn": "tx command দিয়ে পরিচালিত Native Termux workstation control plane। Optional PRoot guest আলাদা provider।" },
+      "boundary": { "en": "The Native Termux host is the control plane; installing the Native workstation does not create a guest root filesystem. Desktop launch and graphics validation are separate steps.", "bn": "Native Termux host-ই control plane; Native workstation install করলে guest root filesystem তৈরি হয় না। Desktop চালু ও graphics যাচাই আলাদা ধাপ।" },
+      "url": "https://github.com/soobujmiah/ternuxx", "state": "Public source"
+    },
+    {
+      "slug": "adt", "name": "ADT", "category": { "en": "ARM64 · Android tooling", "bn": "ARM64 · Android tooling" },
+      "summary": { "en": "An Android development toolchain for Linux ARM64, built from AOSP source and validated through a real-device workflow.", "bn": "AOSP source থেকে তৈরি Linux ARM64-এর Android development toolchain; real-device workflow-এ যাচাই করা।" },
+      "boundary": { "en": "The target is Linux ARM64 with glibc; this is not a native Android/Bionic SDK bundle.", "bn": "লক্ষ্য Linux ARM64 ও glibc; এটি native Android/Bionic SDK bundle নয়।" },
+      "url": "https://github.com/soobujmiah/adt", "state": "Public source"
+    },
+    {
+      "slug": "lai", "name": "LAI", "category": { "en": "Android · Local AI", "bn": "অ্যান্ড্রয়েড · লোকাল এআই" },
+      "summary": { "en": "A Bangla-first local AI and consent-driven Android automation runtime, with arm64 llama.cpp CPU inference.", "bn": "বাংলা-প্রথম লোকাল এআই ও সম্মতিনির্ভর Android automation runtime; arm64 llama.cpp CPU inference-সহ।" },
+      "boundary": { "en": "Adreno Vulkan inference is deliberately fail-closed after a driver crash; CPU is the verified baseline. NPU execution is not claimed.", "bn": "Driver crash-এর পরে Adreno Vulkan inference fail-closed রাখা হয়েছে; CPU যাচাইকৃত baseline। NPU execution দাবি করা হয় না।" },
+      "url": "https://github.com/soobujmiah/lai", "state": "Public source"
+    },
+    {
+      "slug": "ggen", "name": "GGEN", "category": { "en": "Flutter · Creative tools", "bn": "Flutter · সৃজনশীল tool" },
+      "summary": { "en": "An Android-first vector and document studio with page geometry, layered canvas, and linked text flow.", "bn": "Page geometry, layered canvas ও linked text flow-সহ Android-প্রথম vector ও document studio।" },
+      "boundary": { "en": "The public Apache-2.0 source is active development; protected RGEN assets and production integrations are not represented as public features.", "bn": "Public Apache-2.0 source-এ উন্নয়ন চলছে; protected RGEN asset ও production integration-কে public feature বলা হয় না।" },
+      "url": "https://github.com/soobujmiah/ggen", "state": "Public source"
+    },
+    {
+      "slug": "songjog", "name": "Songjog", "category": { "en": "Android · Business operations", "bn": "অ্যান্ড্রয়েড · ব্যবসা পরিচালনা" },
+      "summary": { "en": "A Bangla-first Android business ledger and daily operations app for shops and service businesses.", "bn": "দোকান ও সেবা ব্যবসার জন্য বাংলা-প্রথম Android business ledger ও দৈনন্দিন পরিচালনার অ্যাপ।" },
+      "boundary": { "en": "The public source describes the Owner Edition; future staff, customer, education, and healthcare workflows are not presented as shipped features.", "bn": "Public source-এ Owner Edition-এর কথা বলা হয়েছে; ভবিষ্যতের staff, customer, শিক্ষা ও স্বাস্থ্যসেবা workflow-কে চালু feature বলা হয় না।" },
+      "url": "https://github.com/soobujmiah/songjog", "state": "Public source"
+    },
+    {
+      "slug": "datakhoj", "name": "DataKhoj", "category": { "en": "Android · Data tooling", "bn": "অ্যান্ড্রয়েড · ডেটা tool" },
+      "summary": { "en": "A personal data-collection engine for searching, extracting, structuring, transforming, and exporting information.", "bn": "তথ্য খোঁজা, সংগ্রহ, structure, transform ও export করার personal data-collection engine।" },
+      "boundary": { "en": "The current repository is pre-alpha: its extraction and data engine has verified components, while the Android shell and workflows remain incomplete.", "bn": "বর্তমান repository pre-alpha: extraction ও data engine-এর কিছু অংশ যাচাই করা; Android shell ও workflow এখনো অসম্পূর্ণ।" },
+      "url": "https://github.com/soobujmiah/datakhoj-android", "state": "Pre-alpha"
+    },
+    {
+      "slug": "iqra-online-mart", "name": "Iqra Online Mart", "category": { "en": "Web · Storefront prototype", "bn": "ওয়েব · Storefront prototype" },
+      "summary": { "en": "A bilingual browser-only storefront prototype for local retail workflows.", "bn": "স্থানীয় retail workflow-এর জন্য bilingual browser-only storefront prototype।" },
+      "boundary": { "en": "This is a front-end prototype with no production backend or payment processing.", "bn": "এটি front-end prototype; production backend বা payment processing নেই।" },
+      "url": "https://github.com/soobujmiah/iqra-online-mart", "state": "Prototype"
+    }
+  ],
+  "research": {
+    "en": {
+      "verified": ["llama.cpp CPU inference on arm64 Android", "Linux ARM64 Android toolchain builds validated on real hardware", "Termux Linux desktop graphics through device-qualified Zink/Turnip routes", "Bangla and English software and document workflows"],
+      "experimental": ["Adreno Vulkan AI inference, kept disabled after a driver crash", "Qualcomm Hexagon / QNN inference paths, still requiring physical-device qualification", "VirGL graphics compatibility across different Android devices"],
+      "notClaimed": ["Universal Android GPU acceleration", "Successful NPU inference without device evidence", "Performance figures without the matching device and test conditions"]
+    },
+    "bn": {
+      "verified": ["arm64 Android-এ llama.cpp CPU inference", "Real hardware-এ যাচাই করা Linux ARM64 Android toolchain build", "Device-qualified Zink/Turnip path দিয়ে Termux Linux desktop graphics", "বাংলা ও ইংরেজি software এবং document workflow"],
+      "experimental": ["Driver crash-এর পরে বন্ধ রাখা Adreno Vulkan AI inference", "Physical-device qualification বাকি থাকা Qualcomm Hexagon / QNN inference", "বিভিন্ন Android device-এ VirGL graphics compatibility"],
+      "notClaimed": ["সব Android device-এ GPU acceleration", "Device evidence ছাড়া সফল NPU inference", "নির্দিষ্ট device ও test condition ছাড়া performance figure"]
+    }
+  }
+}

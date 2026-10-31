@@ -1,51 +1,28 @@
-# DESIGN SYSTEM — The Pocket Systems Lab (`soobujmiah.github.io`)
+# Design System — Sobuj Miah Portfolio
 
-**Project:** Sobuj Miah — “The Pocket Systems Lab”  
-**Opening Line:** “The workshop begins in your hand.”  
-**Professional Positioning:** Independent Software & AI Systems Builder  
-**Alignment:** The retained ecosystem tokens (`skb/architecture/WEB_DESIGN_SYSTEM.md`) extended for The Pocket Systems Lab. **Project-start note (2026-10-26):** the former repository URL and Pages root returned 404 at the beginning of this rebuild, so the initial direction followed the retained SKB spec and the owner's brief. The project was then created in the existing public repository and deployed through its GitHub Pages workflow; the design and implementation below describe that current source tree.
+## Direction
 
-## 1. Brand Tokens (`src/design-tokens.ts` & `:root`)
+An editorial field-workbench for an operations professional who also builds software and Android/Linux systems. The visual signature is a large, angled phone on a grounded engineering bench, linked to four useful domains: operations, Linux, local AI, and software. The scene supports the story; readable HTML remains the primary interface.
 
-```json
-{
-  "bg": "#050507",
-  "fg": "#e4e2df",
-  "muted": "rgba(228,226,223,0.45)",
-  "border": "rgba(228,226,223,0.07)",
-  "accent": "#22c55e",
-  "accentBright": "#4ade80",
-  "accentGlow": "rgba(34,197,94,0.18)",
-  "signal": "#10b981",
-  "cardBg": "rgba(6,7,6,0.66)",
-  "chrome": "#060608"
-}
-```
+## Palette and type
 
-## 2. 3D Material & Lighting Language
+- Near-black green `#07100c` for the page and deep panels.
+- Warm pale green for primary text, muted sage for supporting copy.
+- Mint `#62dbb2` for evidence and navigation signals.
+- Lime `#cfff69` for action and emphasis.
+- Instrument Serif paired with Inter and JetBrains Mono; Bengali uses Noto Sans Bengali and Noto Serif Bengali with system fallbacks.
 
-- **Environment Atmosphere:** Deep graphite (`#050507`) with subtle exponential depth fog (`#060809`) and precision-milled floor plates (`#090b0e`).
-- **Materials:**
-  - *Anodized Graphite Chassis:* `#12151a`, roughness `0.38`, metalness `0.82`
-  - *Brushed Alloy Frame:* `#262b33`, roughness `0.28`, metalness `0.88`
-  - *Matte Polymer Substrates:* `#0d1014`, roughness `0.72`, metalness `0.18`
-  - *Dark Optical Glass:* `#080d0b`, roughness `0.14`, metalness `0.25`, subtle transmission/opacity
-  - *Restrained Signal Paths:* `#22c55e` / `#4ade80` emissive traces reserved strictly for active conduits, selected stations, and verified pathways; amber `#f59e0b` for experimental/qualification gates; crimson `#ef4444` for fail-closed hardware containment boundaries.
-- **Camera & Motion:**
-  - Smooth, critically damped interpolation (`reveal: 0.7s cubic-bezier(0.16, 1, 0.3, 1)`).
-  - Interruptible at any moment by touch, click, Escape, or navigation controls.
-  - Respects `prefers-reduced-motion: reduce` and provides an explicit HUD toggle to pause continuous animation or switch to the 2D Architectural Schematic fallback.
+## Composition
 
-## 3. Typography
+- Wide screens place the semantic hero copy to the left and the workbench to the right.
+- Portrait screens keep the full-width phone composition below the hero copy, with a low-opacity wash so the 3D display remains visible.
+- Reusable editorial sections use a restrained grid, thin rules, generous spacing, and dark green surfaces.
+- Project cards link to an internal detail page and the public repository, and state each project's current boundary.
 
-- **Display (English):** `Instrument Serif`, Georgia, serif (`--font-serif`)
-- **Display (Bangla):** `Noto Serif Bengali`, serif (`--font-serif-bn`)
-- **Body / UI (English):** `Inter`, system-ui, sans-serif (`--font-sans`)
-- **Body / UI (Bangla):** `Noto Sans Bengali`, sans-serif (`--font-sans-bn`)
-- **Technical Labels / Monospace:** `JetBrains Mono`, monospace (`--font-mono`)
+## Motion and access
 
-## 4. Content & Evidence Integrity Rules
+Scene movement is slow and pointer response is subtle. The 3D scene is lazy-loaded and uses a capped pixel ratio. Reduced-motion preference stops animation; a keyboard-accessible pause control is available otherwise. The canvas is decorative and all content is available in semantic HTML. Layouts collapse without horizontal scrolling at compact widths.
 
-- **Zero Numeric Achievement Claims / Vanity Badges:** No KPI tiles, star counters, download counters, percentage bars, or test-count badges.
-- **Explicit Evidence Grading:** Every project capability is labeled as **Verified** (`VERIFIED`), **Experimental** (`EXPERIMENTAL`), or **Planned / Boundary** (`BOUNDARY`).
-- **Real Accessible HTML:** All essential copy is rendered in semantic DOM elements, never baked into WebGL canvas textures.
+## Search structure
+
+Each English and Bengali route has a static crawlable fallback, unique metadata, canonical and reciprocal language alternate links, and JSON-LD describing the person and current page. The build produces a route sitemap and 404 page. Google Search Console verification remains in place.

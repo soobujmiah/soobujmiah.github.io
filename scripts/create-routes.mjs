@@ -1,50 +1,183 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import process from 'node:process';
 
-const dist = path.resolve('dist');
-const rootDocument = path.join(dist, 'index.html');
-if (!fs.existsSync(rootDocument)) throw new Error('Build root index.html before generating routes.');
-const rootHtml = fs.readFileSync(rootDocument, 'utf8');
-const routes = [
-  { path: 'work', title: 'Work — Sobuj Miah | The Pocket Systems Lab', description: 'Evidence-grounded details of Sobuj Miah’s public software and systems projects.' },
-  { path: 'process', title: 'Process — Sobuj Miah | The Pocket Systems Lab', description: 'A practical build, install, test, observe, fix, and retest loop—shown with its limits.' },
-  { path: 'services', title: 'Services — Sobuj Miah | The Pocket Systems Lab', description: 'Practical software, Android and Linux setup, workflow, and documentation support.' },
-  { path: 'about', title: 'About Sobuj Miah | The Pocket Systems Lab', description: 'About Sobuj Miah, a self-educated software and systems builder working from Savar, Dhaka.' },
-  { path: 'notes', title: 'Experiments & field notes — Sobuj Miah | The Pocket Systems Lab', description: 'Evidence-grounded experiments from Sobuj Miah’s Android-first software and systems work, with the limits stated.' },
-  { path: 'contact', title: 'Contact Sobuj Miah | The Pocket Systems Lab', description: 'Contact Sobuj Miah about software, Android and Linux, workflows, or documentation.' },
-  ...[
-    ['ternux', 'Ternux', 'A no-root Termux and PRoot Debian/Xfce workstation for Android. Graphics routes remain device-specific.'],
-    ['ternuxx', 'Ternuxx', 'A native Termux workstation control plane with preview-first package changes and optional Debian PRoot handoff.'],
-    ['adt', 'ADT', 'Native ARM64 Android tooling for Linux glibc, with a documented source-to-device build path.'],
-    ['lai', 'LAI', 'A Bangla-first on-device AI runtime with llama.cpp CPU inference and a fail-closed Adreno Vulkan boundary.'],
-    ['ggen', 'GGEN', 'An Android-first Flutter creative canvas for vector work, page geometry, and linked text flow.'],
-    ['songjog', 'Songjog', 'A Bangla-first business record app with local SQLite persistence and diagnostic export.'],
-  ].map(([id, name, description]) => ({ path: `work/${id}`, title: `${name} — Project station | Sobuj Miah`, description, source: `https://github.com/soobujmiah/${id}` })),
+const root = process.cwd();
+const dist = path.join(root, 'dist');
+const data = JSON.parse(fs.readFileSync(path.join(root, 'src/data/site-content.json'), 'utf8'));
+const baseUrl = data.site.url.replace(/\/$/, '');
+const sharedPages = ['about', 'services', 'experience', 'projects', 'research', 'contact'];
+const nav = [
+  ['about', { en: 'About', bn: 'পরিচিতি' }],
+  ['services', { en: 'Services', bn: 'সেবা' }],
+  ['projects', { en: 'Projects', bn: 'প্রকল্প' }],
+  ['experience', { en: 'Experience', bn: 'অভিজ্ঞতা' }],
+  ['research', { en: 'Research', bn: 'গবেষণা' }],
+  ['contact', { en: 'Contact', bn: 'যোগাযোগ' }],
 ];
 
-const escapeHtml = value => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
-for (const route of routes) {
-  const canonical = `https://soobujmiah.github.io/${route.path}/`;
-  const title = escapeHtml(route.title);
-  const description = escapeHtml(route.description);
-  let html = rootHtml
-    .replace(/<title>[\s\S]*?<\/title>/, `<title>${title}</title>`)
-    .replace(/<meta\s+name="description"[\s\S]*?\/>/, `<meta name="description" content="${description}" />`)
-    .replace(/<link rel="canonical" href="[^"]+"\s*\/>/, `<link rel="canonical" href="${canonical}" />`)
-    .replace(/<meta property="og:url" content="[^"]+"\s*\/>/, `<meta property="og:url" content="${canonical}" />`)
-    .replace(/<meta property="og:title" content="[^"]+"\s*\/>/, `<meta property="og:title" content="${title}" />`)
-    .replace(/<meta name="twitter:title" content="[^"]+"\s*\/>/, `<meta name="twitter:title" content="${title}" />`)
-    .replace(/<meta\s+property="og:description"[\s\S]*?\/>/, `<meta property="og:description" content="${description}" />`)
-    .replace(/<meta\s+name="twitter:description"[\s\S]*?\/>/, `<meta name="twitter:description" content="${description}" />`);
+const esc = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+const localePath = (kind, lang, slug) => {
+  const suffix = kind === 'home' ? '' : kind === 'service' ? `services/${slug}/` : kind === 'project' ? `projects/${slug}/` : `${kind}/`;
+  return lang === 'bn' ? `/bn/${suffix}` : `/${suffix}`;
+};
+const urlFor = p => `${baseUrl}${p}`;
 
-  let heading = route.path === 'about' ? 'About Sobuj Miah' : route.path.startsWith('work/') ? route.title.split(' — ')[0] : route.title.split(' — ')[0];
-  let summary = route.description;
-  if (route.path === 'about') summary = 'Self-educated; no formal engineering degree or certification is claimed. Builds practical software and systems from an Android-first setup in Savar, Dhaka.';
-  const projectSource = route.source ? `<p><a href="${escapeHtml(route.source)}" style="color:#4ade80">Open ${escapeHtml(heading)} public source</a></p>` : '';
-  const staticMain = `<main style="max-width: 56rem; margin: 0 auto; padding: 3rem 1.25rem; font-family: system-ui, sans-serif; line-height: 1.7;"><p style="font-family: monospace; text-transform: uppercase; letter-spacing: 0.16em; color: #4ade80; font-size: 0.75rem;">The Pocket Systems Lab · Sobuj Miah</p><h1 style="font-size: 2.5rem; margin: 0.5rem 0;">${escapeHtml(heading)}</h1><p>${escapeHtml(summary)}</p>${projectSource}<p><a href="/" style="color:#4ade80">Return to the Pocket Systems Lab</a></p></main>`;
-  html = html.replace(/<main style="max-width: 56rem;[\s\S]*?<\/main>/, staticMain);
-  const directory = path.join(dist, route.path);
-  fs.mkdirSync(directory, { recursive: true });
-  fs.writeFileSync(path.join(directory, 'index.html'), html);
+function collectRoutes() {
+  const routes = [];
+  for (const lang of ['en', 'bn']) {
+    routes.push({ lang, kind: 'home', path: localePath('home', lang) });
+    for (const kind of sharedPages) routes.push({ lang, kind, path: localePath(kind, lang) });
+    for (const item of data.services) routes.push({ lang, kind: 'service', slug: item.slug, path: localePath('service', lang, item.slug) });
+    for (const item of data.projects) routes.push({ lang, kind: 'project', slug: item.slug, path: localePath('project', lang, item.slug) });
+  }
+  return routes;
 }
-console.log(`Generated ${routes.length} direct-load routes, including SEO-preserving /about/.`);
+
+function pageMeta(route) {
+  const locale = data.pages[route.lang];
+  if (route.kind === 'service') {
+    const item = data.services.find(service => service.slug === route.slug);
+    return { title: `${item.title[route.lang]} | ${locale.services.title}`, description: item.summary[route.lang], name: item.title[route.lang], type: 'Service', item };
+  }
+  if (route.kind === 'project') {
+    const item = data.projects.find(project => project.slug === route.slug);
+    return { title: `${item.name} | ${locale.projects.title}`, description: item.summary[route.lang], name: item.name, type: 'CreativeWork', item };
+  }
+  const page = locale[route.kind];
+  return { title: page.title, description: page.description, name: page.headline, type: 'WebPage', item: page };
+}
+
+function linksFor(route) {
+  const home = localePath('home', route.lang);
+  return nav.map(([kind, label]) => `<a href="${localePath(kind, route.lang)}">${esc(label[route.lang])}</a>`).join('');
+}
+
+function sharedHeadMarkup(route, meta) {
+  const pathEnglish = route.path.replace(/^\/bn(?=\/|$)/, '') || '/';
+  const pathBangla = `/bn${pathEnglish === '/' ? '/' : pathEnglish}`;
+  const english = urlFor(pathEnglish);
+  const bangla = urlFor(pathBangla);
+  const pageType = meta.type === 'Service'
+    ? { '@type': 'Service', name: meta.name, description: meta.description, serviceType: meta.name, url: urlFor(route.path), provider: { '@id': `${baseUrl}/#person` }, areaServed: ['Bangladesh', 'Remote'] }
+    : meta.type === 'CreativeWork'
+      ? { '@type': 'CreativeWork', name: meta.name, description: meta.description, url: urlFor(route.path), sameAs: meta.item.url }
+      : { '@type': 'WebPage', name: meta.title, description: meta.description, url: urlFor(route.path), inLanguage: route.lang };
+  const breadcrumb = {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: route.lang === 'en' ? 'Home' : 'হোম', item: urlFor(localePath('home', route.lang)) },
+      ...(route.kind === 'service' ? [{ '@type': 'ListItem', position: 2, name: data.pages[route.lang].services.headline, item: urlFor(localePath('services', route.lang)) }] : []),
+      ...(route.kind === 'project' ? [{ '@type': 'ListItem', position: 2, name: data.pages[route.lang].projects.headline, item: urlFor(localePath('projects', route.lang)) }] : []),
+      { '@type': 'ListItem', position: route.kind === 'service' || route.kind === 'project' ? 3 : 2, name: meta.name, item: urlFor(route.path) },
+    ],
+  };
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'WebSite', '@id': `${baseUrl}/#website`, url: `${baseUrl}/`, name: 'Sobuj Miah', inLanguage: ['en', 'bn'] },
+      { '@type': 'Person', '@id': `${baseUrl}/#person`, name: 'Sobuj Miah', alternateName: 'সবুজ মিয়া', url: `${baseUrl}/`, jobTitle: 'Independent Software & AI Systems Engineer', address: { '@type': 'PostalAddress', addressLocality: 'Savar, Dhaka', addressCountry: 'BD' }, email: `mailto:${data.site.email}`, telephone: data.site.phone, sameAs: data.site.social.map(item => item.href) },
+      pageType,
+      breadcrumb,
+    ],
+  };
+  const schema = JSON.stringify(graph).replaceAll('<', '\\u003c');
+  return `<link rel="alternate" hreflang="en" href="${esc(english)}">
+    <link rel="alternate" hreflang="bn" href="${esc(bangla)}">
+    <link rel="alternate" hreflang="x-default" href="${esc(english)}">
+    <script type="application/ld+json" id="route-schema">${schema}</script>`;
+}
+
+function fallbackHeader(lang) {
+  const home = localePath('home', lang);
+  const name = lang === 'en' ? 'SOBUJ MIAH' : 'সবুজ মিয়া';
+  const serviceLinks = nav.map(([kind, label]) => `<a href="${localePath(kind, lang)}">${esc(label[lang])}</a>`).join('');
+  return `<header class="site-header"><a class="wordmark" href="${home}"><strong>${name}</strong></a><nav aria-label="${lang === 'en' ? 'Main navigation' : 'প্রধান নেভিগেশন'}">${serviceLinks}</nav><a class="language-switch" href="${lang === 'en' ? '/bn/' : '/'}">${lang === 'en' ? 'বাংলা' : 'English'}</a></header>`;
+}
+
+function homeFallback(route, page) {
+  const lang = route.lang;
+  const serviceItems = data.services.slice(0, 5).map((service, index) => `<li><a href="${localePath('service', lang, service.slug)}">${esc(service.title[lang])}</a> — ${esc(service.summary[lang])}</li>`).join('');
+  const projectItems = data.projects.slice(0, 6).map(project => `<li><a href="${esc(project.url)}">${esc(project.name)}</a> — ${esc(project.summary[lang])}</li>`).join('');
+  return `<section class="fallback-hero"><p class="eyebrow">${esc(page.eyebrow)}</p><p>${esc(data.site.name)} · ${esc(page.identity)}</p><h1>${esc(page.headline)}</h1><p>${esc(page.deck)}</p><p><a class="button button-primary" href="${localePath('projects', lang)}">${esc(page.primary)}</a> <a href="${localePath('services', lang)}">${esc(page.secondary)}</a></p></section><section><h2>${esc(page.aboutTitle)}</h2><p>${esc(page.aboutIntro)}</p><p><a href="${localePath('about', lang)}">${lang === 'en' ? 'About Sobuj' : 'সবুজ মিয়া সম্পর্কে'}</a></p></section><section><h2>${esc(page.servicesTitle)}</h2><ul>${serviceItems}</ul><p><a href="${localePath('services', lang)}">${lang === 'en' ? 'All services' : 'সব সেবা'}</a></p></section><section><h2>${esc(page.selectedTitle)}</h2><p>${esc(page.selectedIntro)}</p><ul>${projectItems}</ul><p><a href="${localePath('projects', lang)}">${lang === 'en' ? 'All public projects' : 'সব পাবলিক প্রকল্প'}</a></p></section>`;
+}
+
+function fallbackContent(route, meta) {
+  const lang = route.lang;
+  const locale = data.pages[lang];
+  const page = locale[route.kind === 'service' ? 'services' : route.kind === 'project' ? 'projects' : route.kind];
+  if (route.kind === 'home') return homeFallback(route, page);
+  if (route.kind === 'about') {
+    return `<section><p class="eyebrow">${esc(page.eyebrow)}</p><h1>${esc(page.headline)}</h1><p>${esc(page.lede)}</p>${page.paragraphs.map(p => `<p>${esc(p)}</p>`).join('')}<h2>${esc(page.factsTitle)}</h2><p>${esc(data.site.location[lang])} · ${esc(page.experienceValue)} · ${esc(page.educationValue)}</p><h2>${esc(page.languagesTitle)}</h2><ul>${data.site.languages.map(item => `<li>${esc(item[lang])} — ${esc(lang === 'en' ? item.levelEn : item.levelBn)}</li>`).join('')}</ul><h2>${lang === 'en' ? 'Capabilities' : 'দক্ষতা'}</h2>${data.skills.map(group => `<h3>${esc(group.title[lang])}</h3><p>${group.items[lang].map(esc).join(' · ')}</p>`).join('')}</section>`;
+  }
+  if (route.kind === 'services') {
+    return `<section><p class="eyebrow">${esc(page.eyebrow)}</p><h1>${esc(page.headline)}</h1><p>${esc(page.lede)}</p><ul>${data.services.map(service => `<li><a href="${localePath('service', lang, service.slug)}"><strong>${esc(service.title[lang])}</strong></a> — ${esc(service.summary[lang])}</li>`).join('')}</ul></section>`;
+  }
+  if (route.kind === 'service') {
+    const item = meta.item;
+    return `<section><p class="eyebrow">${esc(page.eyebrow)}</p><p><a href="${localePath('services', lang)}">${esc(page.backLabel)}</a></p><h1>${esc(item.title[lang])}</h1><p>${esc(item.summary[lang])}</p><h2>${esc(page.detailLabel)}</h2><p>${esc(item.detail[lang])}</p><h2>${esc(page.deliverablesLabel)}</h2><ul>${item.deliverables[lang].map(v => `<li>${esc(v)}</li>`).join('')}</ul><p><a href="${localePath('contact', lang)}">${esc(page.contactLabel)}</a></p></section>`;
+  }
+  if (route.kind === 'experience') {
+    return `<section><p class="eyebrow">${esc(page.eyebrow)}</p><h1>${esc(page.headline)}</h1><p>${esc(page.lede)}</p>${data.experience.map(item => `<article><h2>${esc(item.role[lang])}</h2><p>${esc(item.organisation)} · ${esc(item.location[lang])}</p><ul>${item.work[lang].map(v => `<li>${esc(v)}</li>`).join('')}</ul></article>`).join('')}<p>${esc(page.experienceNote)}</p></section>`;
+  }
+  if (route.kind === 'projects') {
+    return `<section><p class="eyebrow">${esc(page.eyebrow)}</p><h1>${esc(page.headline)}</h1><p>${esc(page.lede)}</p><ul>${data.projects.map(item => `<li><h2><a href="${localePath('project', lang, item.slug)}">${esc(item.name)}</a></h2><p>${esc(item.category[lang])} · ${esc(item.state)}</p><p>${esc(item.summary[lang])}</p><p><strong>${esc(page.statusLabel)}:</strong> ${esc(item.boundary[lang])}</p><p><a href="${esc(item.url)}">${esc(page.repoLabel)}</a></p></li>`).join('')}</ul></section>`;
+  }
+  if (route.kind === 'project') {
+    const item = meta.item;
+    return `<section><p class="eyebrow">${esc(page.eyebrow)} · ${esc(item.category[lang])}</p><p><a href="${localePath('projects', lang)}">${lang === 'en' ? 'All projects' : 'সব প্রকল্প'}</a></p><h1>${esc(item.name)}</h1><p>${esc(item.summary[lang])}</p><h2>${esc(page.statusLabel)}</h2><p>${esc(item.boundary[lang])}</p><p><a href="${esc(item.url)}">${esc(page.repoLabel)}</a></p></section>`;
+  }
+  if (route.kind === 'research') {
+    const info = data.research[lang];
+    return `<section><p class="eyebrow">${esc(page.eyebrow)}</p><h1>${esc(page.headline)}</h1><p>${esc(page.lede)}</p><h2>${esc(page.verifiedTitle)}</h2><ul>${info.verified.map(v => `<li>${esc(v)}</li>`).join('')}</ul><h2>${esc(page.experimentalTitle)}</h2><ul>${info.experimental.map(v => `<li>${esc(v)}</li>`).join('')}</ul><h2>${esc(page.plannedTitle)}</h2><ul>${info.notClaimed.map(v => `<li>${esc(v)}</li>`).join('')}</ul></section>`;
+  }
+  return `<section><p class="eyebrow">${esc(page.eyebrow)}</p><h1>${esc(page.headline)}</h1><p>${esc(page.lede)}</p><p><a href="mailto:${esc(data.site.email)}">${esc(data.site.email)}</a></p><p><a href="tel:${esc(data.site.phoneHref)}">${esc(data.site.phone)}</a></p><ul>${data.site.social.map(link => `<li><a href="${esc(link.href)}">${esc(link.label)}</a></li>`).join('')}</ul></section>`;
+}
+
+function replaceMeta(html, key, value, property = 'name') {
+  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const expression = new RegExp(`<meta\\s+${property}="${escapedKey}"\\s+content="[^"]*"\\s*\\/?\\s*>`, 'i');
+  const tag = `<meta ${property}="${esc(key)}" content="${esc(value)}" />`;
+  return expression.test(html) ? html.replace(expression, tag) : html.replace('</head>', `  ${tag}\n  </head>`);
+}
+
+function makeHtml(template, route) {
+  const meta = pageMeta(route);
+  const locale = data.pages[route.lang];
+  let html = template.replace(/<html\s+lang="[^"]*"/, `<html lang="${route.lang}"`);
+  html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${esc(meta.title)}</title>`);
+  html = replaceMeta(html, 'description', meta.description);
+  html = replaceMeta(html, 'og:type', 'website', 'property');
+  html = replaceMeta(html, 'og:url', urlFor(route.path), 'property');
+  html = replaceMeta(html, 'og:title', meta.title, 'property');
+  html = replaceMeta(html, 'og:description', meta.description, 'property');
+  html = replaceMeta(html, 'og:locale', route.lang === 'en' ? 'en_US' : 'bn_BD', 'property');
+  html = replaceMeta(html, 'twitter:title', meta.title);
+  html = replaceMeta(html, 'twitter:description', meta.description);
+  html = html.replace(/<link\s+rel="canonical"\s+href="[^"]*"\s*\/?\s*>/i, `<link rel="canonical" href="${esc(urlFor(route.path))}" />`);
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${fallbackHeader(route.lang)}<main id="main" class="page-shell"><div class="page-wrap">${fallbackContent(route, meta)}</div></main></div>`);
+  const headTags = sharedHeadMarkup(route, meta);
+  html = html.includes('<!-- ROUTE_LINKS -->') ? html.replace('<!-- ROUTE_LINKS -->', headTags) : html.replace('</head>', `  ${headTags}\n</head>`);
+  return html;
+}
+
+function writeRoute(route, template) {
+  const directory = route.path === '/' ? dist : path.join(dist, route.path.replace(/^\//, '').replace(/\/$/, ''));
+  fs.mkdirSync(directory, { recursive: true });
+  fs.writeFileSync(path.join(directory, 'index.html'), makeHtml(template, route));
+}
+
+const routes = collectRoutes();
+const template = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
+routes.forEach(route => writeRoute(route, template));
+
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${routes.map(route => `  <url><loc>${esc(urlFor(route.path))}</loc></url>`).join('\n')}\n</urlset>\n`;
+fs.writeFileSync(path.join(dist, 'sitemap.xml'), sitemap);
+fs.writeFileSync(path.join(dist, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${baseUrl}/sitemap.xml\n`);
+
+const notFound = template
+  .replace(/<title>[\s\S]*?<\/title>/i, '<title>Page not found | Sobuj Miah</title>')
+  .replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root"><main class="page-wrap not-found"><p class="eyebrow">404 · PAGE NOT FOUND</p><h1>This path has moved.</h1><p><a href="/">Return to Sobuj Miah’s portfolio</a></p></main></div>`)
+  .replace('</head>', '  <meta name="robots" content="noindex,follow" />\n</head>');
+fs.writeFileSync(path.join(dist, '404.html'), notFound);
+console.log(`Generated ${routes.length} direct-load pages, unique canonical/alternate metadata, and sitemap.xml.`);
