@@ -931,7 +931,11 @@
         "bn": "Graphics path ডিভাইসভেদে আলাদা। Zink/Turnip ফল supported Adreno hardware-এ প্রযোজ্য; VirGL compatibility route, সর্বজনীন নিশ্চয়তা নয়।"
       },
       "url": "https://github.com/soobujmiah/ternux",
-      "state": "Public source"
+      "state": "Public source",
+      "evidence": {
+        "en": "Modular Bash installer with doctor, repair, and benchmark tools; Vulkan desktop rendering on Android has been measured on the reference device.",
+        "bn": "মডিউলার Bash installer-এ doctor, repair ও benchmark টুল রয়েছে; Android-এ Vulkan desktop rendering রেফারেন্স ডিভাইসে মেপে যাচাই করা হয়েছে।"
+      }
     },
     {
       "slug": "ternuxx",
@@ -967,7 +971,11 @@
         "bn": "লক্ষ্য Linux ARM64 ও glibc; এটি native Android/Bionic SDK bundle নয়।"
       },
       "url": "https://github.com/soobujmiah/adt",
-      "state": "Public source"
+      "state": "Public source",
+      "evidence": {
+        "en": "Builds ARM64 Linux toolchains from AOSP source and validates the native build-to-install pipeline on real hardware, with checksum-verified offline artifacts.",
+        "bn": "AOSP source থেকে ARM64 Linux toolchain তৈরি করে বাস্তব ডিভাইসে build থেকে install পর্যন্ত যাচাই করে; offline artifact-এ checksum verification থাকে।"
+      }
     },
     {
       "slug": "lai",
@@ -985,7 +993,11 @@
         "bn": "Driver crash-এর পরে Adreno Vulkan inference fail-closed রাখা হয়েছে; CPU যাচাইকৃত baseline। NPU execution দাবি করা হয় না।"
       },
       "url": "https://github.com/soobujmiah/lai",
-      "state": "Public source"
+      "state": "Public source",
+      "evidence": {
+        "en": "Runs local llama.cpp CPU inference and consent-driven Android automation; GPU inference remains gated after a diagnosed driver crash.",
+        "bn": "স্থানীয় llama.cpp CPU inference ও সম্মতিভিত্তিক Android automation চালায়; driver crash শনাক্ত হওয়ার পর GPU inference এখনো বন্ধ রাখা হয়েছে।"
+      }
     },
     {
       "slug": "ggen",
@@ -1003,7 +1015,11 @@
         "bn": "Public Apache-2.0 source-এ উন্নয়ন চলছে; protected RGEN asset ও production integration-কে public feature বলা হয় না।"
       },
       "url": "https://github.com/soobujmiah/ggen",
-      "state": "Public source"
+      "state": "Public source",
+      "evidence": {
+        "en": "Flutter/Dart creative and document studio with deterministic text layout and transactional file persistence.",
+        "bn": "Flutter/Dart-এ তৈরি creative ও document studio; এতে নির্ধারিত নিয়মে text layout এবং transactional file persistence আছে।"
+      }
     },
     {
       "slug": "songjog",
@@ -1021,7 +1037,11 @@
         "bn": "Public source-এ Owner Edition-এর কথা বলা হয়েছে; ভবিষ্যতের staff, customer, শিক্ষা ও স্বাস্থ্যসেবা workflow-কে চালু feature বলা হয় না।"
       },
       "url": "https://github.com/soobujmiah/songjog",
-      "state": "Public source"
+      "state": "Public source",
+      "evidence": {
+        "en": "Bangla-first business operations app with local SQLite records, auditable corrections, and device-validated export and diagnostics.",
+        "bn": "বাংলা-প্রথম business operations app; local SQLite record, audit করা যায় এমন correction, এবং ডিভাইসে যাচাই করা export ও diagnostics রয়েছে।"
+      }
     },
     {
       "slug": "datakhoj",

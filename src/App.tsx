@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, BriefcaseBusiness, Code2,
-  Cpu, Database, Menu, Monitor, PenTool, Smartphone, X,
+  Cpu, Database, FlaskConical, FolderGit2, Globe2, Home, Mail, Monitor,
+  PenTool, Smartphone, UserRound, Clock3, Moon, Sun,
 } from 'lucide-react';
 import rawSite from './data/site-content.json';
 
@@ -23,7 +24,7 @@ interface SiteData {
   }>;
   experience: Array<{ role: Localized; period: string; organisation: string; location: Localized; work: Record<Lang, string[]> }>;
   skills: Array<{ title: Localized; items: Record<Lang, string[]> }>;
-  projects: Array<{ slug: string; name: string; category: Localized; summary: Localized; boundary: Localized; url: string; state: string }>;
+  projects: Array<{ slug: string; name: string; category: Localized; summary: Localized; evidence?: Localized; boundary: Localized; url: string; state: string }>;
   research: Record<Lang, { verified: string[]; experimental: string[]; notClaimed: string[] }>;
 }
 
@@ -68,24 +69,29 @@ function IconFor({ name, size = 18 }: { name: string; size?: number }) {
 }
 
 function Header({ lang, path }: { lang: Lang; path: string }) {
-  const [open, setOpen] = useState(false);
+  const [light, setLight] = useState(() => document.documentElement.dataset.theme === 'light');
   const base = path.replace(/^\/bn(?=\/|$)/, '') || '/';
   const languagePath = lang === 'en' ? `/bn${base === '/' ? '/' : base}` : base;
-  const text = lang === 'en'
-    ? { menu: 'Open navigation', home: 'Sobuj Miah home', language: 'বাংলা' }
-    : { menu: 'নেভিগেশন খুলুন', home: 'সবুজ মিয়ার হোম', language: 'English' };
-  return <header className="site-header">
-    <a className="wordmark" href={routePath('home', lang)} aria-label={text.home}>
-      <span className="wordmark-mark" aria-hidden="true"><i /><i /><i /></span>
-      <span><strong>{lang === 'bn' ? 'সবুজ মিয়া' : 'SOBUJ MIAH'}</strong><small>{lang === 'bn' ? 'সফটওয়্যার · সিস্টেম · পরিচালনা' : 'SOFTWARE · SYSTEMS · OPERATIONS'}</small></span>
-    </a>
-    <button className="menu-toggle" type="button" aria-label={text.menu} aria-expanded={open} aria-controls="primary-nav" onClick={() => setOpen(!open)}>{open ? <X size={19} /> : <Menu size={19} />}</button>
-    <nav id="primary-nav" className={`primary-nav ${open ? 'is-open' : ''}`} aria-label={lang === 'en' ? 'Main navigation' : 'প্রধান নেভিগেশন'}>
-      {navigation.map(item => <a key={item.key} href={routePath(item.key, lang)} onClick={() => setOpen(false)}>{item.label[lang]}</a>)}
-      <a className="nav-contact" href={routePath('contact', lang)} onClick={() => setOpen(false)}>{lang === 'en' ? 'Let’s talk' : 'কথা বলুন'}<ArrowUpRight size={14} /></a>
-    </nav>
-    <a className="language-switch" href={languagePath} lang={lang === 'en' ? 'bn' : 'en'} aria-label={lang === 'en' ? 'View this page in Bangla' : 'এই পৃষ্ঠাটি ইংরেজিতে দেখুন'}>{text.language}</a>
-  </header>;
+  const icons: Record<string, typeof Home> = { about: UserRound, services: BriefcaseBusiness, projects: FolderGit2, experience: Clock3, research: FlaskConical, contact: Mail };
+  const toggleTheme = () => {
+    const next = !light;
+    document.documentElement.dataset.theme = next ? 'light' : 'dark';
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', next ? '#fafaf9' : '#06070a');
+    try { localStorage.setItem('sm-theme', next ? 'light' : 'dark'); } catch { /* storage can be disabled */ }
+    setLight(next);
+  };
+  return <>
+    <a className="dock-home" href={routePath('home', lang)} aria-label={lang === 'en' ? 'Sobuj Miah home' : 'সবুজ মিয়ার হোম'}><span className="wordmark-mark" aria-hidden="true"><i /><i /><i /></span></a>
+    <header className="site-header">
+      <nav id="primary-nav" className="primary-nav" aria-label={lang === 'en' ? 'Main navigation' : 'প্রধান নেভিগেশন'}>
+        {navigation.map(item => { const Icon = icons[item.key]; return <a key={item.key} href={routePath(item.key, lang)} aria-label={item.label[lang]} title={item.label[lang]}><Icon size={18} strokeWidth={1.7} aria-hidden="true" /><span className="dock-tip">{item.label[lang]}</span></a>; })}
+      </nav>
+      <span className="dock-separator" aria-hidden="true" />
+      <button className="theme-toggle" type="button" onClick={toggleTheme} aria-label={light ? (lang === 'en' ? 'Switch to dark theme' : 'ডার্ক থিম চালু করুন') : (lang === 'en' ? 'Switch to light theme' : 'লাইট থিম চালু করুন')} title={light ? 'Dark theme' : 'Light theme'}>{light ? <Moon size={16} /> : <Sun size={16} />}</button>
+      <a className="language-switch" href={languagePath} lang={lang === 'en' ? 'bn' : 'en'} aria-label={lang === 'en' ? 'View this page in Bangla' : 'এই পৃষ্ঠাটি ইংরেজিতে দেখুন'}><Globe2 size={15} aria-hidden="true" /><span>{lang === 'en' ? 'বাংলা' : 'EN'}</span></a>
+      <a className="nav-contact" href={routePath('contact', lang)} aria-label={lang === 'en' ? 'Contact Sobuj' : 'যোগাযোগ'} title={lang === 'en' ? 'Contact Sobuj' : 'যোগাযোগ'}><ArrowUpRight size={18} aria-hidden="true" /></a>
+    </header>
+  </>;
 }
 
 function Footer({ lang }: { lang: Lang }) {
@@ -97,49 +103,6 @@ function Footer({ lang }: { lang: Lang }) {
     </nav>
     <span>© {new Date().getFullYear()} Sobuj Miah</span>
   </footer>;
-}
-
-function useSceneMotion() {
-  const [reduced, setReduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const [motionOverride, setMotionOverride] = useState<boolean | null>(null);
-  useEffect(() => {
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const update = (event: MediaQueryListEvent) => setReduced(event.matches);
-    query.addEventListener('change', update);
-    return () => query.removeEventListener('change', update);
-  }, []);
-  const paused = motionOverride === null ? reduced : !motionOverride;
-  return { paused, toggle: () => setMotionOverride(paused) };
-}
-
-function HeroScene({ paused, label }: { paused: boolean; label: string }) {
-  const host = useRef<HTMLDivElement>(null);
-  const scene = useRef<{ setPaused: (value: boolean) => void; dispose: () => void } | null>(null);
-  const [failed, setFailed] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    void import('./scene/WorkbenchScene').then(({ WorkbenchScene }) => {
-      if (cancelled || !host.current) return;
-      scene.current = new WorkbenchScene(host.current, paused);
-      scene.current.setPaused(paused);
-    }).catch(() => { if (!cancelled) setFailed(true); });
-    return () => { cancelled = true; scene.current?.dispose(); scene.current = null; };
-  }, []);
-  useEffect(() => { scene.current?.setPaused(paused); }, [paused]);
-  return <>
-  <div className={`hero-art ${failed ? 'art-fallback' : ''}`}>
-    <div className="scene-wash" aria-hidden="true" />
-    {!failed ? <div className="scene-host" ref={host} aria-hidden="true" /> : <div className="scene-fallback" aria-hidden="true"><div className="fallback-board">
-      <div className="fallback-module module-linux"><b>01 / LINUX</b><span>ARM64 TOOLCHAIN</span></div>
-      <div className="fallback-module module-ops"><b>02 / OPERATIONS</b><span>RECORDS · DELIVERY</span></div>
-      <div className="fallback-module module-ai"><b>03 / LOCAL AI</b><span>CPU · DEVICE EVIDENCE</span></div>
-      <div className="fallback-module module-software"><b>04 / SOFTWARE</b><span>TOOLS · WORKFLOWS</span></div>
-      <div className="fallback-phone"><span>SOBUJ MIAH / FIELD WORKBENCH</span><strong>Systems<br />made useful.</strong><i /><i /><i /><b>SOFTWARE · ANDROID · OPERATIONS</b></div>
-      <span className="fallback-route route-one" /><span className="fallback-route route-two" /><span className="fallback-route route-three" />
-    </div></div>}
-    <div className="scene-caption" aria-hidden="true"><span className="caption-signal" />{label}</div>
-  </div>
-  </>;
 }
 
 function PageHeading({ copy }: { copy: PageText }) {
@@ -165,45 +128,87 @@ function ProjectCard({ project, lang, index }: { project: SiteData['projects'][n
 
 function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['home'] }) {
   const home = copy;
-  const motion = useSceneMotion();
-  return <>
-    <section className="hero" aria-labelledby="hero-title">
-      <HeroScene paused={motion.paused} label={home.visualCaption ?? home.eyebrow} />
+  const about = site.pages[lang].about;
+  const contact = site.pages[lang].contact;
+  const verified = site.research[lang].verified;
+  const ticker = site.services.map(service => service.title[lang]);
+  return <div className="source-home">
+    <section className="hero source-hero" aria-labelledby="hero-title">
       <div className="hero-inner">
-        <p className="eyebrow hero-eyebrow"><span />{home.eyebrow}</p>
-        <p className="hero-name">{site.site.name}<span> / {lang === 'en' ? 'INDEPENDENT BUILDER' : 'স্বতন্ত্র নির্মাতা'}</span></p>
-        <h1 id="hero-title">{home.headline.split('. ').map((line, index, all) => <span key={line}>{line}{index < all.length - 1 ? '.' : ''}{index === 0 && all.length > 1 ? <br /> : ' '}</span>)}</h1>
-        <p className="hero-deck">{home.deck}</p>
-        <p className="hero-identity">{home.identity}</p>
-        <div className="hero-actions"><a className="button button-primary" href={routePath('projects', lang)}>{home.primary}<ArrowRight size={16} /></a><a className="button button-quiet" href={routePath('services', lang)}>{home.secondary}<ArrowDown size={15} /></a></div>
-        <button className="button button-quiet scene-motion-toggle" type="button" aria-pressed={!motion.paused} onClick={motion.toggle}><span aria-hidden="true">{motion.paused ? '▶' : 'Ⅱ'}</span>{motion.paused ? (lang === 'en' ? 'Play 3D motion' : '3D নড়াচড়া চালু করুন') : (lang === 'en' ? 'Pause 3D motion' : '3D নড়াচড়া থামান')}</button>
-        <div className="hero-bottom"><span>23.81° N · 90.26° E</span><span>{home.visualLabel}</span></div>
+        <span className="tagline"><span className="pulse" />{lang === 'en' ? 'Available for freelance & remote work' : 'ফ্রিল্যান্স ও রিমোট কাজের জন্য উন্মুক্ত'}</span>
+        <h1 className="source-name" id="hero-title"><span>{lang === 'en' ? 'Sobuj ' : 'সবুজ '}</span><span className="name-accent">{lang === 'en' ? 'Miah' : 'মিয়া'}</span></h1>
+        <p className="source-role"><span aria-hidden="true">&gt;</span>{home.identity}<i aria-hidden="true" /></p>
+        <p className="source-intro">{home.deck}</p>
+        <div className="hero-actions"><a className="button button-primary" href={routePath('contact', lang)}>{lang === 'en' ? 'Start a project' : 'কাজ নিয়ে কথা বলুন'}<ArrowUpRight size={16} /></a><a className="button button-quiet" href={routePath('projects', lang)}>{lang === 'en' ? 'Explore my work' : 'আমার কাজ দেখুন'}<ArrowDown size={15} /></a></div>
+        <div className="source-stats">
+          <div><strong>8+</strong><span>{lang === 'en' ? 'Years · self-reported' : 'বছর · স্ব-প্রতিবেদিত'}</span></div>
+          <div><strong>2</strong><span>{lang === 'en' ? 'Countries worked' : 'দেশে কাজের অভিজ্ঞতা'}</span></div>
+          <div><strong>{site.site.languages.length}</strong><span>{lang === 'en' ? 'Languages' : 'টি ভাষা'}</span></div>
+          <div><strong>{site.services.length}</strong><span>{lang === 'en' ? 'Practical services' : 'টি ব্যবহারিক সেবা'}</span></div>
+        </div>
       </div>
-      <div className="hero-edge" aria-hidden="true"><span>FIELD NOTES / 01</span><i /></div>
+      <span className="scroll-hint" aria-hidden="true">{lang === 'en' ? 'SCROLL TO EXPLORE' : 'আরও দেখতে স্ক্রল করুন'}<i /></span>
     </section>
 
-    <section className="section about-teaser" aria-labelledby="home-about-title">
-      <div className="section-meta"><span>01</span><span>{lang === 'en' ? 'PROFILE' : 'পরিচিতি'}</span></div>
-      <div className="about-teaser-copy"><h2 id="home-about-title">{home.aboutTitle}</h2><p>{home.aboutIntro}</p><a className="text-link" href={routePath('about', lang)}>{lang === 'en' ? 'Read my story' : 'আমার পরিচিতি পড়ুন'}<ArrowRight size={15} /></a></div>
-      <div className="principle-note"><span className="principle-mark">“</span><p>{lang === 'en' ? 'Document the work. Verify before reporting. Own the outcome.' : 'কাজ নথিবদ্ধ করি। রিপোর্টের আগে যাচাই করি। ফলাফলের দায় নিই।'}</p><span>{lang === 'en' ? 'A WORKING PRINCIPLE' : 'কাজের নীতি'}</span></div>
+    <div className="source-marquee" aria-label={lang === 'en' ? 'Services and capabilities' : 'সেবা ও দক্ষতা'}><div>{[...ticker, ...ticker].map((item, index) => <span key={`${item}-${index}`}>{item}<b>◆</b></span>)}</div></div>
+
+    <section className="source-section" id="about" aria-labelledby="home-about-title">
+      <div className="source-wrap">
+        <SectionHeading number="01" label={lang === 'en' ? 'PROFILE' : 'পরিচিতি'} title={about.headline} lede={about.lede} id="home-about-title" />
+        <div className="source-about-grid">
+          <div className="source-prose">{(about.paragraphs as string[]).slice(0, 2).map(paragraph => <p key={paragraph}>{paragraph}</p>)}<a className="text-link" href={routePath('about', lang)}>{lang === 'en' ? 'Full profile' : 'সম্পূর্ণ পরিচিতি'}<ArrowRight size={15} /></a></div>
+          <div className="source-side">
+            <aside className="quick-facts"><h3>{lang === 'en' ? 'QUICK FACTS' : 'সংক্ষেপে'}</h3><dl>
+              <div><dt>{lang === 'en' ? 'Location' : 'অবস্থান'}</dt><dd>{site.site.location[lang]}</dd></div>
+              <div><dt>{lang === 'en' ? 'Timezone' : 'সময় অঞ্চল'}</dt><dd>{site.site.timezone[lang]}</dd></div>
+              <div><dt>{about.educationLabel as string}</dt><dd>{about.educationValue as string}</dd></div>
+              <div><dt>{lang === 'en' ? 'Availability' : 'কাজের সুযোগ'}</dt><dd>{about.availabilityValue as string}</dd></div>
+            </dl></aside>
+            <div className="terminal-card" aria-label={lang === 'en' ? 'Verified profile and technology summary' : 'যাচাইকৃত পরিচিতি ও প্রযুক্তির সারাংশ'}>
+              <div className="terminal-bar"><i /><i /><i /><span>sobuj@portfolio: ~/work</span></div>
+              <div className="terminal-body">
+                <p><b>$</b> whoami --summary</p><p><span>Role</span> {lang === 'en' ? 'Office admin · systems builder' : 'অফিস প্রশাসন · সিস্টেম নির্মাতা'}</p><p><span>Base</span> {site.site.location[lang]}</p><p><span>Languages</span> EN · BN · HI · UR · AR</p>
+                <p className="terminal-gap"><b>$</b> research --verified</p>{verified.slice(0, 3).map(item => <p className="terminal-result" key={item}><b>✓</b> {item}</p>)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <section className="section section-tint" aria-labelledby="home-services-title">
-      <div className="section-meta"><span>02</span><span>{lang === 'en' ? 'SERVICES' : 'সেবা'}</span></div>
-      <div className="section-head"><div><p className="eyebrow"><span />{lang === 'en' ? 'PRACTICAL SUPPORT' : 'ব্যবহারিক সহায়তা'}</p><h2 id="home-services-title">{home.servicesTitle}</h2></div><p>{home.servicesIntro}</p></div>
-      <div className="service-grid home-service-grid">{site.services.slice(0, 4).map((service, index) => <ServiceCard key={service.slug} service={service} lang={lang} index={index} />)}</div>
-      <a className="text-link section-link" href={routePath('services', lang)}>{lang === 'en' ? 'Browse every service' : 'সব সেবা দেখুন'}<ArrowRight size={15} /></a>
+    <section className="source-section source-section-alt" id="services" aria-labelledby="home-services-title">
+      <div className="source-wrap">
+        <SectionHeading number="02" label={lang === 'en' ? 'SERVICES' : 'সেবা'} title={home.servicesTitle as string} lede={home.servicesIntro as string} id="home-services-title" />
+        <div className="service-accordion">{site.services.slice(0, 3).map((service, index) => <details className="service-disclosure" key={service.slug}>
+          <summary><span className="disclosure-number">{String(index + 1).padStart(2, '0')}</span><span className="disclosure-title">{service.title[lang]}</span><span className="disclosure-plus" aria-hidden="true" /></summary>
+          <div className="disclosure-body"><p>{service.detail[lang]}</p><div className="source-tags">{service.deliverables[lang].map(item => <span key={item}>{item}</span>)}</div><a href={routePath('service', lang, service.slug)} className="text-link">{lang === 'en' ? 'Service details' : 'সেবার বিবরণ'}<ArrowRight size={14} /></a></div>
+        </details>)}</div>
+        <a className="section-link" href={routePath('services', lang)}>{lang === 'en' ? 'Open services page' : 'সব সেবা দেখুন'}<ArrowUpRight size={14} /></a>
+      </div>
     </section>
 
-    <section className="section" aria-labelledby="home-projects-title">
-      <div className="section-meta"><span>03</span><span>{lang === 'en' ? 'SELECTED WORK' : 'বাছাই করা কাজ'}</span></div>
-      <div className="section-head"><div><p className="eyebrow"><span />{lang === 'en' ? 'PUBLIC SOURCE · REAL BOUNDARIES' : 'পাবলিক সোর্স · বাস্তব সীমা'}</p><h2 id="home-projects-title">{home.selectedTitle}</h2></div><p>{home.selectedIntro}</p></div>
-      <div className="project-grid">{site.projects.slice(0, 3).map((project, index) => <ProjectCard key={project.slug} project={project} lang={lang} index={index} />)}</div>
-      <a className="text-link section-link" href={routePath('projects', lang)}>{lang === 'en' ? 'See all public projects' : 'সব পাবলিক প্রকল্প দেখুন'}<ArrowRight size={15} /></a>
+    <section className="source-section source-section-alt" id="work" aria-labelledby="home-projects-title">
+      <div className="source-wrap">
+        <SectionHeading number="03" label={lang === 'en' ? 'PROJECTS' : 'প্রকল্প'} title={home.selectedTitle as string} lede={home.selectedIntro as string} id="home-projects-title" />
+        <div className="source-project-grid">{site.projects.slice(0, 3).map((project, index) => <article className="source-project" key={project.slug}>
+          <div className="source-project-top"><span>{String(index + 1).padStart(2, '0')} / {project.category[lang]}</span><span>{project.state}</span></div>
+          <h3>{project.name}</h3><p>{project.summary[lang]}</p>{project.evidence && <p className="project-evidence">{project.evidence[lang]}</p>}<p className="project-limit"><b>{lang === 'en' ? 'BOUNDARY' : 'সীমা'}</b>{project.boundary[lang]}</p>
+          <div className="source-project-links"><a href={routePath('project', lang, project.slug)}>{lang === 'en' ? 'Details' : 'বিস্তারিত'}<ArrowRight size={14} /></a><a href={project.url} target="_blank" rel="noopener noreferrer">GitHub<ArrowUpRight size={14} /></a></div>
+        </article>)}</div>
+      </div>
     </section>
+    <section className="source-section source-contact" id="contact" aria-labelledby="home-contact-title">
+      <div className="source-wrap"><SectionHeading number="04" label={lang === 'en' ? 'CONTACT' : 'যোগাযোগ'} title={contact.headline} lede={contact.lede} id="home-contact-title" />
+        <div className="source-contact-links"><a href={`mailto:${site.site.email}`}><span>{contact.emailLabel as string}</span><b>{site.site.email}</b><ArrowUpRight size={17} /></a><a href={`tel:${site.site.phoneHref}`}><span>{contact.phoneLabel as string}</span><b>{site.site.phone}</b><ArrowUpRight size={17} /></a><a href="https://t.me/soobujmiah" target="_blank" rel="noopener noreferrer"><span>Telegram</span><b>@soobujmiah</b><ArrowUpRight size={17} /></a></div>
+        <div className="source-socials">{site.site.social.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.label}<ArrowUpRight size={13} /></a>)}</div>
+      </div>
+    </section>
+  </div>;
+}
 
-    <ContactBand lang={lang} copy={site.pages[lang].contact} />
-  </>;
+function SectionHeading({ number, label, title, lede, id }: { number: string; label: string; title: string; lede?: string; id: string }) {
+  const [first, ...rest] = title.split(/(?<=\s)/);
+  return <header className="source-section-heading"><p className="source-eyebrow">{number} — {label}</p><h2 id={id}>{first}<em>{rest.join('')}</em></h2>{lede && <p>{lede}</p>}</header>;
 }
 
 function AboutPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['about'] }) {
@@ -253,7 +258,7 @@ function ProjectDetail({ lang, copy, slug }: { lang: Lang; copy: SiteData['pages
   if (!project) return <NotFound lang={lang} />;
   return <div className="page-wrap detail-wrap"><a className="back-link" href={routePath('projects', lang)}><ArrowLeft size={15} />{lang === 'en' ? 'All projects' : 'সব প্রকল্প'}</a>
     <PageHeading copy={{ title: `${project.name} — ${copy.title}`, description: project.summary[lang], eyebrow: `${copy.eyebrow} · ${project.category[lang]}`, headline: project.name, lede: project.summary[lang] }} />
-    <div className="project-detail-box"><p className="eyebrow"><span />{copy.statusLabel as string}</p><p>{project.boundary[lang]}</p><a className="button button-primary" href={project.url} target="_blank" rel="noopener noreferrer">{copy.repoLabel as string}<ArrowUpRight size={16} /></a></div>
+    <div className="project-detail-box">{project.evidence && <><p className="eyebrow"><span />{lang === 'en' ? 'ENGINEERING EVIDENCE' : 'প্রকৌশলগত প্রমাণ'}</p><p>{project.evidence[lang]}</p></>}<p className="eyebrow"><span />{copy.statusLabel as string}</p><p>{project.boundary[lang]}</p><a className="button button-primary" href={project.url} target="_blank" rel="noopener noreferrer">{copy.repoLabel as string}<ArrowUpRight size={16} /></a></div>
   </div>;
 }
 
@@ -273,10 +278,6 @@ function ContactPage({ copy }: { lang: Lang; copy: SiteData['pages'][Lang]['cont
     <a href={`tel:${site.site.phoneHref}`}><span>{copy.phoneLabel as string}</span><strong>{site.site.phone}</strong><ArrowUpRight size={17} /></a>
     <a href="https://t.me/soobujmiah" target="_blank" rel="noopener noreferrer"><span>{copy.telegramLabel as string}</span><strong>@soobujmiah</strong><ArrowUpRight size={17} /></a>
   </div><div className="social-list">{site.site.social.filter(link => !['WhatsApp', 'Telegram'].includes(link.label)).map(link => <a href={link.href} target="_blank" rel="noopener noreferrer" key={link.label}>{link.label}<ArrowUpRight size={14} /></a>)}</div></div>;
-}
-
-function ContactBand({ lang, copy }: { lang: Lang; copy: PageText }) {
-  return <section className="contact-band"><p className="eyebrow"><span />{copy.eyebrow}</p><div><h2>{copy.headline}</h2><p>{copy.lede}</p></div><a className="button button-primary" href={routePath('contact', lang)}>{lang === 'en' ? 'Get in touch' : 'যোগাযোগ করুন'}<ArrowRight size={16} /></a></section>;
 }
 
 function NotFound({ lang }: { lang: Lang }) {

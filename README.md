@@ -1,6 +1,6 @@
 # Sobuj Miah — Portfolio
 
-A bilingual, mobile-first portfolio for Sobuj Miah, an office-operations professional and self-taught software and systems builder. It pairs semantic page content with a Three.js engineering workbench: an angled phone with a readable display and visible side profile, supported by a dimensional stand and connected to elevated modules for operations, Linux, local AI, and software.
+A bilingual, mobile-first, multi-page portfolio for Sobuj Miah. Its visual direction follows `/sdcard/index.html`: graphite, lime and cyan, centered Sora typography, compact monospace labels, restrained 2D lighting, and a floating navigation dock. The home page is a concise introduction with service and project previews; full profile, services, experience, projects, research and contact pages remain separate routes.
 
 ## Develop and verify
 
@@ -16,7 +16,7 @@ npm run preview
 
 The route families include `/about/`, `/bn/about/`, `/services/`, every service detail, `/projects/`, every public project detail, experience, research, and contact pages. Public project notes state evidence boundaries; private repositories and unverified capability claims are excluded.
 
-The 3D scene loads separately from the initial app bundle, uses a three-quarter camera and perspective geometry, adapts to viewport shape, and pauses for reduced-motion preferences or the visitor's motion control. The canvas is decorative; all important text, links, and project content remain accessible HTML.
+Important text, links, and project evidence remain semantic HTML. Selected project evidence is checked against the public GitHub profile README, while experimental GPU/NPU paths stay identified as experimental. The project has no WebGL or 3D renderer dependency.
 
 ## Search and deployment
 

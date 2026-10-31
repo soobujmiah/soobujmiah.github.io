@@ -5,7 +5,7 @@ import process from 'node:process';
 const root = process.cwd();
 const files = [
   'src/App.tsx', 'src/main.tsx', 'src/data/site-content.json',
-  'src/scene/WorkbenchScene.ts', 'src/styles.css', 'index.html',
+  'src/styles.css', 'index.html',
   'scripts/create-routes.mjs', 'scripts/verify-portfolio.mjs', 'scripts/make-og.py',
   'README.md', 'DESIGN_SYSTEM.md',
 ];
