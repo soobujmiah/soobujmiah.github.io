@@ -45,4 +45,4 @@ Fonts are requested from Google Fonts in the fully deployed site; the interface 
 
 ## Deployment state
 
-This is the public repository `soobujmiah/soobujmiah.github.io`, deployed at `https://soobujmiah.github.io/`. The workflow last completed a successful Pages deployment from `main` on 2026-10-28. Local edits remain unpublished until pushed; pushes to `main` deploy automatically. Preserve the existing repository history and review the generated build before publication.
+This is the public repository `soobujmiah/soobujmiah.github.io`, deployed at `https://soobujmiah.github.io/`. Local edits remain unpublished until pushed; pushes to `main` deploy automatically. Check the Pages workflow run for the current deployment result, and preserve the existing repository history.

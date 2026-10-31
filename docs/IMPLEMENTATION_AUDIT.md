@@ -21,7 +21,7 @@ I kept the existing Pocket Systems Lab direction and improved its project eviden
 - `npm run build`: production build completed; 12 direct routes generated and production-output verification passed (36/36 checks).
 - Initial gzipped JS was 65.2 KiB against the 80 KiB budget. The lazy 3D route and Three.js payload totaled 134.2 KiB against the 140 KiB budget.
 - Production preview returned HTTP 200 for the home page, six station routes, and six project routes. Titles, headings, canonicals, project source links, and referenced JS/CSS assets were present and returned successfully.
-- The deployed site and its existing Pages workflow were independently checked. The live site returned HTTP 200; the latest observed successful deployment was 2026-10-28. No new deployment was started.
+- The Pages workflow run `41185830856` for commit `3712a55` completed both build and deploy successfully. The live home, Notes, and Ternuxx project routes returned HTTP 200 with the updated content and route metadata.
 - `git diff --check` passed.
 
 ## Xvfb visual review
@@ -36,4 +36,4 @@ The Ternuxx native session repair was applied locally and `tx status` reports XF
 
 ## Release state
 
-The repository deploys on pushes to `main`, as described above. This audit records implementation and local verification; deployment success is determined by the GitHub Pages workflow run for the commit containing it.
+The repository deploys on pushes to `main`, as described above. Workflow run `41185830856` deployed commit `3712a55`; the live route checks above passed.
