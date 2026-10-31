@@ -2,7 +2,7 @@
 
 ## Direction
 
-An editorial field-workbench for an operations professional who also builds software and Android/Linux systems. The visual signature is a large, angled phone on a grounded engineering bench, linked to four useful domains: operations, Linux, local AI, and software. The scene supports the story; readable HTML remains the primary interface.
+An editorial field-workbench for an operations professional who also builds software and Android/Linux systems. The visual signature is a three-quarter view of a dimensional phone on a raised metal cradle above a layered work surface. Four elevated display modules for operations, Linux, local AI, and software connect to the device through routed traces. A readable, high-contrast screen and visible chassis edges make the object read as a physical device in space. The scene supports the story; readable HTML remains the primary interface.
 
 ## Palette and type
 
@@ -14,8 +14,8 @@ An editorial field-workbench for an operations professional who also builds soft
 
 ## Composition
 
-- Wide screens place the semantic hero copy to the left and the workbench to the right.
-- Portrait screens keep the full-width phone composition below the hero copy, with a low-opacity wash so the 3D display remains visible.
+- Wide screens place the semantic hero copy to the left and an oblique, perspective-framed workbench to the right.
+- Portrait screens center the complete bench beneath the hero copy, retaining the phone, its stand, and connected modules without shrinking them into a small middle strip.
 - Reusable editorial sections use a restrained grid, thin rules, generous spacing, and dark green surfaces.
 - Project cards link to an internal detail page and the public repository, and state each project's current boundary.
 

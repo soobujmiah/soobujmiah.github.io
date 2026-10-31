@@ -22,15 +22,20 @@ const expectedProjects = ['ternux', 'ternuxx', 'adt', 'lai', 'ggen', 'songjog', 
 
 assert('Bilingual content covers all profile pages', ['en', 'bn'].every(lang => ['home', 'about', 'services', 'experience', 'projects', 'research', 'contact'].every(page => data.pages[lang][page]?.title && data.pages[lang][page]?.description)));
 assert('All approved public projects are represented', expectedProjects.every(slug => data.projects.some(project => project.slug === slug)));
+assert('Full source-file work history and time zone are represented', data.experience.length === 7 && data.experience.every(item => item.period) && data.site.timezone.en.startsWith('GMT+6'));
+assert('All GitHub profile service links target generated service slugs', ['web-development', 'software-development', 'computer-support', 'android-support', 'business-technology', 'graphics-design', 'office-administration', 'data-entry'].every(slug => data.services.some(service => service.slug === slug)));
 assert('Service and project slugs are unique and route-safe', [...data.services, ...data.projects].every(item => /^[a-z0-9-]+$/.test(item.slug)) && new Set([...data.services, ...data.projects].map(item => item.slug)).size === data.services.length + data.projects.length);
 assert('Project cards link to localized detail pages and repositories', publicSource.includes("routePath('project', lang, project.slug)") && data.projects.every(project => /^https:\/\/github\.com\//.test(project.url)));
 assert('No private repository URLs or token-shaped secrets', !/https?:\/\/github\.com\/[^\s"']+\/(?:private|internal)(?:[\s"']|$)/i.test(publicSource) && !/gh[pousr]_[A-Za-z0-9]{20,}/i.test(publicSource));
 assert('Search Console verification meta preserved', publicSource.includes('Z7hOImSydB4nMFUCSyYaLVRpIPHu8FJBlIbfVSbhWs8'));
 assert('Search Console verification HTML preserved', fs.existsSync(path.join(root, 'public/google7974d87a16aa1b38.html')) && read('public/google7974d87a16aa1b38.html').includes('google-site-verification: google7974d87a16aa1b38.html'));
-assert('3D canvas is decorative while motion control remains accessible', read('src/App.tsx').includes('aria-hidden="true"') && !read('src/App.tsx').includes('className="hero-art ${failed ? \'art-fallback\' : \'\'}" aria-hidden="true"') && read('src/App.tsx').includes('className="scene-motion"'));
+assert('3D canvas is decorative while motion control remains accessible', read('src/App.tsx').includes('aria-hidden="true"') && !read('src/App.tsx').includes('className="hero-art ${failed ? \'art-fallback\' : \'\'}" aria-hidden="true"') && read('src/App.tsx').includes('scene-motion-toggle'));
 assert('Reduced motion and scene failure fallback are implemented', publicSource.includes('prefers-reduced-motion') && read('src/App.tsx').includes('scene-fallback') && read('src/scene/WorkbenchScene.ts').includes('setPaused'));
-assert('3D scene is lazy-loaded and adaptive to viewport shape', read('src/App.tsx').includes("import('./scene/WorkbenchScene')") && read('src/scene/WorkbenchScene.ts').includes('const portrait = width < height'));
-assert('3D artwork has legible overlay contrast on compact viewports', read('src/styles.css').includes('rgba(7,16,12,.18) 38%') && read('src/styles.css').includes('rgba(7,16,12,.04) 72%'));
+assert('Reduced motion starts still but the scene play control explicitly enables animation', read('src/App.tsx').includes('motionOverride === null ? reduced : !motionOverride') && read('src/App.tsx').includes('toggle: () => setMotionOverride(paused)') && read('src/App.tsx').includes('onClick={motion.toggle}') && read('src/scene/WorkbenchScene.ts').includes('Math.sin(this.clock.elapsedTime * 0.55) * 0.14'));
+assert('3D scene is lazy-loaded and adapts to portrait aspect ratio', read('src/App.tsx').includes("import('./scene/WorkbenchScene')") && read('src/scene/WorkbenchScene.ts').includes('const portrait = width / height < 0.9'));
+assert('Hero scene uses real perspective geometry and an oblique camera', read('src/scene/WorkbenchScene.ts').includes('new THREE.ExtrudeGeometry') && read('src/scene/WorkbenchScene.ts').includes('this.camera.position.set(6.35, 5.9, 14.5)') && read('src/scene/WorkbenchScene.ts').includes('this.phone.rotation.set(-0.11, 0.38, -0.085)'));
+assert('Phone display uses normalized plane UVs and a high-contrast screen texture', read('src/scene/WorkbenchScene.ts').includes('new THREE.PlaneGeometry(3.03, 5.66)') && read('src/scene/WorkbenchScene.ts').includes("bg.addColorStop(0, '#edf1e5')"));
+assert('Compact hero wash preserves the 3D artwork', read('src/styles.css').includes('rgba(7,16,12,.22) 27%') && read('src/styles.css').includes('rgba(7,16,12,.025) 49%'));
 assert('Search metadata and route generation are configured', read('scripts/create-routes.mjs').includes('hreflang="x-default"') && read('scripts/create-routes.mjs').includes('application/ld+json') && read('index.html').includes('<!-- ROUTE_LINKS -->'));
 assert('Only one canonical URL is emitted per generated route', !read('scripts/create-routes.mjs').includes('return `<link rel="canonical"') && read('scripts/create-routes.mjs').includes('rel="canonical"'));
 assert('Public 404 and robots/sitemap are produced', read('scripts/create-routes.mjs').includes('404.html') && read('scripts/create-routes.mjs').includes('sitemap.xml') && read('scripts/create-routes.mjs').includes('robots.txt'));
@@ -54,6 +59,9 @@ if (!sourceOnly) {
     const about = fs.readFileSync(path.join(dist, 'about/index.html'), 'utf8');
     const bnAbout = fs.readFileSync(path.join(dist, 'bn/about/index.html'), 'utf8');
     assert('English and Bangla about routes have separate metadata and content', about.includes('About Sobuj Miah') && bnAbout.includes('সবুজ মিয়া') && about !== bnAbout);
+    const experience = fs.readFileSync(path.join(dist, 'experience/index.html'), 'utf8');
+    const bnExperience = fs.readFileSync(path.join(dist, 'bn/experience/index.html'), 'utf8');
+    assert('English and Bangla experience fallback includes all seven source dates', ['Mar 2023 — Present', 'Sep 2022 — Feb 2023', '2015 — 2017'].every(date => experience.includes(date) && bnExperience.includes(date)) && (experience.match(/<article>/g) ?? []).length === 7);
     assert('Initial application JS stays under 80 KiB gzipped', initialJsSize() < 80, `${initialJsSize().toFixed(1)} KiB`);
     assert('Lazy scene and Three.js stay under 140 KiB gzipped', lazyJsSize() < 140, `${lazyJsSize().toFixed(1)} KiB`);
   }

@@ -12,7 +12,7 @@ interface PageText { title: string; description: string; eyebrow: string; headli
 interface SiteData {
   site: {
     name: string; url: string; email: string; phone: string; phoneHref: string;
-    location: Localized;
+    location: Localized; timezone: Localized;
     languages: Array<{ en: string; bn: string; levelEn: string; levelBn: string }>;
     social: Array<{ label: string; href: string }>;
   };
@@ -21,7 +21,7 @@ interface SiteData {
     slug: string; icon: string; title: Localized; summary: Localized; detail: Localized;
     deliverables: Record<Lang, string[]>;
   }>;
-  experience: Array<{ role: Localized; organisation: string; location: Localized; work: Record<Lang, string[]> }>;
+  experience: Array<{ role: Localized; period: string; organisation: string; location: Localized; work: Record<Lang, string[]> }>;
   skills: Array<{ title: Localized; items: Record<Lang, string[]> }>;
   projects: Array<{ slug: string; name: string; category: Localized; summary: Localized; boundary: Localized; url: string; state: string }>;
   research: Record<Lang, { verified: string[]; experimental: string[]; notClaimed: string[] }>;
@@ -99,32 +99,47 @@ function Footer({ lang }: { lang: Lang }) {
   </footer>;
 }
 
-function HeroScene({ lang, label }: { lang: Lang; label: string }) {
-  const host = useRef<HTMLDivElement>(null);
-  const scene = useRef<{ setPaused: (value: boolean) => void; dispose: () => void } | null>(null);
-  const [failed, setFailed] = useState(false);
-  const [paused, setPaused] = useState(false);
+function useSceneMotion() {
   const [reduced, setReduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const [motionOverride, setMotionOverride] = useState<boolean | null>(null);
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
     const update = (event: MediaQueryListEvent) => setReduced(event.matches);
     query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+  const paused = motionOverride === null ? reduced : !motionOverride;
+  return { paused, toggle: () => setMotionOverride(paused) };
+}
+
+function HeroScene({ paused, label }: { paused: boolean; label: string }) {
+  const host = useRef<HTMLDivElement>(null);
+  const scene = useRef<{ setPaused: (value: boolean) => void; dispose: () => void } | null>(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
     let cancelled = false;
     void import('./scene/WorkbenchScene').then(({ WorkbenchScene }) => {
       if (cancelled || !host.current) return;
-      scene.current = new WorkbenchScene(host.current, reduced || paused);
-      scene.current.setPaused(reduced || paused);
+      scene.current = new WorkbenchScene(host.current, paused);
+      scene.current.setPaused(paused);
     }).catch(() => { if (!cancelled) setFailed(true); });
-    return () => { cancelled = true; query.removeEventListener('change', update); scene.current?.dispose(); scene.current = null; };
+    return () => { cancelled = true; scene.current?.dispose(); scene.current = null; };
   }, []);
-  useEffect(() => { scene.current?.setPaused(reduced || paused); }, [reduced, paused]);
-  const pauseLabel = reduced ? (lang === 'en' ? 'Reduced motion enabled' : 'Reduced motion চালু') : paused ? (lang === 'en' ? 'Resume scene motion' : 'দৃশ্যের গতি চালু করুন') : (lang === 'en' ? 'Pause scene motion' : 'দৃশ্যের গতি থামান');
-  return <div className={`hero-art ${failed ? 'art-fallback' : ''}`}>
+  useEffect(() => { scene.current?.setPaused(paused); }, [paused]);
+  return <>
+  <div className={`hero-art ${failed ? 'art-fallback' : ''}`}>
     <div className="scene-wash" aria-hidden="true" />
-    {!failed ? <div className="scene-host" ref={host} /> : <div className="scene-fallback"><div className="fallback-board"><div className="fallback-phone"><span>SOBUJ / SYSTEMS</span><i /><i /><i /><b>ARM64 · AI · WEB</b></div><div className="fallback-chip">WORK<br />BENCH</div><span className="fallback-line line-a" /><span className="fallback-line line-b" /><span className="fallback-node node-a">01 / SYSTEMS</span><span className="fallback-node node-b">02 / WORKFLOWS</span></div></div>}
+    {!failed ? <div className="scene-host" ref={host} aria-hidden="true" /> : <div className="scene-fallback" aria-hidden="true"><div className="fallback-board">
+      <div className="fallback-module module-linux"><b>01 / LINUX</b><span>ARM64 TOOLCHAIN</span></div>
+      <div className="fallback-module module-ops"><b>02 / OPERATIONS</b><span>RECORDS · DELIVERY</span></div>
+      <div className="fallback-module module-ai"><b>03 / LOCAL AI</b><span>CPU · DEVICE EVIDENCE</span></div>
+      <div className="fallback-module module-software"><b>04 / SOFTWARE</b><span>TOOLS · WORKFLOWS</span></div>
+      <div className="fallback-phone"><span>SOBUJ MIAH / FIELD WORKBENCH</span><strong>Systems<br />made useful.</strong><i /><i /><i /><b>SOFTWARE · ANDROID · OPERATIONS</b></div>
+      <span className="fallback-route route-one" /><span className="fallback-route route-two" /><span className="fallback-route route-three" />
+    </div></div>}
     <div className="scene-caption" aria-hidden="true"><span className="caption-signal" />{label}</div>
-    {!failed && <button className="scene-motion" type="button" aria-hidden="false" aria-label={pauseLabel} title={pauseLabel} onClick={() => setPaused(!paused)} disabled={reduced}><span>{paused || reduced ? 'II' : '↗'}</span><span className="sr-only">{pauseLabel}</span></button>}
-  </div>;
+  </div>
+  </>;
 }
 
 function PageHeading({ copy }: { copy: PageText }) {
@@ -150,9 +165,10 @@ function ProjectCard({ project, lang, index }: { project: SiteData['projects'][n
 
 function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['home'] }) {
   const home = copy;
+  const motion = useSceneMotion();
   return <>
     <section className="hero" aria-labelledby="hero-title">
-      <HeroScene lang={lang} label={home.visualCaption ?? home.eyebrow} />
+      <HeroScene paused={motion.paused} label={home.visualCaption ?? home.eyebrow} />
       <div className="hero-inner">
         <p className="eyebrow hero-eyebrow"><span />{home.eyebrow}</p>
         <p className="hero-name">{site.site.name}<span> / {lang === 'en' ? 'INDEPENDENT BUILDER' : 'স্বতন্ত্র নির্মাতা'}</span></p>
@@ -160,6 +176,7 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
         <p className="hero-deck">{home.deck}</p>
         <p className="hero-identity">{home.identity}</p>
         <div className="hero-actions"><a className="button button-primary" href={routePath('projects', lang)}>{home.primary}<ArrowRight size={16} /></a><a className="button button-quiet" href={routePath('services', lang)}>{home.secondary}<ArrowDown size={15} /></a></div>
+        <button className="button button-quiet scene-motion-toggle" type="button" aria-pressed={!motion.paused} onClick={motion.toggle}><span aria-hidden="true">{motion.paused ? '▶' : 'Ⅱ'}</span>{motion.paused ? (lang === 'en' ? 'Play 3D motion' : '3D নড়াচড়া চালু করুন') : (lang === 'en' ? 'Pause 3D motion' : '3D নড়াচড়া থামান')}</button>
         <div className="hero-bottom"><span>23.81° N · 90.26° E</span><span>{home.visualLabel}</span></div>
       </div>
       <div className="hero-edge" aria-hidden="true"><span>FIELD NOTES / 01</span><i /></div>
@@ -195,6 +212,7 @@ function AboutPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['
     <section className="about-layout"><div className="prose">{(c.paragraphs as string[]).map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
       <aside className="profile-aside"><p className="eyebrow"><span />{c.factsTitle as string}</p><dl>
         <div><dt>{lang === 'en' ? 'Based in' : 'অবস্থান'}</dt><dd>{site.site.location[lang]}</dd></div>
+        <div><dt>{lang === 'en' ? 'Time zone' : 'সময় অঞ্চল'}</dt><dd>{site.site.timezone[lang]}</dd></div>
         <div><dt>{c.experienceLabel as string}</dt><dd>{c.experienceValue as string}</dd></div>
         <div><dt>{c.educationLabel as string}</dt><dd>{c.educationValue as string}</dd></div>
         <div><dt>{c.availabilityLabel as string}</dt><dd>{c.availabilityValue as string}</dd></div>
@@ -222,7 +240,7 @@ function ServiceDetail({ lang, copy, slug }: { lang: Lang; copy: SiteData['pages
 
 function ExperiencePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['experience'] }) {
   return <div className="page-wrap"><PageHeading copy={copy} /><div className="experience-list">{site.experience.map((item, index) => <article className="experience-item" key={`${item.role.en}-${item.organisation}`}>
-    <span className="experience-index">0{index + 1}</span><div><p className="experience-place">{item.organisation} · {item.location[lang]}</p><h2>{item.role[lang]}</h2><ul>{item.work[lang].map(task => <li key={task}>{task}</li>)}</ul></div>
+    <span className="experience-index">0{index + 1}</span><div><div className="experience-heading"><div><p className="experience-place">{item.organisation} · {item.location[lang]}</p><h2>{item.role[lang]}</h2></div><time className="experience-period">{item.period}</time></div><ul>{item.work[lang].map(task => <li key={task}>{task}</li>)}</ul></div>
   </article>)}</div><p className="quiet-note">{copy.experienceNote as string}</p></div>;
 }
 
