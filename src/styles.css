@@ -418,7 +418,7 @@ html[lang="bn"] .hero-identity, html[lang="bn"] .hero-deck, html[lang="bn"] .pag
 .site-footer { padding-bottom: 100px; }
 
 .source-home { padding-bottom: 10px; }
-.source-hero { display: grid; place-items: center; min-height: min(100svh, 860px); padding: clamp(45px,7vh,82px) var(--side-pad) 88px; }
+.source-hero { display: grid; place-items: start center; min-height: min(78svh, 700px); padding: clamp(58px,8vh,78px) var(--side-pad) 60px; }
 .source-hero .systems-map { display: none; }
 .source-hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 35% 38% at 50% 42%,rgba(205,255,87,.065),transparent 100%),radial-gradient(ellipse 30% 30% at 76% 27%,rgba(87,232,255,.045),transparent 100%); }
 .source-hero .hero-inner { z-index: 1; }
