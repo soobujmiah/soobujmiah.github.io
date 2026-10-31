@@ -2,7 +2,7 @@
 
 ## Direction
 
-The design follows `/sdcard/index.html`: graphite background, lime and cyan accents, centered Sora hero type, compact monospace labels, soft 2D light, and a small floating navigation dock. The site stays multi-page. The home page introduces Sobuj and previews a few services and projects; profile, service, experience, project, research, and contact content each has its own localized route.
+The design follows `/sdcard/index.html`: graphite background, lime and cyan accents, centered Sora hero type, compact monospace labels, soft 2D light, and a small floating navigation dock. The site stays multi-page. The home page introduces Sobuj and previews a few services and projects; profile, service, experience, project, research, evidence, and contact content each has its own localized route.
 
 No 3D scene, WebGL renderer, or faux-depth artwork is used. Open layouts, short section gaps, dividers, and a limited number of compact panels keep the page from feeling like a stack of boxes. On narrow screens the preview grids collapse and the dock remains usable above the safe area.
 
@@ -20,4 +20,4 @@ The portfolio content is bilingual and keeps project status boundaries visible. 
 
 ## Search structure
 
-Each English and Bengali route has a static crawlable fallback, unique metadata, canonical and reciprocal language alternate links, and route-aware JSON-LD. The build produces a route sitemap and 404 page. Google Search Console verification remains in place.
+The bilingual evidence page links project claims to public sources and states the limits of that support. Each English and Bengali route has a static crawlable fallback, unique metadata, canonical and reciprocal language alternate links, and route-aware JSON-LD. The build produces a route sitemap and 404 page. Google Search Console verification remains in place.

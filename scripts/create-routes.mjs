@@ -6,13 +6,14 @@ const root = process.cwd();
 const dist = path.join(root, 'dist');
 const data = JSON.parse(fs.readFileSync(path.join(root, 'src/data/site-content.json'), 'utf8'));
 const baseUrl = data.site.url.replace(/\/$/, '');
-const sharedPages = ['about', 'services', 'experience', 'projects', 'research', 'contact'];
+const sharedPages = ['about', 'services', 'experience', 'projects', 'research', 'evidence', 'contact'];
 const nav = [
   ['about', { en: 'About', bn: 'পরিচিতি' }],
   ['services', { en: 'Services', bn: 'সেবা' }],
   ['projects', { en: 'Projects', bn: 'প্রকল্প' }],
   ['experience', { en: 'Experience', bn: 'অভিজ্ঞতা' }],
   ['research', { en: 'Research', bn: 'গবেষণা' }],
+  ['evidence', { en: 'Evidence', bn: 'প্রমাণ' }],
   ['contact', { en: 'Contact', bn: 'যোগাযোগ' }],
 ];
 
@@ -97,7 +98,8 @@ function fallbackHeader(lang) {
 
 function homeFallback(route, page) {
   const lang = route.lang;
-  const serviceItems = data.services.slice(0, 3).map(service => `<li><a href="${localePath('service', lang, service.slug)}"><strong>${esc(service.title[lang])}</strong></a> — ${esc(service.summary[lang])}</li>`).join('');
+  const featuredServices = ['software-development', 'android-support', 'office-administration'].map(slug => data.services.find(item => item.slug === slug)).filter(Boolean);
+  const serviceItems = featuredServices.map(service => `<li><a href="${localePath('service', lang, service.slug)}"><strong>${esc(service.title[lang])}</strong></a> — ${esc(service.summary[lang])}</li>`).join('');
   const projectItems = data.projects.slice(0, 3).map(project => `<li><a href="${localePath('project', lang, project.slug)}"><strong>${esc(project.name)}</strong></a> — ${esc(project.summary[lang])}${project.evidence ? `<p>${esc(project.evidence[lang])}</p>` : ''}</li>`).join('');
   const paragraphs = data.pages[lang].about.paragraphs.slice(0, 2).map(paragraph => `<p>${esc(paragraph)}</p>`).join('');
   return `<section class="fallback-hero"><p class="eyebrow">${esc(page.eyebrow)}</p><h1>${esc(data.site.name)}</h1><p>${esc(page.identity)}</p><p>${esc(page.deck)}</p><p><a class="button button-primary" href="${localePath('contact', lang)}">${esc(page.primary)}</a> <a href="${localePath('projects', lang)}">${esc(page.secondary)}</a></p></section><section id="about"><h2>${esc(page.aboutTitle)}</h2><p>${esc(page.aboutIntro)}</p>${paragraphs}<p>${esc(data.site.location[lang])} · ${esc(data.site.timezone[lang])}</p><p><a href="${localePath('about', lang)}">${lang === 'en' ? 'Full profile' : 'সম্পূর্ণ পরিচিতি'}</a></p></section><section id="services"><h2>${esc(page.servicesTitle)}</h2><p>${esc(data.pages[lang].services.lede)}</p><ul>${serviceItems}</ul><p><a href="${localePath('services', lang)}">${lang === 'en' ? 'All services' : 'সব সেবা'}</a></p></section><section id="projects"><h2>${esc(page.selectedTitle)}</h2><p>${esc(page.selectedIntro)}</p><ul>${projectItems}</ul><p><a href="${localePath('projects', lang)}">${lang === 'en' ? 'All public projects' : 'সব পাবলিক প্রকল্প'}</a></p></section><section id="contact"><h2>${esc(data.pages[lang].contact.headline)}</h2><p>${esc(data.pages[lang].contact.lede)}</p><p><a href="mailto:${esc(data.site.email)}">${esc(data.site.email)}</a> · <a href="tel:${esc(data.site.phoneHref)}">${esc(data.site.phone)}</a></p></section>`;
@@ -126,7 +128,11 @@ function fallbackContent(route, meta) {
   }
   if (route.kind === 'project') {
     const item = meta.item;
-    return `<section><p class="eyebrow">${esc(page.eyebrow)} · ${esc(item.category[lang])}</p><p><a href="${localePath('projects', lang)}">${lang === 'en' ? 'All projects' : 'সব প্রকল্প'}</a></p><h1>${esc(item.name)}</h1><p>${esc(item.summary[lang])}</p>${item.evidence ? `<h2>${lang === 'en' ? 'Engineering evidence' : 'প্রকৌশলগত প্রমাণ'}</h2><p>${esc(item.evidence[lang])}</p>` : ''}<h2>${esc(page.statusLabel)}</h2><p>${esc(item.boundary[lang])}</p><p><a href="${esc(item.url)}">${esc(page.repoLabel)}</a></p></section>`;
+    return `<section><p class="eyebrow">${esc(page.eyebrow)} · ${esc(item.category[lang])}</p><p><a href="${localePath('projects', lang)}">${lang === 'en' ? 'All projects' : 'সব প্রকল্প'}</a></p><h1>${esc(item.name)}</h1><p>${esc(item.summary[lang])}</p>${item.evidence ? `<h2>${lang === 'en' ? 'Engineering evidence' : 'প্রকৌশলগত প্রমাণ'}</h2><p>${esc(item.evidence[lang])}</p>` : ''}<h2>${esc(page.statusLabel)}</h2><p>${esc(item.boundary[lang])}</p><p><a href="${esc(item.url)}">${esc(page.repoLabel)}</a></p><p><a href="${localePath('evidence', lang)}">${lang === 'en' ? 'Evidence and claim limits' : 'প্রমাণ ও দাবির সীমা'}</a></p></section>`;
+  }
+  if (route.kind === 'evidence') {
+    const note = page.note;
+    return `<section><p class="eyebrow">${esc(page.eyebrow)}</p><h1>${esc(page.headline)}</h1><p>${esc(page.lede)}</p><p>${esc(note)}</p><ul>${data.projects.map(item => `<li><h2>${esc(item.name)}</h2><p>${esc(item.evidence?.[lang] ?? item.summary[lang])}</p><p><strong>${esc(page.limitLabel)}:</strong> ${esc(item.boundary[lang])}</p><p><a href="${esc(item.url)}">${esc(page.sourceLabel)}</a></p></li>`).join('')}</ul><p><a href="${localePath('research', lang)}">${esc(page.researchLink)}</a></p></section>`;
   }
   if (route.kind === 'research') {
     const info = data.research[lang];

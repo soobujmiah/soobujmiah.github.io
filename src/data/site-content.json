@@ -156,6 +156,17 @@
         "emailLabel": "Email",
         "phoneLabel": "Phone / WhatsApp",
         "telegramLabel": "Telegram"
+      },
+      "evidence": {
+        "title": "Claims, Evidence & Limits — Sobuj Miah",
+        "description": "Public source links, supporting project evidence, and clear limits for claims in Sobuj Miah’s portfolio.",
+        "eyebrow": "EVIDENCE · SOURCES AND SCOPE",
+        "headline": "What the public evidence supports.",
+        "lede": "Project descriptions are linked to their public source. Read the supporting detail alongside each project’s current status and limits.",
+        "note": "Project evidence is drawn from public repositories and documented project records; it is not an independent audit. Work history is self-reported, and service descriptions are offers rather than completed client outcomes.",
+        "limitLabel": "SCOPE / LIMIT",
+        "sourceLabel": "Open public source",
+        "researchLink": "See verified, experimental, and unclaimed work"
       }
     },
     "bn": {
@@ -249,6 +260,17 @@
         "emailLabel": "ইমেইল",
         "phoneLabel": "ফোন / হোয়াটসঅ্যাপ",
         "telegramLabel": "টেলিগ্রাম"
+      },
+      "evidence": {
+        "title": "দাবি, প্রমাণ ও সীমাবদ্ধতা — সবুজ মিয়া",
+        "description": "সবুজ মিয়ার পোর্টফোলিওর দাবির পাশে পাবলিক সোর্স, প্রকল্পের সমর্থনকারী তথ্য এবং স্পষ্ট সীমাবদ্ধতা।",
+        "eyebrow": "প্রমাণ · সোর্স ও কাজের পরিধি",
+        "headline": "পাবলিক প্রমাণে যা সমর্থিত।",
+        "lede": "প্রকল্পের বিবরণের সঙ্গে পাবলিক সোর্স যুক্ত আছে। প্রতিটি প্রকল্পের বর্তমান অবস্থা ও সীমার সঙ্গে প্রমাণ মিলিয়ে দেখুন।",
+        "note": "প্রকল্পের প্রমাণ পাবলিক repository ও নথিবদ্ধ প্রকল্পের তথ্য থেকে নেওয়া; এটি স্বাধীন audit নয়। কাজের ইতিহাস স্ব-প্রতিবেদিত, আর সেবার বিবরণ ভবিষ্যৎ কাজের প্রস্তাব—সম্পন্ন client outcome নয়।",
+        "limitLabel": "পরিধি / সীমা",
+        "sourceLabel": "পাবলিক সোর্স দেখুন",
+        "researchLink": "যাচাইকৃত, পরীক্ষামূলক ও অদাবিকৃত কাজ দেখুন"
       }
     }
   },
@@ -953,7 +975,11 @@
         "bn": "Native Termux host-ই control plane; Native workstation install করলে guest root filesystem তৈরি হয় না। Desktop চালু ও graphics যাচাই আলাদা ধাপ।"
       },
       "url": "https://github.com/soobujmiah/ternuxx",
-      "state": "Public source"
+      "state": "Public source",
+      "evidence": {
+        "en": "Public source documents the native workstation control plane, desktop lifecycle, and separation between Native Termux and optional PRoot guests.",
+        "bn": "পাবলিক সোর্সে Native workstation control plane, desktop lifecycle, এবং Native Termux ও optional PRoot guest-এর পৃথক ভূমিকা নথিবদ্ধ।"
+      }
     },
     {
       "slug": "adt",

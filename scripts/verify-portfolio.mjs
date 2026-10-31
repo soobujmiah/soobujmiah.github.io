@@ -13,14 +13,14 @@ const routes = [];
 for (const lang of ['en', 'bn']) {
   const base = lang === 'en' ? '' : '/bn';
   routes.push(`${base}/`);
-  for (const page of ['about', 'services', 'experience', 'projects', 'research', 'contact']) routes.push(`${base}/${page}/`);
+  for (const page of ['about', 'services', 'experience', 'projects', 'research', 'evidence', 'contact']) routes.push(`${base}/${page}/`);
   for (const item of data.services) routes.push(`${base}/services/${item.slug}/`);
   for (const item of data.projects) routes.push(`${base}/projects/${item.slug}/`);
 }
 const publicSource = ['index.html', 'src/App.tsx', 'src/styles.css', 'src/data/site-content.json', 'scripts/create-routes.mjs'].map(read).join('\n');
 const expectedProjects = ['ternux', 'ternuxx', 'adt', 'lai', 'ggen', 'songjog'];
 
-assert('Bilingual content covers all profile pages', ['en', 'bn'].every(lang => ['home', 'about', 'services', 'experience', 'projects', 'research', 'contact'].every(page => data.pages[lang][page]?.title && data.pages[lang][page]?.description)));
+assert('Bilingual content covers all profile pages', ['en', 'bn'].every(lang => ['home', 'about', 'services', 'experience', 'projects', 'research', 'evidence', 'contact'].every(page => data.pages[lang][page]?.title && data.pages[lang][page]?.description)));
 assert('Requested public projects are represented and removed projects stay absent', expectedProjects.every(slug => data.projects.some(project => project.slug === slug)) && !data.projects.some(project => ['datakhoj', 'iqra-online-mart'].includes(project.slug)));
 assert('Full source-file work history and time zone are represented', data.experience.length === 7 && data.experience.every(item => item.period) && data.site.timezone.en.startsWith('GMT+6'));
 assert('All GitHub profile service links target generated service slugs', ['web-development', 'software-development', 'computer-support', 'android-support', 'business-technology', 'graphics-design', 'office-administration', 'data-entry'].every(slug => data.services.some(service => service.slug === slug)));
@@ -31,9 +31,10 @@ assert('Search Console verification meta preserved', publicSource.includes('Z7hO
 assert('Search Console verification HTML preserved', fs.existsSync(path.join(root, 'public/google7974d87a16aa1b38.html')) && read('public/google7974d87a16aa1b38.html').includes('google-site-verification: google7974d87a16aa1b38.html'));
 assert('3D scene, WebGL canvas, and motion control have been removed', !publicSource.includes('WorkbenchScene') && !publicSource.includes('scene-motion-toggle') && !read('src/styles.css').includes('workbench-canvas') && !fs.existsSync(path.join(root, 'src/scene/WorkbenchScene.ts')));
 assert('Homepage follows the source index visual system without 3D artwork', read('src/App.tsx').includes('source-hero') && read('src/styles.css').includes('--lime: #cdff57') && read('src/styles.css').includes('--mint: #57e8ff') && !publicSource.includes('WorkbenchScene'));
-assert('Portfolio remains multi-page with concise homepage previews', read('src/App.tsx').includes('site.services.slice(0, 3)') && read('src/App.tsx').includes('site.projects.slice(0, 3)') && read('src/App.tsx').includes("key: 'experience'"));
+assert('Portfolio remains multi-page with focused service and work previews', read('src/App.tsx').includes("'software-development', 'android-support', 'office-administration'") && read('src/App.tsx').includes('site.projects.slice(0, 3)') && read('src/App.tsx').includes("key: 'experience'") && read('src/App.tsx').includes('Claims, Evidence & Limits'));
 assert('Reduced-motion preference disables decorative motion', read('src/styles.css').includes('@media (prefers-reduced-motion: reduce)') && read('src/styles.css').includes('.source-marquee > div'));
 assert('Hero and page spacing use the compact source-index rhythm', read('src/styles.css').includes('.source-hero { display: grid') && read('src/styles.css').includes('padding: clamp(43px,6vw,76px)') && read('src/styles.css').includes('min-height: 58px'));
+assert('Bilingual evidence page links all public project sources and limits', ['en', 'bn'].every(lang => data.pages[lang].evidence?.title && data.pages[lang].evidence?.description) && data.projects.every(project => /^https:\/\/github\.com\//.test(project.url)) && read('src/App.tsx').includes('EvidencePage'));
 assert('Evidence from the public profile README appears on project pages', ['ternux', 'adt', 'lai', 'ggen', 'songjog'].every(slug => data.projects.some(project => project.slug === slug && project.evidence?.en && project.evidence?.bn)) && read('src/App.tsx').includes('ENGINEERING EVIDENCE'));
 assert('Search metadata and route generation are configured', read('scripts/create-routes.mjs').includes('hreflang="x-default"') && read('scripts/create-routes.mjs').includes('application/ld+json') && read('index.html').includes('<!-- ROUTE_LINKS -->'));
 assert('Only one canonical URL is emitted per generated route', !read('scripts/create-routes.mjs').includes('return `<link rel="canonical"') && read('scripts/create-routes.mjs').includes('rel="canonical"'));
@@ -46,7 +47,7 @@ if (!sourceOnly) {
   const dist = path.join(root, 'dist');
   assert('Production output exists', fs.existsSync(path.join(dist, 'index.html')));
   if (fs.existsSync(dist)) {
-    assert('Generated route count matches bilingual route matrix', routes.length === 2 * (1 + 6 + data.services.length + data.projects.length) && routes.length === 48, `${routes.length} direct-load routes`);
+    assert('Generated route count matches bilingual route matrix', routes.length === 2 * (1 + 7 + data.services.length + data.projects.length) && routes.length === 50, `${routes.length} direct-load routes`);
     const routeHtml = routes.map(route => ({ route, file: path.join(dist, route.replace(/^\//, ''), 'index.html') }));
     assert('Every English and Bangla route has a static HTML entry', routeHtml.every(item => fs.existsSync(item.file)));
     const pages = routeHtml.filter(item => fs.existsSync(item.file)).map(({ route, file }) => ({ route, html: fs.readFileSync(file, 'utf8') }));
