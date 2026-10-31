@@ -40,6 +40,8 @@ The Ternuxx native session repair was applied locally and `tx status` reports XF
 
 - Upgraded Vite to 6.4.5, which includes patched Vite/esbuild versions covering all nine open Dependabot alerts. `npm audit` now reports zero vulnerabilities.
 - Updated GitHub Actions to Node 24-compatible releases: checkout v7.0.1, setup-node v7.1.0, upload-pages-artifact v5.0.0, and deploy-pages v5.0.1.
-- `npm run check` passed (16/16 source checks); `npm run build` passed (37/37 production checks). Native Termux:X11 Firefox at 752×1155 displayed the updated portrait 3D Notes view clearly.
+- Added `npm audit --audit-level=low` to the Pages build workflow so future vulnerable dependency updates fail CI.
+- `npm run check` passed (16/16 source checks); `npm run build` passed (37/37 production checks). Native Termux:X11 Firefox at 752×1155 displayed the updated portrait 3D Notes view clearly, and the live Notes route returned HTTP 200 after deployment.
+- GitHub's dependency SBOM now lists Vite 6.4.5 and esbuild 0.25.12. Local `npm audit` reports zero vulnerabilities, but the Dependabot API still listed nine open alert records last updated 2026-10-26; those records had not refreshed after the fixed lockfile reached `main`.
 
-The repository deploys on pushes to `main`, as described above. Workflow run `41185952231` deployed commit `21b4b49`; these follow-up changes are awaiting their push and Pages workflow.
+The repository deploys on pushes to `main`, as described above. Workflow run `41187064985` deployed commit `efc005f` successfully. A later follow-up adds the npm audit CI step; verify that run before closing the follow-up milestone.
