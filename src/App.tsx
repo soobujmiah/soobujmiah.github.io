@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, BriefcaseBusiness, Code2,
+  ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, BriefcaseBusiness, Code2,
   Cpu, Database, FlaskConical, FolderGit2, Globe2, Home, Mail, Monitor,
   PenTool, Smartphone, UserRound, Clock3, Moon, Sun, Menu, X,
 } from 'lucide-react';
@@ -8,7 +8,7 @@ import rawSite from './data/site-content.json';
 
 type Lang = 'en' | 'bn';
 type Localized = Record<Lang, string>;
-type Kind = 'home' | 'about' | 'services' | 'service' | 'experience' | 'projects' | 'project' | 'research' | 'contact';
+type Kind = 'home' | 'about' | 'services' | 'service' | 'experience' | 'projects' | 'project' | 'research' | 'evidence' | 'contact';
 interface PageText { title: string; description: string; eyebrow: string; headline: string; lede?: string; visualCaption?: string; [key: string]: string | string[] | undefined; }
 interface SiteData {
   site: {
@@ -17,7 +17,7 @@ interface SiteData {
     languages: Array<{ en: string; bn: string; levelEn: string; levelBn: string }>;
     social: Array<{ label: string; href: string }>;
   };
-  pages: Record<Lang, Record<'home' | 'about' | 'services' | 'experience' | 'projects' | 'research' | 'contact', PageText>>;
+  pages: Record<Lang, Record<'home' | 'about' | 'services' | 'experience' | 'projects' | 'research' | 'evidence' | 'contact', PageText>>;
   services: Array<{
     slug: string; icon: string; title: Localized; summary: Localized; detail: Localized;
     deliverables: Record<Lang, string[]>;
@@ -29,12 +29,13 @@ interface SiteData {
 }
 
 const site = rawSite as unknown as SiteData;
-const navigation: Array<{ key: 'about' | 'services' | 'projects' | 'experience' | 'research' | 'contact'; label: Localized }> = [
+const navigation: Array<{ key: 'about' | 'services' | 'projects' | 'experience' | 'research' | 'evidence' | 'contact'; label: Localized }> = [
   { key: 'about', label: { en: 'About', bn: 'পরিচিতি' } },
   { key: 'services', label: { en: 'Services', bn: 'সেবা' } },
   { key: 'projects', label: { en: 'Projects', bn: 'প্রকল্প' } },
   { key: 'experience', label: { en: 'Experience', bn: 'অভিজ্ঞতা' } },
   { key: 'research', label: { en: 'Research', bn: 'গবেষণা' } },
+  { key: 'evidence', label: { en: 'Evidence', bn: 'প্রমাণ' } },
   { key: 'contact', label: { en: 'Contact', bn: 'যোগাযোগ' } },
 ];
 const routePath = (kind: string, lang: Lang, slug?: string) => {
@@ -50,7 +51,7 @@ function readRoute() {
   if (path[0] === 'services' && path[1]) return { lang, kind: 'service' as Kind, slug: path[1], path: routePath('service', lang, path[1]) };
   if (path[0] === 'services') return { lang, kind: 'services' as Kind, path: routePath('services', lang) };
   if (path[0] === 'projects' && path[1]) return { lang, kind: 'project' as Kind, slug: path[1], path: routePath('project', lang, path[1]) };
-  const allowed = new Set(['about', 'experience', 'projects', 'research', 'contact']);
+  const allowed = new Set(['about', 'experience', 'projects', 'research', 'evidence', 'contact']);
   if (allowed.has(path[0])) return { lang, kind: path[0] as Kind, path: routePath(path[0], lang) };
   return { lang, kind: 'home' as Kind, path: lang === 'bn' ? '/bn/' : '/' };
 }
@@ -73,7 +74,7 @@ function Header({ lang, path }: { lang: Lang; path: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const base = path.replace(/^\/bn(?=\/|$)/, '') || '/';
   const languagePath = lang === 'en' ? `/bn${base === '/' ? '/' : base}` : base;
-  const icons: Record<string, typeof Home> = { about: UserRound, services: BriefcaseBusiness, projects: FolderGit2, experience: Clock3, research: FlaskConical, contact: Mail };
+  const icons: Record<string, typeof Home> = { about: UserRound, services: BriefcaseBusiness, projects: FolderGit2, experience: Clock3, research: FlaskConical, evidence: BadgeCheck, contact: Mail };
   useEffect(() => {
     if (!menuOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setMenuOpen(false); };
@@ -121,6 +122,7 @@ function Footer({ lang }: { lang: Lang }) {
     <nav aria-label={lang === 'en' ? 'Footer navigation' : 'ফুটার নেভিগেশন'}>
       {navigation.map(item => <a key={item.key} href={routePath(item.key, lang)}>{item.label[lang]}</a>)}
     </nav>
+    <a className="footer-evidence" href={routePath('evidence', lang)}>{lang === 'en' ? 'Claims, Evidence & Limits' : 'দাবি, প্রমাণ ও সীমাবদ্ধতা'}</a>
     <span>© {new Date().getFullYear()} Sobuj Miah</span>
   </footer>;
 }
@@ -151,6 +153,9 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
   const about = site.pages[lang].about;
   const contact = site.pages[lang].contact;
   const verified = site.research[lang].verified;
+  const featuredServices = ['software-development', 'android-support', 'office-administration']
+    .map(slug => site.services.find(service => service.slug === slug))
+    .filter((service): service is SiteData['services'][number] => Boolean(service));
   const ticker = site.services.map(service => service.title[lang]);
   return <div className="source-home">
     <section className="hero source-hero" aria-labelledby="hero-title">
@@ -159,7 +164,7 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
         <h1 className="source-name" id="hero-title"><span>{lang === 'en' ? 'Sobuj ' : 'সবুজ '}</span><span className="name-accent">{lang === 'en' ? 'Miah' : 'মিয়া'}</span></h1>
         <p className="source-role"><span aria-hidden="true">&gt;</span>{home.identity}<i aria-hidden="true" /></p>
         <p className="source-intro">{home.deck}</p>
-        <div className="hero-actions"><a className="button button-primary" href={routePath('contact', lang)}>{lang === 'en' ? 'Start a project' : 'কাজ নিয়ে কথা বলুন'}<ArrowUpRight size={16} /></a><a className="button button-quiet" href={routePath('projects', lang)}>{lang === 'en' ? 'Explore my work' : 'আমার কাজ দেখুন'}<ArrowDown size={15} /></a></div>
+        <div className="hero-actions"><a className="button button-primary" href={routePath('contact', lang)}>{lang === 'en' ? 'Discuss a project' : 'কাজ নিয়ে কথা বলুন'}<ArrowUpRight size={16} /></a><a className="button button-quiet" href={routePath('projects', lang)}>{lang === 'en' ? 'View projects' : 'প্রকল্প দেখুন'}<ArrowDown size={15} /></a></div>
         <div className="source-stats">
           <div><strong>8+</strong><span>{lang === 'en' ? 'Years · self-reported' : 'বছর · স্ব-প্রতিবেদিত'}</span></div>
           <div><strong>2</strong><span>{lang === 'en' ? 'Countries worked' : 'দেশে কাজের অভিজ্ঞতা'}</span></div>
@@ -199,7 +204,7 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
     <section className="source-section source-section-alt" id="services" aria-labelledby="home-services-title">
       <div className="source-wrap">
         <SectionHeading number="02" label={lang === 'en' ? 'SERVICES' : 'সেবা'} title={home.servicesTitle as string} lede={home.servicesIntro as string} id="home-services-title" />
-        <div className="service-accordion">{site.services.slice(0, 3).map((service, index) => <details className="service-disclosure" key={service.slug}>
+        <div className="service-accordion">{featuredServices.map((service, index) => <details className="service-disclosure" key={service.slug}>
           <summary><span className="disclosure-number">{String(index + 1).padStart(2, '0')}</span><span className="disclosure-title">{service.title[lang]}</span><span className="disclosure-plus" aria-hidden="true" /></summary>
           <div className="disclosure-body"><p>{service.detail[lang]}</p><div className="source-tags">{service.deliverables[lang].map(item => <span key={item}>{item}</span>)}</div><a href={routePath('service', lang, service.slug)} className="text-link">{lang === 'en' ? 'Service details' : 'সেবার বিবরণ'}<ArrowRight size={14} /></a></div>
         </details>)}</div>
@@ -278,7 +283,7 @@ function ProjectDetail({ lang, copy, slug }: { lang: Lang; copy: SiteData['pages
   if (!project) return <NotFound lang={lang} />;
   return <div className="page-wrap detail-wrap"><a className="back-link" href={routePath('projects', lang)}><ArrowLeft size={15} />{lang === 'en' ? 'All projects' : 'সব প্রকল্প'}</a>
     <PageHeading copy={{ title: `${project.name} — ${copy.title}`, description: project.summary[lang], eyebrow: `${copy.eyebrow} · ${project.category[lang]}`, headline: project.name, lede: project.summary[lang] }} />
-    <div className="project-detail-box">{project.evidence && <><p className="eyebrow"><span />{lang === 'en' ? 'ENGINEERING EVIDENCE' : 'প্রকৌশলগত প্রমাণ'}</p><p>{project.evidence[lang]}</p></>}<p className="eyebrow"><span />{copy.statusLabel as string}</p><p>{project.boundary[lang]}</p><a className="button button-primary" href={project.url} target="_blank" rel="noopener noreferrer">{copy.repoLabel as string}<ArrowUpRight size={16} /></a></div>
+    <div className="project-detail-box">{project.evidence && <><p className="eyebrow"><span />{lang === 'en' ? 'ENGINEERING EVIDENCE' : 'প্রকৌশলগত প্রমাণ'}</p><p>{project.evidence[lang]}</p></>}<p className="eyebrow"><span />{copy.statusLabel as string}</p><p>{project.boundary[lang]}</p><a className="button button-primary" href={project.url} target="_blank" rel="noopener noreferrer">{copy.repoLabel as string}<ArrowUpRight size={16} /></a><a className="text-link" href={routePath('evidence', lang)}>{lang === 'en' ? 'Evidence and claim limits' : 'প্রমাণ ও দাবির সীমা'}<ArrowRight size={14} /></a></div>
   </div>;
 }
 
@@ -290,6 +295,20 @@ function ResearchPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang
     { title: copy.plannedTitle as string, items: data.notClaimed, className: 'research-boundary' },
   ];
   return <div className="page-wrap"><PageHeading copy={copy} /><div className="research-grid">{groups.map(group => <section className={`research-card ${group.className}`} key={group.title}><h2>{group.title}</h2><ul>{group.items.map(item => <li key={item}>{item}</li>)}</ul></section>)}</div></div>;
+}
+
+function EvidencePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['evidence'] }) {
+  return <div className="page-wrap"><PageHeading copy={copy} />
+    <p className="evidence-note">{copy.note}</p>
+    <div className="evidence-list">{site.projects.map((project, index) => <article className="evidence-entry" key={project.slug}>
+      <div className="evidence-entry-head"><span>{String(index + 1).padStart(2, '0')} · {project.category[lang]}</span><span>{project.state}</span></div>
+      <h2>{project.name}</h2>
+      <p>{project.evidence?.[lang] ?? project.summary[lang]}</p>
+      <div className="evidence-boundary"><strong>{copy.limitLabel}</strong><p>{project.boundary[lang]}</p></div>
+      <a className="text-link" href={project.url} target="_blank" rel="noopener noreferrer">{copy.sourceLabel}<ArrowUpRight size={14} /></a>
+    </article>)}</div>
+    <a className="text-link evidence-research-link" href={routePath('research', lang)}>{copy.researchLink}<ArrowRight size={15} /></a>
+  </div>;
 }
 
 function ContactPage({ copy }: { lang: Lang; copy: SiteData['pages'][Lang]['contact'] }) {
@@ -336,6 +355,7 @@ function App() {
   else if (kind === 'projects') content = <div className="page-shell"><ProjectsPage lang={lang} copy={locale.projects} /></div>;
   else if (kind === 'project') content = <div className="page-shell"><ProjectDetail lang={lang} copy={locale.projects} slug={route.slug ?? ''} /></div>;
   else if (kind === 'research') content = <div className="page-shell"><ResearchPage lang={lang} copy={locale.research} /></div>;
+  else if (kind === 'evidence') content = <div className="page-shell"><EvidencePage lang={lang} copy={locale.evidence} /></div>;
   else if (kind === 'contact') content = <div className="page-shell"><ContactPage lang={lang} copy={locale.contact} /></div>;
   else content = <div className="page-shell"><NotFound lang={lang} /></div>;
 
