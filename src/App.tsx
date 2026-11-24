@@ -35,6 +35,7 @@ interface Service {
 interface Project {
   slug: string;
   name: string;
+  website?: string;
   category: Localized;
   role: Localized;
   metaTitle: Localized;
@@ -63,6 +64,8 @@ interface SiteData {
     availability: Localized;
     description: Localized;
     keywords: Record<Lang, string[]>;
+    roles: Record<Lang, string[]>;
+    process: Array<{ title: Localized; body: Localized }>;
     languages: Array<{ en: string; bn: string; levelEn: string; levelBn: string }>;
     social: Array<{ label: string; href: string }>;
   };
@@ -130,31 +133,66 @@ function graphemes(value: string): string[] {
   return Array.from(new Segmenter('en', { granularity: 'grapheme' }).segment(value), part => part.segment);
 }
 
-/** Type → hold → delete → retype, forever. Returns the visible slice plus a `done` flag. */
-function useTypewriter(text: string) {
-  const chars = useMemo(() => graphemes(text), [text]);
+/** Type → hold → delete → next role → repeat, for as long as the list runs. */
+function useTypewriter(roles: string[]) {
+  const list = useMemo(() => roles.filter(Boolean), [roles]);
+  const [index, setIndex] = useState(0);
+  const chars = useMemo(() => graphemes(list[index] ?? ''), [list, index]);
   const [count, setCount] = useState(0);
   const [deleting, setDeleting] = useState(false);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-    if (!chars.length) return;
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) { setCount(chars.length); setDeleting(false); return; }
+    if (!list.length) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setCount(chars.length); setDeleting(false); setPaused(false); return; }
+    if (paused) return;
     const total = chars.length;
     let timer: number;
     if (!deleting && count < total) {
-      timer = window.setTimeout(() => setCount(value => Math.min(total, value + 1)), count === 0 ? 520 : 46);
+      timer = window.setTimeout(() => setCount(value => Math.min(total, value + 1)), count === 0 ? 420 : 42);
     } else if (!deleting) {
-      timer = window.setTimeout(() => setDeleting(true), 3600);
+      timer = window.setTimeout(() => setDeleting(true), 3000);
     } else if (count > 0) {
-      timer = window.setTimeout(() => setCount(value => Math.max(0, value - 1)), 22);
+      timer = window.setTimeout(() => setCount(value => Math.max(0, value - 1)), 18);
     } else {
-      timer = window.setTimeout(() => setDeleting(false), 620);
+      timer = window.setTimeout(() => {
+        setDeleting(false);
+        setIndex(value => (value + 1) % list.length);
+        setPaused(true);
+      }, 640);
     }
     return () => window.clearTimeout(timer);
-  }, [chars, count, deleting]);
+  }, [chars, count, deleting, list, paused]);
 
-  return { typed: chars.slice(0, count).join(''), complete: count >= chars.length && !deleting };
+  // A beat of stillness between roles, so the swap reads as a deliberate change.
+  useEffect(() => {
+    if (!paused) return;
+    const timer = window.setTimeout(() => { setPaused(false); }, 900);
+    return () => window.clearTimeout(timer);
+  }, [paused]);
+
+  return { typed: chars.slice(0, count).join(''), complete: count >= chars.length && !deleting, index };
+}
+
+/** Count a number up from zero once the element scrolls into view. */
+function useCountUp(target: number, active: boolean) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (!active) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setValue(target); return; }
+    let frame = 0;
+    const started = performance.now();
+    const duration = 900;
+    const step = (now: number) => {
+      const progress = Math.min(1, (now - started) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(Math.round(target * eased));
+      if (progress < 1) frame = window.requestAnimationFrame(step);
+    };
+    frame = window.requestAnimationFrame(step);
+    return () => window.cancelAnimationFrame(frame);
+  }, [active, target]);
+  return value;
 }
 
 function Header({ lang, path }: { lang: Lang; path: string }) {
@@ -233,9 +271,27 @@ function ProjectCard({ project, lang, index }: { project: Project; lang: Lang; i
     <div className="project-boundary"><span>{lang === 'en' ? 'BOUNDARY' : 'সীমা'}</span><p>{project.boundary[lang]}</p></div>
     <div className="project-links">
       <a href={routePath('project', lang, project.slug)} className="text-link">{lang === 'en' ? 'Project details' : 'প্রকল্পের বিবরণ'}<ArrowRight size={14} /></a>
+      {project.website && <a href={project.website} target="_blank" rel="noopener noreferrer" className="text-link text-link-site">{lang === 'en' ? 'Visit website' : 'ওয়েবসাইট দেখুন'}<ArrowUpRight size={14} /></a>}
       <a href={project.url} target="_blank" rel="noopener noreferrer" className="text-link">{lang === 'en' ? 'Open repository' : 'Source repository খুলুন'}<ArrowUpRight size={14} /></a>
     </div>
   </article>;
+}
+
+function Stat({ value, suffix = '', label }: { value: number; suffix?: string; label: string }) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    if (!('IntersectionObserver' in window)) { setActive(true); return; }
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) { setActive(true); observer.disconnect(); }
+    }, { threshold: 0.4 });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+  const shown = useCountUp(value, active);
+  return <div ref={ref}><strong data-value={value}>{shown}{suffix}</strong><span>{label}</span></div>;
 }
 
 function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['home'] }) {
@@ -243,8 +299,8 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
   const about = site.pages[lang].about;
   const contact = site.pages[lang].contact;
   const verified = site.research[lang].verified;
-  const identity = home.identity as string;
-  const { typed, complete } = useTypewriter(identity);
+  const roles = site.site.roles[lang];
+  const { typed, complete } = useTypewriter(roles);
   const featuredServices = (home.featuredServices as string[]).map(slug => site.services.find(service => service.slug === slug)).filter((service): service is Service => Boolean(service));
   const featuredProjects = (home.featuredProjects as string[]).map(slug => site.projects.find(project => project.slug === slug)).filter((project): project is Project => Boolean(project));
   const focus = home.focus as string[];
@@ -255,17 +311,17 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
         <span className="tagline" data-reveal><span className="pulse" />{site.site.availability[lang]}</span>
         <h1 className="source-name" id="hero-title" data-reveal><span>{lang === 'en' ? 'Sobuj ' : 'সবুজ '}</span><span className="name-accent">{lang === 'en' ? 'Miah' : 'মিয়া'}</span></h1>
         <p className="source-role" data-reveal>
-          <span className="sr-only">{identity}</span>
+          <span className="sr-only">{roles.join(' · ')}</span>
           <span className="role-line" aria-hidden="true"><b>&gt;</b>{typed}<i className={complete ? 'role-caret is-idle' : 'role-caret'} /></span>
         </p>
         <p className="source-intro" data-reveal>{home.deck as string}</p>
         <div className="hero-actions" data-reveal><a className="button button-primary" href={routePath('contact', lang)}>{lang === 'en' ? 'Discuss a project' : 'কাজ নিয়ে কথা বলুন'}<ArrowUpRight size={16} /></a><a className="button button-quiet" href={routePath('projects', lang)}>{lang === 'en' ? 'View projects' : 'প্রকল্প দেখুন'}<ArrowDown size={15} /></a></div>
         <ul className="focus-chips" aria-label={lang === 'en' ? 'Current focus areas' : 'বর্তমান কাজের ক্ষেত্র'}>{focus.map(item => <li key={item}>{item}</li>)}</ul>
         <div className="source-stats" data-reveal>
-          <div><strong>8+</strong><span>{lang === 'en' ? 'Years · self-reported' : 'বছর · স্ব-প্রতিবেদিত'}</span></div>
-          <div><strong>2</strong><span>{lang === 'en' ? 'Countries worked' : 'দেশে কাজের অভিজ্ঞতা'}</span></div>
-          <div><strong>{site.projects.length}</strong><span>{lang === 'en' ? 'Public projects' : 'পাবলিক প্রকল্প'}</span></div>
-          <div><strong>{site.site.languages.length}</strong><span>{lang === 'en' ? 'Languages' : 'টি ভাষা'}</span></div>
+          <Stat value={8} suffix="+" label={lang === 'en' ? 'Years · self-reported' : 'বছর · স্ব-প্রতিবেদিত'} />
+          <Stat value={2} label={lang === 'en' ? 'Countries worked' : 'দেশে কাজের অভিজ্ঞতা'} />
+          <Stat value={site.projects.length} label={lang === 'en' ? 'Public projects' : 'পাবলিক প্রকল্প'} />
+          <Stat value={site.site.languages.length} label={lang === 'en' ? 'Languages' : 'টি ভাষা'} />
         </div>
       </div>
       <span className="scroll-hint" aria-hidden="true">{lang === 'en' ? 'SCROLL TO EXPLORE' : 'আরও দেখতে স্ক্রল করুন'}<i /></span>
@@ -316,8 +372,19 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
         <a className="section-link" href={routePath('projects', lang)}>{lang === 'en' ? 'All projects' : 'সব প্রকল্প'}<ArrowUpRight size={14} /></a>
       </div>
     </section>
+
+    <section className="source-section" id="process" aria-labelledby="home-process-title">
+      <div className="source-wrap">
+        <SectionHeading number="04" label={home.processEyebrow as string} title={home.processTitle as string} lede={home.processLede as string} id="home-process-title" />
+        <div className="process-grid">{site.site.process.map((step, index) => <article className="process-step" key={step.title.en} data-reveal>
+          <span className="process-number">{String(index + 1).padStart(2, '0')}</span>
+          <h3>{step.title[lang]}</h3><p>{step.body[lang]}</p>
+        </article>)}</div>
+      </div>
+    </section>
+
     <section className="source-section source-contact" id="contact" aria-labelledby="home-contact-title">
-      <div className="source-wrap"><SectionHeading number="04" label={lang === 'en' ? 'CONTACT' : 'যোগাযোগ'} title={contact.headline} lede={contact.lede} id="home-contact-title" />
+      <div className="source-wrap"><SectionHeading number="05" label={lang === 'en' ? 'CONTACT' : 'যোগাযোগ'} title={contact.headline} lede={contact.lede} id="home-contact-title" />
         <div className="source-contact-links" data-reveal><a href={`mailto:${site.site.email}`}><span>{contact.emailLabel as string}</span><b>{site.site.email}</b><ArrowUpRight size={17} /></a><a href={`tel:${site.site.phoneHref}`}><span>{contact.phoneLabel as string}</span><b>{site.site.phone}</b><ArrowUpRight size={17} /></a><a href="https://t.me/soobujmiah" target="_blank" rel="noopener noreferrer"><span>Telegram</span><b>@soobujmiah</b><ArrowUpRight size={17} /></a></div>
         <div className="source-socials">{site.site.social.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.label}<ArrowUpRight size={13} /></a>)}</div>
       </div>
@@ -401,7 +468,11 @@ function ProjectDetail({ lang, copy, slug }: { lang: Lang; copy: SiteData['pages
         <section data-reveal><h2>{copy.overviewLabel as string}</h2><p>{project.overview[lang]}</p></section>
         <section data-reveal><h2>{copy.highlightsLabel as string}</h2><ul className="highlight-list">{project.highlights[lang].map(item => <li key={item}><Check size={15} aria-hidden="true" />{item}</li>)}</ul></section>
         <section className="project-evidence-block" data-reveal><h2>{copy.evidenceLabel as string}</h2><p>{project.evidence[lang]}</p></section>
-        <div className="project-links" data-reveal><a className="button button-primary" href={project.url} target="_blank" rel="noopener noreferrer">{copy.repoLabel as string}<ArrowUpRight size={16} /></a><a className="text-link" href={routePath('evidence', lang)}>{lang === 'en' ? 'Evidence and claim limits' : 'প্রমাণ ও দাবির সীমা'}<ArrowRight size={14} /></a></div>
+        <div className="project-links" data-reveal>
+          {project.website && <a className="button button-primary" href={project.website} target="_blank" rel="noopener noreferrer">{lang === 'en' ? 'Visit the website' : 'প্রজেক্টের ওয়েবসাইট'}<ArrowUpRight size={16} /></a>}
+          <a className={project.website ? 'button button-quiet' : 'button button-primary'} href={project.url} target="_blank" rel="noopener noreferrer">{copy.repoLabel as string}<ArrowUpRight size={16} /></a>
+          <a className="text-link" href={routePath('evidence', lang)}>{lang === 'en' ? 'Evidence and claim limits' : 'প্রমাণ ও দাবির সীমা'}<ArrowRight size={14} /></a>
+        </div>
       </div>
       <aside className="project-aside" data-reveal>
         <p className="eyebrow"><span />{copy.statusLabel as string}</p>
@@ -528,7 +599,7 @@ function NextPage({ lang, kind }: { lang: Lang; kind: Kind }) {
       setPull(0);
     }}
   >
-    <span className="next-page-inner">
+    <span className="next-page-inner" data-reveal>
       <span className="next-page-step">{lang === 'en' ? 'NEXT' : 'পরবর্তী'} · {next.step}</span>
       <span className="next-page-body">
         <b>{next.title}</b>
@@ -584,6 +655,19 @@ function App() {
     }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
     nodes.forEach(node => observer.observe(node));
     return () => { observer.disconnect(); root.classList.remove('reveal-ready'); };
+  }, []);
+
+  useEffect(() => {
+    // Card glow follows the cursor; the CSS falls back to the centre without this.
+    const track = (event: PointerEvent) => {
+      const card = (event.target as Element | null)?.closest?.('.service-card, .project-card') as HTMLElement | null;
+      if (!card) return;
+      const box = card.getBoundingClientRect();
+      card.style.setProperty('--mx', `${((event.clientX - box.left) / box.width) * 100}%`);
+      card.style.setProperty('--my', `${((event.clientY - box.top) / box.height) * 100}%`);
+    };
+    window.addEventListener('pointermove', track, { passive: true });
+    return () => window.removeEventListener('pointermove', track);
   }, []);
 
   useEffect(() => {

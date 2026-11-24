@@ -153,6 +153,7 @@ function schemaGraph(route, meta) {
             '@type': ['ternux', 'ternuxx', 'adt'].includes(project.slug) ? 'SoftwareSourceCode' : 'SoftwareApplication',
             name: project.name, description: project.summary[route.lang],
             url: urlFor(localePath('project', route.lang, project.slug)), codeRepository: project.url,
+            ...(project.website ? { sameAs: project.website } : {}),
             applicationCategory: 'DeveloperApplication', operatingSystem: 'Android, Linux',
           },
         })),
@@ -164,7 +165,8 @@ function schemaGraph(route, meta) {
     pageType = {
       '@type': isSourceCode ? 'SoftwareSourceCode' : 'SoftwareApplication',
       name: item.name, description: item.metaDescription[route.lang], url: urlFor(route.path),
-      codeRepository: item.url, programmingLanguage: item.stack.filter(entry => ['Bash', 'C/C++', 'Dart', 'Kotlin', 'Python'].includes(entry)),
+      codeRepository: item.url, ...(item.website ? { sameAs: item.website } : {}),
+      programmingLanguage: item.stack.filter(entry => ['Bash', 'C/C++', 'Dart', 'Kotlin', 'Python'].includes(entry)),
       runtimePlatform: 'Android, Linux', operatingSystem: 'Android, Linux',
       applicationCategory: isSourceCode ? 'DeveloperApplication' : 'BusinessApplication',
       author: { '@id': personId }, keywords: item.keywords.join(', '),
