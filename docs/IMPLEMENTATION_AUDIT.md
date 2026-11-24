@@ -8,28 +8,32 @@ The home page is a concise introduction: hero, profile preview, an index of feat
 
 ## What changed in the latest pass
 
+- Made Back actually work. The earlier guard only recognised a fresh `back_forward` load, but browsers usually restore the previous page from bfcache, which keeps the old listeners alive with the band still armed at the bottom — so the first wheel notch or thumb-flick after pressing Back pushed forward again. The band now has a single rule that covers both cases: a page reached through history starts **cold** and ignores wheel spin and drags until the reader has climbed 240px away from the end and come back. `pageshow` resets the frozen state on bfcache restores, the `navigating` guard and a cancelled synthesised tap stop one gesture from pushing two history entries, and a cold band says so ("Scroll up to keep reading, or tap to continue"). A tap on the band always works.
+- Shortened every rotating hero role to one line (≤ 40 Latin characters, ≤ 30 Bengali graphemes; longest was 50) and put the primary title first. The role block now reserves a single line at every breakpoint instead of two on phones, so it no longer reads as a wrapped sentence.
+- Reduced the footer on every page to copyright · place · time zone · **Claims & limits**. The social profiles are gone from it: the contact page lists them all and the dock reaches it from anywhere.
+- Rebuilt the contact page as one compact chip directory: 22 small chips in five labelled rows (Direct, Social, Code & writing, Profiles & publishing, Support & identity), with email, phone and Telegram as accent-outlined chips in the same panel instead of separate rows. The sprite gained hand-written `mail` and `phone` marks (23 symbols).
 - Removed the top-left hamburger menu. It duplicated the dock, which already reaches every page; the dock now keeps all six page icons visible at every breakpoint instead of hiding the secondary pages.
 - Fixed the hero role line. The `>` prompt, the role text, and the caret were separate flex items, so a long line broke them onto three different lines on phones. They are one inline flow now.
 - Replaced the blinking caret with a real typewriter loop (type → hold → delete → retype) that segments on grapheme clusters, so Bengali conjuncts type whole. The full sentence stays available to screen readers.
 - Closed the dead air above the hero badge: top padding drops from 88–128px to 30–104px depending on viewport, and the hero no longer forces a full viewport height on phones.
-- Slimmed the footer to one metadata line plus social profiles and the claims link. It no longer repeats the name, the page title, or the page navigation.
+- Slimmed the footer to one metadata line. It no longer repeats the name, the page title, or the page navigation.
 - Cut home-page duplication. The heavy project grid and the service accordion duplicated the dedicated projects and services pages; both are now compact index rows that point at the full pages.
 - Replaced the project list inside the terminal card with the current focus list, so the card no longer repeats the projects page either.
 - Added a 2px scroll-progress bar and staggered reveal timing so several sections entering together cascade instead of appearing at once.
 - Widened the keyword coverage: 32 English and 27 Bengali site-level terms, plus niche vocabulary for each project (`proot-distro`, `Termux:X11`, `GGUF quantization`, `AOSP build`, `on-device LLM`, and Bengali equivalents). See [SEO.md](SEO.md).
 - Pinned the hero role line so the typewriter cannot move the page. The block reserves a fixed height and the inner line has a constant width, so the `>` prompt stays on the same left edge and nothing below shifts as text is typed and deleted.
-- Fixed the overscroll-to-next-page trigger firing when the reader scrolled back. It now refuses to arm on a back/forward restore, requires the reader to have actually scrolled down in the current view, and waits 1.2s after load for the previous page's inertia to settle. A downward drag on the band never navigates. `overscroll-behavior-y: contain` also stops Android Chrome turning a drag at the top into a pull-to-refresh.
-- The contact page footer no longer repeats the 21 profiles that the page body already lists; it keeps only the claims link there. Every other page keeps the full profile row.
-- Centred the hero role line without letting the `>` prompt drift: a hidden ghost copy of each sentence fixes the block's width, so short roles sit in the middle of the page and the prompt stays put through the whole type/delete cycle. Reordered the roles shortest-first so the opening frame holds one line on a phone.
+- Stopped the overscroll-to-next-page trigger firing when the reader scrolled back (superseded by the cold-band rule above). A downward drag on the band never navigates. `overscroll-behavior-y: contain` also stops Android Chrome turning a drag at the top into a pull-to-refresh.
+- Removed the profile row from the contact page footer (it repeated the 21 profiles the body lists); the footer change above then removed it from every page.
+- Centred the hero role line without letting the `>` prompt drift: a hidden ghost copy of each sentence fixes the block's width, so short roles sit in the middle of the page and the prompt stays put through the whole type/delete cycle.
 - Removed a duplicated lede on the contact page — `PageHeading` and the page body were both printing "Share the task, the constraints, and the outcome you need."
-- Added all 21 profiles to the contact page, grouped by what each one is for (Social, Messaging, Code & writing, Profiles & publishing, Support & identity) and each with a brand mark. The marks come from a generated external SVG sprite, so they add nothing to the JavaScript bundle.
+- Added all 21 profiles to the contact page, grouped by what each one is for and each with a brand mark (now rendered as chips). The marks come from a generated external SVG sprite, so they add nothing to the JavaScript bundle.
 - Rotated the hero role line through five trades instead of repeating one sentence: software and AI systems engineering, Linux on Android and Termux desktops, on-device local AI with llama.cpp, Flutter/web/Android development, and office operations. Both languages carry their own set.
 - Linked the projects that ship their own site. Ternux and ADT now expose `website` in the content model, surface a "Visit website" link on the projects grid and a primary button on their detail pages, and publish it as `sameAs` in their JSON-LD.
 - Added a client-facing "how it goes" section to the home page: scope in writing, checkpoints you can open, handover with notes. It describes process rather than promising outcomes, so it stays truthful.
 - Added more motion: count-up hero stats, a breathing hero grid and drifting glow, a blur-resolve on section headings, and a cursor-following radial glow on service and project cards. Every one of them is disabled under `prefers-reduced-motion`.
 - Enabled `scroll-behavior: smooth` for anchor and focus jumps.
 - Added a next-page band to every top-level page: the next page's title, an arrow, and a lime progress line. Overscrolling at the bottom of a page, or dragging up on the band, continues to the next page in reading order, so the site reads as one continuous scroll while every page keeps its own URL. Detail pages keep their existing prev/next project navigation.
-- Added sixteen regression checks covering the hamburger removal, the rotating typewriter, the home index rows, the footer, the progress bar, the pinned role line, the next-page band, the project website links, the process strip, the social groups, the sprite, the de-duplicated contact lede, the one-line opening role, the scroll-back guard, and the minimal contact footer.
+- Added regression checks covering the hamburger removal, the rotating typewriter, the home index rows, the footer, the progress bar, the pinned role line, the next-page band, the project website links, the process strip, the contact chip directory, the sprite, the single-page-only profiles, the one-line roles, the scroll-back guard, and the once-only drag navigation (69 checks in total).
 
 ## What changed in the earlier polish
 
@@ -84,14 +88,14 @@ See [SEO.md](SEO.md) for the keyword research and placement plan.
 
 ## Validation
 
-`npm run build` runs TypeScript, Vite, route generation, and a 68-check verification suite covering:
+`npm run build` runs TypeScript, Vite, route generation, and a 69-check verification suite covering:
 
 - Bilingual content completeness and project/service metadata.
 - Route matrix, unique titles, canonical tags, and one `h1` per route.
 - Search Console assets, hreflang, JSON-LD, sitemap, robots, and the public sitemap mirror.
 - Structured-data entity coverage.
 - Asset presence and manifest configuration.
-- Bundle size (currently about 75.7 KiB gzipped for application JS).
+- Bundle size (currently about 79.8 KiB gzipped for application JS, under the 80 KiB budget).
 
 ## Known limits
 

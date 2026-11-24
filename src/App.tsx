@@ -233,21 +233,14 @@ function Header({ lang, path }: { lang: Lang; path: string }) {
 }
 
 /**
- * The footer carries the social profiles everywhere except the contact page,
- * whose body already lists every profile in full — repeating them there was
- * pure duplication.
+ * The footer is deliberately one line: copyright, place, and the claims link.
+ * Every profile lives on the contact page, and the dock already reaches it from
+ * anywhere, so repeating twenty links here was noise rather than navigation.
  */
-function Footer({ lang, minimal = false }: { lang: Lang; minimal?: boolean }) {
+function Footer({ lang }: { lang: Lang }) {
   return <footer className="site-footer">
     <p className="footer-meta">© {new Date().getFullYear()} · {site.site.location[lang]} · {site.site.timezone[lang]}</p>
-    {minimal
-      ? <nav className="footer-links" aria-label={lang === 'en' ? 'Evidence' : 'প্রমাণ'}>
-          <a className="footer-evidence" href={routePath('evidence', lang)}>{lang === 'en' ? 'Claims & limits' : 'দাবি ও সীমাবদ্ধতা'}</a>
-        </nav>
-      : <nav className="footer-links" aria-label={lang === 'en' ? 'Profiles and evidence' : 'প্রোফাইল ও প্রমাণ'}>
-          {socialLinks.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.label}</a>)}
-          <a className="footer-evidence" href={routePath('evidence', lang)}>{lang === 'en' ? 'Claims & limits' : 'দাবি ও সীমাবদ্ধতা'}</a>
-        </nav>}
+    <a className="footer-evidence" href={routePath('evidence', lang)}>{lang === 'en' ? 'Claims & limits' : 'দাবি ও সীমাবদ্ধতা'}</a>
   </footer>;
 }
 
@@ -539,38 +532,53 @@ function SocialIcon({ name }: { name: string }) {
   return <svg className="social-icon" aria-hidden="true" focusable="false"><use href={`/social-icons.svg#si-${name}`} /></svg>;
 }
 
+function Chip({ label, href, icon, strong = false }: { label: string; href: string; icon: string; strong?: boolean }) {
+  const external = href.startsWith('http');
+  return <a
+    className={strong ? 'chip chip-strong' : 'chip'}
+    href={href}
+    {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+  >
+    <SocialIcon name={icon} />
+    <span>{label}</span>
+  </a>;
+}
+
 function ContactPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['contact'] }) {
+  const channels = [
+    { label: copy.emailLabel as string, href: `mailto:${site.site.email}`, icon: 'mail' },
+    { label: copy.phoneLabel as string, href: `tel:${site.site.phoneHref}`, icon: 'phone' },
+    { label: copy.telegramLabel as string, href: 'https://t.me/soobujmiah', icon: 'telegram' },
+  ];
+  // WhatsApp is reachable through the phone channel, and Telegram has its own
+  // row above, so neither repeats in the profile groups below.
+  const groups = socialGroups
+    .map(group => ({ ...group, items: group.items.filter(item => !['Telegram', 'WhatsApp'].includes(item.label)) }))
+    .filter(group => group.items.length);
+
   return <div className="page-wrap contact-page"><PageHeading copy={copy} />
-    <div className="contact-grid" data-reveal>
-      <a href={`mailto:${site.site.email}`}><span>{copy.emailLabel as string}</span><strong>{site.site.email}</strong><ArrowUpRight size={17} /></a>
-      <a href={`tel:${site.site.phoneHref}`}><span>{copy.phoneLabel as string}</span><strong>{site.site.phone}</strong><ArrowUpRight size={17} /></a>
-      <a href="https://t.me/soobujmiah" target="_blank" rel="noopener noreferrer"><span>{copy.telegramLabel as string}</span><strong>@soobujmiah</strong><ArrowUpRight size={17} /></a>
-    </div>
+    <section className="chip-panel" aria-labelledby="channels-title">
+      <div className="subsection-heading" data-reveal>
+        <p className="eyebrow"><span />{lang === 'en' ? 'REACH ME' : 'যোগাযোগ'}</p>
+        <h2 id="channels-title">{lang === 'en' ? 'Every channel, in one place.' : 'সব মাধ্যম একসাথে।'}</h2>
+        <p className="social-note">{lang === 'en' ? 'Pick whichever you already use — they all reach the same person.' : 'যেটা আপনি আগে থেকেই ব্যবহার করেন, সেটাই বেছে নিন — সবগুলো একই জায়গায় পৌঁছায়।'}</p>
+      </div>
+
+      <div className="chip-block" data-reveal>
+        <p className="chip-label">{lang === 'en' ? 'Direct' : 'সরাসরি'}</p>
+        <ul className="chip-row">{channels.map(item => <li key={item.label}><Chip {...item} strong /></li>)}</ul>
+      </div>
+
+      {groups.map(group => <div className="chip-block" key={group.id} data-reveal>
+        <p className="chip-label">{group.label[lang]}</p>
+        <ul className="chip-row">{group.items.map(item => <li key={item.label}><Chip label={item.label} href={item.href} icon={item.icon} /></li>)}</ul>
+      </div>)}
+    </section>
+
     <div className="contact-detail-grid">
       <section className="contact-brief" data-reveal><h2>{copy.briefTitle as string}</h2><ol>{(copy.brief as string[]).map(item => <li key={item}>{item}</li>)}</ol></section>
       <aside className="contact-meta" data-reveal><div><span>{copy.responseLabel as string}</span><b>{copy.responseValue as string}</b></div><div><span>{lang === 'en' ? 'Time zone' : 'সময় অঞ্চল'}</span><b>{site.site.timezone[lang]}</b></div><div><span>{lang === 'en' ? 'Location' : 'অবস্থান'}</span><b>{site.site.location[lang]}</b></div></aside>
     </div>
-    <section className="social-section" aria-labelledby="social-title">
-      <div className="subsection-heading" data-reveal>
-        <p className="eyebrow"><span />{lang === 'en' ? 'EVERYWHERE ELSE' : 'আরও যেখানে'}</p>
-        <h2 id="social-title">{lang === 'en' ? 'Find me on' : 'আমাকে খুঁজুন'}</h2>
-        <p className="social-note">{lang === 'en' ? 'Grouped by what each one is for.' : 'কোনটা কী কাজে, সেই অনুযায়ী সাজানো।'}</p>
-      </div>
-      <div className="social-groups">
-        {socialGroups.map(group => <div className="social-group" key={group.id} data-reveal>
-          <h3>{group.label[lang]}</h3>
-          <ul>
-            {group.items.map(item => <li key={item.label}>
-              <a href={item.href} target="_blank" rel="noopener noreferrer">
-                <SocialIcon name={item.icon} />
-                <span>{item.label}</span>
-                <ArrowUpRight size={13} aria-hidden="true" />
-              </a>
-            </li>)}
-          </ul>
-        </div>)}
-      </div>
-    </section>
   </div>;
 }
 
@@ -596,45 +604,104 @@ function nextPageFor(kind: Kind, lang: Lang) {
 }
 
 /**
+ * Distances (px) and timings (ms) that separate a deliberate "continue" from
+ * a stray gesture at the end of a page.
+ */
+const END_SLACK = 4;          // viewport bottom this close to the document end counts as "at the end"
+const LEAVE_DISTANCE = 240;   // a restored page re-arms only after the reader climbs this far up
+const WHEEL_DISTANCE = 520;   // wheel travel past the end that opens the next page
+const PULL_DISTANCE = 90;     // upward drag on the band that opens the next page
+const SETTLE_MS = 900;        // grace after a load or a history restore
+
+/**
  * Bottom-of-page "continue" band. Scrolling past the end of a page — or
  * dragging up on the band — opens the next page in reading order, so the
  * sections read as one continuous scroll while every page keeps its own URL.
+ *
+ * History restores land exactly where the reader left off — at the end, right
+ * on this band — usually with the wheel or finger still moving. A restored page
+ * therefore starts "cold": the band ignores wheel spin and drags until the
+ * reader has climbed LEAVE_DISTANCE away from the end and come back. A tap on
+ * the band always works, because a tap cannot happen by accident.
  */
 function NextPage({ lang, kind }: { lang: Lang; kind: Kind }) {
   const next = nextPageFor(kind, lang);
   const href = next?.href;
   const [pull, setPull] = useState(0);
+  const [cold, setCold] = useState(false);
   const startY = useRef(0);
+  const navigating = useRef(false);
+  const hotRef = useRef<() => boolean>(() => false);
+
+  const navigate = () => {
+    if (!href || navigating.current) return;
+    navigating.current = true;
+    window.location.assign(href);
+  };
 
   useEffect(() => {
     if (!href) return;
-    // A back/forward restore lands at the bottom of the page with the wheel
-    // still spinning. Arming there would immediately push forward again, which
-    // is why "going back" felt like it just reloaded the same page.
-    const entries = typeof performance.getEntriesByType === 'function' ? performance.getEntriesByType('navigation') : [];
-    const navigation = entries[0] as PerformanceNavigationTiming | undefined;
-    if (navigation?.type === 'back_forward') return;
+    const doc = document.documentElement;
+    const pageHeight = () => doc.scrollHeight;
+    const atEnd = () => window.scrollY + window.innerHeight >= pageHeight() - END_SLACK;
+    const away = () => window.scrollY + window.innerHeight < pageHeight() - LEAVE_DISTANCE;
+    const shortPage = () => pageHeight() - window.innerHeight < LEAVE_DISTANCE;
+    const navigationType = () => {
+      const entries = typeof performance.getEntriesByType === 'function' ? performance.getEntriesByType('navigation') : [];
+      return (entries[0] as PerformanceNavigationTiming | undefined)?.type;
+    };
 
+    // "Ready" means the reader has earned the overscroll: a fresh load is ready
+    // at once, a history restore only once it has climbed away from the end.
+    let ready = navigationType() !== 'back_forward' || away();
     let accumulated = 0;
+    let lastY = window.scrollY;
+    let settleUntil = performance.now() + SETTLE_MS;
     let idle: number | undefined;
-    let armed = false;
-    let readyAt = performance.now() + 1200;
-    const onScroll = () => { if (window.scrollY > 80) armed = true; };
+    const hot = () => ready && (shortPage() || atEnd());
+    hotRef.current = hot;
+
+    const onScroll = () => {
+      const y = window.scrollY;
+      // Ignore the scroll a restore itself performs (animated or not).
+      if (performance.now() >= settleUntil && (away() || (shortPage() && y < lastY - 4))) ready = true;
+      lastY = y;
+      setCold(!ready);
+    };
+
+    // bfcache restores a frozen page: listeners, refs and all. Without this
+    // reset the band would still be armed from the previous visit.
+    const onPageShow = (event: PageTransitionEvent) => {
+      const restored = event.persisted || navigationType() === 'back_forward';
+      ready = !restored || away();
+      accumulated = 0;
+      lastY = window.scrollY;
+      settleUntil = performance.now() + SETTLE_MS;
+      navigating.current = false;
+      setCold(!ready);
+    };
+
     const onWheel = (event: WheelEvent) => {
-      const scrollable = document.documentElement.scrollHeight - window.innerHeight > 40;
-      const atEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4;
-      if (!armed || performance.now() < readyAt || !scrollable || !atEnd || event.deltaY <= 0) { accumulated = 0; return; }
+      if (shortPage() && event.deltaY < 0) ready = true; // climbing back up on a page that cannot scroll
+      if (navigating.current || !hot() || performance.now() < settleUntil || event.deltaY <= 0) {
+        accumulated = 0;
+        return;
+      }
       accumulated += event.deltaY;
       window.clearTimeout(idle);
       idle = window.setTimeout(() => { accumulated = 0; }, 900);
-      if (accumulated >= 520) { accumulated = 0; armed = false; window.location.assign(href); }
+      if (accumulated >= WHEEL_DISTANCE) { accumulated = 0; ready = false; navigate(); }
     };
+
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('wheel', onWheel, { passive: true });
+    window.addEventListener('pageshow', onPageShow);
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('pageshow', onPageShow);
       window.clearTimeout(idle);
+      hotRef.current = () => false;
     };
   }, [href]);
 
@@ -647,21 +714,27 @@ function NextPage({ lang, kind }: { lang: Lang; kind: Kind }) {
     onTouchStart={event => { startY.current = event.touches[0]?.clientY ?? 0; }}
     onTouchMove={event => {
       const y = event.touches[0]?.clientY ?? 0;
+      if (!hotRef.current()) return; // cold band: no pull feedback, no navigation
       setPull(Math.max(0, Math.min(120, startY.current - y)));
     }}
-    onTouchEnd={() => {
-      if (pull >= 90) window.location.assign(next.href);
+    onTouchEnd={event => {
+      const go = pull >= PULL_DISTANCE && hotRef.current();
       setPull(0);
+      if (!go) return;
+      event.preventDefault(); // the synthesised tap would push a second history entry
+      navigate();
     }}
   >
     <span className="next-page-inner" data-reveal>
       <span className="next-page-step">{lang === 'en' ? 'NEXT' : 'পরবর্তী'} · {next.step}</span>
       <span className="next-page-body">
         <b>{next.title}</b>
-        <em>{lang === 'en' ? 'Keep scrolling or tap to continue' : 'স্ক্রল করুন বা ট্যাপ করুন'}</em>
+        <em>{cold
+          ? (lang === 'en' ? 'Scroll up to keep reading, or tap to continue' : 'পড়া চালিয়ে যেতে উপরে স্ক্রল করুন, বা ট্যাপ করুন')
+          : (lang === 'en' ? 'Keep scrolling or tap to continue' : 'স্ক্রল করুন বা ট্যাপ করুন')}</em>
       </span>
       <span className="next-page-arrow"><ArrowRight size={22} aria-hidden="true" /></span>
-      <span className="next-page-pull" style={{ transform: `scaleX(${Math.min(1, pull / 90)})` }} aria-hidden="true" />
+      <span className="next-page-pull" style={{ transform: `scaleX(${Math.min(1, pull / PULL_DISTANCE)})` }} aria-hidden="true" />
     </span>
   </a>;
 }
@@ -759,7 +832,7 @@ function App() {
   else if (kind === 'contact') content = <div className="page-shell"><ContactPage lang={lang} copy={locale.contact} /></div>;
   else content = <div className="page-shell"><NotFound lang={lang} /></div>;
 
-  return <><a className="skip-link" href="#main">{lang === 'en' ? 'Skip to content' : 'মূল কনটেন্টে যান'}</a><span className="scroll-progress" aria-hidden="true" /><Header lang={lang} path={route.path} /><main id="main">{content}<NextPage lang={lang} kind={kind} /></main><Footer lang={lang} minimal={kind === 'contact'} /></>;
+  return <><a className="skip-link" href="#main">{lang === 'en' ? 'Skip to content' : 'মূল কনটেন্টে যান'}</a><span className="scroll-progress" aria-hidden="true" /><Header lang={lang} path={route.path} /><main id="main">{content}<NextPage lang={lang} kind={kind} /></main><Footer lang={lang} /></>;
 }
 
 export default App;
