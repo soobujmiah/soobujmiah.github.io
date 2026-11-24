@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import {
   ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, BriefcaseBusiness, Check,
   Code2, Cpu, Database, FlaskConical, FolderGit2, Globe2, Home, Mail, Monitor,
@@ -49,6 +49,8 @@ interface Project {
   boundary: Localized;
   evidence: Localized;
   url: string;
+  /** Public repository facts, read from the GitHub API on the date named on the evidence page. */
+  repo: { license: string; language: string; created: string; pushed: string; release: string };
 }
 
 interface SiteData {
@@ -80,7 +82,6 @@ interface SiteData {
 
 const site = rawSite as unknown as SiteData;
 const socialLinks = site.site.social.flatMap(group => group.items);
-const socialGroups = site.site.social;
 
 const navigation: Array<{ key: 'about' | 'services' | 'projects' | 'experience' | 'research' | 'evidence' | 'contact'; label: Localized }> = [
   { key: 'about', label: { en: 'About', bn: 'পরিচিতি' } },
@@ -233,13 +234,13 @@ function Header({ lang, path }: { lang: Lang; path: string }) {
 }
 
 /**
- * The footer is deliberately one line: copyright, place, and the claims link.
- * Every profile lives on the contact page, and the dock already reaches it from
- * anywhere, so repeating twenty links here was noise rather than navigation.
+ * The footer is a single link on every page: Claims & limits. No place, hours
+ * or profiles — those belong to the contact page, which the dock reaches from
+ * anywhere — and neither the name nor the page title, which already sit in the
+ * hero.
  */
 function Footer({ lang }: { lang: Lang }) {
   return <footer className="site-footer">
-    <p className="footer-meta">© {new Date().getFullYear()} · {site.site.location[lang]} · {site.site.timezone[lang]}</p>
     <a className="footer-evidence" href={routePath('evidence', lang)}>{lang === 'en' ? 'Claims & limits' : 'দাবি ও সীমাবদ্ধতা'}</a>
   </footer>;
 }
@@ -395,8 +396,10 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
 
     <section className="source-section source-contact" id="contact" aria-labelledby="home-contact-title">
       <div className="source-wrap"><SectionHeading number="05" label={lang === 'en' ? 'CONTACT' : 'যোগাযোগ'} title={contact.headline} lede={contact.lede} id="home-contact-title" />
-        <div className="source-contact-links" data-reveal><a href={`mailto:${site.site.email}`}><span>{contact.emailLabel as string}</span><b>{site.site.email}</b><ArrowUpRight size={17} /></a><a href={`tel:${site.site.phoneHref}`}><span>{contact.phoneLabel as string}</span><b>{site.site.phone}</b><ArrowUpRight size={17} /></a><a href="https://t.me/soobujmiah" target="_blank" rel="noopener noreferrer"><span>Telegram</span><b>@soobujmiah</b><ArrowUpRight size={17} /></a></div>
-        <div className="source-socials">{socialLinks.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.label}<ArrowUpRight size={13} /></a>)}</div>
+        <div className="contact-buttons" data-reveal>{directChannels(lang, true).map(item => <a
+          key={item.icon} className="contact-button" href={item.href} title={`${item.label}: ${item.value}`} aria-label={`${item.label}: ${item.value}`}
+          {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        ><SocialIcon name={item.icon} /><span>{item.label}</span><ArrowUpRight size={14} /></a>)}</div>
       </div>
     </section>
   </div>;
@@ -514,17 +517,44 @@ function ResearchPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang
 }
 
 function EvidencePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['evidence'] }) {
+  const text = (key: string) => copy[key] as string;
+  const releaseLabel = (code: string) => (code === '@none' ? text('releaseNone') : code === '@prerelease' ? text('releasePre') : code);
+  const licenseLabel = (code: string) => (code === 'custom' ? text('licenseCustom') : code === 'none' ? text('licenseNone') : code);
+  const columns = ['colLicense', 'colLanguage', 'colCreated', 'colPushed', 'colRelease'];
   return <div className="page-wrap"><PageHeading copy={copy} />
-    <p className="evidence-note" data-reveal>{copy.note as string}</p>
-    <section className="evidence-how" data-reveal><h2>{copy.howTitle as string}</h2><ol>{(copy.how as string[]).map(item => <li key={item}>{item}</li>)}</ol></section>
+    <p className="evidence-note" data-reveal>{text('note')}</p>
+    <section className="evidence-how" data-reveal><h2>{text('howTitle')}</h2><ol>{(copy.how as string[]).map(item => <li key={item}>{item}</li>)}</ol></section>
+
+    <section className="evidence-facts" aria-labelledby="facts-title" data-reveal>
+      <h2 id="facts-title">{text('factsTitle')}</h2>
+      <p className="evidence-facts-note">{text('factsNote')}</p>
+      <table className="evidence-table">
+        <thead><tr><th>{text('colProject')}</th>{columns.map(key => <th key={key}>{text(key)}</th>)}</tr></thead>
+        <tbody>{site.projects.map(project => <tr key={project.slug}>
+          <th scope="row">
+            <a href={project.url} target="_blank" rel="noopener noreferrer">{project.name}</a>
+            {project.website && <a className="evidence-live" href={project.website} target="_blank" rel="noopener noreferrer">{text('liveLabel')}<ArrowUpRight size={11} /></a>}
+          </th>
+          <td data-label={text('colLicense')} className={project.repo.license === 'Apache-2.0' ? undefined : 'is-caveat'}>{licenseLabel(project.repo.license)}</td>
+          <td data-label={text('colLanguage')}>{project.repo.language}</td>
+          <td data-label={text('colCreated')}>{project.repo.created}</td>
+          <td data-label={text('colPushed')}>{project.repo.pushed}</td>
+          <td data-label={text('colRelease')} className={project.repo.release.startsWith('@') ? 'is-caveat' : undefined}>{releaseLabel(project.repo.release)}</td>
+        </tr>)}</tbody>
+      </table>
+    </section>
+
     <div className="evidence-list">{site.projects.map((project, index) => <article className="evidence-entry" key={project.slug} data-reveal>
       <div className="evidence-entry-head"><span>{String(index + 1).padStart(2, '0')} · {project.category[lang]}</span><span>{project.state[lang]}</span></div>
       <h2>{project.name}</h2>
-      <p>{project.evidence[lang]}</p>
-      <div className="evidence-boundary"><strong>{copy.limitLabel as string}</strong><p>{project.boundary[lang]}</p></div>
-      <a className="text-link" href={project.url} target="_blank" rel="noopener noreferrer">{copy.sourceLabel as string}<ArrowUpRight size={14} /></a>
+      <div className="evidence-cols">
+        <div><strong>{text('claimLabel')}</strong><ul>{project.highlights[lang].map(item => <li key={item}>{item}</li>)}</ul></div>
+        <div><strong>{text('evidenceLabel')}</strong><p>{project.evidence[lang]}</p></div>
+        <div><strong>{text('limitLabel')}</strong><p>{project.boundary[lang]}</p></div>
+      </div>
+      <a className="text-link" href={project.url} target="_blank" rel="noopener noreferrer">{text('sourceLabel')}<ArrowUpRight size={14} /></a>
     </article>)}</div>
-    <a className="text-link evidence-research-link" href={routePath('research', lang)}>{copy.researchLink as string}<ArrowRight size={15} /></a>
+    <a className="text-link evidence-research-link" href={routePath('research', lang)}>{text('researchLink')}<ArrowRight size={15} /></a>
   </div>;
 }
 
@@ -532,52 +562,56 @@ function SocialIcon({ name }: { name: string }) {
   return <svg className="social-icon" aria-hidden="true" focusable="false"><use href={`/social-icons.svg#si-${name}`} /></svg>;
 }
 
-function Chip({ label, href, icon, strong = false }: { label: string; href: string; icon: string; strong?: boolean }) {
-  const external = href.startsWith('http');
-  return <a
-    className={strong ? 'chip chip-strong' : 'chip'}
-    href={href}
-    {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-  >
-    <SocialIcon name={icon} />
-    <span>{label}</span>
-  </a>;
+/** The three channels that reach the owner directly, always in this order. */
+function directChannels(lang: Lang, short = false) {
+  const copy = site.pages[lang].contact;
+  return [
+    { label: (short ? (lang === 'en' ? 'Email' : 'ইমেইল') : copy.emailLabel) as string, href: `mailto:${site.site.email}`, icon: 'mail', external: false, value: site.site.email },
+    { label: (short ? (lang === 'en' ? 'Phone' : 'ফোন') : copy.phoneLabel) as string, href: `tel:${site.site.phoneHref}`, icon: 'phone', external: false, value: site.site.phone },
+    { label: copy.telegramLabel as string, href: 'https://t.me/soobujmiah', icon: 'telegram', external: true, value: '@soobujmiah' },
+  ];
 }
 
+/**
+ * Display order of the profile circles: by what each one tells a client about
+ * the work, direct channels first. A profile missing from this list keeps its
+ * content order at the end, so a new profile never silently disappears.
+ */
+const profileOrder = ['github', 'linkedin', 'stackoverflow', 'huggingface', 'youtube', 'facebook', 'instagram', 'x', 'threads', 'whatsapp', 'medium', 'devdotto', 'hashnode', 'wordpress', 'aboutme', 'peerlist', 'producthunt', 'gravatar', 'buymeacoffee', 'patreon'];
+
 function ContactPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['contact'] }) {
-  const channels = [
-    { label: copy.emailLabel as string, href: `mailto:${site.site.email}`, icon: 'mail' },
-    { label: copy.phoneLabel as string, href: `tel:${site.site.phoneHref}`, icon: 'phone' },
-    { label: copy.telegramLabel as string, href: 'https://t.me/soobujmiah', icon: 'telegram' },
-  ];
-  // WhatsApp is reachable through the phone channel, and Telegram has its own
-  // row above, so neither repeats in the profile groups below.
-  const groups = socialGroups
-    .map(group => ({ ...group, items: group.items.filter(item => !['Telegram', 'WhatsApp'].includes(item.label)) }))
-    .filter(group => group.items.length);
+  const channels = directChannels(lang);
+  const profiles = socialLinks
+    .map((item, index) => ({ item, rank: profileOrder.includes(item.icon) ? profileOrder.indexOf(item.icon) : profileOrder.length + index }))
+    .filter(({ item }) => !channels.some(channel => channel.icon === item.icon))
+    .sort((a, b) => a.rank - b.rank)
+    .map(entry => entry.item);
 
   return <div className="page-wrap contact-page"><PageHeading copy={copy} />
-    <section className="chip-panel" aria-labelledby="channels-title">
+    <section className="contact-circles" aria-labelledby="channels-title">
       <div className="subsection-heading" data-reveal>
         <p className="eyebrow"><span />{lang === 'en' ? 'REACH ME' : 'যোগাযোগ'}</p>
         <h2 id="channels-title">{lang === 'en' ? 'Every channel, in one place.' : 'সব মাধ্যম একসাথে।'}</h2>
-        <p className="social-note">{lang === 'en' ? 'Pick whichever you already use — they all reach the same person.' : 'যেটা আপনি আগে থেকেই ব্যবহার করেন, সেটাই বেছে নিন — সবগুলো একই জায়গায় পৌঁছায়।'}</p>
       </div>
-
-      <div className="chip-block" data-reveal>
-        <p className="chip-label">{lang === 'en' ? 'Direct' : 'সরাসরি'}</p>
-        <ul className="chip-row">{channels.map(item => <li key={item.label}><Chip {...item} strong /></li>)}</ul>
-      </div>
-
-      {groups.map(group => <div className="chip-block" key={group.id} data-reveal>
-        <p className="chip-label">{group.label[lang]}</p>
-        <ul className="chip-row">{group.items.map(item => <li key={item.label}><Chip label={item.label} href={item.href} icon={item.icon} /></li>)}</ul>
-      </div>)}
+      <ul className="circle-row" data-reveal>
+        {channels.map(item => <li key={item.icon}><a
+          className="circle circle-direct" href={item.href} aria-label={`${item.label}: ${item.value}`} title={`${item.label}: ${item.value}`}
+          {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        ><SocialIcon name={item.icon} /></a></li>)}
+        {profiles.map(item => <li key={item.label}><a className="circle" href={item.href} aria-label={item.label} title={item.label} target="_blank" rel="noopener noreferrer"><SocialIcon name={item.icon} /></a></li>)}
+      </ul>
+      <p className="social-note" data-reveal>{lang === 'en' ? 'Direct channels first, then every profile in order of importance. Pick whichever you already use.' : 'আগে সরাসরি মাধ্যম, তারপর গুরুত্ব অনুযায়ী সব প্রোফাইল। যেটা আপনি আগে থেকেই ব্যবহার করেন, সেটাই বেছে নিন।'}</p>
     </section>
 
     <div className="contact-detail-grid">
       <section className="contact-brief" data-reveal><h2>{copy.briefTitle as string}</h2><ol>{(copy.brief as string[]).map(item => <li key={item}>{item}</li>)}</ol></section>
-      <aside className="contact-meta" data-reveal><div><span>{copy.responseLabel as string}</span><b>{copy.responseValue as string}</b></div><div><span>{lang === 'en' ? 'Time zone' : 'সময় অঞ্চল'}</span><b>{site.site.timezone[lang]}</b></div><div><span>{lang === 'en' ? 'Location' : 'অবস্থান'}</span><b>{site.site.location[lang]}</b></div></aside>
+      <aside className="contact-meta" data-reveal>
+        <div><span>{copy.emailLabel as string}</span><b><a href={`mailto:${site.site.email}`}>{site.site.email}</a></b></div>
+        <div><span>{copy.phoneLabel as string}</span><b><a href={`tel:${site.site.phoneHref}`}>{site.site.phone}</a></b></div>
+        <div><span>{copy.responseLabel as string}</span><b>{copy.responseValue as string}</b></div>
+        <div><span>{lang === 'en' ? 'Time zone' : 'সময় অঞ্চল'}</span><b>{site.site.timezone[lang]}</b></div>
+        <div><span>{lang === 'en' ? 'Location' : 'অবস্থান'}</span><b>{site.site.location[lang]}</b></div>
+      </aside>
     </div>
   </div>;
 }
@@ -603,9 +637,13 @@ function nextPageFor(kind: Kind, lang: Lang) {
   };
 }
 
+/** Session flag set just before a scroll-back: the previous page should land at its end. */
+const FLOW_ARRIVAL = 'soobuj:flow-arrival';
+let arrivedFromNext = false;
+
 /**
- * Distances (px) and timings (ms) that separate a deliberate "continue" from
- * a stray gesture at the end of a page.
+ * Distances (px) and timings (ms) that separate a deliberate "continue" or
+ * "go back" from a stray gesture at either end of a page.
  */
 const END_SLACK = 4;          // viewport bottom this close to the document end counts as "at the end"
 const LEAVE_DISTANCE = 240;   // a restored page re-arms only after the reader climbs this far up
@@ -652,8 +690,9 @@ function NextPage({ lang, kind }: { lang: Lang; kind: Kind }) {
     };
 
     // "Ready" means the reader has earned the overscroll: a fresh load is ready
-    // at once, a history restore only once it has climbed away from the end.
-    let ready = navigationType() !== 'back_forward' || away();
+    // at once; a history restore or a scroll-back arrival — both of which land
+    // on this band — only once the reader has climbed away from the end.
+    let ready = !(navigationType() === 'back_forward' || arrivedFromNext) || away();
     let accumulated = 0;
     let lastY = window.scrollY;
     let settleUntil = performance.now() + SETTLE_MS;
@@ -693,6 +732,7 @@ function NextPage({ lang, kind }: { lang: Lang; kind: Kind }) {
       if (accumulated >= WHEEL_DISTANCE) { accumulated = 0; ready = false; navigate(); }
     };
 
+    setCold(!ready);
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('wheel', onWheel, { passive: true });
     window.addEventListener('pageshow', onPageShow);
@@ -739,6 +779,110 @@ function NextPage({ lang, kind }: { lang: Lang; kind: Kind }) {
   </a>;
 }
 
+function prevPageFor(kind: Kind, lang: Lang) {
+  const index = pageOrder.indexOf(kind);
+  if (index <= 0) return null;
+  const prev = pageOrder[index - 1];
+  const entry = navigation.find(item => item.key === prev);
+  const copy = site.pages[lang] as unknown as Record<string, { headline?: string }>;
+  return {
+    href: routePath(prev, lang),
+    label: prev === 'home' ? (lang === 'en' ? 'Home' : 'হোম') : (entry?.label[lang] ?? prev),
+    title: prev === 'home' ? site.site.name : (copy[prev]?.headline ?? entry?.label[lang] ?? prev),
+  };
+}
+
+/**
+ * The mirror of the next-page band. Scrolling up past the top of a page — a
+ * sustained upward wheel turn on desktop, a downward pull on touch — returns to
+ * the previous page in reading order and lands at its end, so the pages read as
+ * one strip that can be scrolled in both directions. A hint at the top of the
+ * viewport names the page you would return to and fills as you pull.
+ *
+ * The same "deliberate only" rules apply as at the bottom end: a wheel turn
+ * only counts when it starts after a pause (not as the tail of the scroll that
+ * reached the top), nothing fires during the settle window after a load or a
+ * history restore, and touches that begin on the dock, a link or a control are
+ * ignored.
+ */
+function ScrollBack({ lang, kind }: { lang: Lang; kind: Kind }) {
+  const prev = useMemo(() => prevPageFor(kind, lang), [kind, lang]);
+  const [pull, setPull] = useState(0);
+  const startY = useRef(Number.NaN);
+  const drag = useRef(0);
+  const navigating = useRef(false);
+
+  useEffect(() => {
+    if (!prev) return;
+    let accumulated = 0;
+    let lastWheelAt = 0;
+    let idle: number | undefined;
+    let settleUntil = performance.now() + SETTLE_MS;
+    navigating.current = false;
+    const atTop = () => window.scrollY <= 0;
+    const go = () => {
+      if (navigating.current) return;
+      navigating.current = true;
+      try { sessionStorage.setItem(FLOW_ARRIVAL, 'end'); } catch { /* storage unavailable: the previous page simply opens at its top */ }
+      window.location.assign(prev.href);
+    };
+    const onWheel = (event: WheelEvent) => {
+      const now = performance.now();
+      if (now - lastWheelAt > 400) accumulated = 0; // a fresh turn, not the tail of the previous one
+      lastWheelAt = now;
+      if (!atTop() || event.deltaY >= 0 || now < settleUntil) { accumulated = 0; setPull(0); return; }
+      accumulated += -event.deltaY;
+      setPull(Math.min(1, accumulated / WHEEL_DISTANCE));
+      window.clearTimeout(idle);
+      idle = window.setTimeout(() => { accumulated = 0; setPull(0); }, 900);
+      if (accumulated >= WHEEL_DISTANCE) { accumulated = 0; setPull(0); go(); }
+    };
+    const onControl = (target: EventTarget | null) =>
+      (target as Element | null)?.closest?.('.site-header, a, button, input, textarea, select') != null;
+    const onTouchStart = (event: TouchEvent) => {
+      startY.current = atTop() && !onControl(event.target) ? event.touches[0].clientY : Number.NaN;
+      drag.current = 0;
+    };
+    const onTouchMove = (event: TouchEvent) => {
+      if (Number.isNaN(startY.current) || !atTop()) return;
+      drag.current = Math.max(0, event.touches[0].clientY - startY.current);
+      setPull(Math.min(1, drag.current / PULL_DISTANCE));
+    };
+    const onTouchEnd = () => {
+      const fire = drag.current >= PULL_DISTANCE && atTop();
+      startY.current = Number.NaN;
+      drag.current = 0;
+      setPull(0);
+      if (fire) go();
+    };
+    const onPageShow = () => {
+      accumulated = 0;
+      navigating.current = false;
+      settleUntil = performance.now() + SETTLE_MS;
+      setPull(0);
+    };
+    window.addEventListener('wheel', onWheel, { passive: true });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onTouchEnd, { passive: true });
+    window.addEventListener('pageshow', onPageShow);
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('pageshow', onPageShow);
+      window.clearTimeout(idle);
+    };
+  }, [prev]);
+
+  if (!prev) return null;
+  return <div className="back-hint" style={{ '--pull': pull } as CSSProperties} aria-hidden="true">
+    <i className="back-hint-line" />
+    <span className="back-hint-pill"><ArrowLeft size={14} />{prev.label}</span>
+  </div>;
+}
+
 function App() {
   const route = useMemo(readRoute, []);
   const { lang, kind } = route;
@@ -763,6 +907,20 @@ function App() {
     setMeta('meta[name="twitter:description"]', 'content', meta.description);
     setMeta('link[rel="canonical"]', 'href', `${site.site.url}${route.path}`);
   }, [lang, meta, route.path]);
+
+  useLayoutEffect(() => {
+    // Coming back by scroll: land where the reader left this page — at its end —
+    // before the first paint, so nothing flashes at the top.
+    let arrival: string | null = null;
+    try { arrival = sessionStorage.getItem(FLOW_ARRIVAL); sessionStorage.removeItem(FLOW_ARRIVAL); } catch { arrival = null; }
+    if (arrival !== 'end') return;
+    arrivedFromNext = true;
+    const toEnd = () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' as ScrollBehavior });
+    toEnd();
+    const timer = window.setTimeout(toEnd, 250);   // late layout (fonts, images)
+    window.addEventListener('load', toEnd);
+    return () => { window.clearTimeout(timer); window.removeEventListener('load', toEnd); };
+  }, []);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -832,7 +990,7 @@ function App() {
   else if (kind === 'contact') content = <div className="page-shell"><ContactPage lang={lang} copy={locale.contact} /></div>;
   else content = <div className="page-shell"><NotFound lang={lang} /></div>;
 
-  return <><a className="skip-link" href="#main">{lang === 'en' ? 'Skip to content' : 'মূল কনটেন্টে যান'}</a><span className="scroll-progress" aria-hidden="true" /><Header lang={lang} path={route.path} /><main id="main">{content}<NextPage lang={lang} kind={kind} /></main><Footer lang={lang} /></>;
+  return <><a className="skip-link" href="#main">{lang === 'en' ? 'Skip to content' : 'মূল কনটেন্টে যান'}</a><span className="scroll-progress" aria-hidden="true" /><Header lang={lang} path={route.path} /><main id="main">{content}<NextPage lang={lang} kind={kind} /></main><ScrollBack lang={lang} kind={kind} /><Footer lang={lang} /></>;
 }
 
 export default App;
