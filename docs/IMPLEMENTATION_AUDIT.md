@@ -8,6 +8,8 @@ The home page is a concise introduction: hero, profile preview, an index of feat
 
 ## What changed in the latest pass
 
+- Removed the contact page's separate meta rows (email, phone, response time, time zone, location) at the owner's request: the circle cluster already carries every channel, and the direct circles name the address or number in `title`/`aria-label`. Only the "what to include" brief remains below the circles.
+- Made the next-page band compact on phones: its mobile bottom padding had been reserving 96px for the dock, which the footer now already clears — the band went from 26/96px to 22/24px, removing the empty space under its caption.
 - Restored the next-page band's stylesheet. PR #11 replaced the block that ran from the old home contact rows up to the footer and, in doing so, deleted every base `.next-page` rule (only the mobile overrides survived), so the band lost its layout, type scale, arrow and progress line. The verifier now checks for each band rule individually.
 - Made the hero role line fit one line on any device: the hidden ghost is laid out without wrapping and `useFitRoleLine` scales the line's font-size down whenever the sentence is wider than the hero column (handles system font scaling and narrow phones), re-running on role change, resize and font load.
 - Made the footer's Claims & limits link a 42px pill with a 86px + safe-area bottom clearance, so it is a comfortable tap on a phone and never sits under the fixed dock.
@@ -43,7 +45,7 @@ The home page is a concise introduction: hero, profile preview, an index of feat
 - Added more motion: count-up hero stats, a breathing hero grid and drifting glow, a blur-resolve on section headings, and a cursor-following radial glow on service and project cards. Every one of them is disabled under `prefers-reduced-motion`.
 - Enabled `scroll-behavior: smooth` for anchor and focus jumps.
 - Added a next-page band to every top-level page: the next page's title, an arrow, and a lime progress line. Overscrolling at the bottom of a page, or dragging up on the band, continues to the next page in reading order, so the site reads as one continuous scroll while every page keeps its own URL. Detail pages keep their existing prev/next project navigation.
-- Added regression checks covering the hamburger removal, the rotating typewriter, the home index rows, the footer, the progress bar, the pinned role line, the next-page band, the project website links, the process strip, the contact circle cluster, the sprite, the single-page-only profiles, the one-line roles, the scroll-back guard, the once-only drag navigation, the repository facts, the footer, scroll-back, the fitted role line, the tap-sized footer link, the retired route stubs, and the complete band stylesheet (77 checks in total).
+- Added regression checks covering the hamburger removal, the rotating typewriter, the home index rows, the footer, the progress bar, the pinned role line, the next-page band, the project website links, the process strip, the contact circle cluster, the sprite, the single-page-only profiles, the one-line roles, the scroll-back guard, the once-only drag navigation, the repository facts, the footer, scroll-back, the fitted role line, the tap-sized footer link, the retired route stubs, the complete band stylesheet, the row-free contact page, and the compact band (79 checks in total).
 
 ## What changed in the earlier polish
 
@@ -98,7 +100,7 @@ See [SEO.md](SEO.md) for the keyword research and placement plan.
 
 ## Validation
 
-`npm run build` runs TypeScript, Vite, route generation, and a 77-check verification suite covering:
+`npm run build` runs TypeScript, Vite, route generation, and a 79-check verification suite covering:
 
 - Bilingual content completeness and project/service metadata.
 - Route matrix, unique titles, canonical tags, and one `h1` per route.

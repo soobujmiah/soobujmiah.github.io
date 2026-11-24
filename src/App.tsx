@@ -631,16 +631,7 @@ function ContactPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]
       <p className="social-note" data-reveal>{lang === 'en' ? 'Direct channels first, then every profile in order of importance. Pick whichever you already use.' : 'আগে সরাসরি মাধ্যম, তারপর গুরুত্ব অনুযায়ী সব প্রোফাইল। যেটা আপনি আগে থেকেই ব্যবহার করেন, সেটাই বেছে নিন।'}</p>
     </section>
 
-    <div className="contact-detail-grid">
-      <section className="contact-brief" data-reveal><h2>{copy.briefTitle as string}</h2><ol>{(copy.brief as string[]).map(item => <li key={item}>{item}</li>)}</ol></section>
-      <aside className="contact-meta" data-reveal>
-        <div><span>{copy.emailLabel as string}</span><b><a href={`mailto:${site.site.email}`}>{site.site.email}</a></b></div>
-        <div><span>{copy.phoneLabel as string}</span><b><a href={`tel:${site.site.phoneHref}`}>{site.site.phone}</a></b></div>
-        <div><span>{copy.responseLabel as string}</span><b>{copy.responseValue as string}</b></div>
-        <div><span>{lang === 'en' ? 'Time zone' : 'সময় অঞ্চল'}</span><b>{site.site.timezone[lang]}</b></div>
-        <div><span>{lang === 'en' ? 'Location' : 'অবস্থান'}</span><b>{site.site.location[lang]}</b></div>
-      </aside>
-    </div>
+    <section className="contact-brief" data-reveal><h2>{copy.briefTitle as string}</h2><ol>{(copy.brief as string[]).map(item => <li key={item}>{item}</li>)}</ol></section>
   </div>;
 }
 
