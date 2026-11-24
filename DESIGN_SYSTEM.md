@@ -40,21 +40,23 @@ Headlines use tight tracking (`-.055em` to `-.075em`) and `text-wrap: balance`. 
 - Side padding: `clamp(22px, 5.4vw, 82px)`.
 - Section rhythm: `clamp(43px, 6vw, 76px)` vertical padding.
 - Page rhythm: `clamp(86px, 10vw, 118px)` top padding, with extra bottom clearance for the floating dock.
+- Home hero: `clamp(72px, 8vw, 104px)` top padding, dropping to `clamp(30px, 8vw, 46px)` on phones so the badge sits close to the top of the viewport instead of floating in dead air.
 - Cards: 14–16px radius, 1px border, subtle surface, hover lift.
 - Dividers carry the structure between sections; boxes are not stacked for every idea.
 
 ## Navigation
 
-The primary navigation is a floating pill dock fixed to the bottom centre. It contains a home link, page icons, a theme toggle, a language switch, and a lime contact action. On narrow screens, secondary pages collapse into the top-left menu.
+The primary navigation is a single floating pill dock fixed to the bottom centre. It holds a home link, all six page icons, a theme toggle, a language switch, and a lime contact action. There is deliberately **no top-left hamburger menu** — the dock already reaches every page, and a second navigation control duplicated it.
 
-The menu is a modal dialog with a backdrop, focus trap, Escape handling, and body scroll lock. It exposes every page in the current language plus the language switch.
+Because the dock is the only navigation, every entry stays visible at every breakpoint instead of collapsing away. Below 620px the dock tightens to 36px targets and the language switch becomes icon-only; below 430px it drops to 28px targets so all ten controls still fit a 320px viewport.
 
 ## Motion
 
-- A soft hero entrance and a marquee of services.
-- Scroll-reveal on section headings and cards via `IntersectionObserver`.
+- The hero role line is a looping typewriter: type → hold 3.6s → delete → pause → retype. It splits on grapheme clusters with `Intl.Segmenter` so Bengali conjuncts and vowel marks are never torn mid-character. The full sentence is always present for assistive tech in an `.sr-only` span; the animated copy is `aria-hidden`.
+- A 2px scroll-progress bar along the top edge reports page position in the lime/mint gradient.
+- Scroll-reveal on section headings and cards via `IntersectionObserver`, with up to 280ms of stagger when several elements enter the viewport together. `data-reveal="left"`, `"right"`, and `"scale"` offer directional variants.
 - Hover lifts of 2–3px and 150–220ms transitions.
-- `prefers-reduced-motion` disables all decorative animation and reveal transitions.
+- `prefers-reduced-motion` disables the typewriter (the sentence renders whole), the progress bar, the marquee, and every reveal transition.
 
 ## Accessibility
 
@@ -63,7 +65,7 @@ The menu is a modal dialog with a backdrop, focus trap, Escape handling, and bod
 - Skip link to `#main`.
 - Visible focus rings using the lime accent.
 - Icon-only controls have `aria-label`; decorative SVGs are `aria-hidden`.
-- The menu traps focus, closes on Escape, and restores focus.
+- The typewriter's animated text is `aria-hidden`; the real sentence lives in an `.sr-only` span so the accessible name never changes mid-animation.
 - Colour contrast is checked against both themes; body copy stays above 4.5:1.
 
 ## Search structure
@@ -71,3 +73,7 @@ The menu is a modal dialog with a backdrop, focus trap, Escape handling, and bod
 Every route ships with a static HTML fallback, unique title and description, a keyword set, canonical URL, reciprocal `hreflang`, Open Graph/Twitter metadata, and route-aware JSON-LD. The build emits a sitemap with `lastmod` and reciprocal alternates, plus a noindexed 404 page.
 
 Structured data describes the person, website, profile page, service catalog, service detail, project collection, software records, contact page, breadcrumbs, and the services FAQ. See [docs/SEO.md](docs/SEO.md).
+
+## Footer
+
+The footer is intentionally one line of metadata (year, location, timezone) plus the social profiles and a link to the claims page. It repeats neither the name nor the page title — those already sit in the hero — and carries no page navigation, because the fixed dock is always on screen.

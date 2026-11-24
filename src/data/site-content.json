@@ -35,7 +35,27 @@
         "llama.cpp",
         "Android developer Bangladesh",
         "office administration Savar",
-        "freelance software developer"
+        "freelance software developer",
+        "ARM64 developer",
+        "Termux Linux desktop",
+        "Termux proot-distro",
+        "llama.cpp Termux",
+        "local LLM Android",
+        "offline AI Android",
+        "on-device inference",
+        "GGUF quantization",
+        "Android app developer Dhaka",
+        "Flutter developer Bangladesh",
+        "AI systems engineer",
+        "technical SEO",
+        "schema markup",
+        "Core Web Vitals",
+        "bilingual website Bengali",
+        "GitHub Pages deployment",
+        "Debian on Android",
+        "freelance engineer Bangladesh",
+        "remote software contractor",
+        "Savar Dhaka"
       ],
       "bn": [
         "সবুজ মিয়া",
@@ -49,7 +69,22 @@
         "লামা ডট সি পি পি",
         "অ্যান্ড্রয়েড ডেভেলপার বাংলাদেশ",
         "অফিস প্রশাসন সাভার",
-        "ফ্রিল্যান্স সফটওয়্যার"
+        "ফ্রিল্যান্স সফটওয়্যার",
+        "ARM64 ডেভেলপার",
+        "টার্মাক্স লিনাক্স ডেস্কটপ",
+        "টার্মাক্স প্রুট ডিস্ট্রো",
+        "লামা ডট সি পি পি টার্মাক্স",
+        "অফলাইন এআই অ্যান্ড্রয়েড",
+        "অ্যান্ড্রয়েডে লোকাল এলএলএম",
+        "অ্যান্ড্রয়েড অ্যাপ ডেভেলপার ঢাকা",
+        "ফ্লাটার ডেভেলপার বাংলাদেশ",
+        "এআই সিস্টেম প্রকৌশলী",
+        "টেকনিক্যাল এসইও",
+        "স্কিমা মার্কআপ",
+        "দ্বিভাষিক ওয়েবসাইট",
+        "অ্যান্ড্রয়েডে ডেবিয়ান",
+        "রিমোট সফটওয়্যার ইঞ্জিনিয়ার",
+        "সাভার ঢাকা"
       ]
     },
     "languages": [
@@ -151,7 +186,13 @@
           "Debian",
           "local AI Android",
           "web developer Bangladesh",
-          "office administration Savar"
+          "office administration Savar",
+          "Sobuj Miah portfolio",
+          "software engineer Savar Dhaka",
+          "Linux on Android portfolio",
+          "Termux projects",
+          "local AI projects",
+          "bilingual portfolio"
         ],
         "eyebrow": "INDEPENDENT ENGINEER · SAVAR, DHAKA",
         "headline": "Operations, made reliable. Systems, made useful.",
@@ -169,9 +210,24 @@
         "aboutIntro": "My background spans office and site operations, alongside self-directed engineering across Linux, Android, local AI, and software tools.",
         "contactTitle": "Have a real problem to solve?",
         "contactIntro": "Tell me what is getting in the way. We can work out a practical next step.",
-        "featuredServices": ["software-development", "linux-systems", "office-administration"],
-        "featuredProjects": ["ternux", "lai", "adt"],
-        "focus": ["Termux", "Debian", "ARM64", "llama.cpp", "Flutter", "Web"]
+        "featuredServices": [
+          "software-development",
+          "linux-systems",
+          "office-administration"
+        ],
+        "featuredProjects": [
+          "ternux",
+          "lai",
+          "adt"
+        ],
+        "focus": [
+          "Termux",
+          "Debian",
+          "ARM64",
+          "llama.cpp",
+          "Flutter",
+          "Web"
+        ]
       },
       "about": {
         "title": "About Sobuj Miah — Software Engineer & Office Administrator",
@@ -182,7 +238,11 @@
           "software engineer Bangladesh",
           "self-taught engineer",
           "office administrator Dhaka",
-          "Linux on Android"
+          "Linux on Android",
+          "self-taught software engineer",
+          "Savar Dhaka engineer",
+          "autodidact programmer Bangladesh",
+          "office administrator and developer"
         ],
         "eyebrow": "ABOUT · OPERATIONS MEET ENGINEERING",
         "headline": "Operations discipline. Engineering curiosity.",
@@ -217,7 +277,11 @@
           "local AI setup",
           "computer support Dhaka",
           "SEO services Bangladesh",
-          "office administration"
+          "office administration",
+          "hire Linux on Android help",
+          "Termux setup service",
+          "local AI setup service",
+          "freelance developer Dhaka"
         ],
         "eyebrow": "SERVICES · PRACTICAL SUPPORT",
         "headline": "What can I take off your plate?",
@@ -264,7 +328,11 @@
           "site coordinator Saudi Arabia",
           "progress reporter",
           "electrician Saudi Arabia",
-          "email marketing"
+          "email marketing",
+          "office administrator experience",
+          "site coordinator experience",
+          "electrician experience Saudi Arabia",
+          "email marketing experience"
         ],
         "eyebrow": "EXPERIENCE · BANGLADESH & SAUDI ARABIA",
         "headline": "Eight years of work across two countries.",
@@ -283,7 +351,12 @@
           "ADT ARM64",
           "LAI local AI",
           "GGEN Flutter",
-          "Songjog"
+          "Songjog",
+          "Ternux project",
+          "Ternuxx project",
+          "ADT toolchain",
+          "Songjog app",
+          "open source projects Bangladesh"
         ],
         "eyebrow": "PROJECTS · SOURCE-LINKED",
         "headline": "Built to solve actual constraints.",
@@ -308,7 +381,11 @@
           "ARM64 toolchain",
           "llama.cpp Android",
           "local AI research",
-          "Vulkan Android"
+          "Vulkan Android",
+          "Termux graphics research",
+          "ARM64 toolchain research",
+          "local AI benchmark Android",
+          "Linux on Android experiments"
         ],
         "eyebrow": "RESEARCH · EVIDENCE BEFORE CLAIMS",
         "headline": "Experiments, with the boundaries in view.",
@@ -327,7 +404,9 @@
           "hire software developer Dhaka",
           "freelance engineer Bangladesh",
           "Linux on Android help",
-          "website developer contact"
+          "website developer contact",
+          "Linux on Android consultant",
+          "remote developer Bangladesh"
         ],
         "eyebrow": "CONTACT · SAVAR, DHAKA",
         "headline": "Let’s make the next step practical.",
@@ -353,7 +432,9 @@
           "project sources",
           "Ternux evidence",
           "ADT evidence",
-          "LAI evidence"
+          "LAI evidence",
+          "verified results",
+          "evidence page"
         ],
         "eyebrow": "EVIDENCE · SOURCES AND SCOPE",
         "headline": "What the public evidence supports.",
@@ -382,7 +463,12 @@
           "ডেবিয়ান",
           "লোকাল এআই অ্যান্ড্রয়েড",
           "ওয়েব ডেভেলপার বাংলাদেশ",
-          "অফিস প্রশাসন সাভার"
+          "অফিস প্রশাসন সাভার",
+          "সবুজ মিয়া পোর্টফোলিও",
+          "সফটওয়্যার ইঞ্জিনিয়ার সাভার ঢাকা",
+          "অ্যান্ড্রয়েডে লিনাক্স প্রকল্প",
+          "টার্মাক্স প্রকল্প",
+          "লোকাল এআই প্রকল্প"
         ],
         "eyebrow": "স্বতন্ত্র প্রকৌশলী · সাভার, ঢাকা",
         "headline": "পরিচালনায় নির্ভরযোগ্যতা। সিস্টেমে কাজের সমাধান।",
@@ -400,9 +486,24 @@
         "aboutIntro": "অফিস ও সাইট পরিচালনার পাশাপাশি লিনাক্স, অ্যান্ড্রয়েড, লোকাল এআই এবং সফটওয়্যার টুলে নিজে হাতে কাজ করেছি।",
         "contactTitle": "বাস্তব কোনো সমস্যার সমাধান দরকার?",
         "contactIntro": "কোন কাজটি আটকে আছে বলুন। আমরা বাস্তবসম্মত পরবর্তী ধাপ ঠিক করতে পারি।",
-        "featuredServices": ["software-development", "linux-systems", "office-administration"],
-        "featuredProjects": ["ternux", "lai", "adt"],
-        "focus": ["Termux", "Debian", "ARM64", "llama.cpp", "Flutter", "Web"]
+        "featuredServices": [
+          "software-development",
+          "linux-systems",
+          "office-administration"
+        ],
+        "featuredProjects": [
+          "ternux",
+          "lai",
+          "adt"
+        ],
+        "focus": [
+          "Termux",
+          "Debian",
+          "ARM64",
+          "llama.cpp",
+          "Flutter",
+          "Web"
+        ]
       },
       "about": {
         "title": "সবুজ মিয়া সম্পর্কে — সফটওয়্যার প্রকৌশলী ও অফিস প্রশাসক",
@@ -413,7 +514,10 @@
           "সফটওয়্যার প্রকৌশলী বাংলাদেশ",
           "স্বশিক্ষিত প্রকৌশলী",
           "অফিস প্রশাসক ঢাকা",
-          "অ্যান্ড্রয়েডে লিনাক্স"
+          "অ্যান্ড্রয়েডে লিনাক্স",
+          "স্বশিক্ষিত সফটওয়্যার ইঞ্জিনিয়ার",
+          "সাভার ঢাকার প্রকৌশলী",
+          "অফিস প্রশাসক ও ডেভেলপার"
         ],
         "eyebrow": "পরিচিতি · পরিচালনা ও প্রকৌশল",
         "headline": "পরিচালনার শৃঙ্খলা। প্রকৌশলের কৌতূহল।",
@@ -448,7 +552,12 @@
           "লোকাল এআই setup",
           "কম্পিউটার সহায়তা ঢাকা",
           "এসইও সেবা বাংলাদেশ",
-          "অফিস প্রশাসন"
+          "অফিস প্রশাসন",
+          "অ্যান্ড্রয়েডে লিনাক্স সেটআপ সেবা",
+          "টার্মাক্স সেটআপ",
+          "লোকাল এআই সেটআপ",
+          "ওয়েবসাইট তৈরি বাংলাদেশ",
+          "ফ্রিল্যান্স ডেভেলপার ঢাকা"
         ],
         "eyebrow": "সেবা · ব্যবহারিক সহায়তা",
         "headline": "কোন কাজের দায়িত্ব আমি নিতে পারি?",
@@ -495,7 +604,10 @@
           "সাইট সমন্বয়কারী সৌদি আরব",
           "অগ্রগতি প্রতিবেদক",
           "ইলেকট্রিশিয়ান সৌদি আরব",
-          "ইমেইল মার্কেটিং"
+          "ইমেইল মার্কেটিং",
+          "অফিস প্রশাসকের অভিজ্ঞতা",
+          "সাইট সমন্বয়কারীর অভিজ্ঞতা",
+          "সৌদি আরবে কাজের অভিজ্ঞতা"
         ],
         "eyebrow": "অভিজ্ঞতা · বাংলাদেশ ও সৌদি আরব",
         "headline": "দুই দেশে আট বছরের কাজের অভিজ্ঞতা।",
@@ -514,7 +626,13 @@
           "ADT ARM64",
           "LAI লোকাল এআই",
           "GGEN Flutter",
-          "Songjog"
+          "Songjog",
+          "টার্নাক্স প্রকল্প",
+          "টার্নাক্সএক্স প্রকল্প",
+          "এডিটি টুলচেইন",
+          "লাই লোকাল এআই",
+          "জিজেন ফ্লাটার",
+          "সংজোগ অ্যাপ"
         ],
         "eyebrow": "প্রকল্প · সোর্স-লিংকসহ",
         "headline": "বাস্তব সীমাবদ্ধতা মেটাতে তৈরি।",
@@ -539,7 +657,10 @@
           "ARM64 toolchain",
           "llama.cpp অ্যান্ড্রয়েড",
           "লোকাল এআই গবেষণা",
-          "Vulkan অ্যান্ড্রয়েড"
+          "Vulkan অ্যান্ড্রয়েড",
+          "টার্মাক্স গ্রাফিক্স গবেষণা",
+          "ভালকান অ্যান্ড্রয়েড",
+          "ARM64 টুলচেইন গবেষণা"
         ],
         "eyebrow": "গবেষণা · দাবির আগে প্রমাণ",
         "headline": "সীমা স্পষ্ট রেখে পরীক্ষা করি।",
@@ -558,7 +679,8 @@
           "সফটওয়্যার ডেভেলপার নিয়োগ ঢাকা",
           "ফ্রিল্যান্স প্রকৌশলী বাংলাদেশ",
           "অ্যান্ড্রয়েডে লিনাক্স সাহায্য",
-          "ওয়েব ডেভেলপার যোগাযোগ"
+          "ওয়েব ডেভেলপার যোগাযোগ",
+          "অ্যান্ড্রয়েডে লিনাক্স পরামর্শ"
         ],
         "eyebrow": "যোগাযোগ · সাভার, ঢাকা",
         "headline": "পরবর্তী ধাপটা বাস্তবসম্মত করি।",
@@ -584,7 +706,8 @@
           "প্রকল্পের সোর্স",
           "Ternux প্রমাণ",
           "ADT প্রমাণ",
-          "LAI প্রমাণ"
+          "LAI প্রমাণ",
+          "যাচাইকৃত ফলাফল"
         ],
         "eyebrow": "প্রমাণ · সোর্স ও কাজের পরিধি",
         "headline": "পাবলিক প্রমাণে যা সমর্থিত।",
@@ -624,7 +747,15 @@
         "responsive website",
         "portfolio website",
         "GitHub Pages",
-        "SEO metadata"
+        "SEO metadata",
+        "static site",
+        "website development Bangladesh",
+        "GitHub Pages hosting",
+        "portfolio website design",
+        "landing page",
+        "technical SEO audit",
+        "Core Web Vitals",
+        "bilingual website"
       ],
       "deliverables": {
         "en": [
@@ -661,7 +792,12 @@
         "custom software Bangladesh",
         "workflow tool",
         "prototype",
-        "internal tool"
+        "internal tool",
+        "workflow automation",
+        "prototype to production",
+        "Flutter app development",
+        "desktop application",
+        "CLI tool development"
       ],
       "deliverables": {
         "en": [
@@ -697,7 +833,11 @@
       "keywords": [
         "computer support Dhaka",
         "PC troubleshooting",
-        "office computer setup"
+        "office computer setup",
+        "virus removal",
+        "hardware upgrade",
+        "Windows and Linux support",
+        "printer and network setup"
       ],
       "deliverables": {
         "en": [
@@ -733,7 +873,11 @@
       "keywords": [
         "Android support",
         "phone troubleshooting",
-        "Android setup"
+        "Android setup",
+        "Android storage cleanup",
+        "Termux installation help",
+        "developer mode setup",
+        "mobile Linux setup"
       ],
       "deliverables": {
         "en": [
@@ -769,7 +913,11 @@
       "keywords": [
         "business technology",
         "office workflow",
-        "digital records"
+        "digital records",
+        "document digitisation",
+        "small business automation",
+        "Google Workspace setup",
+        "spreadsheet systems"
       ],
       "deliverables": {
         "en": [
@@ -805,7 +953,11 @@
       "keywords": [
         "graphics design Bangladesh",
         "social media graphics",
-        "promotional design"
+        "promotional design",
+        "brand identity",
+        "poster design",
+        "thumbnail design",
+        "vector logo"
       ],
       "deliverables": {
         "en": [
@@ -841,7 +993,11 @@
       "keywords": [
         "office administrator",
         "document processing",
-        "records management Dhaka"
+        "records management Dhaka",
+        "office coordination",
+        "filing system",
+        "email correspondence",
+        "meeting scheduling"
       ],
       "deliverables": {
         "en": [
@@ -878,7 +1034,11 @@
         "data entry",
         "data cleanup",
         "spreadsheet",
-        "digitisation"
+        "digitisation",
+        "Excel data entry",
+        "data formatting",
+        "CRM data entry",
+        "Bangla and English typing"
       ],
       "deliverables": {
         "en": [
@@ -915,7 +1075,11 @@
         "SEO Dhaka",
         "digital marketing",
         "email marketing",
-        "social media management"
+        "social media management",
+        "keyword research",
+        "on-page SEO",
+        "local SEO Bangladesh",
+        "content optimisation"
       ],
       "deliverables": {
         "en": [
@@ -954,7 +1118,12 @@
         "Debian",
         "Termux:X11",
         "PRoot",
-        "Linux workstation"
+        "Linux workstation",
+        "proot-distro",
+        "ARM64 Linux",
+        "Linux desktop setup",
+        "open source tooling",
+        "shell scripting"
       ],
       "deliverables": {
         "en": [
@@ -992,7 +1161,12 @@
         "llama.cpp",
         "GGUF",
         "Android local LLM",
-        "private AI"
+        "private AI",
+        "offline AI",
+        "on-device inference",
+        "local model quantization",
+        "AI automation",
+        "open source models"
       ],
       "deliverables": {
         "en": [
@@ -1366,7 +1540,17 @@
         "Termux desktop",
         "Xfce Android",
         "Termux:X11",
-        "no root Linux"
+        "no root Linux",
+        "Debian on Android",
+        "Xfce on Android",
+        "proot-distro Debian",
+        "Linux desktop Android no root",
+        "ARM64 Debian",
+        "Termux X11",
+        "VNC Android",
+        "chroot Android",
+        "mobile Linux workstation",
+        "XFCE Android"
       ],
       "summary": {
         "en": "A no-root Debian and Xfce Linux desktop that runs on an Android phone through Termux and PRoot.",
@@ -1390,7 +1574,21 @@
           "সমর্থিত Adreno hardware-এ Zink/Turnip দিয়ে ডিভাইস-যাচাইকৃত Vulkan desktop rendering।"
         ]
       },
-      "stack": ["Bash", "Termux", "PRoot", "Debian", "Xfce", "Termux:X11", "PulseAudio", "D-Bus", "Mesa", "Zink", "Turnip", "Vulkan", "ARM64"],
+      "stack": [
+        "Bash",
+        "Termux",
+        "PRoot",
+        "Debian",
+        "Xfce",
+        "Termux:X11",
+        "PulseAudio",
+        "D-Bus",
+        "Mesa",
+        "Zink",
+        "Turnip",
+        "Vulkan",
+        "ARM64"
+      ],
       "state": {
         "en": "Public source",
         "bn": "পাবলিক সোর্স"
@@ -1429,7 +1627,15 @@
         "native Termux",
         "Termux desktop",
         "PRoot",
-        "tx command"
+        "tx command",
+        "Termux control",
+        "native Termux workstation",
+        "Termux CLI tool",
+        "Android Linux automation",
+        "Termux scripts",
+        "systemd Termux",
+        "Termux desktop manager",
+        "Android workstation setup"
       ],
       "summary": {
         "en": "A native Termux workstation control plane managed with the tx command, with optional PRoot guests kept as separate providers.",
@@ -1453,7 +1659,14 @@
           "Install-এর সময় ভুলবশত guest root filesystem তৈরি হয় না।"
         ]
       },
-      "stack": ["Bash", "Termux", "Native Termux", "PRoot", "Termux:X11", "Android"],
+      "stack": [
+        "Bash",
+        "Termux",
+        "Native Termux",
+        "PRoot",
+        "Termux:X11",
+        "Android"
+      ],
       "state": {
         "en": "Public source",
         "bn": "পাবলিক সোর্স"
@@ -1493,7 +1706,16 @@
         "ARM64 Linux",
         "AOSP",
         "glibc",
-        "Android development"
+        "Android development",
+        "AOSP build",
+        "ARM64 cross compile",
+        "glibc Android",
+        "custom toolchain",
+        "bionic vs glibc",
+        "musl Android",
+        "Linux ARM64 toolchain",
+        "Android NDK alternative",
+        "cross compilation Android"
       ],
       "summary": {
         "en": "An Android development toolchain for Linux ARM64, built from AOSP source and validated on real hardware.",
@@ -1517,7 +1739,15 @@
           "স্পষ্ট লক্ষ্য: glibc-সহ Linux ARM64, Android/Bionic নয়।"
         ]
       },
-      "stack": ["AOSP", "Clang", "LLVM", "ARM64", "glibc", "Bash", "Android"],
+      "stack": [
+        "AOSP",
+        "Clang",
+        "LLVM",
+        "ARM64",
+        "glibc",
+        "Bash",
+        "Android"
+      ],
       "state": {
         "en": "Public source",
         "bn": "পাবলিক সোর্স"
@@ -1557,7 +1787,16 @@
         "GGUF",
         "local LLM",
         "Android automation",
-        "offline AI"
+        "offline AI",
+        "llama.cpp Termux",
+        "GGUF quantization",
+        "on-device LLM",
+        "offline chatbot Android",
+        "private AI Android",
+        "local inference Android",
+        "Bangla LLM",
+        "AI automation Termux",
+        "Android AI without internet"
       ],
       "summary": {
         "en": "A Bangla-first local AI and consent-driven Android automation runtime with arm64 llama.cpp CPU inference.",
@@ -1581,7 +1820,15 @@
           "Driver crash শনাক্ত হওয়ার পর Adreno Vulkan inference fail-closed।"
         ]
       },
-      "stack": ["llama.cpp", "GGUF", "C/C++", "Android", "Termux", "Vulkan", "Bash"],
+      "stack": [
+        "llama.cpp",
+        "GGUF",
+        "C/C++",
+        "Android",
+        "Termux",
+        "Vulkan",
+        "Bash"
+      ],
       "state": {
         "en": "Public source",
         "bn": "পাবলিক সোর্স"
@@ -1621,7 +1868,15 @@
         "vector editor",
         "document studio",
         "linked text flow",
-        "Flutter"
+        "Flutter",
+        "Flutter desktop",
+        "Flutter Android app",
+        "vector graphics editor",
+        "Bangla typography",
+        "document editor Android",
+        "Dart",
+        "open source Flutter app",
+        "Bangla document editor"
       ],
       "summary": {
         "en": "An Android-first vector and document studio with page geometry, layered canvas, and linked text flow.",
@@ -1645,7 +1900,12 @@
           "Deterministic text layout ও transactional file persistence।"
         ]
       },
-      "stack": ["Flutter", "Dart", "Android", "Skia"],
+      "stack": [
+        "Flutter",
+        "Dart",
+        "Android",
+        "Skia"
+      ],
       "state": {
         "en": "Public source",
         "bn": "পাবলিক সোর্স"
@@ -1685,7 +1945,15 @@
         "Android app",
         "SQLite",
         "Bangla app",
-        "shop management"
+        "shop management",
+        "shop management app Bangladesh",
+        "Bangla business app",
+        "SQLite Android",
+        "small business ledger",
+        "POS Android",
+        "invoice app Bangla",
+        "দোকান হিসাব অ্যাপ",
+        "বাংলা ব্যবসায়িক অ্যাপ"
       ],
       "summary": {
         "en": "A Bangla-first Android business ledger and daily operations app for shops and service businesses.",
@@ -1709,7 +1977,12 @@
           "পাবলিক scope Owner Edition; অন্য workflow ভবিষ্যতের কাজ।"
         ]
       },
-      "stack": ["Android", "SQLite", "Bangla UI", "Local-first"],
+      "stack": [
+        "Android",
+        "SQLite",
+        "Bangla UI",
+        "Local-first"
+      ],
       "state": {
         "en": "Public source",
         "bn": "পাবলিক সোর্স"
