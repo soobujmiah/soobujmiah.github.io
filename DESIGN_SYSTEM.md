@@ -58,9 +58,14 @@ Scrolling past the end of a page continues the flow rather than dead-ending: a s
 
 ## Motion
 
-- The hero role line is a looping typewriter: type → hold 3.6s → delete → pause → retype. It splits on grapheme clusters with `Intl.Segmenter` so Bengali conjuncts and vowel marks are never torn mid-character. The full sentence is always present for assistive tech in an `.sr-only` span; the animated copy is `aria-hidden`.
+- The hero role line is a **rotating typewriter**: it types one trade, holds three seconds, deletes it, pauses, and types the next. Five roles cycle in both languages (`site.roles`). It splits on grapheme clusters with `Intl.Segmenter` so Bengali conjuncts and vowel marks are never torn mid-character. All five roles are always present for assistive tech in an `.sr-only` span, joined with `·`; the animated copy is `aria-hidden`.
 - The line never moves the page. `.source-role` reserves a fixed height (two lines on phones, one on desktop) so the block below it cannot jump as text is added and removed, and `.role-line` is a fixed-width (`min(80ch, 100%)`), left-aligned inner block. Because its width is constant, the `>` prompt stays pinned to the same left edge for the whole cycle instead of re-centring with every character.
 - A 2px scroll-progress bar along the top edge reports page position in the lime/mint gradient.
+- The four hero stats count up from zero over 900ms once they enter the viewport, with an ease-out curve. Reduced motion renders the final number immediately.
+- `html { scroll-behavior: smooth }` makes anchor and focus jumps glide; reduced motion resets it to instant.
+- The hero grid breathes and the cyan glow drifts on slow loops, so the first screen is never fully static.
+- Section headings arrive with a slight blur that resolves as they fade in, which reads softer than a plain opacity fade.
+- Service and project cards carry a radial glow that follows the cursor (`--mx` / `--my` custom properties set from a passive pointermove listener), falling back to the centre without JavaScript.
 - Scroll-reveal on section headings and cards via `IntersectionObserver`, with up to 280ms of stagger when several elements enter the viewport together. `data-reveal="left"`, `"right"`, and `"scale"` offer directional variants.
 - Hover lifts of 2–3px and 150–220ms transitions.
 - `prefers-reduced-motion` disables the typewriter (the sentence renders whole), the progress bar, the marquee, and every reveal transition.
@@ -80,6 +85,10 @@ Scrolling past the end of a page continues the flow rather than dead-ending: a s
 Every route ships with a static HTML fallback, unique title and description, a keyword set, canonical URL, reciprocal `hreflang`, Open Graph/Twitter metadata, and route-aware JSON-LD. The build emits a sitemap with `lastmod` and reciprocal alternates, plus a noindexed 404 page.
 
 Structured data describes the person, website, profile page, service catalog, service detail, project collection, software records, contact page, breadcrumbs, and the services FAQ. See [docs/SEO.md](docs/SEO.md).
+
+## Client-facing strip
+
+Between selected work and contact, the home page carries a short "how it goes" section: three process promises — scope in writing, checkpoints you can open, handover with notes. It describes how an engagement runs rather than claiming results, so it stays accurate for a portfolio with self-reported history.
 
 ## Footer
 

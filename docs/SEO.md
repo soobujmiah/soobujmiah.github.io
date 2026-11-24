@@ -195,6 +195,16 @@ Two mechanisms keep crawl depth shallow and give every page a descriptive inboun
 
 Project and service detail pages already carry their own prev/next or related links, so they do not repeat the band.
 
+## Project sites as entities
+
+Ternux and ADT each ship their own GitHub Pages site. The content model carries a `website` field for them, which appears in three places:
+
+- a "Visit website" link on the projects grid,
+- a primary button on the project detail page, with the repository demoted to a quiet button,
+- `sameAs` on the project's `SoftwareSourceCode` JSON-LD, which tells search engines the code record and the live product are the same thing.
+
+Only projects that really have a live site get the field — linking a repository to a page that does not exist would be worse than not linking at all.
+
 ## Measurement
 
 - Search Console: filter queries for `linux on android`, `termux`, `llama.cpp android`, `web developer dhaka`, and `office administrator dhaka`.

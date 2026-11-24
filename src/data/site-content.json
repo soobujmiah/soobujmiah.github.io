@@ -136,6 +136,54 @@
         "label": "WhatsApp",
         "href": "https://wa.me/8801617040846"
       }
+    ],
+    "roles": {
+      "en": [
+        "Independent Software & AI Systems Engineer · Web Developer · Operations Support",
+        "Linux on Android & Termux desktop specialist",
+        "Local AI on-device inference with llama.cpp and GGUF",
+        "Flutter, web and Android developer in Dhaka",
+        "Office operations, records and business technology"
+      ],
+      "bn": [
+        "স্বতন্ত্র সফটওয়্যার ও এআই সিস্টেম প্রকৌশলী · ওয়েব ডেভেলপার · পরিচালনা সহায়তা",
+        "অ্যান্ড্রয়েডে লিনাক্স ও টার্মাক্স ডেস্কটপ বিশেষজ্ঞ",
+        "llama.cpp ও GGUF দিয়ে অন-ডিভাইস লোকাল এআই",
+        "ঢাকার ফ্লাটার, ওয়েব ও অ্যান্ড্রয়েড ডেভেলপার",
+        "অফিস পরিচালনা, রেকর্ড ও ব্যবসায়িক প্রযুক্তি"
+      ]
+    },
+    "process": [
+      {
+        "title": {
+          "en": "Scope in writing",
+          "bn": "লেখা স্কোপ"
+        },
+        "body": {
+          "en": "We agree what is in and what is out before any work starts, including what the result will not do.",
+          "bn": "কাজ শুরুর আগেই ঠিক হয় কী থাকবে আর কী থাকবে না — ফলাফল কী করবে না, সেটাও।"
+        }
+      },
+      {
+        "title": {
+          "en": "Checkpoints you can open",
+          "bn": "খোলা চেকপয়েন্ট"
+        },
+        "body": {
+          "en": "Work arrives in small, testable pieces rather than one reveal at the end.",
+          "bn": "কাজ একবারে নয়, ছোট ছোট পরীক্ষাযোগ্য ধাপে আসে।"
+        }
+      },
+      {
+        "title": {
+          "en": "Handover with notes",
+          "bn": "নোটসহ হ্যান্ডওভার"
+        },
+        "body": {
+          "en": "You get the source, the setup steps, and the known limits in plain language.",
+          "bn": "সোর্স, সেটআপ ধাপ আর জানা সীমাবদ্ধতা — সব সহজ ভাষায়।"
+        }
+      }
     ]
   },
   "serviceGroups": [
@@ -227,7 +275,10 @@
           "llama.cpp",
           "Flutter",
           "Web"
-        ]
+        ],
+        "processEyebrow": "HOW IT GOES",
+        "processTitle": "Clear scope. Visible progress. Nothing hidden.",
+        "processLede": "A short, written brief is enough to start. Every step below is something you can see and check."
       },
       "about": {
         "title": "About Sobuj Miah — Software Engineer & Office Administrator",
@@ -503,7 +554,10 @@
           "llama.cpp",
           "Flutter",
           "Web"
-        ]
+        ],
+        "processEyebrow": "কীভাবে এগোয়",
+        "processTitle": "স্পষ্ট সীমা। দৃশ্যমান অগ্রগতি। কিছুই লুকানো নয়।",
+        "processLede": "শুরু করতে একটা ছোট লেখা ব্রিফই যথেষ্ট। নিচের প্রতিটা ধাপ আপনি দেখতে ও যাচাই করতে পারবেন।"
       },
       "about": {
         "title": "সবুজ মিয়া সম্পর্কে — সফটওয়্যার প্রকৌশলী ও অফিস প্রশাসক",
@@ -1601,7 +1655,8 @@
         "en": "Modular Bash installer with doctor, repair, and benchmark tools; Vulkan desktop rendering on Android has been measured on the reference device.",
         "bn": "মডিউলার Bash installer-এ doctor, repair ও benchmark টুল রয়েছে; Android-এ Vulkan desktop rendering রেফারেন্স ডিভাইসে মেপে যাচাই করা হয়েছে।"
       },
-      "url": "https://github.com/soobujmiah/ternux"
+      "url": "https://github.com/soobujmiah/ternux",
+      "website": "https://soobujmiah.github.io/ternux/"
     },
     {
       "slug": "ternuxx",
@@ -1760,7 +1815,8 @@
         "en": "Builds ARM64 Linux toolchains from AOSP source and validates the native build-to-install pipeline on real hardware, with checksum-verified offline artifacts.",
         "bn": "AOSP source থেকে ARM64 Linux toolchain তৈরি করে বাস্তব ডিভাইসে build থেকে install পর্যন্ত যাচাই করে; offline artifact-এ checksum verification থাকে।"
       },
-      "url": "https://github.com/soobujmiah/adt"
+      "url": "https://github.com/soobujmiah/adt",
+      "website": "https://soobujmiah.github.io/adt/"
     },
     {
       "slug": "lai",
