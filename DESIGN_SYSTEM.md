@@ -54,7 +54,17 @@ Because the dock is the only navigation, every entry stays visible at every brea
 
 Every top-level page ends in a **next-page band**: the next page's title, a large arrow, and a thin lime progress line. It is a real link, so it is keyboard reachable and crawlable.
 
-Scrolling past the end of a page continues the flow rather than dead-ending: a sustained overscroll (420px of accumulated wheel delta at the bottom) or a 90px upward drag on the band opens the next page. Detail pages are excluded — projects and services already carry their own prev/next navigation — and the last page (Contact) has no band. Reading order is Home → About → Services → Projects → Experience → Research → Evidence → Contact, matching the dock.
+Scrolling past the end of a page continues the flow rather than dead-ending: a sustained overscroll (520px of accumulated wheel delta at the bottom) or a 90px upward drag on the band opens the next page.
+
+Three guards keep that from misfiring:
+
+- **It never arms on a back/forward restore.** A back/forward navigation lands at the bottom of the page with the wheel still turning; arming there would push forward again immediately, which made "going back" feel like the page had reloaded.
+- **The reader must have scrolled down first.** Arriving at a page and nudging the wheel does nothing until `scrollY` has passed 80px in this view.
+- **A 1.2s settle window** after load absorbs the leftover inertia from the previous page.
+
+A downward drag on the band is the reader asking to scroll back up, so it never navigates.
+
+`html { overscroll-behavior-y: contain }` additionally stops Android Chrome turning an upward drag at the top of the page into a pull-to-refresh, which readers kept reading as the site reloading itself. Detail pages are excluded — projects and services already carry their own prev/next navigation — and the last page (Contact) has no band. Reading order is Home → About → Services → Projects → Experience → Research → Evidence → Contact, matching the dock.
 
 ## Motion
 
@@ -98,4 +108,4 @@ The marks live in `public/social-icons.svg`, an external `<symbol>` sprite gener
 
 ## Footer
 
-The footer is intentionally one line of metadata (year, location, timezone) plus the social profiles and a link to the claims page. It repeats neither the name nor the page title — those already sit in the hero — and carries no page navigation, because the fixed dock is always on screen.
+The footer is intentionally one line of metadata (year, location, timezone) plus the social profiles and a link to the claims page. On the contact page it drops the profiles, because the page body already lists all 21 of them — repeating them was pure duplication. It repeats neither the name nor the page title — those already sit in the hero — and carries no page navigation, because the fixed dock is always on screen.

@@ -863,7 +863,10 @@ html[lang="bn"] .next-page-body b { letter-spacing: 0; line-height: 1.25; }
 .not-found .button { margin-top: 26px; }
 
 /* ---------- scroll feel ---------- */
-html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+/* `contain` keeps Android Chrome from turning an upward drag at the top of the
+   page into a pull-to-refresh, which readers kept mistaking for the site
+   reloading itself. */
+html { scroll-behavior: smooth; scroll-padding-top: 24px; overscroll-behavior-y: contain; }
 
 /* ---------- process strip ---------- */
 .process-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }

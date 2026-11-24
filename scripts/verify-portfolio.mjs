@@ -50,6 +50,8 @@ const graphemeCount = value => typeof Intl.Segmenter === 'function'
   ? Array.from(new Intl.Segmenter('en', { granularity: 'grapheme' }).segment(value)).length
   : Array.from(value).length;
 assert('The first rotating role is short enough to hold one line on a phone', ['en', 'bn'].every(lang => graphemeCount(data.site.roles[lang][0]) <= 46));
+assert('Scrolling back never advances to the next page', read('src/App.tsx').includes("'back_forward'") && read('src/App.tsx').includes('deltaY <= 0') && read('src/styles.css').includes('overscroll-behavior-y: contain'));
+assert('The contact page footer does not repeat the profiles listed in the body', read('src/App.tsx').includes('minimal={kind') && read('src/App.tsx').includes('minimal = false'));
 assert('A scroll progress indicator reports page position', read('src/App.tsx').includes('scroll-progress') && read('src/styles.css').includes('.scroll-progress'));
 assert('Hero and page spacing use the compact source-index rhythm', read('src/styles.css').includes('.source-hero { display: grid') && read('src/styles.css').includes('padding: clamp(43px,6vw,76px)') && read('src/styles.css').includes('min-height: 58px'));
 assert('Bilingual evidence page links all public project sources and limits', ['en', 'bn'].every(lang => data.pages[lang].evidence?.title && data.pages[lang].evidence?.description) && data.projects.every(project => /^https:\/\/github\.com\//.test(project.url)) && read('src/App.tsx').includes('EvidencePage'));

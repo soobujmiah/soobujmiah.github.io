@@ -232,13 +232,22 @@ function Header({ lang, path }: { lang: Lang; path: string }) {
   </header>;
 }
 
-function Footer({ lang }: { lang: Lang }) {
+/**
+ * The footer carries the social profiles everywhere except the contact page,
+ * whose body already lists every profile in full — repeating them there was
+ * pure duplication.
+ */
+function Footer({ lang, minimal = false }: { lang: Lang; minimal?: boolean }) {
   return <footer className="site-footer">
     <p className="footer-meta">© {new Date().getFullYear()} · {site.site.location[lang]} · {site.site.timezone[lang]}</p>
-    <nav className="footer-links" aria-label={lang === 'en' ? 'Profiles and evidence' : 'প্রোফাইল ও প্রমাণ'}>
-      {socialLinks.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.label}</a>)}
-      <a className="footer-evidence" href={routePath('evidence', lang)}>{lang === 'en' ? 'Claims & limits' : 'দাবি ও সীমাবদ্ধতা'}</a>
-    </nav>
+    {minimal
+      ? <nav className="footer-links" aria-label={lang === 'en' ? 'Evidence' : 'প্রমাণ'}>
+          <a className="footer-evidence" href={routePath('evidence', lang)}>{lang === 'en' ? 'Claims & limits' : 'দাবি ও সীমাবদ্ধতা'}</a>
+        </nav>
+      : <nav className="footer-links" aria-label={lang === 'en' ? 'Profiles and evidence' : 'প্রোফাইল ও প্রমাণ'}>
+          {socialLinks.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.label}</a>)}
+          <a className="footer-evidence" href={routePath('evidence', lang)}>{lang === 'en' ? 'Claims & limits' : 'দাবি ও সীমাবদ্ধতা'}</a>
+        </nav>}
   </footer>;
 }
 
@@ -599,19 +608,34 @@ function NextPage({ lang, kind }: { lang: Lang; kind: Kind }) {
 
   useEffect(() => {
     if (!href) return;
+    // A back/forward restore lands at the bottom of the page with the wheel
+    // still spinning. Arming there would immediately push forward again, which
+    // is why "going back" felt like it just reloaded the same page.
+    const entries = typeof performance.getEntriesByType === 'function' ? performance.getEntriesByType('navigation') : [];
+    const navigation = entries[0] as PerformanceNavigationTiming | undefined;
+    if (navigation?.type === 'back_forward') return;
+
     let accumulated = 0;
     let idle: number | undefined;
+    let armed = false;
+    let readyAt = performance.now() + 1200;
+    const onScroll = () => { if (window.scrollY > 80) armed = true; };
     const onWheel = (event: WheelEvent) => {
       const scrollable = document.documentElement.scrollHeight - window.innerHeight > 40;
       const atEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4;
-      if (!scrollable || !atEnd || event.deltaY <= 0) { accumulated = 0; return; }
+      if (!armed || performance.now() < readyAt || !scrollable || !atEnd || event.deltaY <= 0) { accumulated = 0; return; }
       accumulated += event.deltaY;
       window.clearTimeout(idle);
       idle = window.setTimeout(() => { accumulated = 0; }, 900);
-      if (accumulated >= 420) { accumulated = 0; window.location.assign(href); }
+      if (accumulated >= 520) { accumulated = 0; armed = false; window.location.assign(href); }
     };
+    window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('wheel', onWheel, { passive: true });
-    return () => { window.removeEventListener('wheel', onWheel); window.clearTimeout(idle); };
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('wheel', onWheel);
+      window.clearTimeout(idle);
+    };
   }, [href]);
 
   if (!next || !href) return null;
@@ -735,7 +759,7 @@ function App() {
   else if (kind === 'contact') content = <div className="page-shell"><ContactPage lang={lang} copy={locale.contact} /></div>;
   else content = <div className="page-shell"><NotFound lang={lang} /></div>;
 
-  return <><a className="skip-link" href="#main">{lang === 'en' ? 'Skip to content' : 'মূল কনটেন্টে যান'}</a><span className="scroll-progress" aria-hidden="true" /><Header lang={lang} path={route.path} /><main id="main">{content}<NextPage lang={lang} kind={kind} /></main><Footer lang={lang} /></>;
+  return <><a className="skip-link" href="#main">{lang === 'en' ? 'Skip to content' : 'মূল কনটেন্টে যান'}</a><span className="scroll-progress" aria-hidden="true" /><Header lang={lang} path={route.path} /><main id="main">{content}<NextPage lang={lang} kind={kind} /></main><Footer lang={lang} minimal={kind === 'contact'} /></>;
 }
 
 export default App;
