@@ -2,11 +2,24 @@
 
 ## Current direction
 
-The site is a bilingual, multi-page portfolio built with React, TypeScript, and Vite. It uses a graphite base with lime and cyan accents, Sora display type, compact monospace labels, a floating bottom dock, and restrained scroll motion. There is no WebGL or 3D runtime.
+The site is a bilingual, multi-page portfolio built with React, TypeScript, and Vite. It uses a graphite base with lime and cyan accents, Sora display type, compact monospace labels, a single floating bottom dock, and restrained scroll motion. There is no WebGL or 3D runtime.
 
-The home page is a concise introduction: hero, profile preview, three featured services, three featured projects, and contact. Full profile, services, service details, experience, projects, project details, research, evidence, and contact each have separate English and Bangla routes.
+The home page is a concise introduction: hero, profile preview, an index of featured services, an index of selected work, and contact. Full profile, services, service details, experience, projects, project details, research, evidence, and contact each have separate English and Bangla routes.
 
-## What changed in this polish
+## What changed in the latest pass
+
+- Removed the top-left hamburger menu. It duplicated the dock, which already reaches every page; the dock now keeps all six page icons visible at every breakpoint instead of hiding the secondary pages.
+- Fixed the hero role line. The `>` prompt, the role text, and the caret were separate flex items, so a long line broke them onto three different lines on phones. They are one inline flow now.
+- Replaced the blinking caret with a real typewriter loop (type → hold → delete → retype) that segments on grapheme clusters, so Bengali conjuncts type whole. The full sentence stays available to screen readers.
+- Closed the dead air above the hero badge: top padding drops from 88–128px to 30–104px depending on viewport, and the hero no longer forces a full viewport height on phones.
+- Slimmed the footer to one metadata line plus social profiles and the claims link. It no longer repeats the name, the page title, or the page navigation.
+- Cut home-page duplication. The heavy project grid and the service accordion duplicated the dedicated projects and services pages; both are now compact index rows that point at the full pages.
+- Replaced the project list inside the terminal card with the current focus list, so the card no longer repeats the projects page either.
+- Added a 2px scroll-progress bar and staggered reveal timing so several sections entering together cascade instead of appearing at once.
+- Widened the keyword coverage: 32 English and 27 Bengali site-level terms, plus niche vocabulary for each project (`proot-distro`, `Termux:X11`, `GGUF quantization`, `AOSP build`, `on-device LLM`, and Bengali equivalents). See [SEO.md](SEO.md).
+- Added five regression checks covering the hamburger removal, the typewriter, the home index rows, the footer, and the progress bar.
+
+## What changed in the earlier polish
 
 - Replaced three generations of overlapping CSS with one coherent design system, including a working light theme.
 - Added a focus-trapped, scroll-locked navigation menu and a proper mobile dock with secondary items collapsing out of the way.
@@ -21,6 +34,7 @@ The home page is a concise introduction: hero, profile preview, three featured s
 ## Implemented structure
 
 - 50 static route entries: 2 home routes, 14 shared pages, 22 service details, and 12 project details.
+- One navigation surface: the bottom dock. No secondary menu to keep in sync.
 - Unique title, description, keyword set, canonical URL, reciprocal `hreflang`, Open Graph/Twitter metadata, and route-aware JSON-LD on every route.
 - Static semantic HTML fallback for every route, plus a noindexed `404.html`.
 - Bilingual sitemap with `lastmod`, priority, and reciprocal `xhtml:link` alternates.
@@ -58,7 +72,7 @@ See [SEO.md](SEO.md) for the keyword research and placement plan.
 
 ## Validation
 
-`npm run build` runs TypeScript, Vite, route generation, and a 52-check verification suite covering:
+`npm run build` runs TypeScript, Vite, route generation, and a 57-check verification suite covering:
 
 - Bilingual content completeness and project/service metadata.
 - Route matrix, unique titles, canonical tags, and one `h1` per route.

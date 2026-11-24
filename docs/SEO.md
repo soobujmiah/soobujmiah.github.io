@@ -14,13 +14,15 @@ Sobuj Miah is an independent software and AI systems engineer, web developer, an
 
 The site should win queries where the intent is a **tool, a setup, a service, or a person** — not generic “what is Linux” articles.
 
+Keyword coverage is layered rather than repeated: a small brand-and-intent set at the site level, a narrower set on each shared page, and a project-specific vocabulary on each project page. Nothing is stuffed into a page where it does not belong — a term only appears where the page actually answers that query.
+
 ## Keyword clusters
 
 ### 1. Linux on Android / Termux desktop
 
 Primary: `linux on android`, `termux linux`, `termux debian`, `termux desktop`, `debian on android`, `proot debian`, `termux x11`, `xfce android`, `no root linux android`
 
-Secondary: `android linux desktop`, `termux gui`, `termux xfce`, `proot-distro`, `termux x11 setup`, `vulkan termux`, `zink turnip android`, `virgl android`, `termux workstation`
+Secondary: `android linux desktop`, `termux gui`, `termux xfce`, `proot-distro`, `termux x11 setup`, `vulkan termux`, `zink turnip android`, `virgl android`, `termux workstation`, `arm64 debian`, `chroot android`, `mobile linux workstation`, `linux desktop android no root`
 
 Intent: find a working setup or tool. The SERP is dominated by step-by-step guides and GitHub installers. Ternux is a credible answer because it is a real installer with doctor, repair, and benchmark tools.
 
@@ -40,7 +42,7 @@ Supporting sources:
 
 Primary: `local ai android`, `llama.cpp android`, `llama.cpp termux`, `gguf android`, `local llm android`, `offline ai android`
 
-Secondary: `android local llm`, `termux llama.cpp`, `qwen android`, `llama 3.2 android`, `npu inference android`, `vulkan llama.cpp`
+Secondary: `android local llm`, `termux llama.cpp`, `qwen android`, `llama 3.2 android`, `npu inference android`, `vulkan llama.cpp`, `gguf quantization`, `on-device llm`, `offline chatbot android`, `private ai android`, `bangla llm`
 
 Intent: set up private, on-device inference. LAI answers with a Bangla-first runtime and a verified CPU baseline. The research page is the right place for experimental GPU/NPU paths.
 
@@ -57,7 +59,7 @@ Supporting sources:
 
 Primary: `android toolchain arm64`, `aosp toolchain`, `arm64 linux toolchain`, `adt android`
 
-Secondary: `aosp build arm64`, `clang arm64 android`, `glibc arm64 toolchain`, `android native toolchain`
+Secondary: `aosp build arm64`, `clang arm64 android`, `glibc arm64 toolchain`, `android native toolchain`, `cross compile arm64 android`, `bionic vs glibc`, `custom toolchain android`, `linux arm64 server`
 
 Intent: technical, low-volume, high-value. ADT is the direct answer. Keep the boundary explicit: Linux ARM64 + glibc, not Android/Bionic.
 
@@ -132,13 +134,14 @@ Intent: same clusters in Bangla. The `/bn/` routes carry localized titles, descr
 
 | Page | Primary target | Placement |
 | --- | --- | --- |
-| `/` | software engineer Dhaka, Linux on Android | title, description, H1, hero deck, featured projects |
+| `/` | software engineer Dhaka, Linux on Android | title, description, H1, hero deck, service index, selected-work index |
 | `/about/` | Sobuj Miah, software engineer Bangladesh | title, H1, profile copy, capabilities |
 | `/services/` | software services Dhaka, Linux on Android setup | title, H1, group headings, service cards, FAQ |
 | `/services/linux-systems/` | Linux on Android, Termux setup | title, H1, detail, deliverables, keywords |
 | `/services/local-ai/` | local AI setup, llama.cpp | title, H1, detail, deliverables |
 | `/projects/` | Sobuj Miah projects, Linux on Android | title, H1, project cards |
 | `/projects/ternux/` | Linux on Android, Termux Debian, Termux desktop | title, description, H1, overview, highlights, stack, evidence |
+| `/projects/ternuxx/` | Termux workstation, native Termux | title, description, H1, overview, highlights, boundary |
 | `/projects/lai/` | local AI Android, llama.cpp Android | title, description, H1, overview, highlights, evidence |
 | `/projects/adt/` | Android toolchain ARM64, AOSP | title, description, H1, overview, highlights, boundary |
 | `/projects/ggen/` | Flutter Android, vector editor | title, description, H1, highlights |
@@ -149,6 +152,21 @@ Intent: same clusters in Bangla. The `/bn/` routes carry localized titles, descr
 | `/experience/` | office administrator Dhaka | title, H1, roles, dates |
 
 Bengali routes mirror the same mapping with localized phrasing.
+
+## Per-project vocabulary
+
+Each project carries a keyword set that names the exact thing a searcher would type, so the page can match a specific tool query rather than only a generic category.
+
+| Project | Added terms |
+| --- | --- |
+| Ternux | Debian on Android, Xfce on Android, proot-distro Debian, Linux desktop Android no root, ARM64 Debian, VNC Android, chroot Android, mobile Linux workstation |
+| Ternuxx | Termux control, native Termux workstation, Termux CLI tool, Android Linux automation, Termux scripts, systemd Termux |
+| ADT | AOSP build, ARM64 cross compile, glibc Android, bionic vs glibc, musl Android, custom toolchain, Android NDK alternative |
+| LAI | llama.cpp Termux, GGUF quantization, on-device LLM, offline chatbot Android, private AI Android, Bangla LLM, AI automation Termux |
+| GGEN | Flutter desktop, Flutter Android app, vector graphics editor, Bangla typography, document editor Android, Dart |
+| Songjog | shop management app Bangladesh, Bangla business app, SQLite Android, small business ledger, POS Android, invoice app Bangla, দোকান হিসাব অ্যাপ |
+
+The Bengali sets mirror these with the spellings people actually type — `টার্মাক্স`, `অ্যান্ড্রয়েডে লিনাক্স`, `অ্যান্ড্রয়েডে ডেবিয়ান`, `লোকাল এআই`, `অফলাইন এআই অ্যান্ড্রয়েড`, `অ্যান্ড্রয়েডে লোকাল এলএলএম` — rather than transliterating the English terms.
 
 ## Implementation checklist
 
