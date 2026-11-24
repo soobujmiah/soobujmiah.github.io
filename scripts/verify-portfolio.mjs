@@ -18,11 +18,12 @@ for (const lang of ['en', 'bn']) {
   for (const item of data.projects) routes.push(`${base}/projects/${item.slug}/`);
 }
 const publicSource = ['index.html', 'src/App.tsx', 'src/styles.css', 'src/data/site-content.json', 'scripts/create-routes.mjs'].map(read).join('\n');
-const expectedProjects = ['ternux', 'ternuxx', 'adt', 'lai', 'ggen', 'songjog'];
+const expectedProjects = ['ternux', 'adt', 'lai', 'ggen', 'songjog'];
 const baseUrl = data.site.url.replace(/\/$/, '');
 
 assert('Bilingual content covers all profile pages', ['en', 'bn'].every(lang => ['home', 'about', 'services', 'experience', 'projects', 'research', 'evidence', 'contact'].every(page => data.pages[lang][page]?.title && data.pages[lang][page]?.description)));
-assert('Requested public projects are represented and removed projects stay absent', expectedProjects.every(slug => data.projects.some(project => project.slug === slug)) && !data.projects.some(project => ['datakhoj', 'iqra-online-mart'].includes(project.slug)));
+assert('Requested public projects are represented and removed projects stay absent', expectedProjects.every(slug => data.projects.some(project => project.slug === slug)) && !data.projects.some(project => ['datakhoj', 'iqra-online-mart', 'ternuxx'].includes(project.slug)) && !/ternuxx/i.test(read('src/data/site-content.json') + read('src/App.tsx') + read('src/styles.css')));
+assert('Retired project routes redirect to the living page', read('scripts/create-routes.mjs').includes("['/projects/ternuxx/', '/projects/']") && read('scripts/create-routes.mjs').includes('http-equiv="refresh"'));
 assert('Full source-file work history and time zone are represented', data.experience.length === 7 && data.experience.every(item => item.period) && data.site.timezone.en.startsWith('GMT+6'));
 assert('All GitHub profile service links target generated service slugs', ['web-development', 'software-development', 'computer-support', 'android-support', 'business-technology', 'graphics-design', 'office-administration', 'data-entry'].every(slug => data.services.some(service => service.slug === slug)));
 assert('Service and project slugs are unique and route-safe', [...data.services, ...data.projects].every(item => /^[a-z0-9-]+$/.test(item.slug)) && new Set([...data.services, ...data.projects].map(item => item.slug)).size === data.services.length + data.projects.length);
@@ -39,7 +40,9 @@ assert('Hero role line types, holds, deletes and repeats', read('src/App.tsx').i
 assert('Home page previews services and work as index rows instead of repeating their pages', read('src/App.tsx').includes('home-index-list') && !read('src/App.tsx').includes('source-project-grid') && !read('src/App.tsx').includes('service-accordion'));
 assert('The footer carries only the claims link on every page', !read('src/App.tsx').includes('footer-name') && !read('src/App.tsx').includes('footer-links') && !read('src/App.tsx').includes('footer-meta') && !read('src/styles.css').includes('.footer-meta') && read('src/App.tsx').includes('footer-evidence'));
 assert('Hero role line reserves fixed height so the typewriter cannot shift the page', read('src/styles.css').includes('.role-ghost') && read('src/App.tsx').includes('role-ghost') && read('src/styles.css').includes('min-height: 1.9em;') && !read('src/styles.css').includes('min-height: calc(1.9em * 2)'));
-assert('Every page but the last offers a next-page band in reading order', read('src/App.tsx').includes('next-page') && read('src/App.tsx').includes("const pageOrder") && read('src/styles.css').includes('.next-page'));
+assert('Every page but the last offers a next-page band in reading order, fully styled', read('src/App.tsx').includes('next-page') && read('src/App.tsx').includes("const pageOrder") && ['.next-page {', '.next-page-inner {', '.next-page-step {', '.next-page-body b {', '.next-page-arrow {', '.next-page-pull {', '.next-page:hover .next-page-body b'].every(rule => read('src/styles.css').includes(rule)));
+assert('The hero role line is fitted to one line instead of wrapping', read('src/App.tsx').includes('useFitRoleLine') && read('src/styles.css').includes('.role-line { position: relative; display: inline-block; max-width: 100%; vertical-align: top; text-align: left; white-space: nowrap; }'));
+assert('The footer claims link is a comfortable tap target on every page', read('src/styles.css').includes('min-height: 42px; padding: 0 18px;') && read('src/styles.css').includes('padding: 22px var(--side-pad) calc(86px + env(safe-area-inset-bottom));'));
 assert('The hero role line rotates through several trades in both languages', ['en', 'bn'].every(lang => data.site.roles?.[lang]?.length >= 3 && data.site.roles[lang].every(Boolean)));
 assert('Projects that ship their own website link to it', ['ternux', 'adt'].every(slug => data.projects.find(project => project.slug === slug)?.website) && read('src/App.tsx').includes('project.website'));
 assert('The home page explains how a engagement runs for prospective clients', data.site.process?.length === 3 && data.site.process.every(step => step.title?.en && step.title?.bn && step.body?.en && step.body?.bn) && read('src/App.tsx').includes('process-grid') && read('src/styles.css').includes('.process-grid'));
@@ -90,7 +93,7 @@ if (!sourceOnly) {
   const dist = path.join(root, 'dist');
   assert('Production output exists', fs.existsSync(path.join(dist, 'index.html')));
   if (fs.existsSync(dist)) {
-    assert('Generated route count matches bilingual route matrix', routes.length === 2 * (1 + 7 + data.services.length + data.projects.length) && routes.length === 50, `${routes.length} direct-load routes`);
+    assert('Generated route count matches bilingual route matrix', routes.length === 2 * (1 + 7 + data.services.length + data.projects.length) && routes.length === 48, `${routes.length} direct-load routes`);
     const routeHtml = routes.map(route => ({ route, file: path.join(dist, route.replace(/^\//, ''), 'index.html') }));
     assert('Every English and Bangla route has a static HTML entry', routeHtml.every(item => fs.existsSync(item.file)));
     const pages = routeHtml.filter(item => fs.existsSync(item.file)).map(({ route, file }) => ({ route, html: fs.readFileSync(file, 'utf8') }));

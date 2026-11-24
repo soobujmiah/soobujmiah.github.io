@@ -6,7 +6,7 @@ Research date: 2026-11-24. This is an intent-based keyword map built from curren
 
 Sobuj Miah is an independent software and AI systems engineer, web developer, and office administrator in Savar, Dhaka, Bangladesh. The strongest differentiators are:
 
-1. **Linux on Android with Termux** — Ternux, Ternuxx, and the Linux workstation service.
+1. **Linux on Android with Termux** — Ternux and the Linux workstation service.
 2. **Local AI on Android** — LAI, llama.cpp, GGUF, and CPU-first inference.
 3. **ARM64 Android tooling** — ADT, built from AOSP and validated on real hardware.
 4. **Practical software and web work** — websites, custom tools, Flutter, Android.
@@ -29,7 +29,7 @@ Intent: find a working setup or tool. The SERP is dominated by step-by-step guid
 Target pages:
 - `/projects/ternux/` — primary
 - `/services/linux-systems/` — service intent
-- `/projects/` and `/projects/ternuxx/` — supporting
+- `/projects/` — supporting
 - `/` — brand + discovery
 
 Supporting sources:
@@ -141,7 +141,6 @@ Intent: same clusters in Bangla. The `/bn/` routes carry localized titles, descr
 | `/services/local-ai/` | local AI setup, llama.cpp | title, H1, detail, deliverables |
 | `/projects/` | Sobuj Miah projects, Linux on Android | title, H1, project cards |
 | `/projects/ternux/` | Linux on Android, Termux Debian, Termux desktop | title, description, H1, overview, highlights, stack, evidence |
-| `/projects/ternuxx/` | Termux workstation, native Termux | title, description, H1, overview, highlights, boundary |
 | `/projects/lai/` | local AI Android, llama.cpp Android | title, description, H1, overview, highlights, evidence |
 | `/projects/adt/` | Android toolchain ARM64, AOSP | title, description, H1, overview, highlights, boundary |
 | `/projects/ggen/` | Flutter Android, vector editor | title, description, H1, highlights |
@@ -160,7 +159,6 @@ Each project carries a keyword set that names the exact thing a searcher would t
 | Project | Added terms |
 | --- | --- |
 | Ternux | Debian on Android, Xfce on Android, proot-distro Debian, Linux desktop Android no root, ARM64 Debian, VNC Android, chroot Android, mobile Linux workstation |
-| Ternuxx | Termux control, native Termux workstation, Termux CLI tool, Android Linux automation, Termux scripts, systemd Termux |
 | ADT | AOSP build, ARM64 cross compile, glibc Android, bionic vs glibc, musl Android, custom toolchain, Android NDK alternative |
 | LAI | llama.cpp Termux, GGUF quantization, on-device LLM, offline chatbot Android, private AI Android, Bangla LLM, AI automation Termux |
 | GGEN | Flutter desktop, Flutter Android app, vector graphics editor, Bangla typography, document editor Android, Dart |

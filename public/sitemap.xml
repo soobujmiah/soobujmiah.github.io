@@ -1,53 +1,435 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://soobujmiah.github.io/</loc></url>
-  <url><loc>https://soobujmiah.github.io/about/</loc></url>
-  <url><loc>https://soobujmiah.github.io/services/</loc></url>
-  <url><loc>https://soobujmiah.github.io/experience/</loc></url>
-  <url><loc>https://soobujmiah.github.io/projects/</loc></url>
-  <url><loc>https://soobujmiah.github.io/research/</loc></url>
-  <url><loc>https://soobujmiah.github.io/evidence/</loc></url>
-  <url><loc>https://soobujmiah.github.io/contact/</loc></url>
-  <url><loc>https://soobujmiah.github.io/services/web-development/</loc></url>
-  <url><loc>https://soobujmiah.github.io/services/software-development/</loc></url>
-  <url><loc>https://soobujmiah.github.io/services/computer-support/</loc></url>
-  <url><loc>https://soobujmiah.github.io/services/android-support/</loc></url>
-  <url><loc>https://soobujmiah.github.io/services/business-technology/</loc></url>
-  <url><loc>https://soobujmiah.github.io/services/graphics-design/</loc></url>
-  <url><loc>https://soobujmiah.github.io/services/office-administration/</loc></url>
-  <url><loc>https://soobujmiah.github.io/services/data-entry/</loc></url>
-  <url><loc>https://soobujmiah.github.io/services/digital-marketing/</loc></url>
-  <url><loc>https://soobujmiah.github.io/services/linux-systems/</loc></url>
-  <url><loc>https://soobujmiah.github.io/services/local-ai/</loc></url>
-  <url><loc>https://soobujmiah.github.io/projects/ternux/</loc></url>
-  <url><loc>https://soobujmiah.github.io/projects/ternuxx/</loc></url>
-  <url><loc>https://soobujmiah.github.io/projects/adt/</loc></url>
-  <url><loc>https://soobujmiah.github.io/projects/lai/</loc></url>
-  <url><loc>https://soobujmiah.github.io/projects/ggen/</loc></url>
-  <url><loc>https://soobujmiah.github.io/projects/songjog/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/about/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/services/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/experience/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/projects/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/research/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/evidence/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/contact/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/services/web-development/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/services/software-development/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/services/computer-support/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/services/android-support/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/services/business-technology/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/services/graphics-design/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/services/office-administration/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/services/data-entry/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/services/digital-marketing/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/services/linux-systems/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/services/local-ai/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/projects/ternux/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/projects/ternuxx/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/projects/adt/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/projects/lai/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/projects/ggen/</loc></url>
-  <url><loc>https://soobujmiah.github.io/bn/projects/songjog/</loc></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://soobujmiah.github.io/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/about/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/about/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/about/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/about/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/services/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/experience/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/experience/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/experience/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/experience/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/projects/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/projects/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/projects/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/projects/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/research/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/research/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/research/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/research/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/evidence/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/evidence/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/evidence/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/evidence/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/contact/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/contact/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/contact/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/contact/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/services/web-development/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/web-development/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/web-development/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/web-development/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/services/software-development/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/software-development/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/software-development/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/software-development/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/services/computer-support/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/computer-support/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/computer-support/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/computer-support/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/services/android-support/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/android-support/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/android-support/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/android-support/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/services/business-technology/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/business-technology/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/business-technology/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/business-technology/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/services/graphics-design/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/graphics-design/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/graphics-design/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/graphics-design/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/services/office-administration/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/office-administration/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/office-administration/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/office-administration/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/services/data-entry/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/data-entry/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/data-entry/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/data-entry/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/services/digital-marketing/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/digital-marketing/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/digital-marketing/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/digital-marketing/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/services/linux-systems/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/linux-systems/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/linux-systems/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/linux-systems/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/services/local-ai/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/local-ai/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/local-ai/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/local-ai/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/projects/ternux/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/projects/ternux/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/projects/ternux/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/projects/ternux/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/projects/adt/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/projects/adt/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/projects/adt/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/projects/adt/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/projects/lai/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/projects/lai/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/projects/lai/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/projects/lai/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/projects/ggen/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/projects/ggen/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/projects/ggen/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/projects/ggen/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/projects/songjog/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/projects/songjog/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/projects/songjog/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/projects/songjog/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/about/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/about/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/about/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/about/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/services/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/experience/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/experience/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/experience/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/experience/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/projects/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/projects/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/projects/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/projects/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/research/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/research/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/research/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/research/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/evidence/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/evidence/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/evidence/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/evidence/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/contact/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/contact/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/contact/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/contact/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/services/web-development/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/web-development/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/web-development/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/web-development/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/services/software-development/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/software-development/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/software-development/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/software-development/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/services/computer-support/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/computer-support/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/computer-support/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/computer-support/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/services/android-support/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/android-support/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/android-support/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/android-support/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/services/business-technology/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/business-technology/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/business-technology/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/business-technology/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/services/graphics-design/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/graphics-design/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/graphics-design/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/graphics-design/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/services/office-administration/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/office-administration/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/office-administration/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/office-administration/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/services/data-entry/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/data-entry/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/data-entry/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/data-entry/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/services/digital-marketing/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/digital-marketing/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/digital-marketing/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/digital-marketing/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/services/linux-systems/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/linux-systems/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/linux-systems/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/linux-systems/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/services/local-ai/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/services/local-ai/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/services/local-ai/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/services/local-ai/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/projects/ternux/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/projects/ternux/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/projects/ternux/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/projects/ternux/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/projects/adt/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/projects/adt/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/projects/adt/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/projects/adt/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/projects/lai/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/projects/lai/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/projects/lai/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/projects/lai/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/projects/ggen/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/projects/ggen/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/projects/ggen/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/projects/ggen/" />
+  </url>
+  <url>
+    <loc>https://soobujmiah.github.io/bn/projects/songjog/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://soobujmiah.github.io/projects/songjog/" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://soobujmiah.github.io/bn/projects/songjog/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://soobujmiah.github.io/projects/songjog/" />
+  </url>
 </urlset>

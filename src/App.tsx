@@ -177,6 +177,32 @@ function useTypewriter(roles: string[]) {
   return { typed: chars.slice(0, count).join(''), complete: count >= chars.length && !deleting, index };
 }
 
+/**
+ * Keep the role line on one line whatever the viewport, system font scale or
+ * script: the hidden ghost is laid out without wrapping, and whenever it is
+ * wider than the hero column the whole line's font-size is scaled down to fit.
+ */
+function useFitRoleLine(ref: { current: HTMLSpanElement | null }, text: string) {
+  useLayoutEffect(() => {
+    const line = ref.current;
+    const column = line?.parentElement;
+    if (!line || !column) return;
+    let timer = 0;
+    const fit = () => {
+      line.style.fontSize = '';
+      const base = parseFloat(getComputedStyle(line).fontSize) || 11.5;
+      const natural = line.scrollWidth;
+      const available = column.clientWidth;
+      if (natural > available && natural > 0) line.style.fontSize = `${Math.max(7, Math.floor((base * available * 10) / natural) / 10)}px`;
+    };
+    const later = () => { window.clearTimeout(timer); timer = window.setTimeout(fit, 80); };
+    fit();
+    document.fonts?.ready.then(fit, () => undefined);
+    window.addEventListener('resize', later);
+    return () => { window.removeEventListener('resize', later); window.clearTimeout(timer); };
+  }, [ref, text]);
+}
+
 /** Count a number up from zero once the element scrolls into view. */
 function useCountUp(target: number, active: boolean) {
   const [value, setValue] = useState(0);
@@ -306,6 +332,8 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
   const verified = site.research[lang].verified;
   const roles = site.site.roles[lang];
   const { typed, complete, index } = useTypewriter(roles);
+  const roleLine = useRef<HTMLSpanElement>(null);
+  useFitRoleLine(roleLine, roles[index]);
   const featuredServices = (home.featuredServices as string[]).map(slug => site.services.find(service => service.slug === slug)).filter((service): service is Service => Boolean(service));
   const featuredProjects = (home.featuredProjects as string[]).map(slug => site.projects.find(project => project.slug === slug)).filter((project): project is Project => Boolean(project));
   const focus = home.focus as string[];
@@ -320,7 +348,7 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
           {/* The invisible ghost reserves the width of the whole sentence, so the
               block is the same size for every frame of the type/delete cycle.
               The visible line is laid over it, left-anchored on the prompt. */}
-          <span className="role-line" aria-hidden="true">
+          <span className="role-line" ref={roleLine} aria-hidden="true">
             <span className="role-ghost"><b>&gt;</b>{roles[index]}</span>
             <span className="role-live"><b>&gt;</b>{typed}<i className={complete ? 'role-caret is-idle' : 'role-caret'} /></span>
           </span>
@@ -770,7 +798,7 @@ function NextPage({ lang, kind }: { lang: Lang; kind: Kind }) {
       <span className="next-page-body">
         <b>{next.title}</b>
         <em>{cold
-          ? (lang === 'en' ? 'Scroll up to keep reading, or tap to continue' : 'পড়া চালিয়ে যেতে উপরে স্ক্রল করুন, বা ট্যাপ করুন')
+          ? (lang === 'en' ? 'Scroll up to keep reading' : 'পড়া চালিয়ে যেতে উপরে স্ক্রল করুন')
           : (lang === 'en' ? 'Keep scrolling or tap to continue' : 'স্ক্রল করুন বা ট্যাপ করুন')}</em>
       </span>
       <span className="next-page-arrow"><ArrowRight size={22} aria-hidden="true" /></span>
@@ -915,11 +943,18 @@ function App() {
     try { arrival = sessionStorage.getItem(FLOW_ARRIVAL); sessionStorage.removeItem(FLOW_ARRIVAL); } catch { arrival = null; }
     if (arrival !== 'end') return;
     arrivedFromNext = true;
+    const atEnd = () => {
+      const limit = document.documentElement.scrollHeight - window.innerHeight;
+      return limit <= 0 || window.scrollY >= limit - 4;
+    };
     const toEnd = () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' as ScrollBehavior });
+    // Late layout (fonts, images) can grow the page: re-pin, but only while the
+    // reader is still at the end — never pull back someone who has moved on.
+    const rePin = () => { if (atEnd()) toEnd(); };
     toEnd();
-    const timer = window.setTimeout(toEnd, 250);   // late layout (fonts, images)
-    window.addEventListener('load', toEnd);
-    return () => { window.clearTimeout(timer); window.removeEventListener('load', toEnd); };
+    const timer = window.setTimeout(rePin, 300);
+    window.addEventListener('load', rePin);
+    return () => { window.clearTimeout(timer); window.removeEventListener('load', rePin); };
   }, []);
 
   useLayoutEffect(() => {

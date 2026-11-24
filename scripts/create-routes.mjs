@@ -150,7 +150,7 @@ function schemaGraph(route, meta) {
         '@type': 'ItemList', name: 'Projects', itemListElement: data.projects.map((project, index) => ({
           '@type': 'ListItem', position: index + 1,
           item: {
-            '@type': ['ternux', 'ternuxx', 'adt'].includes(project.slug) ? 'SoftwareSourceCode' : 'SoftwareApplication',
+            '@type': ['ternux', 'adt'].includes(project.slug) ? 'SoftwareSourceCode' : 'SoftwareApplication',
             name: project.name, description: project.summary[route.lang],
             url: urlFor(localePath('project', route.lang, project.slug)), codeRepository: project.url,
             ...(project.website ? { sameAs: project.website } : {}),
@@ -161,7 +161,7 @@ function schemaGraph(route, meta) {
     };
   } else if (route.kind === 'project') {
     const item = meta.item;
-    const isSourceCode = ['ternux', 'ternuxx', 'adt'].includes(item.slug);
+    const isSourceCode = ['ternux', 'adt'].includes(item.slug);
     pageType = {
       '@type': isSourceCode ? 'SoftwareSourceCode' : 'SoftwareApplication',
       name: item.name, description: item.metaDescription[route.lang], url: urlFor(route.path),
@@ -299,6 +299,15 @@ function writeRoute(route, template) {
 const routes = collectRoutes();
 const template = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
 routes.forEach(route => writeRoute(route, template));
+
+// Retired routes get a static meta-refresh + canonical stub (GitHub Pages has
+// no redirect config), so an old link lands on the living page, not a 404.
+const retired = [['/projects/ternuxx/', '/projects/'], ['/bn/projects/ternuxx/', '/bn/projects/']];
+for (const [from, to] of retired) {
+  const directory = path.join(dist, from.replace(/^\//, '').replace(/\/$/, ''));
+  fs.mkdirSync(directory, { recursive: true });
+  fs.writeFileSync(path.join(directory, 'index.html'), `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><link rel="canonical" href="${esc(urlFor(to))}"><meta http-equiv="refresh" content="0; url=${esc(to)}"><title>Moved | Sobuj Miah</title></head><body><p>This page has moved. <a href="${esc(to)}">Continue to Projects</a></p></body></html>`);
+}
 
 const priority = route => route.kind === 'home' ? '1.0' : ['service', 'project'].includes(route.kind) ? '0.7' : '0.8';
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${routes.map(route => {

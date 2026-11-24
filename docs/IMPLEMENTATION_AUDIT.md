@@ -8,9 +8,14 @@ The home page is a concise introduction: hero, profile preview, an index of feat
 
 ## What changed in the latest pass
 
+- Restored the next-page band's stylesheet. PR #11 replaced the block that ran from the old home contact rows up to the footer and, in doing so, deleted every base `.next-page` rule (only the mobile overrides survived), so the band lost its layout, type scale, arrow and progress line. The verifier now checks for each band rule individually.
+- Made the hero role line fit one line on any device: the hidden ghost is laid out without wrapping and `useFitRoleLine` scales the line's font-size down whenever the sentence is wider than the hero column (handles system font scaling and narrow phones), re-running on role change, resize and font load.
+- Made the footer's Claims & limits link a 42px pill with a 86px + safe-area bottom clearance, so it is a comfortable tap on a phone and never sits under the fixed dock.
+- Removed Ternuxx from the website at the owner's request (projects, keywords, evidence table, sitemap); `/projects/ternuxx/` and its Bangla route now serve a noindex meta-refresh stub to `/projects/`.
+- Scroll-back arrival re-pins to the end after late layout only while the reader is still at the end, so it can never pull someone back who has already moved; the cold band caption is shorter.
 - Added scroll-back. Scrolling up past the top of a page (sustained upward wheel after a pause, or a 90px downward pull on touch) returns to the previous page in reading order and lands at its end, mirroring the next-page band. A fixed hint at the top names the destination and fills with the gesture. Arrival is flagged through `sessionStorage` so the destination page opens at its end before first paint and with its next-page band cold.
 - Reduced the footer to a single centred **Claims & limits** link on every page; the place, time-zone and hours line is gone.
-- Enriched the Claims & limits page with real repository data: a table of all six public repositories (license, primary language, created and last-push dates, latest release, live site where one exists), read from the GitHub API on 24 November 2026 and stored per project as `repo` in the content model, plus a claim / evidence / limit column set per project built from the project's own highlights, evidence and boundary. Two genuine limits are now visible in the table: Songjog declares no license and Ternuxx ships only a pre-release and a custom license.
+- Enriched the Claims & limits page with real repository data: a table of all five public repositories (license, primary language, created and last-push dates, latest release, live site where one exists), read from the GitHub API on 24 November 2026 and stored per project as `repo` in the content model, plus a claim / evidence / limit column set per project built from the project's own highlights, evidence and boundary. Genuine limits are now visible in the table: Songjog declares no license; GGEN and Songjog have no tagged release.
 - Home page contact section now offers only email, phone and Telegram as three equal dark buttons in one row; the 21-link profile row is gone from the home page.
 - Contact page: every channel and profile is now an icon-only circle (24px mark in a 50px circle), all in one centred cluster, equal size and spacing, ordered by importance (direct channels first, then GitHub, LinkedIn, Stack Overflow…). The address and number are spelled out in the meta aside.
 - Made Back actually work. The earlier guard only recognised a fresh `back_forward` load, but browsers usually restore the previous page from bfcache, which keeps the old listeners alive with the band still armed at the bottom — so the first wheel notch or thumb-flick after pressing Back pushed forward again. The band now has a single rule that covers both cases: a page reached through history starts **cold** and ignores wheel spin and drags until the reader has climbed 240px away from the end and come back. `pageshow` resets the frozen state on bfcache restores, the `navigating` guard and a cancelled synthesised tap stop one gesture from pushing two history entries, and a cold band says so ("Scroll up to keep reading, or tap to continue"). A tap on the band always works.
@@ -38,7 +43,7 @@ The home page is a concise introduction: hero, profile preview, an index of feat
 - Added more motion: count-up hero stats, a breathing hero grid and drifting glow, a blur-resolve on section headings, and a cursor-following radial glow on service and project cards. Every one of them is disabled under `prefers-reduced-motion`.
 - Enabled `scroll-behavior: smooth` for anchor and focus jumps.
 - Added a next-page band to every top-level page: the next page's title, an arrow, and a lime progress line. Overscrolling at the bottom of a page, or dragging up on the band, continues to the next page in reading order, so the site reads as one continuous scroll while every page keeps its own URL. Detail pages keep their existing prev/next project navigation.
-- Added regression checks covering the hamburger removal, the rotating typewriter, the home index rows, the footer, the progress bar, the pinned role line, the next-page band, the project website links, the process strip, the contact circle cluster, the sprite, the single-page-only profiles, the one-line roles, the scroll-back guard, the once-only drag navigation, the repository facts, the footer, and scroll-back (74 checks in total).
+- Added regression checks covering the hamburger removal, the rotating typewriter, the home index rows, the footer, the progress bar, the pinned role line, the next-page band, the project website links, the process strip, the contact circle cluster, the sprite, the single-page-only profiles, the one-line roles, the scroll-back guard, the once-only drag navigation, the repository facts, the footer, scroll-back, the fitted role line, the tap-sized footer link, the retired route stubs, and the complete band stylesheet (77 checks in total).
 
 ## What changed in the earlier polish
 
@@ -71,7 +76,7 @@ The content source is `src/data/site-content.json`. It contains:
 - Seven work-history entries across Bangladesh and Saudi Arabia.
 - Six capability groups.
 - Eleven services in three groups, each with summary, detail, deliverables, and search keywords.
-- Six public projects with localized metadata, overview, highlights, stack, role, state, evidence, and boundary.
+- Five public projects with localized metadata, overview, highlights, stack, role, state, evidence, and boundary.
 - Research status split into verified, experimental, and not claimed.
 - A bilingual evidence page with source links and verification steps.
 - A bilingual services FAQ and contact brief.
@@ -93,7 +98,7 @@ See [SEO.md](SEO.md) for the keyword research and placement plan.
 
 ## Validation
 
-`npm run build` runs TypeScript, Vite, route generation, and a 74-check verification suite covering:
+`npm run build` runs TypeScript, Vite, route generation, and a 77-check verification suite covering:
 
 - Bilingual content completeness and project/service metadata.
 - Route matrix, unique titles, canonical tags, and one `h1` per route.

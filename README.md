@@ -12,7 +12,7 @@ npm run build
 npm run preview
 ```
 
-`npm run build` typechecks, builds the client, generates 50 static route entries under `dist/`, writes the bilingual sitemap and robots file, and runs the 74-check verification suite.
+`npm run build` typechecks, builds the client, generates 50 static route entries under `dist/`, writes the bilingual sitemap and robots file, and runs the 77-check verification suite.
 
 ## Content model
 
@@ -21,7 +21,7 @@ npm run preview
 - Profile, availability, location, languages, and the social links shown as an ordered circle cluster on the contact page.
 - Eight page groups in English and Bangla, including page-level titles, descriptions, and keyword sets.
 - Eleven services grouped into Engineering, Operations, and Growth, each with detail copy, deliverables, and search keywords.
-- Six public projects with localized search metadata, an overview, highlights, stack, evidence, and an explicit boundary.
+- Five public projects with localized search metadata, an overview, highlights, stack, evidence, and an explicit boundary.
 - Seven work-history entries, six capability groups, research status, and the evidence page copy.
 
 The UI renders this content directly. The build also emits a semantic HTML fallback for every route, so crawlers and no-JS visitors receive the same core information before React loads.
