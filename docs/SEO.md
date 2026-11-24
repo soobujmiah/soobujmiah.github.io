@@ -186,6 +186,15 @@ The Bengali sets mirror these with the spellings people actually type — `ট�
 - [ ] Run the Rich Results Test and PageSpeed Insights on the live URLs.
 - [ ] Refresh `lastmod` when project evidence or copy changes.
 
+## Internal linking
+
+Two mechanisms keep crawl depth shallow and give every page a descriptive inbound link.
+
+1. **The bottom dock** links all eight top-level pages from every route.
+2. **The next-page band** closes each top-level page with a link to the next one in reading order (Home → About → Services → Projects → Experience → Research → Evidence → Contact), using the destination page's real `h1` as the anchor text rather than "next". That gives every page in the chain a keyword-rich internal link, and it also gives a visitor who scrolls to the end an obvious way to keep going.
+
+Project and service detail pages already carry their own prev/next or related links, so they do not repeat the band.
+
 ## Measurement
 
 - Search Console: filter queries for `linux on android`, `termux`, `llama.cpp android`, `web developer dhaka`, and `office administrator dhaka`.
