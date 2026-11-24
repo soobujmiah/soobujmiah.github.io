@@ -12,13 +12,13 @@ npm run build
 npm run preview
 ```
 
-`npm run build` typechecks, builds the client, generates 50 static route entries under `dist/`, writes the bilingual sitemap and robots file, and runs the 69-check verification suite.
+`npm run build` typechecks, builds the client, generates 50 static route entries under `dist/`, writes the bilingual sitemap and robots file, and runs the 72-check verification suite.
 
 ## Content model
 
 `src/data/site-content.json` is the single source for both languages. It contains:
 
-- Profile, availability, location, languages, and the social links shown as a chip directory on the contact page.
+- Profile, availability, location, languages, and the social links shown as an ordered circle cluster on the contact page.
 - Eight page groups in English and Bangla, including page-level titles, descriptions, and keyword sets.
 - Eleven services grouped into Engineering, Operations, and Growth, each with detail copy, deliverables, and search keywords.
 - Six public projects with localized search metadata, an overview, highlights, stack, evidence, and an explicit boundary.

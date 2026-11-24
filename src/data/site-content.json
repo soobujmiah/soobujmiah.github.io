@@ -628,11 +628,27 @@
         "limitLabel": "SCOPE / LIMIT",
         "sourceLabel": "Open public source",
         "researchLink": "See verified, experimental, and unclaimed work",
+        "factsTitle": "Public repositories at a glance",
+        "factsNote": "License, primary language, dates and releases were read from the GitHub API on 24 November 2026. Everything else on this page comes from each project’s own documentation.",
+        "colProject": "Project",
+        "colLicense": "License",
+        "colLanguage": "Language",
+        "colCreated": "Created",
+        "colPushed": "Last push",
+        "colRelease": "Release",
+        "licenseCustom": "Custom (see LICENSE)",
+        "licenseNone": "None declared — public to read, not licensed for reuse",
+        "releaseNone": "no tagged release",
+        "releasePre": "pre-release only",
+        "claimLabel": "CLAIM",
+        "evidenceLabel": "EVIDENCE",
+        "liveLabel": "Live site",
         "howTitle": "How to verify a claim",
         "how": [
           "Open the repository linked on each project page.",
           "Compare the claim with the README and the recorded device conditions.",
-          "Treat experimental paths as experiments, not shipped features."
+          "Treat experimental paths as experiments, not shipped features.",
+          "Check the license and the last-push date in the table below before depending on a project."
         ]
       }
     },
@@ -904,11 +920,27 @@
         "limitLabel": "পরিধি / সীমা",
         "sourceLabel": "পাবলিক সোর্স দেখুন",
         "researchLink": "যাচাইকৃত, পরীক্ষামূলক ও অদাবিকৃত কাজ দেখুন",
+        "factsTitle": "এক নজরে পাবলিক রিপোজিটরি",
+        "factsNote": "লাইসেন্স, মূল ভাষা, তারিখ ও রিলিজ GitHub API থেকে ২৪ নভেম্বর ২০২৬-এ পড়া হয়েছে। এই পৃষ্ঠার বাকি সব তথ্য প্রতিটি প্রকল্পের নিজস্ব ডকুমেন্টেশন থেকে।",
+        "colProject": "প্রকল্প",
+        "colLicense": "লাইসেন্স",
+        "colLanguage": "ভাষা",
+        "colCreated": "শুরু",
+        "colPushed": "শেষ push",
+        "colRelease": "রিলিজ",
+        "licenseCustom": "কাস্টম (LICENSE দেখুন)",
+        "licenseNone": "ঘোষিত নয় — পড়ার জন্য পাবলিক, পুনর্ব্যবহারের লাইসেন্স নেই",
+        "releaseNone": "কোনো ট্যাগ করা রিলিজ নেই",
+        "releasePre": "শুধু প্রি-রিলিজ",
+        "claimLabel": "দাবি",
+        "evidenceLabel": "প্রমাণ",
+        "liveLabel": "লাইভ সাইট",
         "howTitle": "কীভাবে দাবি যাচাই করবেন",
         "how": [
           "প্রতিটি প্রকল্পের পৃষ্ঠায় দেওয়া repository খুলুন।",
           "দাবির সঙ্গে README এবং লিপিবদ্ধ ডিভাইসের শর্ত মিলিয়ে দেখুন।",
-          "পরীক্ষামূলক পথকে পরীক্ষা হিসেবে দেখুন, চালু feature হিসেবে নয়।"
+          "পরীক্ষামূলক পথকে পরীক্ষা হিসেবে দেখুন, চালু feature হিসেবে নয়।",
+          "কোনো প্রকল্পের উপর নির্ভর করার আগে নিচের ছকে লাইসেন্স ও শেষ push-এর তারিখ দেখে নিন।"
         ]
       }
     }
@@ -1789,6 +1821,9 @@
         "en": "Modular Bash installer with doctor, repair, and benchmark tools; Vulkan desktop rendering on Android has been measured on the reference device.",
         "bn": "মডিউলার Bash installer-এ doctor, repair ও benchmark টুল রয়েছে; Android-এ Vulkan desktop rendering রেফারেন্স ডিভাইসে মেপে যাচাই করা হয়েছে।"
       },
+      "repo": {
+        "license": "Apache-2.0", "language": "Shell", "created": "2026-08-13", "pushed": "2026-11-24", "release": "v1.4.0"
+      },
       "url": "https://github.com/soobujmiah/ternux",
       "website": "https://soobujmiah.github.io/ternux/"
     },
@@ -1867,6 +1902,9 @@
       "evidence": {
         "en": "Public source documents the native workstation control plane, desktop lifecycle, and separation between Native Termux and optional PRoot guests.",
         "bn": "পাবলিক সোর্সে Native workstation control plane, desktop lifecycle, এবং Native Termux ও optional PRoot guest-এর পৃথক ভূমিকা নথিবদ্ধ।"
+      },
+      "repo": {
+        "license": "custom", "language": "Python", "created": "2026-10-17", "pushed": "2026-11-05", "release": "@prerelease"
       },
       "url": "https://github.com/soobujmiah/ternuxx"
     },
@@ -1948,6 +1986,9 @@
       "evidence": {
         "en": "Builds ARM64 Linux toolchains from AOSP source and validates the native build-to-install pipeline on real hardware, with checksum-verified offline artifacts.",
         "bn": "AOSP source থেকে ARM64 Linux toolchain তৈরি করে বাস্তব ডিভাইসে build থেকে install পর্যন্ত যাচাই করে; offline artifact-এ checksum verification থাকে।"
+      },
+      "repo": {
+        "license": "Apache-2.0", "language": "Shell", "created": "2026-08-31", "pushed": "2026-10-16", "release": "v37.0.0"
       },
       "url": "https://github.com/soobujmiah/adt",
       "website": "https://soobujmiah.github.io/adt/"
@@ -2031,6 +2072,9 @@
         "en": "Runs local llama.cpp CPU inference and consent-driven Android automation; GPU inference remains gated after a diagnosed driver crash.",
         "bn": "স্থানীয় llama.cpp CPU inference ও সম্মতিভিত্তিক Android automation চালায়; driver crash শনাক্ত হওয়ার পর GPU inference এখনো বন্ধ রাখা হয়েছে।"
       },
+      "repo": {
+        "license": "Apache-2.0", "language": "Kotlin", "created": "2026-08-16", "pushed": "2026-11-22", "release": "catalog-v1"
+      },
       "url": "https://github.com/soobujmiah/lai"
     },
     {
@@ -2108,6 +2152,9 @@
         "en": "Flutter/Dart creative and document studio with deterministic text layout and transactional file persistence.",
         "bn": "Flutter/Dart-এ তৈরি creative ও document studio; এতে নির্ধারিত নিয়মে text layout এবং transactional file persistence আছে।"
       },
+      "repo": {
+        "license": "Apache-2.0", "language": "Dart", "created": "2026-08-19", "pushed": "2026-09-29", "release": "@none"
+      },
       "url": "https://github.com/soobujmiah/ggen"
     },
     {
@@ -2184,6 +2231,9 @@
       "evidence": {
         "en": "Bangla-first business operations app with local SQLite records, auditable corrections, and device-validated export and diagnostics.",
         "bn": "বাংলা-প্রথম business operations app; local SQLite record, audit করা যায় এমন correction, এবং ডিভাইসে যাচাই করা export ও diagnostics রয়েছে।"
+      },
+      "repo": {
+        "license": "none", "language": "Dart", "created": "2026-08-25", "pushed": "2026-09-29", "release": "@none"
       },
       "url": "https://github.com/soobujmiah/songjog"
     }

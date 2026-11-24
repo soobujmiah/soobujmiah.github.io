@@ -219,7 +219,7 @@ function homeFallback(route, page) {
   <section id="about"><h2>${esc(page.aboutTitle)}</h2><p>${esc(page.aboutIntro)}</p>${paragraphs}<p>${esc(data.site.location[lang])} · ${esc(data.site.timezone[lang])}</p><p><a href="${localePath('about', lang)}">${lang === 'en' ? 'Full profile' : 'সম্পূর্ণ পরিচিতি'}</a></p></section>
   <section id="services"><h2>${esc(page.servicesTitle)}</h2><p>${esc(page.servicesIntro)}</p><ul>${serviceItems}</ul><p><a href="${localePath('services', lang)}">${lang === 'en' ? 'All services' : 'সব সেবা'}</a></p></section>
   <section id="projects"><h2>${esc(page.selectedTitle)}</h2><p>${esc(page.selectedIntro)}</p><ul>${projectItems}</ul><p><a href="${localePath('projects', lang)}">${lang === 'en' ? 'All public projects' : 'সব পাবলিক প্রকল্প'}</a></p></section>
-  <section id="contact"><h2>${esc(data.pages[lang].contact.headline)}</h2><p>${esc(data.pages[lang].contact.lede)}</p><p><a href="mailto:${esc(data.site.email)}">${esc(data.site.email)}</a> · <a href="tel:${esc(data.site.phoneHref)}">${esc(data.site.phone)}</a></p></section>`;
+  <section id="contact"><h2>${esc(data.pages[lang].contact.headline)}</h2><p>${esc(data.pages[lang].contact.lede)}</p><p><a href="mailto:${esc(data.site.email)}">${esc(data.site.email)}</a> · <a href="tel:${esc(data.site.phoneHref)}">${esc(data.site.phone)}</a> · <a href="https://t.me/soobujmiah">Telegram</a></p></section>`;
 }
 
 function fallbackContent(route, meta) {

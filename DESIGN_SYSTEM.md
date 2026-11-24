@@ -102,12 +102,14 @@ Structured data describes the person, website, profile page, service catalog, se
 
 Between selected work and contact, the home page carries a short "how it goes" section: three process promises — scope in writing, checkpoints you can open, handover with notes. It describes how an engagement runs rather than claiming results, so it stays accurate for a portfolio with self-reported history.
 
-## Contact chips
+## Contact circles
 
-Every way to reach the owner lives on the contact page and nowhere else, as one compact chip directory in the spirit of Stack Overflow's profile links: 22 small chips in five labelled rows — **Direct** (email, phone, Telegram — outlined in the accent because they are the fastest routes), **Social**, **Code & writing**, **Profiles & publishing**, **Support & identity**. Telegram and WhatsApp are not repeated in the Social row, since the Direct row already reaches them. A chip is a real link with a 20px brand badge and a short label; the group label is an 8.5px monospace caption. Density is deliberate — this is a directory, not a set of feature cards.
+Every way to reach the owner lives on the contact page and nowhere else, as one centred cluster of **23 equal circles**: the three direct channels (email, phone, Telegram) first, outlined in the accent, then every profile ordered by what it tells a client about the work — GitHub, LinkedIn, Stack Overflow, Hugging Face, YouTube, Facebook, Instagram, X, Threads, WhatsApp, Medium, Dev.to, Hashnode, WordPress, About.me, PeerList, Product Hunt, Gravatar, Buy Me a Coffee, Patreon. Icons only (24px brand marks in 50px circles, 12px gaps; the row wraps and stays centred); each circle is named by `aria-label` and `title`, and the direct ones spell out the address or number. The order lives in `profileOrder` in `App.tsx`; a profile missing from that list still renders, at the end. The email address and phone number are also written out in the contact page's meta aside, so they can be read, not only tapped.
 
 The marks live in `public/social-icons.svg`, an external `<symbol>` sprite generated from `simple-icons` by `npm run make:social` (23 symbols: 21 brands plus hand-written `mail` and `phone`). Keeping them out of the React bundle means the logos cost the JavaScript nothing; the browser only fetches the sprite on pages that render an icon, and caches it afterwards. LinkedIn is hand-written because `simple-icons` does not ship it.
 
 ## Footer
 
-The footer is the same one line on every page: copyright year, place, time zone, and the **Claims & limits** link. Nothing else. It carries no social profiles (they all live on the contact page, which the fixed dock reaches from anywhere), no page navigation (the dock is always on screen), and neither the name nor the page title (those already sit in the hero).
+The footer is one centred link on every page: **Claims & limits**. Nothing else — no place, hours or copyright line, no social profiles (they all live on the contact page, which the fixed dock reaches from anywhere), no page navigation (the dock is always on screen), and neither the name nor the page title (those already sit in the hero).
+
+The home page's contact section offers only the three direct channels — email, phone, Telegram — as three equal dark buttons in a single row (icon, short label, arrow), each with the address or number in its `title`/`aria-label`. No profile links appear on the home page.
