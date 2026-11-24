@@ -6,8 +6,9 @@ const root = process.cwd();
 const files = [
   'src/App.tsx', 'src/main.tsx', 'src/data/site-content.json',
   'src/styles.css', 'index.html',
-  'scripts/create-routes.mjs', 'scripts/verify-portfolio.mjs', 'scripts/make-og.py',
-  'README.md', 'DESIGN_SYSTEM.md',
+  'scripts/create-routes.mjs', 'scripts/verify-portfolio.mjs', 'scripts/make-og.py', 'scripts/make-icons.py',
+  'README.md', 'DESIGN_SYSTEM.md', 'docs/IMPLEMENTATION_AUDIT.md', 'docs/SEO.md',
+  'public/site.webmanifest',
 ];
 const errors = [];
 for (const file of files) {
@@ -20,5 +21,7 @@ for (const file of files) {
 }
 try { JSON.parse(fs.readFileSync(path.join(root, 'src/data/site-content.json'), 'utf8')); }
 catch (error) { errors.push(`site-content.json: ${error.message}`); }
+try { JSON.parse(fs.readFileSync(path.join(root, 'public/site.webmanifest'), 'utf8')); }
+catch (error) { errors.push(`site.webmanifest: ${error.message}`); }
 if (errors.length) { errors.forEach(error => console.error(`FAIL ${error}`)); process.exit(1); }
 console.log(`PASS source hygiene (${files.length} files)`);

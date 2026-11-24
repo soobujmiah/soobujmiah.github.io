@@ -1,6 +1,6 @@
 # Sobuj Miah — Portfolio
 
-A bilingual, mobile-first, multi-page portfolio for Sobuj Miah. Its visual direction follows `/sdcard/index.html`: graphite, lime and cyan, centered Sora typography, compact monospace labels, restrained 2D lighting, and a floating navigation dock. The home page is a concise introduction with service and project previews; full profile, services, experience, projects, research, evidence and contact pages remain separate routes.
+A bilingual, mobile-first, multi-page portfolio for Sobuj Miah. It combines a clean graphite, lime, and cyan visual system with source-linked project evidence, practical service pages, and a crawlable English/Bangla route structure.
 
 ## Develop and verify
 
@@ -12,12 +12,51 @@ npm run build
 npm run preview
 ```
 
-`src/data/site-content.json` is the English and Bangla content source. The build generates 50 static route entries under `dist/`, each with a direct-load HTML fallback, unique title and description, canonical URL, language alternates, and route-specific structured data. It also generates a sitemap, robots file, and 404 page for GitHub Pages.
+`npm run build` typechecks, builds the client, generates 50 static route entries under `dist/`, writes the bilingual sitemap and robots file, and runs the full verification suite.
 
-The route families include `/about/`, `/bn/about/`, `/services/`, every service detail, `/projects/`, every public project detail, experience, research, evidence, and contact pages. Public project notes link to supporting repositories and state evidence boundaries. A dedicated bilingual evidence page distinguishes project documentation from independent audits, self-reported work history, and service offers.
+## Content model
 
-Important text, links, and project evidence remain semantic HTML. Selected project evidence is checked against the public GitHub profile README, while experimental GPU/NPU paths stay identified as experimental. The project has no WebGL or 3D renderer dependency.
+`src/data/site-content.json` is the single source for both languages. It contains:
 
-## Search and deployment
+- Profile, availability, location, languages, and social links.
+- Eight page groups in English and Bangla, including page-level titles, descriptions, and keyword sets.
+- Eleven services grouped into Engineering, Operations, and Growth, each with detail copy, deliverables, and search keywords.
+- Six public projects with localized search metadata, an overview, highlights, stack, evidence, and an explicit boundary.
+- Seven work-history entries, six capability groups, research status, and the evidence page copy.
 
-The existing Google Search Console meta tag and `public/google7974d87a16aa1b38.html` verification file are retained. The Pages workflow builds and deploys `main`. The public website is `https://soobujmiah.github.io/`.
+The UI renders this content directly. The build also emits a semantic HTML fallback for every route, so crawlers and no-JS visitors receive the same core information before React loads.
+
+## Routes and search
+
+Each generated route has a unique title, description, keyword set, canonical URL, reciprocal `hreflang` links, Open Graph/Twitter metadata, route-aware JSON-LD, and a static HTML fallback. The sitemap includes `lastmod`, priority, and reciprocal `xhtml:link` alternates.
+
+Structured data covers `Person`, `WebSite`, `ProfilePage`, `CollectionPage`, `Service`, `SoftwareApplication`, `SoftwareSourceCode`, `ContactPage`, `BreadcrumbList`, and a services `FAQPage`.
+
+The Search Console verification meta tag and `public/google7974d87a16aa1b38.html` are preserved. The public website is `https://soobujmiah.github.io/`.
+
+See [docs/SEO.md](docs/SEO.md) for the keyword research and placement plan.
+
+## Assets
+
+- `public/og.png` — 1200×630 social preview.
+- `public/icon.svg` — terminal-prompt mark.
+- `public/icon-192.png`, `public/icon-512.png`, `public/apple-touch-icon.png` — raster icons.
+- `public/site.webmanifest` — install metadata.
+
+Regenerate locally with:
+
+```sh
+npm run make:assets
+```
+
+These scripts use Pillow and the DejaVu fonts available on the build machine. They are not part of the site runtime.
+
+## Design and documentation
+
+- [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) — palette, type, layout, components, motion, and accessibility.
+- [docs/IMPLEMENTATION_AUDIT.md](docs/IMPLEMENTATION_AUDIT.md) — what is implemented, what changed, and what remains experimental.
+- [docs/SEO.md](docs/SEO.md) — keyword clusters, search intent, page mapping, and measurement.
+
+## Deployment
+
+The Pages workflow builds and deploys `main`. It runs `npm run check`, `npm run build`, and uploads `dist/`.

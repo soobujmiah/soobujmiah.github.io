@@ -1,6 +1,7 @@
 {
   "site": {
     "name": "Sobuj Miah",
+    "alternateName": "সবুজ মিয়া",
     "url": "https://soobujmiah.github.io",
     "email": "soobujmiah@gmail.com",
     "phone": "+880 1617 040846",
@@ -8,6 +9,48 @@
     "location": {
       "en": "Savar, Dhaka, Bangladesh",
       "bn": "সাভার, ঢাকা, বাংলাদেশ"
+    },
+    "timezone": {
+      "en": "GMT+6 · flexible hours",
+      "bn": "GMT+6 · নমনীয় সময়"
+    },
+    "availability": {
+      "en": "Open to freelance and remote work",
+      "bn": "ফ্রিল্যান্স ও রিমোট কাজের জন্য উন্মুক্ত"
+    },
+    "description": {
+      "en": "Independent software and AI systems engineer, web developer, and office administrator in Savar, Dhaka, Bangladesh. Builds websites and custom software, sets up Linux on Android with Termux, and supports dependable office and digital operations.",
+      "bn": "সাভার, ঢাকার স্বতন্ত্র সফটওয়্যার ও এআই সিস্টেম প্রকৌশলী, ওয়েব ডেভেলপার ও অফিস প্রশাসক। ওয়েবসাইট ও কাস্টম সফটওয়্যার তৈরি, Termux-এ অ্যান্ড্রয়েডে লিনাক্স setup এবং নির্ভরযোগ্য অফিস ও ডিজিটাল পরিচালনা সহায়তা করেন।"
+    },
+    "keywords": {
+      "en": [
+        "Sobuj Miah",
+        "software engineer Dhaka",
+        "web developer Bangladesh",
+        "Linux on Android",
+        "Termux",
+        "Debian",
+        "Termux:X11",
+        "local AI Android",
+        "llama.cpp",
+        "Android developer Bangladesh",
+        "office administration Savar",
+        "freelance software developer"
+      ],
+      "bn": [
+        "সবুজ মিয়া",
+        "সফটওয়্যার ইঞ্জিনিয়ার ঢাকা",
+        "ওয়েব ডেভেলপার বাংলাদেশ",
+        "অ্যান্ড্রয়েডে লিনাক্স",
+        "টার্মাক্স",
+        "ডেবিয়ান",
+        "টার্মাক্স এক্স১১",
+        "লোকাল এআই অ্যান্ড্রয়েড",
+        "লামা ডট সি পি পি",
+        "অ্যান্ড্রয়েড ডেভেলপার বাংলাদেশ",
+        "অফিস প্রশাসন সাভার",
+        "ফ্রিল্যান্স সফটওয়্যার"
+      ]
     },
     "languages": [
       {
@@ -58,20 +101,61 @@
         "label": "WhatsApp",
         "href": "https://wa.me/8801617040846"
       }
-    ],
-    "timezone": {
-      "en": "GMT+6 · flexible hours",
-      "bn": "GMT+6 · নমনীয় সময়"
-    }
+    ]
   },
+  "serviceGroups": [
+    {
+      "id": "engineering",
+      "title": {
+        "en": "Engineering",
+        "bn": "ইঞ্জিনিয়ারিং"
+      },
+      "lede": {
+        "en": "Software, Linux, Android, and local AI work built around a clear technical problem.",
+        "bn": "সফটওয়্যার, Linux, Android ও লোকাল AI কাজ—স্পষ্ট প্রযুক্তিগত সমস্যাকে কেন্দ্র করে।"
+      }
+    },
+    {
+      "id": "operations",
+      "title": {
+        "en": "Operations",
+        "bn": "পরিচালনা"
+      },
+      "lede": {
+        "en": "Computer, Android, business, and office support that keeps daily work reliable.",
+        "bn": "কম্পিউটার, Android, ব্যবসা ও অফিস সহায়তা—দৈনন্দিন কাজ নির্ভরযোগ্য রাখে।"
+      }
+    },
+    {
+      "id": "growth",
+      "title": {
+        "en": "Growth",
+        "bn": "প্রবৃদ্ধি"
+      },
+      "lede": {
+        "en": "Design, search, and publishing support that makes the work easier to find.",
+        "bn": "ডিজাইন, search ও publishing সহায়তা—কাজটি সহজে খুঁজে পাওয়া যায়।"
+      }
+    }
+  ],
   "pages": {
     "en": {
       "home": {
-        "title": "Sobuj Miah — Software, AI & Operations",
-        "description": "Sobuj Miah is an independent software and AI systems builder in Savar, Dhaka, combining practical engineering with dependable office and digital operations.",
+        "title": "Sobuj Miah — Software, Linux on Android & AI Systems Engineer",
+        "description": "Independent software and AI systems engineer in Savar, Dhaka, Bangladesh. Websites, custom software, Linux on Android with Termux, local AI, and operations support.",
+        "keywords": [
+          "Sobuj Miah",
+          "software engineer Dhaka",
+          "Linux on Android",
+          "Termux",
+          "Debian",
+          "local AI Android",
+          "web developer Bangladesh",
+          "office administration Savar"
+        ],
         "eyebrow": "INDEPENDENT ENGINEER · SAVAR, DHAKA",
         "headline": "Operations, made reliable. Systems, made useful.",
-        "deck": "I bring office operations and hands-on engineering together: practical software, Android and Linux systems, and digital support grounded in real work.",
+        "deck": "I bring office operations and hands-on engineering together: practical software, Linux on Android with Termux, local AI, and digital support grounded in real work.",
         "identity": "Independent Software & AI Systems Engineer · Web Developer · Operations Support",
         "primary": "Explore the work",
         "secondary": "View services",
@@ -84,11 +168,22 @@
         "aboutTitle": "Two sides of useful work",
         "aboutIntro": "My background spans office and site operations, alongside self-directed engineering across Linux, Android, local AI, and software tools.",
         "contactTitle": "Have a real problem to solve?",
-        "contactIntro": "Tell me what is getting in the way. We can work out a practical next step."
+        "contactIntro": "Tell me what is getting in the way. We can work out a practical next step.",
+        "featuredServices": ["software-development", "linux-systems", "office-administration"],
+        "featuredProjects": ["ternux", "lai", "adt"],
+        "focus": ["Termux", "Debian", "ARM64", "llama.cpp", "Flutter", "Web"]
       },
       "about": {
-        "title": "About Sobuj Miah — Operations & Engineering",
-        "description": "Meet Sobuj Miah: an office administrator and self-taught software and systems builder based in Savar, Dhaka.",
+        "title": "About Sobuj Miah — Software Engineer & Office Administrator",
+        "description": "Self-taught software and Linux systems engineer, web developer, and office administrator in Savar, Dhaka. Building Android and Linux tools, websites, and local AI workflows.",
+        "keywords": [
+          "Sobuj Miah",
+          "about Sobuj Miah",
+          "software engineer Bangladesh",
+          "self-taught engineer",
+          "office administrator Dhaka",
+          "Linux on Android"
+        ],
         "eyebrow": "ABOUT · OPERATIONS MEET ENGINEERING",
         "headline": "Operations discipline. Engineering curiosity.",
         "lede": "Someone who can keep the back office moving—and build the tools that make the work clearer.",
@@ -107,75 +202,191 @@
         "availabilityValue": "Open to freelance and remote work",
         "experienceLabel": "Experience",
         "experienceValue": "8+ years, self-reported",
-        "languagesTitle": "Languages"
+        "languagesTitle": "Languages",
+        "capabilitiesTitle": "A wide, practical toolkit.",
+        "capabilitiesEyebrow": "CAPABILITIES"
       },
       "services": {
-        "title": "Services — Software, Technology & Operations Support",
-        "description": "Website and software development, computer and Android support, design, SEO, office administration, and data services by Sobuj Miah.",
+        "title": "Services — Software, Linux on Android, Web & Operations",
+        "description": "Website development, custom software, Linux on Android and Termux setup, local AI, computer support, SEO, and office administration in Dhaka, Bangladesh.",
+        "keywords": [
+          "software services Dhaka",
+          "website development Bangladesh",
+          "Linux on Android setup",
+          "Termux setup",
+          "local AI setup",
+          "computer support Dhaka",
+          "SEO services Bangladesh",
+          "office administration"
+        ],
         "eyebrow": "SERVICES · PRACTICAL SUPPORT",
         "headline": "What can I take off your plate?",
         "lede": "Choose a service to see the work it covers. Scope and deliverables are agreed around your actual workflow.",
         "detailLabel": "Service details",
         "deliverablesLabel": "Typical work",
         "contactLabel": "Discuss this service",
-        "backLabel": "All services"
+        "backLabel": "All services",
+        "faqTitle": "Common questions",
+        "faqIntro": "Short answers about scope, platforms, and how a project starts.",
+        "faq": [
+          {
+            "question": "Do you set up Linux on Android?",
+            "answer": "Yes. I help plan and troubleshoot Termux and Linux-on-Android environments, including Debian, Xfce, Termux:X11, and device-specific graphics paths. I check what the device actually supports before promising a result."
+          },
+          {
+            "question": "Can you build a website for a small business?",
+            "answer": "Yes. I plan and build focused, responsive websites with clear content structure, search metadata, and GitHub Pages deployment where it fits."
+          },
+          {
+            "question": "Do you work with clients outside Dhaka?",
+            "answer": "Yes. Remote work is available across Bangladesh and internationally. Most projects start with a short call or a written brief."
+          },
+          {
+            "question": "How do you scope a project?",
+            "answer": "We agree on the problem, the deliverables, the timeline, and what is out of scope before work starts. Changes are agreed in writing."
+          },
+          {
+            "question": "What is your experience with local AI?",
+            "answer": "I build CPU-first local inference setups with llama.cpp and GGUF models on Android and Linux. GPU and NPU paths are only claimed when they have been validated on the specific device."
+          },
+          {
+            "question": "Do you guarantee search rankings?",
+            "answer": "No. I handle technical and editorial SEO basics, but rankings depend on competition, content, and search engine decisions."
+          }
+        ]
       },
       "experience": {
-        "title": "Experience — Office Operations & Technical Work",
-        "description": "Professional experience in office administration, coordination, electrical work, progress reporting, fire safety, and email marketing.",
+        "title": "Experience — Office Administration, Coordination & Technical Work",
+        "description": "Professional experience in office administration, coordination, electrical work, progress reporting, fire safety, and email marketing in Bangladesh and Saudi Arabia.",
+        "keywords": [
+          "Sobuj Miah experience",
+          "office administrator Dhaka",
+          "site coordinator Saudi Arabia",
+          "progress reporter",
+          "electrician Saudi Arabia",
+          "email marketing"
+        ],
         "eyebrow": "EXPERIENCE · BANGLADESH & SAUDI ARABIA",
         "headline": "Eight years of work across two countries.",
         "lede": "From industrial sites to day-to-day office operations, with accuracy and follow-through at the centre.",
-        "experienceNote": "Dates reflect my self-reported work history."
+        "experienceNote": "Dates reflect my self-reported work history.",
+        "summary": "7 roles · 2 countries · 2015 — present"
       },
       "projects": {
-        "title": "Projects — Software, Android & Linux Systems",
-        "description": "Selected public software and technology projects by Sobuj Miah, with implementation status and links to their source repositories.",
+        "title": "Projects — Linux on Android, Termux, AI & Software",
+        "description": "Public projects by Sobuj Miah: Ternux for Linux on Android with Termux, ADT for ARM64 Android toolchains, LAI for local AI, GGEN, and Songjog.",
+        "keywords": [
+          "Sobuj Miah projects",
+          "Ternux",
+          "Linux on Android",
+          "Termux Debian",
+          "ADT ARM64",
+          "LAI local AI",
+          "GGEN Flutter",
+          "Songjog"
+        ],
         "eyebrow": "PROJECTS · SOURCE-LINKED",
         "headline": "Built to solve actual constraints.",
         "lede": "A selection of public projects across Android, ARM64 Linux, AI, software tooling, and practical digital work.",
         "repoLabel": "Open repository",
-        "statusLabel": "Project boundary"
+        "statusLabel": "Project boundary",
+        "detailsLabel": "Project details",
+        "stackLabel": "Stack",
+        "highlightsLabel": "What it does",
+        "evidenceLabel": "Engineering evidence",
+        "overviewLabel": "Overview",
+        "roleLabel": "Role",
+        "stateLabel": "Status",
+        "repoLabelShort": "GitHub"
       },
       "research": {
-        "title": "Research & Experiments — Sobuj Miah",
-        "description": "A clear view of Sobuj Miah’s engineering research: what is verified, what is experimental, and what remains a qualification target.",
+        "title": "Research & Experiments — Linux on Android, Local AI & ARM64",
+        "description": "Engineering research by Sobuj Miah: verified Linux on Android, ARM64 toolchain, and local AI results, plus experimental and unclaimed paths.",
+        "keywords": [
+          "Linux on Android research",
+          "Termux graphics",
+          "ARM64 toolchain",
+          "llama.cpp Android",
+          "local AI research",
+          "Vulkan Android"
+        ],
         "eyebrow": "RESEARCH · EVIDENCE BEFORE CLAIMS",
         "headline": "Experiments, with the boundaries in view.",
         "lede": "I document what worked, what failed, and what still needs proof. Experimental paths are not presented as shipped capabilities.",
         "verifiedTitle": "Verified in project evidence",
         "experimentalTitle": "Experimental or still in qualification",
-        "plannedTitle": "Not claimed as working"
+        "plannedTitle": "Not claimed as working",
+        "lastReviewed": "Last reviewed November 2026",
+        "researchNote": "A result counts as verified only when the device, software build, and test conditions are recorded. Everything else stays labelled as an experiment."
       },
       "contact": {
-        "title": "Contact Sobuj Miah — Software & Operations Support",
-        "description": "Contact Sobuj Miah about software, Android and Linux systems, AI tooling, web development, or operations support.",
+        "title": "Contact Sobuj Miah — Software, Linux & Operations",
+        "description": "Contact Sobuj Miah in Savar, Dhaka for software development, Linux on Android setup, local AI, websites, computer support, or office administration.",
+        "keywords": [
+          "contact Sobuj Miah",
+          "hire software developer Dhaka",
+          "freelance engineer Bangladesh",
+          "Linux on Android help",
+          "website developer contact"
+        ],
         "eyebrow": "CONTACT · SAVAR, DHAKA",
         "headline": "Let’s make the next step practical.",
         "lede": "Share the task, the constraints, and the outcome you need. I’m open to freelance and remote work.",
         "emailLabel": "Email",
         "phoneLabel": "Phone / WhatsApp",
-        "telegramLabel": "Telegram"
+        "telegramLabel": "Telegram",
+        "briefTitle": "What to include in a message",
+        "brief": [
+          "The outcome you need, in plain words.",
+          "Your timeline and a rough budget range.",
+          "Any device, platform, or workflow constraints."
+        ],
+        "responseLabel": "Response time",
+        "responseValue": "Usually within one working day (GMT+6)."
       },
       "evidence": {
         "title": "Claims, Evidence & Limits — Sobuj Miah",
-        "description": "Public source links, supporting project evidence, and clear limits for claims in Sobuj Miah’s portfolio.",
+        "description": "Public sources, project evidence, and clear claim limits for Sobuj Miah’s portfolio, work history, and service offers.",
+        "keywords": [
+          "Sobuj Miah evidence",
+          "portfolio claims",
+          "project sources",
+          "Ternux evidence",
+          "ADT evidence",
+          "LAI evidence"
+        ],
         "eyebrow": "EVIDENCE · SOURCES AND SCOPE",
         "headline": "What the public evidence supports.",
         "lede": "Project descriptions are linked to their public source. Read the supporting detail alongside each project’s current status and limits.",
         "note": "Project evidence is drawn from public repositories and documented project records; it is not an independent audit. Work history is self-reported, and service descriptions are offers rather than completed client outcomes.",
         "limitLabel": "SCOPE / LIMIT",
         "sourceLabel": "Open public source",
-        "researchLink": "See verified, experimental, and unclaimed work"
+        "researchLink": "See verified, experimental, and unclaimed work",
+        "howTitle": "How to verify a claim",
+        "how": [
+          "Open the repository linked on each project page.",
+          "Compare the claim with the README and the recorded device conditions.",
+          "Treat experimental paths as experiments, not shipped features."
+        ]
       }
     },
     "bn": {
       "home": {
-        "title": "সবুজ মিয়া — সফটওয়্যার, এআই ও পরিচালনা",
-        "description": "সবুজ মিয়া ঢাকার সাভারভিত্তিক একজন স্বতন্ত্র সফটওয়্যার ও এআই সিস্টেম নির্মাতা; ব্যবহারিক প্রকৌশলের সঙ্গে নির্ভরযোগ্য অফিস ও ডিজিটাল পরিচালনা মিলিয়ে কাজ করেন।",
+        "title": "সবুজ মিয়া — সফটওয়্যার, অ্যান্ড্রয়েডে লিনাক্স ও এআই সিস্টেম প্রকৌশলী",
+        "description": "সাভার, ঢাকাভিত্তিক স্বতন্ত্র সফটওয়্যার ও এআই সিস্টেম প্রকৌশলী। ওয়েবসাইট, কাস্টম সফটওয়্যার, Termux-এ অ্যান্ড্রয়েডে লিনাক্স, লোকাল এআই এবং পরিচালনা সহায়তা।",
+        "keywords": [
+          "সবুজ মিয়া",
+          "সফটওয়্যার ইঞ্জিনিয়ার ঢাকা",
+          "অ্যান্ড্রয়েডে লিনাক্স",
+          "টার্মাক্স",
+          "ডেবিয়ান",
+          "লোকাল এআই অ্যান্ড্রয়েড",
+          "ওয়েব ডেভেলপার বাংলাদেশ",
+          "অফিস প্রশাসন সাভার"
+        ],
         "eyebrow": "স্বতন্ত্র প্রকৌশলী · সাভার, ঢাকা",
         "headline": "পরিচালনায় নির্ভরযোগ্যতা। সিস্টেমে কাজের সমাধান।",
-        "deck": "অফিস পরিচালনা ও হাতে-কলমে প্রকৌশলকে একসঙ্গে আনি: ব্যবহারিক সফটওয়্যার, অ্যান্ড্রয়েড ও লিনাক্স সিস্টেম, আর বাস্তব কাজভিত্তিক ডিজিটাল সহায়তা।",
+        "deck": "অফিস পরিচালনা ও হাতে-কলমে প্রকৌশলকে একসঙ্গে আনি: ব্যবহারিক সফটওয়্যার, Termux-এ অ্যান্ড্রয়েডে লিনাক্স, লোকাল এআই, আর বাস্তব কাজভিত্তিক ডিজিটাল সহায়তা।",
         "identity": "স্বতন্ত্র সফটওয়্যার ও এআই সিস্টেম প্রকৌশলী · ওয়েব ডেভেলপার · পরিচালনা সহায়তা",
         "primary": "কাজগুলো দেখুন",
         "secondary": "সেবাগুলো দেখুন",
@@ -188,11 +399,22 @@
         "aboutTitle": "ব্যবহারিক কাজের দুই দিক",
         "aboutIntro": "অফিস ও সাইট পরিচালনার পাশাপাশি লিনাক্স, অ্যান্ড্রয়েড, লোকাল এআই এবং সফটওয়্যার টুলে নিজে হাতে কাজ করেছি।",
         "contactTitle": "বাস্তব কোনো সমস্যার সমাধান দরকার?",
-        "contactIntro": "কোন কাজটি আটকে আছে বলুন। আমরা বাস্তবসম্মত পরবর্তী ধাপ ঠিক করতে পারি।"
+        "contactIntro": "কোন কাজটি আটকে আছে বলুন। আমরা বাস্তবসম্মত পরবর্তী ধাপ ঠিক করতে পারি।",
+        "featuredServices": ["software-development", "linux-systems", "office-administration"],
+        "featuredProjects": ["ternux", "lai", "adt"],
+        "focus": ["Termux", "Debian", "ARM64", "llama.cpp", "Flutter", "Web"]
       },
       "about": {
-        "title": "সবুজ মিয়া সম্পর্কে — পরিচালনা ও প্রকৌশল",
-        "description": "সবুজ মিয়ার পরিচয়: ঢাকার সাভারভিত্তিক অফিস প্রশাসক ও স্বশিক্ষিত সফটওয়্যার এবং সিস্টেম নির্মাতা।",
+        "title": "সবুজ মিয়া সম্পর্কে — সফটওয়্যার প্রকৌশলী ও অফিস প্রশাসক",
+        "description": "সাভার, ঢাকার স্বশিক্ষিত সফটওয়্যার ও লিনাক্স সিস্টেম প্রকৌশলী, ওয়েব ডেভেলপার ও অফিস প্রশাসক। Android/Linux টুল, ওয়েবসাইট ও লোকাল এআই workflow তৈরি করেন।",
+        "keywords": [
+          "সবুজ মিয়া",
+          "সবুজ মিয়া পরিচিতি",
+          "সফটওয়্যার প্রকৌশলী বাংলাদেশ",
+          "স্বশিক্ষিত প্রকৌশলী",
+          "অফিস প্রশাসক ঢাকা",
+          "অ্যান্ড্রয়েডে লিনাক্স"
+        ],
         "eyebrow": "পরিচিতি · পরিচালনা ও প্রকৌশল",
         "headline": "পরিচালনার শৃঙ্খলা। প্রকৌশলের কৌতূহল।",
         "lede": "দাপ্তরিক কাজ সামলানোর পাশাপাশি কাজকে সহজ করে এমন টুলও তৈরি করি।",
@@ -211,66 +433,172 @@
         "availabilityValue": "ফ্রিল্যান্স ও রিমোট কাজের জন্য উন্মুক্ত",
         "experienceLabel": "অভিজ্ঞতা",
         "experienceValue": "৮ বছরের বেশি, স্ব-প্রতিবেদিত",
-        "languagesTitle": "ভাষা"
+        "languagesTitle": "ভাষা",
+        "capabilitiesTitle": "ব্যবহারিক দক্ষতার বিস্তৃত পরিসর।",
+        "capabilitiesEyebrow": "দক্ষতা"
       },
       "services": {
-        "title": "সেবা — সফটওয়্যার, প্রযুক্তি ও পরিচালনা সহায়তা",
-        "description": "সবুজ মিয়ার ওয়েব ও সফটওয়্যার ডেভেলপমেন্ট, কম্পিউটার ও অ্যান্ড্রয়েড সহায়তা, ডিজাইন, এসইও, অফিস প্রশাসন এবং ডেটা সেবা।",
+        "title": "সেবা — সফটওয়্যার, অ্যান্ড্রয়েডে লিনাক্স, ওয়েব ও পরিচালনা",
+        "description": "ঢাকা, বাংলাদেশে ওয়েবসাইট ডেভেলপমেন্ট, কাস্টম সফটওয়্যার, Termux-এ অ্যান্ড্রয়েডে লিনাক্স, লোকাল এআই, কম্পিউটার সহায়তা, এসইও ও অফিস প্রশাসন।",
+        "keywords": [
+          "সফটওয়্যার সেবা ঢাকা",
+          "ওয়েবসাইট ডেভেলপমেন্ট বাংলাদেশ",
+          "অ্যান্ড্রয়েডে লিনাক্স setup",
+          "টার্মাক্স setup",
+          "লোকাল এআই setup",
+          "কম্পিউটার সহায়তা ঢাকা",
+          "এসইও সেবা বাংলাদেশ",
+          "অফিস প্রশাসন"
+        ],
         "eyebrow": "সেবা · ব্যবহারিক সহায়তা",
         "headline": "কোন কাজের দায়িত্ব আমি নিতে পারি?",
         "lede": "কাজের ধরন জানতে প্রতিটি সেবা দেখুন। আপনার workflow অনুযায়ী পরিধি ও deliverable ঠিক হবে।",
         "detailLabel": "সেবার বিবরণ",
         "deliverablesLabel": "যে কাজগুলো করা যায়",
         "contactLabel": "এই সেবা নিয়ে কথা বলুন",
-        "backLabel": "সব সেবা"
+        "backLabel": "সব সেবা",
+        "faqTitle": "সাধারণ প্রশ্ন",
+        "faqIntro": "scope, platform এবং কাজ কীভাবে শুরু হয়—সংক্ষিপ্ত উত্তর।",
+        "faq": [
+          {
+            "question": "আপনি কি Android-এ Linux setup করে দেন?",
+            "answer": "হ্যাঁ। Termux ও Linux-on-Android environment—Debian, Xfce, Termux:X11 এবং ডিভাইসভিত্তিক graphics path—পরিকল্পনা ও troubleshooting করি। ফলাফলের আগে ডিভাইস আসলে কী সমর্থন করে তা যাচাই করি।"
+          },
+          {
+            "question": "ছোট ব্যবসার জন্য ওয়েবসাইট বানাবেন?",
+            "answer": "হ্যাঁ। স্পষ্ট content structure, responsive layout, search metadata এবং প্রযোজ্য হলে GitHub Pages deployment-সহ লক্ষ্যভিত্তিক ওয়েবসাইট পরিকল্পনা ও তৈরি করি।"
+          },
+          {
+            "question": "ঢাকার বাইরের client-এর সঙ্গে কাজ করেন?",
+            "answer": "হ্যাঁ। বাংলাদেশ ও বিদেশে remote কাজ করি। বেশিরভাগ কাজ একটি সংক্ষিপ্ত call বা লিখিত brief দিয়ে শুরু হয়।"
+          },
+          {
+            "question": "প্রকল্পের scope কীভাবে ঠিক হয়?",
+            "answer": "কাজ শুরুর আগে সমস্যা, deliverable, সময়সীমা এবং কোন কাজ scope-এর বাইরে তা নির্ধারণ করি। পরিবর্তন লিখিতভাবে নিশ্চিত হয়।"
+          },
+          {
+            "question": "লোকাল AI-তে আপনার অভিজ্ঞতা কী?",
+            "answer": "Android ও Linux-এ llama.cpp ও GGUF model দিয়ে CPU-first local inference setup করি। GPU ও NPU path নির্দিষ্ট ডিভাইসে যাচাই না হলে দাবি করি না।"
+          },
+          {
+            "question": "search ranking-এর নিশ্চয়তা দেবেন?",
+            "answer": "না। technical ও editorial SEO-এর মৌলিক বিষয়গুলো দেখি; ranking প্রতিযোগিতা, content এবং search engine-এর সিদ্ধান্তের ওপর নির্ভর করে।"
+          }
+        ]
       },
       "experience": {
-        "title": "অভিজ্ঞতা — অফিস পরিচালনা ও কারিগরি কাজ",
-        "description": "অফিস প্রশাসন, সমন্বয়, বৈদ্যুতিক কাজ, অগ্রগতি প্রতিবেদন, অগ্নিনিরাপত্তা এবং ইমেইল মার্কেটিংয়ে সবুজ মিয়ার পেশাগত অভিজ্ঞতা।",
+        "title": "অভিজ্ঞতা — অফিস প্রশাসন, সমন্বয় ও কারিগরি কাজ",
+        "description": "বাংলাদেশ ও সৌদি আরবে অফিস প্রশাসন, সমন্বয়, বৈদ্যুতিক কাজ, অগ্রগতি প্রতিবেদন, অগ্নিনিরাপত্তা ও ইমেইল মার্কেটিংয়ে পেশাগত অভিজ্ঞতা।",
+        "keywords": [
+          "সবুজ মিয়ার অভিজ্ঞতা",
+          "অফিস প্রশাসক ঢাকা",
+          "সাইট সমন্বয়কারী সৌদি আরব",
+          "অগ্রগতি প্রতিবেদক",
+          "ইলেকট্রিশিয়ান সৌদি আরব",
+          "ইমেইল মার্কেটিং"
+        ],
         "eyebrow": "অভিজ্ঞতা · বাংলাদেশ ও সৌদি আরব",
         "headline": "দুই দেশে আট বছরের কাজের অভিজ্ঞতা।",
         "lede": "শিল্প প্রকল্প সাইট থেকে দৈনন্দিন অফিস পরিচালনা—কাজের কেন্দ্রে নির্ভুলতা ও follow-through।",
-        "experienceNote": "তারিখগুলো আমার দেওয়া কাজের ইতিহাস অনুযায়ী।"
+        "experienceNote": "তারিখগুলো আমার দেওয়া কাজের ইতিহাস অনুযায়ী।",
+        "summary": "৭টি দায়িত্ব · ২টি দেশ · ২০১৫ — বর্তমান"
       },
       "projects": {
-        "title": "প্রকল্প — সফটওয়্যার, অ্যান্ড্রয়েড ও লিনাক্স সিস্টেম",
-        "description": "সবুজ মিয়ার বাছাই করা পাবলিক সফটওয়্যার ও প্রযুক্তি প্রকল্প; বাস্তবায়নের সীমা ও সোর্স repository-র লিংকসহ।",
+        "title": "প্রকল্প — অ্যান্ড্রয়েডে লিনাক্স, টার্মাক্স, এআই ও সফটওয়্যার",
+        "description": "সবুজ মিয়ার পাবলিক প্রকল্প: Termux-এ অ্যান্ড্রয়েডে লিনাক্সের জন্য Ternux, ARM64 Android toolchain-এর জন্য ADT, লোকাল এআই-এর জন্য LAI, GGEN ও Songjog।",
+        "keywords": [
+          "সবুজ মিয়ার প্রকল্প",
+          "Ternux",
+          "অ্যান্ড্রয়েডে লিনাক্স",
+          "টার্মাক্স ডেবিয়ান",
+          "ADT ARM64",
+          "LAI লোকাল এআই",
+          "GGEN Flutter",
+          "Songjog"
+        ],
         "eyebrow": "প্রকল্প · সোর্স-লিংকসহ",
         "headline": "বাস্তব সীমাবদ্ধতা মেটাতে তৈরি।",
         "lede": "অ্যান্ড্রয়েড, ARM64 লিনাক্স, এআই, সফটওয়্যার টুল এবং ব্যবহারিক ডিজিটাল কাজের কয়েকটি পাবলিক প্রকল্প।",
         "repoLabel": "Repository দেখুন",
-        "statusLabel": "প্রকল্পের সীমা"
+        "statusLabel": "প্রকল্পের সীমা",
+        "detailsLabel": "প্রকল্পের বিবরণ",
+        "stackLabel": "Stack",
+        "highlightsLabel": "যা করে",
+        "evidenceLabel": "প্রকৌশলগত প্রমাণ",
+        "overviewLabel": "সংক্ষিপ্ত বিবরণ",
+        "roleLabel": "দায়িত্ব",
+        "stateLabel": "অবস্থা",
+        "repoLabelShort": "GitHub"
       },
       "research": {
-        "title": "গবেষণা ও পরীক্ষা — সবুজ মিয়া",
-        "description": "সবুজ মিয়ার প্রকৌশল গবেষণার পরিষ্কার চিত্র: কোনটি যাচাই করা, কোনটি পরীক্ষামূলক, আর কোনটির আরও যোগ্যতা যাচাই দরকার।",
+        "title": "গবেষণা ও পরীক্ষা — অ্যান্ড্রয়েডে লিনাক্স, লোকাল এআই ও ARM64",
+        "description": "সবুজ মিয়ার প্রকৌশল গবেষণা: অ্যান্ড্রয়েডে লিনাক্স, ARM64 toolchain ও লোকাল এআই-এর যাচাইকৃত ফল, পরীক্ষামূলক পথ ও অদাবিকৃত কাজ।",
+        "keywords": [
+          "অ্যান্ড্রয়েডে লিনাক্স গবেষণা",
+          "টার্মাক্স গ্রাফিক্স",
+          "ARM64 toolchain",
+          "llama.cpp অ্যান্ড্রয়েড",
+          "লোকাল এআই গবেষণা",
+          "Vulkan অ্যান্ড্রয়েড"
+        ],
         "eyebrow": "গবেষণা · দাবির আগে প্রমাণ",
         "headline": "সীমা স্পষ্ট রেখে পরীক্ষা করি।",
         "lede": "কী কাজ করেছে, কোথায় ব্যর্থ হয়েছে, আর কী এখনো প্রমাণ করা বাকি—সব নথিবদ্ধ করি। পরীক্ষামূলক পথকে তৈরি পণ্য বলে দেখাই না।",
         "verifiedTitle": "প্রকল্পে যাচাই করা",
         "experimentalTitle": "পরীক্ষামূলক বা যাচাই চলছে",
-        "plannedTitle": "কাজ করছে বলে দাবি করা হয় না"
+        "plannedTitle": "কাজ করছে বলে দাবি করা হয় না",
+        "lastReviewed": "শেষ পর্যালোচনা নভেম্বর ২০২৬",
+        "researchNote": "কোনো ফলাফল তখনই যাচাইকৃত গণ্য হয় যখন ডিভাইস, software build ও test condition লিপিবদ্ধ থাকে। বাকি সব পরীক্ষা হিসেবে চিহ্নিত থাকে।"
       },
       "contact": {
-        "title": "যোগাযোগ — সফটওয়্যার ও পরিচালনা সহায়তা",
-        "description": "সফটওয়্যার, অ্যান্ড্রয়েড ও লিনাক্স সিস্টেম, এআই টুলিং, ওয়েব ডেভেলপমেন্ট বা পরিচালনা সহায়তার জন্য সবুজ মিয়ার সঙ্গে যোগাযোগ করুন।",
+        "title": "যোগাযোগ — সফটওয়্যার, লিনাক্স ও পরিচালনা",
+        "description": "সফটওয়্যার ডেভেলপমেন্ট, অ্যান্ড্রয়েডে লিনাক্স, লোকাল এআই, ওয়েবসাইট, কম্পিউটার সহায়তা বা অফিস প্রশাসনের জন্য সাভার, ঢাকার সবুজ মিয়ার সঙ্গে যোগাযোগ করুন।",
+        "keywords": [
+          "সবুজ মিয়ার সঙ্গে যোগাযোগ",
+          "সফটওয়্যার ডেভেলপার নিয়োগ ঢাকা",
+          "ফ্রিল্যান্স প্রকৌশলী বাংলাদেশ",
+          "অ্যান্ড্রয়েডে লিনাক্স সাহায্য",
+          "ওয়েব ডেভেলপার যোগাযোগ"
+        ],
         "eyebrow": "যোগাযোগ · সাভার, ঢাকা",
         "headline": "পরবর্তী ধাপটা বাস্তবসম্মত করি।",
         "lede": "কাজটি, সীমাবদ্ধতা এবং আপনার দরকারি ফলাফলটি জানান। ফ্রিল্যান্স ও রিমোট কাজের জন্য আমি উন্মুক্ত।",
         "emailLabel": "ইমেইল",
         "phoneLabel": "ফোন / হোয়াটসঅ্যাপ",
-        "telegramLabel": "টেলিগ্রাম"
+        "telegramLabel": "টেলিগ্রাম",
+        "briefTitle": "বার্তায় কী লিখবেন",
+        "brief": [
+          "আপনার দরকারি ফলাফল—সহজ ভাষায়।",
+          "আপনার সময়সীমা ও বাজেটের ধারণা।",
+          "ডিভাইস, platform বা workflow-এর সীমাবদ্ধতা।"
+        ],
+        "responseLabel": "সাড়ার সময়",
+        "responseValue": "সাধারণত এক কর্মদিবসের মধ্যে (GMT+6)।"
       },
       "evidence": {
         "title": "দাবি, প্রমাণ ও সীমাবদ্ধতা — সবুজ মিয়া",
-        "description": "সবুজ মিয়ার পোর্টফোলিওর দাবির পাশে পাবলিক সোর্স, প্রকল্পের সমর্থনকারী তথ্য এবং স্পষ্ট সীমাবদ্ধতা।",
+        "description": "সবুজ মিয়ার পোর্টফোলিওর দাবির পাশে পাবলিক সোর্স, প্রকল্পের প্রমাণ এবং কাজের ইতিহাস ও সেবার সীমা।",
+        "keywords": [
+          "সবুজ মিয়ার প্রমাণ",
+          "পোর্টফোলিওর দাবি",
+          "প্রকল্পের সোর্স",
+          "Ternux প্রমাণ",
+          "ADT প্রমাণ",
+          "LAI প্রমাণ"
+        ],
         "eyebrow": "প্রমাণ · সোর্স ও কাজের পরিধি",
         "headline": "পাবলিক প্রমাণে যা সমর্থিত।",
         "lede": "প্রকল্পের বিবরণের সঙ্গে পাবলিক সোর্স যুক্ত আছে। প্রতিটি প্রকল্পের বর্তমান অবস্থা ও সীমার সঙ্গে প্রমাণ মিলিয়ে দেখুন।",
         "note": "প্রকল্পের প্রমাণ পাবলিক repository ও নথিবদ্ধ প্রকল্পের তথ্য থেকে নেওয়া; এটি স্বাধীন audit নয়। কাজের ইতিহাস স্ব-প্রতিবেদিত, আর সেবার বিবরণ ভবিষ্যৎ কাজের প্রস্তাব—সম্পন্ন client outcome নয়।",
         "limitLabel": "পরিধি / সীমা",
         "sourceLabel": "পাবলিক সোর্স দেখুন",
-        "researchLink": "যাচাইকৃত, পরীক্ষামূলক ও অদাবিকৃত কাজ দেখুন"
+        "researchLink": "যাচাইকৃত, পরীক্ষামূলক ও অদাবিকৃত কাজ দেখুন",
+        "howTitle": "কীভাবে দাবি যাচাই করবেন",
+        "how": [
+          "প্রতিটি প্রকল্পের পৃষ্ঠায় দেওয়া repository খুলুন।",
+          "দাবির সঙ্গে README এবং লিপিবদ্ধ ডিভাইসের শর্ত মিলিয়ে দেখুন।",
+          "পরীক্ষামূলক পথকে পরীক্ষা হিসেবে দেখুন, চালু feature হিসেবে নয়।"
+        ]
       }
     }
   },
@@ -278,6 +606,7 @@
     {
       "slug": "web-development",
       "icon": "web",
+      "group": "engineering",
       "title": {
         "en": "Website Development",
         "bn": "ওয়েবসাইট ডেভেলপমেন্ট"
@@ -290,6 +619,13 @@
         "en": "Plan and build a focused website for a person, service, or small organisation. Work can include content structure, responsive layouts, accessible interactions, search metadata, and GitHub Pages deployment.",
         "bn": "ব্যক্তি, সেবা বা ছোট প্রতিষ্ঠানের জন্য লক্ষ্যভিত্তিক ওয়েবসাইট পরিকল্পনা ও তৈরি। কাজের মধ্যে content structure, responsive layout, accessible interaction, search metadata এবং GitHub Pages deployment থাকতে পারে।"
       },
+      "keywords": [
+        "website development Dhaka",
+        "responsive website",
+        "portfolio website",
+        "GitHub Pages",
+        "SEO metadata"
+      ],
       "deliverables": {
         "en": [
           "Page and navigation structure",
@@ -308,6 +644,7 @@
     {
       "slug": "software-development",
       "icon": "software",
+      "group": "engineering",
       "title": {
         "en": "Custom Software Development",
         "bn": "কাস্টম সফটওয়্যার ডেভেলপমেন্ট"
@@ -320,6 +657,12 @@
         "en": "Shape a problem into a practical software feature, prototype, or internal tool. Requirements, supported platforms, data boundaries, and what is not included are made explicit before implementation.",
         "bn": "সমস্যাকে ব্যবহারিক software feature, prototype বা internal tool-এ রূপ দেওয়া। implementation-এর আগে requirement, supported platform, data boundary এবং কোন কাজ scope-এর বাইরে তা স্পষ্ট করা হয়।"
       },
+      "keywords": [
+        "custom software Bangladesh",
+        "workflow tool",
+        "prototype",
+        "internal tool"
+      ],
       "deliverables": {
         "en": [
           "Requirements and feature scope",
@@ -338,6 +681,7 @@
     {
       "slug": "computer-support",
       "icon": "computer",
+      "group": "operations",
       "title": {
         "en": "Computer Support",
         "bn": "কম্পিউটার সহায়তা"
@@ -350,6 +694,11 @@
         "en": "Troubleshoot common operating-system, software, file-management, and office-application problems. The work starts from observed symptoms and ends with clear notes on what was changed and how to verify it.",
         "bn": "সাধারণ operating-system, software, file management এবং office application-এর সমস্যা খুঁজে সমাধান করা। লক্ষণ পর্যবেক্ষণ দিয়ে কাজ শুরু হয়; কী বদলানো হয়েছে এবং কীভাবে যাচাই করবেন—তা লিখে শেষ হয়।"
       },
+      "keywords": [
+        "computer support Dhaka",
+        "PC troubleshooting",
+        "office computer setup"
+      ],
       "deliverables": {
         "en": [
           "Issue triage and reproduction notes",
@@ -368,6 +717,7 @@
     {
       "slug": "android-support",
       "icon": "android",
+      "group": "operations",
       "title": {
         "en": "Android Support",
         "bn": "অ্যান্ড্রয়েড সহায়তা"
@@ -380,6 +730,11 @@
         "en": "Help diagnose Android application and device-workflow issues, organise files and settings for a task, or assess a phone-based development setup. Any device change is discussed first and kept within the agreed scope.",
         "bn": "অ্যান্ড্রয়েড অ্যাপ ও device workflow-এর সমস্যা diagnosis, কাজের জন্য ফাইল ও setting গুছানো, অথবা ফোনভিত্তিক development setup পর্যালোচনায় সহায়তা। ডিভাইসে পরিবর্তনের আগে আলোচনা হয় এবং তা নির্ধারিত scope-এ সীমিত থাকে।"
       },
+      "keywords": [
+        "Android support",
+        "phone troubleshooting",
+        "Android setup"
+      ],
       "deliverables": {
         "en": [
           "Scoped troubleshooting",
@@ -398,6 +753,7 @@
     {
       "slug": "business-technology",
       "icon": "business",
+      "group": "operations",
       "title": {
         "en": "Business Technology",
         "bn": "ব্যবসায়িক প্রযুক্তি"
@@ -410,6 +766,11 @@
         "en": "Review a recurring business task and find a manageable way to organise it with available digital tools. The aim is reliable follow-through and understandable records—not adding technology for its own sake.",
         "bn": "বারবার করা ব্যবসায়িক কাজ পর্যালোচনা করে বিদ্যমান digital tool দিয়ে কীভাবে গুছিয়ে নেওয়া যায় তা খোঁজা। লক্ষ্য নির্ভরযোগ্য follow-through ও বোঝার মতো record—শুধু প্রযুক্তি যোগ করা নয়।"
       },
+      "keywords": [
+        "business technology",
+        "office workflow",
+        "digital records"
+      ],
       "deliverables": {
         "en": [
           "Workflow map and friction points",
@@ -428,6 +789,7 @@
     {
       "slug": "graphics-design",
       "icon": "design",
+      "group": "growth",
       "title": {
         "en": "Graphics Design",
         "bn": "গ্রাফিক্স ডিজাইন"
@@ -440,6 +802,11 @@
         "en": "Create practical social and promotional graphics with a clear message, consistent layout, and delivery sizes suited to the selected channel. Visual assets and copy are reviewed together so the final material is ready to use.",
         "bn": "স্পষ্ট বার্তা, সঙ্গত layout এবং বেছে নেওয়া channel অনুযায়ী মাপসহ ব্যবহারিক social ও promotional graphic তৈরি। চূড়ান্ত উপকরণ ব্যবহারের উপযোগী করতে visual asset ও copy একসঙ্গে পর্যালোচনা করা হয়।"
       },
+      "keywords": [
+        "graphics design Bangladesh",
+        "social media graphics",
+        "promotional design"
+      ],
       "deliverables": {
         "en": [
           "Campaign or post graphics",
@@ -458,6 +825,7 @@
     {
       "slug": "office-administration",
       "icon": "office",
+      "group": "operations",
       "title": {
         "en": "Office Administration",
         "bn": "অফিস প্রশাসন"
@@ -470,6 +838,11 @@
         "en": "Support recurring administrative work such as document processing, filing, registration records, inbox follow-up, scheduling, and coordination. Access and handling stay limited to the records and tools required for the agreed task.",
         "bn": "Document processing, filing, registration record, inbox follow-up, scheduling এবং coordination-এর মতো নিয়মিত প্রশাসনিক কাজে সহায়তা। access ও তথ্যের ব্যবহার নির্ধারিত কাজের প্রয়োজনীয় record ও tool-এ সীমিত থাকে।"
       },
+      "keywords": [
+        "office administrator",
+        "document processing",
+        "records management Dhaka"
+      ],
       "deliverables": {
         "en": [
           "Document preparation and filing",
@@ -488,6 +861,7 @@
     {
       "slug": "data-entry",
       "icon": "data",
+      "group": "operations",
       "title": {
         "en": "Data Entry & Data Work",
         "bn": "ডেটা এন্ট্রি ও ডেটা-সংক্রান্ত কাজ"
@@ -500,6 +874,12 @@
         "en": "Enter or convert information into a clear structure, clean inconsistencies without hiding source values, and check a sample or full set according to the agreed requirements. Reporting experience informs a verify-before-submit workflow.",
         "bn": "তথ্যকে পরিষ্কার structure-এ আনা, মূল তথ্য আড়াল না করে অসঙ্গতি পরিষ্কার করা, এবং নির্ধারিত শর্ত অনুযায়ী sample বা পুরো dataset যাচাই করা। অগ্রগতি প্রতিবেদনের অভিজ্ঞতা থেকে submit-এর আগে যাচাইয়ের পদ্ধতি অনুসরণ করি।"
       },
+      "keywords": [
+        "data entry",
+        "data cleanup",
+        "spreadsheet",
+        "digitisation"
+      ],
       "deliverables": {
         "en": [
           "Structured spreadsheet or records",
@@ -518,6 +898,7 @@
     {
       "slug": "digital-marketing",
       "icon": "marketing",
+      "group": "growth",
       "title": {
         "en": "SEO & Digital Operations",
         "bn": "এসইও ও ডিজিটাল পরিচালনা"
@@ -530,6 +911,12 @@
         "en": "Maintain website content, page metadata, and social or email publishing workflows. SEO work focuses on technical and editorial basics; search positions and traffic outcomes are not guaranteed.",
         "bn": "ওয়েবসাইটের content, page metadata এবং social বা email publishing workflow গুছিয়ে রাখা। SEO-তে technical ও editorial-এর মৌলিক বিষয়গুলো দেখা হয়; search ranking বা traffic-এর নিশ্চয়তা দেওয়া হয় না।"
       },
+      "keywords": [
+        "SEO Dhaka",
+        "digital marketing",
+        "email marketing",
+        "social media management"
+      ],
       "deliverables": {
         "en": [
           "Page title and description review",
@@ -548,6 +935,7 @@
     {
       "slug": "linux-systems",
       "icon": "linux",
+      "group": "engineering",
       "title": {
         "en": "Linux & Android Workstation Setup",
         "bn": "লিনাক্স ও অ্যান্ড্রয়েড ওয়ার্কস্টেশন সেটআপ"
@@ -560,6 +948,14 @@
         "en": "Plan or troubleshoot Termux and Linux-on-Android environments, desktop sessions, developer tools, and graphics compatibility. Capabilities depend on the device and software stack; installation and graphics results are checked rather than assumed.",
         "bn": "Termux ও Android-এ Linux environment, desktop session, developer tool এবং graphics compatibility পরিকল্পনা বা troubleshooting। সক্ষমতা ডিভাইস ও software stack-এর ওপর নির্ভরশীল; installation ও graphics ফল অনুমান না করে যাচাই করা হয়।"
       },
+      "keywords": [
+        "Linux on Android",
+        "Termux",
+        "Debian",
+        "Termux:X11",
+        "PRoot",
+        "Linux workstation"
+      ],
       "deliverables": {
         "en": [
           "Device and requirement assessment",
@@ -578,6 +974,7 @@
     {
       "slug": "local-ai",
       "icon": "ai",
+      "group": "engineering",
       "title": {
         "en": "Local AI & LLM Setup",
         "bn": "লোকাল এআই ও এলএলএম সেটআপ"
@@ -590,6 +987,13 @@
         "en": "Assess a local inference use case, choose an appropriate model and runtime, and configure a CPU-first baseline where practical. GPU and NPU paths require device-specific validation and are never presented as working without evidence.",
         "bn": "লোকাল inference-এর ব্যবহার যাচাই, উপযুক্ত model ও runtime নির্বাচন, এবং সম্ভব হলে CPU-first baseline configure করা। GPU ও NPU path ডিভাইসভিত্তিক যাচাই দাবি করে; প্রমাণ ছাড়া এগুলোকে সচল বলা হয় না।"
       },
+      "keywords": [
+        "local AI",
+        "llama.cpp",
+        "GGUF",
+        "Android local LLM",
+        "private AI"
+      ],
       "deliverables": {
         "en": [
           "Use-case and device assessment",
@@ -944,20 +1348,62 @@
         "en": "Android · Linux",
         "bn": "অ্যান্ড্রয়েড · লিনাক্স"
       },
+      "role": {
+        "en": "Creator & maintainer",
+        "bn": "নির্মাতা ও রক্ষণাবেক্ষক"
+      },
+      "metaTitle": {
+        "en": "Ternux — Debian Linux Desktop on Android with Termux",
+        "bn": "Ternux — Termux দিয়ে Android-এ Debian Linux Desktop"
+      },
+      "metaDescription": {
+        "en": "Ternux is a no-root Debian and Xfce Linux desktop for Android phones, installed through Termux and PRoot. Modular Bash installer with doctor, repair, and benchmark tools.",
+        "bn": "Ternux হলো Termux ও PRoot দিয়ে Android ফোনে no-root Debian ও Xfce Linux desktop। Modular Bash installer-এ doctor, repair ও benchmark টুল আছে।"
+      },
+      "keywords": [
+        "Linux on Android",
+        "Termux Debian",
+        "Termux desktop",
+        "Xfce Android",
+        "Termux:X11",
+        "no root Linux"
+      ],
       "summary": {
-        "en": "A no-root Debian and Xfce Linux desktop environment running on an Android phone through Termux and PRoot.",
-        "bn": "Termux ও PRoot ব্যবহার করে Android ফোনে no-root Debian ও Xfce Linux desktop environment।"
+        "en": "A no-root Debian and Xfce Linux desktop that runs on an Android phone through Termux and PRoot.",
+        "bn": "Termux ও PRoot ব্যবহার করে Android ফোনে no-root Debian ও Xfce Linux desktop।"
+      },
+      "overview": {
+        "en": "Ternux turns an Android phone into a practical Linux workstation without rooting the device. It installs a Debian environment inside Termux, layers an Xfce desktop on top, and wires up Termux:X11, audio, and graphics acceleration for the device in hand. The installer is modular: it checks the environment first, repairs common breaks, and leaves the desktop reproducible from a clean Termux session.",
+        "bn": "Ternux একটি Android ফোনকে root না করেই ব্যবহারিক Linux workstation-এ রূপ দেয়। এটি Termux-এর ভেতরে Debian environment ইনস্টল করে, তার ওপর Xfce desktop বসায়, এবং হাতের ডিভাইসের জন্য Termux:X11, audio ও graphics acceleration সংযোগ করে। Installer টি মডিউলার: প্রথমে environment যাচাই করে, সাধারণ সমস্যা মেরামত করে, এবং desktop-কে একটি পরিষ্কার Termux session থেকে পুনরায় তৈরি করার উপায় রাখে।"
+      },
+      "highlights": {
+        "en": [
+          "No-root Debian and Xfce desktop inside Termux and PRoot.",
+          "Modular Bash installer with doctor, repair, and benchmark commands.",
+          "Termux:X11, D-Bus, and PulseAudio wired into one launch path.",
+          "Device-qualified Vulkan desktop rendering through Zink/Turnip on supported Adreno hardware."
+        ],
+        "bn": [
+          "Termux ও PRoot-এর ভেতরে no-root Debian ও Xfce desktop।",
+          "Doctor, repair ও benchmark command-সহ মডিউলার Bash installer।",
+          "একই launch path-এ Termux:X11, D-Bus ও PulseAudio।",
+          "সমর্থিত Adreno hardware-এ Zink/Turnip দিয়ে ডিভাইস-যাচাইকৃত Vulkan desktop rendering।"
+        ]
+      },
+      "stack": ["Bash", "Termux", "PRoot", "Debian", "Xfce", "Termux:X11", "PulseAudio", "D-Bus", "Mesa", "Zink", "Turnip", "Vulkan", "ARM64"],
+      "state": {
+        "en": "Public source",
+        "bn": "পাবলিক সোর্স"
       },
       "boundary": {
         "en": "Graphics paths depend on the device. Zink/Turnip results apply to supported Adreno hardware; VirGL is a compatibility route, not a universal guarantee.",
         "bn": "Graphics path ডিভাইসভেদে আলাদা। Zink/Turnip ফল supported Adreno hardware-এ প্রযোজ্য; VirGL compatibility route, সর্বজনীন নিশ্চয়তা নয়।"
       },
-      "url": "https://github.com/soobujmiah/ternux",
-      "state": "Public source",
       "evidence": {
         "en": "Modular Bash installer with doctor, repair, and benchmark tools; Vulkan desktop rendering on Android has been measured on the reference device.",
         "bn": "মডিউলার Bash installer-এ doctor, repair ও benchmark টুল রয়েছে; Android-এ Vulkan desktop rendering রেফারেন্স ডিভাইসে মেপে যাচাই করা হয়েছে।"
-      }
+      },
+      "url": "https://github.com/soobujmiah/ternux"
     },
     {
       "slug": "ternuxx",
@@ -966,20 +1412,61 @@
         "en": "Native Termux · Workstation tools",
         "bn": "Native Termux · Workstation tool"
       },
+      "role": {
+        "en": "Creator & maintainer",
+        "bn": "নির্মাতা ও রক্ষণাবেক্ষক"
+      },
+      "metaTitle": {
+        "en": "Ternuxx — Native Termux Workstation Control Plane",
+        "bn": "Ternuxx — Native Termux Workstation নিয়ন্ত্রণ ব্যবস্থা"
+      },
+      "metaDescription": {
+        "en": "Ternuxx manages a native Termux workstation with one tx command, keeping optional PRoot guests separate and the desktop lifecycle explicit.",
+        "bn": "Ternuxx একটি tx command দিয়ে native Termux workstation পরিচালনা করে; optional PRoot guest আলাদা রাখে এবং desktop lifecycle স্পষ্ট রাখে।"
+      },
+      "keywords": [
+        "Termux workstation",
+        "native Termux",
+        "Termux desktop",
+        "PRoot",
+        "tx command"
+      ],
       "summary": {
-        "en": "A native Termux workstation control plane managed with the tx command. Optional PRoot guests remain separate providers.",
+        "en": "A native Termux workstation control plane managed with the tx command, with optional PRoot guests kept as separate providers.",
         "bn": "tx command দিয়ে পরিচালিত Native Termux workstation control plane। Optional PRoot guest আলাদা provider।"
+      },
+      "overview": {
+        "en": "Ternuxx is the native companion to Ternux. It manages a Termux-first workstation from a single tx command: install the native toolchain, start and stop the desktop session, and keep optional PRoot guests separate from the host. The design keeps the control plane explicit, so a guest root filesystem is never created by accident.",
+        "bn": "Ternuxx হলো Ternux-এর native সঙ্গী। এটি একটি tx command থেকে Termux-first workstation পরিচালনা করে: native toolchain ইনস্টল, desktop session চালু ও বন্ধ, এবং optional PRoot guest-কে host থেকে আলাদা রাখা। ডিজাইনটি control plane স্পষ্ট রাখে, তাই guest root filesystem ভুলবশত তৈরি হয় না।"
+      },
+      "highlights": {
+        "en": [
+          "Single tx command for the native Termux workstation.",
+          "Native Termux host separated from optional PRoot guests.",
+          "Desktop lifecycle and tooling documented in one place.",
+          "No implicit guest root filesystem during install."
+        ],
+        "bn": [
+          "Native Termux workstation-এর জন্য একটি tx command।",
+          "Native Termux host এবং optional PRoot guest আলাদা।",
+          "Desktop lifecycle ও tooling এক জায়গায় নথিবদ্ধ।",
+          "Install-এর সময় ভুলবশত guest root filesystem তৈরি হয় না।"
+        ]
+      },
+      "stack": ["Bash", "Termux", "Native Termux", "PRoot", "Termux:X11", "Android"],
+      "state": {
+        "en": "Public source",
+        "bn": "পাবলিক সোর্স"
       },
       "boundary": {
         "en": "The Native Termux host is the control plane; installing the Native workstation does not create a guest root filesystem. Desktop launch and graphics validation are separate steps.",
         "bn": "Native Termux host-ই control plane; Native workstation install করলে guest root filesystem তৈরি হয় না। Desktop চালু ও graphics যাচাই আলাদা ধাপ।"
       },
-      "url": "https://github.com/soobujmiah/ternuxx",
-      "state": "Public source",
       "evidence": {
         "en": "Public source documents the native workstation control plane, desktop lifecycle, and separation between Native Termux and optional PRoot guests.",
         "bn": "পাবলিক সোর্সে Native workstation control plane, desktop lifecycle, এবং Native Termux ও optional PRoot guest-এর পৃথক ভূমিকা নথিবদ্ধ।"
-      }
+      },
+      "url": "https://github.com/soobujmiah/ternuxx"
     },
     {
       "slug": "adt",
@@ -988,20 +1475,62 @@
         "en": "ARM64 · Android tooling",
         "bn": "ARM64 · Android tooling"
       },
+      "role": {
+        "en": "Creator & maintainer",
+        "bn": "নির্মাতা ও রক্ষণাবেক্ষক"
+      },
+      "metaTitle": {
+        "en": "ADT — Linux ARM64 Android Toolchain from AOSP",
+        "bn": "ADT — AOSP থেকে Linux ARM64 Android Toolchain"
+      },
+      "metaDescription": {
+        "en": "ADT builds Linux ARM64 Android toolchains from AOSP source and validates the native build-to-install pipeline on real hardware, with checksum-verified offline artifacts.",
+        "bn": "ADT AOSP source থেকে Linux ARM64 Android toolchain তৈরি করে এবং বাস্তব ডিভাইসে build-to-install pipeline যাচাই করে; offline artifact-এ checksum verification আছে।"
+      },
+      "keywords": [
+        "ADT",
+        "Android toolchain",
+        "ARM64 Linux",
+        "AOSP",
+        "glibc",
+        "Android development"
+      ],
       "summary": {
-        "en": "An Android development toolchain for Linux ARM64, built from AOSP source and validated through a real-device workflow.",
+        "en": "An Android development toolchain for Linux ARM64, built from AOSP source and validated on real hardware.",
         "bn": "AOSP source থেকে তৈরি Linux ARM64-এর Android development toolchain; real-device workflow-এ যাচাই করা।"
+      },
+      "overview": {
+        "en": "ADT builds the parts of the Android toolchain that run on Linux ARM64 from AOSP source, then proves the build on a real device. The goal is a reproducible path from source to a working native build, not a rebranded SDK bundle. Artifacts are checksum-verified so an offline install can be trusted.",
+        "bn": "ADT AOSP source থেকে Linux ARM64-এ চলা Android toolchain-এর অংশগুলো তৈরি করে, তারপর বাস্তব ডিভাইসে build প্রমাণ করে। লক্ষ্য একটি rebranded SDK bundle নয়—source থেকে কার্যকর native build পর্যন্ত পুনরাবৃত্তিযোগ্য পথ তৈরি করা। Artifact-এ checksum verification থাকায় offline install-কে বিশ্বাস করা যায়।"
+      },
+      "highlights": {
+        "en": [
+          "ARM64 Linux toolchains built from AOSP source.",
+          "Native build-to-install pipeline validated on real hardware.",
+          "Checksum-verified offline artifacts.",
+          "Clear target boundary: Linux ARM64 with glibc, not Android/Bionic."
+        ],
+        "bn": [
+          "AOSP source থেকে তৈরি ARM64 Linux toolchain।",
+          "বাস্তব hardware-এ যাচাই করা native build-to-install pipeline।",
+          "Checksum-verified offline artifact।",
+          "স্পষ্ট লক্ষ্য: glibc-সহ Linux ARM64, Android/Bionic নয়।"
+        ]
+      },
+      "stack": ["AOSP", "Clang", "LLVM", "ARM64", "glibc", "Bash", "Android"],
+      "state": {
+        "en": "Public source",
+        "bn": "পাবলিক সোর্স"
       },
       "boundary": {
         "en": "The target is Linux ARM64 with glibc; this is not a native Android/Bionic SDK bundle.",
         "bn": "লক্ষ্য Linux ARM64 ও glibc; এটি native Android/Bionic SDK bundle নয়।"
       },
-      "url": "https://github.com/soobujmiah/adt",
-      "state": "Public source",
       "evidence": {
         "en": "Builds ARM64 Linux toolchains from AOSP source and validates the native build-to-install pipeline on real hardware, with checksum-verified offline artifacts.",
         "bn": "AOSP source থেকে ARM64 Linux toolchain তৈরি করে বাস্তব ডিভাইসে build থেকে install পর্যন্ত যাচাই করে; offline artifact-এ checksum verification থাকে।"
-      }
+      },
+      "url": "https://github.com/soobujmiah/adt"
     },
     {
       "slug": "lai",
@@ -1010,20 +1539,62 @@
         "en": "Android · Local AI",
         "bn": "অ্যান্ড্রয়েড · লোকাল এআই"
       },
+      "role": {
+        "en": "Creator & maintainer",
+        "bn": "নির্মাতা ও রক্ষণাবেক্ষক"
+      },
+      "metaTitle": {
+        "en": "LAI — Bangla-First Local AI on Android with llama.cpp",
+        "bn": "LAI — llama.cpp দিয়ে Android-এ বাংলা-প্রথম লোকাল এআই"
+      },
+      "metaDescription": {
+        "en": "LAI is a Bangla-first local AI and consent-driven Android automation runtime using arm64 llama.cpp CPU inference, with GPU paths gated behind evidence.",
+        "bn": "LAI বাংলা-প্রথম লোকাল এআই ও সম্মতিনির্ভর Android automation runtime; arm64 llama.cpp CPU inference-সহ, GPU পথ প্রমাণ ছাড়া দাবি করা হয় না।"
+      },
+      "keywords": [
+        "local AI Android",
+        "llama.cpp Android",
+        "GGUF",
+        "local LLM",
+        "Android automation",
+        "offline AI"
+      ],
       "summary": {
-        "en": "A Bangla-first local AI and consent-driven Android automation runtime, with arm64 llama.cpp CPU inference.",
+        "en": "A Bangla-first local AI and consent-driven Android automation runtime with arm64 llama.cpp CPU inference.",
         "bn": "বাংলা-প্রথম লোকাল এআই ও সম্মতিনির্ভর Android automation runtime; arm64 llama.cpp CPU inference-সহ।"
+      },
+      "overview": {
+        "en": "LAI explores what a useful local AI assistant can do on a phone. It runs quantized GGUF models through llama.cpp on arm64 Android, keeps the CPU path as the verified baseline, and gates device automation behind explicit consent. The Adreno Vulkan path is deliberately fail-closed after a driver crash, so the honest baseline stays the default.",
+        "bn": "LAI দেখে একটি ফোনে কার্যকর লোকাল AI assistant কী করতে পারে। এটি arm64 Android-এ llama.cpp দিয়ে quantized GGUF model চালায়, CPU path-কে যাচাইকৃত baseline হিসেবে রাখে, এবং device automation-কে স্পষ্ট সম্মতির পেছনে রাখে। Driver crash-এর পর Adreno Vulkan path ইচ্ছাকৃতভাবে fail-closed রাখা হয়েছে, তাই সঠিক baseline-ই ডিফল্ট থাকে।"
+      },
+      "highlights": {
+        "en": [
+          "Bangla-first local AI prompts and responses.",
+          "arm64 llama.cpp CPU inference as the verified baseline.",
+          "Consent-driven Android automation.",
+          "Adreno Vulkan inference fail-closed after a diagnosed driver crash."
+        ],
+        "bn": [
+          "বাংলা-প্রথম লোকাল AI prompt ও response।",
+          "যাচাইকৃত baseline হিসেবে arm64 llama.cpp CPU inference।",
+          "সম্মতিনির্ভর Android automation।",
+          "Driver crash শনাক্ত হওয়ার পর Adreno Vulkan inference fail-closed।"
+        ]
+      },
+      "stack": ["llama.cpp", "GGUF", "C/C++", "Android", "Termux", "Vulkan", "Bash"],
+      "state": {
+        "en": "Public source",
+        "bn": "পাবলিক সোর্স"
       },
       "boundary": {
         "en": "Adreno Vulkan inference is deliberately fail-closed after a driver crash; CPU is the verified baseline. NPU execution is not claimed.",
         "bn": "Driver crash-এর পরে Adreno Vulkan inference fail-closed রাখা হয়েছে; CPU যাচাইকৃত baseline। NPU execution দাবি করা হয় না।"
       },
-      "url": "https://github.com/soobujmiah/lai",
-      "state": "Public source",
       "evidence": {
         "en": "Runs local llama.cpp CPU inference and consent-driven Android automation; GPU inference remains gated after a diagnosed driver crash.",
         "bn": "স্থানীয় llama.cpp CPU inference ও সম্মতিভিত্তিক Android automation চালায়; driver crash শনাক্ত হওয়ার পর GPU inference এখনো বন্ধ রাখা হয়েছে।"
-      }
+      },
+      "url": "https://github.com/soobujmiah/lai"
     },
     {
       "slug": "ggen",
@@ -1032,20 +1603,62 @@
         "en": "Flutter · Creative tools",
         "bn": "Flutter · সৃজনশীল tool"
       },
+      "role": {
+        "en": "Creator & maintainer",
+        "bn": "নির্মাতা ও রক্ষণাবেক্ষক"
+      },
+      "metaTitle": {
+        "en": "GGEN — Android Vector & Document Studio in Flutter",
+        "bn": "GGEN — Flutter-এ Android Vector ও Document Studio"
+      },
+      "metaDescription": {
+        "en": "GGEN is an Android-first vector and document studio built with Flutter, with page geometry, layered canvas, linked text flow, and transactional file persistence.",
+        "bn": "GGEN Flutter দিয়ে তৈরি Android-প্রথম vector ও document studio; page geometry, layered canvas, linked text flow এবং transactional file persistence আছে।"
+      },
+      "keywords": [
+        "GGEN",
+        "Flutter Android",
+        "vector editor",
+        "document studio",
+        "linked text flow",
+        "Flutter"
+      ],
       "summary": {
         "en": "An Android-first vector and document studio with page geometry, layered canvas, and linked text flow.",
         "bn": "Page geometry, layered canvas ও linked text flow-সহ Android-প্রথম vector ও document studio।"
+      },
+      "overview": {
+        "en": "GGEN is a Flutter-based creative and document studio built for phones first. It combines page geometry, a layered canvas, and linked text flow so a layout stays editable instead of flattening into an image. File persistence is transactional, which keeps a document from corrupting when a write is interrupted.",
+        "bn": "GGEN ফোন-প্রথমভাবে তৈরি Flutter-based creative ও document studio। এটি page geometry, layered canvas ও linked text flow মিলিয়ে layout-কে image-এ ফ্ল্যাটেন না করে editable রাখে। File persistence transactional, তাই write মাঝপথে বন্ধ হলেও document নষ্ট হয় না।"
+      },
+      "highlights": {
+        "en": [
+          "Android-first vector and document editing in Flutter.",
+          "Page geometry and a layered canvas.",
+          "Linked text flow that stays editable.",
+          "Deterministic text layout and transactional file persistence."
+        ],
+        "bn": [
+          "Flutter-এ Android-প্রথম vector ও document editing।",
+          "Page geometry ও layered canvas।",
+          "Editable থাকা linked text flow।",
+          "Deterministic text layout ও transactional file persistence।"
+        ]
+      },
+      "stack": ["Flutter", "Dart", "Android", "Skia"],
+      "state": {
+        "en": "Public source",
+        "bn": "পাবলিক সোর্স"
       },
       "boundary": {
         "en": "The public Apache-2.0 source is active development; protected RGEN assets and production integrations are not represented as public features.",
         "bn": "Public Apache-2.0 source-এ উন্নয়ন চলছে; protected RGEN asset ও production integration-কে public feature বলা হয় না।"
       },
-      "url": "https://github.com/soobujmiah/ggen",
-      "state": "Public source",
       "evidence": {
         "en": "Flutter/Dart creative and document studio with deterministic text layout and transactional file persistence.",
         "bn": "Flutter/Dart-এ তৈরি creative ও document studio; এতে নির্ধারিত নিয়মে text layout এবং transactional file persistence আছে।"
-      }
+      },
+      "url": "https://github.com/soobujmiah/ggen"
     },
     {
       "slug": "songjog",
@@ -1054,20 +1667,62 @@
         "en": "Android · Business operations",
         "bn": "অ্যান্ড্রয়েড · ব্যবসা পরিচালনা"
       },
+      "role": {
+        "en": "Creator & maintainer",
+        "bn": "নির্মাতা ও রক্ষণাবেক্ষক"
+      },
+      "metaTitle": {
+        "en": "Songjog — Bangla-First Android Business Ledger",
+        "bn": "Songjog — বাংলা-প্রথম Android Business Ledger"
+      },
+      "metaDescription": {
+        "en": "Songjog is a Bangla-first Android business ledger with local SQLite records, auditable corrections, and device-validated exports for shops and service businesses.",
+        "bn": "Songjog বাংলা-প্রথম Android business ledger; local SQLite record, audit করা যায় এমন correction এবং ডিভাইসে যাচাই করা export ও diagnostics আছে।"
+      },
+      "keywords": [
+        "Songjog",
+        "business ledger",
+        "Android app",
+        "SQLite",
+        "Bangla app",
+        "shop management"
+      ],
       "summary": {
         "en": "A Bangla-first Android business ledger and daily operations app for shops and service businesses.",
         "bn": "দোকান ও সেবা ব্যবসার জন্য বাংলা-প্রথম Android business ledger ও দৈনন্দিন পরিচালনার অ্যাপ।"
+      },
+      "overview": {
+        "en": "Songjog is a Bangla-first ledger for small shops and service businesses. It keeps daily records in local SQLite, makes corrections auditable, and validates export and diagnostics on the device. The public source covers the Owner Edition; staff, customer, education, and healthcare workflows are future work, not shipped features.",
+        "bn": "Songjog ছোট দোকান ও সেবা ব্যবসার জন্য বাংলা-প্রথম ledger। এটি দৈনন্দিন record local SQLite-এ রাখে, correction-কে audit করা যায় এমন করে, এবং export ও diagnostics ডিভাইসে যাচাই করে। পাবলিক সোর্সে Owner Edition-এর কথা বলা হয়েছে; staff, customer, শিক্ষা ও স্বাস্থ্যসেবা workflow ভবিষ্যতের কাজ, চালু feature নয়।"
+      },
+      "highlights": {
+        "en": [
+          "Bangla-first ledger and daily operations flows.",
+          "Local SQLite records with auditable corrections.",
+          "Device-validated export and diagnostics.",
+          "Owner Edition is the public scope; other workflows are future work."
+        ],
+        "bn": [
+          "বাংলা-প্রথম ledger ও দৈনন্দিন পরিচালনার কাজ।",
+          "Audit করা যায় এমন correction-সহ local SQLite record।",
+          "ডিভাইসে যাচাই করা export ও diagnostics।",
+          "পাবলিক scope Owner Edition; অন্য workflow ভবিষ্যতের কাজ।"
+        ]
+      },
+      "stack": ["Android", "SQLite", "Bangla UI", "Local-first"],
+      "state": {
+        "en": "Public source",
+        "bn": "পাবলিক সোর্স"
       },
       "boundary": {
         "en": "The public source describes the Owner Edition; future staff, customer, education, and healthcare workflows are not presented as shipped features.",
         "bn": "Public source-এ Owner Edition-এর কথা বলা হয়েছে; ভবিষ্যতের staff, customer, শিক্ষা ও স্বাস্থ্যসেবা workflow-কে চালু feature বলা হয় না।"
       },
-      "url": "https://github.com/soobujmiah/songjog",
-      "state": "Public source",
       "evidence": {
         "en": "Bangla-first business operations app with local SQLite records, auditable corrections, and device-validated export and diagnostics.",
         "bn": "বাংলা-প্রথম business operations app; local SQLite record, audit করা যায় এমন correction, এবং ডিভাইসে যাচাই করা export ও diagnostics রয়েছে।"
-      }
+      },
+      "url": "https://github.com/soobujmiah/songjog"
     }
   ],
   "research": {
@@ -1075,7 +1730,7 @@
       "verified": [
         "llama.cpp CPU inference on arm64 Android",
         "Linux ARM64 Android toolchain builds validated on real hardware",
-        "Termux Linux desktop graphics through device-qualified Zink/Turnip routes",
+        "Termux Linux desktop graphics through device-qualified ZINK/Turnip routes",
         "Bangla and English software and document workflows"
       ],
       "experimental": [
@@ -1093,7 +1748,7 @@
       "verified": [
         "arm64 Android-এ llama.cpp CPU inference",
         "Real hardware-এ যাচাই করা Linux ARM64 Android toolchain build",
-        "Device-qualified Zink/Turnip path দিয়ে Termux Linux desktop graphics",
+        "Device-qualified ZINK/Turnip path দিয়ে Termux Linux desktop graphics",
         "বাংলা ও ইংরেজি software এবং document workflow"
       ],
       "experimental": [

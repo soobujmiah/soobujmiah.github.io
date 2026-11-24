@@ -1,9 +1,9 @@
 {
   "name": "sobuj-miah-portfolio",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
-  "description": "Sobuj Miah — Bilingual portfolio for software, systems, and operations",
+  "description": "Sobuj Miah — bilingual portfolio for software, Linux on Android, local AI, and operations",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 4173",
     "build": "tsc --noEmit && vite build && node scripts/create-routes.mjs && node scripts/verify-portfolio.mjs",
@@ -12,6 +12,8 @@
     "test": "node scripts/verify-portfolio.mjs --source-only",
     "check": "npm run typecheck && npm run lint && npm run test",
     "make:og": "python3 scripts/make-og.py",
+    "make:icons": "python3 scripts/make-icons.py",
+    "make:assets": "python3 scripts/make-og.py && python3 scripts/make-icons.py",
     "preview": "vite preview --host 0.0.0.0 --port 4173"
   },
   "dependencies": {
