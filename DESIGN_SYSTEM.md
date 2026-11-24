@@ -50,9 +50,16 @@ The primary navigation is a single floating pill dock fixed to the bottom centre
 
 Because the dock is the only navigation, every entry stays visible at every breakpoint instead of collapsing away. Below 620px the dock tightens to 36px targets and the language switch becomes icon-only; below 430px it drops to 28px targets so all ten controls still fit a 320px viewport.
 
+## Page-to-page flow
+
+Every top-level page ends in a **next-page band**: the next page's title, a large arrow, and a thin lime progress line. It is a real link, so it is keyboard reachable and crawlable.
+
+Scrolling past the end of a page continues the flow rather than dead-ending: a sustained overscroll (420px of accumulated wheel delta at the bottom) or a 90px upward drag on the band opens the next page. Detail pages are excluded — projects and services already carry their own prev/next navigation — and the last page (Contact) has no band. Reading order is Home → About → Services → Projects → Experience → Research → Evidence → Contact, matching the dock.
+
 ## Motion
 
 - The hero role line is a looping typewriter: type → hold 3.6s → delete → pause → retype. It splits on grapheme clusters with `Intl.Segmenter` so Bengali conjuncts and vowel marks are never torn mid-character. The full sentence is always present for assistive tech in an `.sr-only` span; the animated copy is `aria-hidden`.
+- The line never moves the page. `.source-role` reserves a fixed height (two lines on phones, one on desktop) so the block below it cannot jump as text is added and removed, and `.role-line` is a fixed-width (`min(80ch, 100%)`), left-aligned inner block. Because its width is constant, the `>` prompt stays pinned to the same left edge for the whole cycle instead of re-centring with every character.
 - A 2px scroll-progress bar along the top edge reports page position in the lime/mint gradient.
 - Scroll-reveal on section headings and cards via `IntersectionObserver`, with up to 280ms of stagger when several elements enter the viewport together. `data-reveal="left"`, `"right"`, and `"scale"` offer directional variants.
 - Hover lifts of 2–3px and 150–220ms transitions.

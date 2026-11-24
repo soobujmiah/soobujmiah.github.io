@@ -17,7 +17,9 @@ The home page is a concise introduction: hero, profile preview, an index of feat
 - Replaced the project list inside the terminal card with the current focus list, so the card no longer repeats the projects page either.
 - Added a 2px scroll-progress bar and staggered reveal timing so several sections entering together cascade instead of appearing at once.
 - Widened the keyword coverage: 32 English and 27 Bengali site-level terms, plus niche vocabulary for each project (`proot-distro`, `Termux:X11`, `GGUF quantization`, `AOSP build`, `on-device LLM`, and Bengali equivalents). See [SEO.md](SEO.md).
-- Added five regression checks covering the hamburger removal, the typewriter, the home index rows, the footer, and the progress bar.
+- Pinned the hero role line so the typewriter cannot move the page. The block reserves a fixed height and the inner line has a constant width, so the `>` prompt stays on the same left edge and nothing below shifts as text is typed and deleted.
+- Added a next-page band to every top-level page: the next page's title, an arrow, and a lime progress line. Overscrolling at the bottom of a page, or dragging up on the band, continues to the next page in reading order, so the site reads as one continuous scroll while every page keeps its own URL. Detail pages keep their existing prev/next project navigation.
+- Added seven regression checks covering the hamburger removal, the typewriter, the home index rows, the footer, the progress bar, the pinned role line, and the next-page band.
 
 ## What changed in the earlier polish
 
@@ -72,7 +74,7 @@ See [SEO.md](SEO.md) for the keyword research and placement plan.
 
 ## Validation
 
-`npm run build` runs TypeScript, Vite, route generation, and a 57-check verification suite covering:
+`npm run build` runs TypeScript, Vite, route generation, and a 59-check verification suite covering:
 
 - Bilingual content completeness and project/service metadata.
 - Route matrix, unique titles, canonical tags, and one `h1` per route.

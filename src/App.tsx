@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, BriefcaseBusiness, Check,
   Code2, Cpu, Database, FlaskConical, FolderGit2, Globe2, Home, Mail, Monitor,
@@ -467,6 +467,79 @@ function NotFound({ lang }: { lang: Lang }) {
   return <div className="page-wrap not-found"><p className="eyebrow"><span />404 · {lang === 'en' ? 'PAGE NOT FOUND' : 'পেজ পাওয়া যায়নি'}</p><h1>{lang === 'en' ? 'This path has moved.' : 'এই ঠিকানাটি আর নেই।'}</h1><a className="button button-primary" href={routePath('home', lang)}>{lang === 'en' ? 'Return home' : 'হোমে ফিরুন'}<ArrowRight size={16} /></a></div>;
 }
 
+/** Reading order of the top-level pages. Detail pages keep their own prev/next nav. */
+const pageOrder: Kind[] = ['home', 'about', 'services', 'projects', 'experience', 'research', 'evidence', 'contact'];
+
+function nextPageFor(kind: Kind, lang: Lang) {
+  const index = pageOrder.indexOf(kind);
+  if (index < 0 || index >= pageOrder.length - 1) return null;
+  const next = pageOrder[index + 1];
+  const entry = navigation.find(item => item.key === next);
+  const copy = site.pages[lang] as unknown as Record<string, { headline?: string }>;
+  return {
+    href: routePath(next, lang),
+    label: next === 'home' ? (lang === 'en' ? 'Home' : 'হোম') : (entry?.label[lang] ?? next),
+    title: next === 'home' ? site.site.name : (copy[next]?.headline ?? entry?.label[lang] ?? next),
+    step: String(index + 2).padStart(2, '0'),
+  };
+}
+
+/**
+ * Bottom-of-page "continue" band. Scrolling past the end of a page — or
+ * dragging up on the band — opens the next page in reading order, so the
+ * sections read as one continuous scroll while every page keeps its own URL.
+ */
+function NextPage({ lang, kind }: { lang: Lang; kind: Kind }) {
+  const next = nextPageFor(kind, lang);
+  const href = next?.href;
+  const [pull, setPull] = useState(0);
+  const startY = useRef(0);
+
+  useEffect(() => {
+    if (!href) return;
+    let accumulated = 0;
+    let idle: number | undefined;
+    const onWheel = (event: WheelEvent) => {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight > 40;
+      const atEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4;
+      if (!scrollable || !atEnd || event.deltaY <= 0) { accumulated = 0; return; }
+      accumulated += event.deltaY;
+      window.clearTimeout(idle);
+      idle = window.setTimeout(() => { accumulated = 0; }, 900);
+      if (accumulated >= 420) { accumulated = 0; window.location.assign(href); }
+    };
+    window.addEventListener('wheel', onWheel, { passive: true });
+    return () => { window.removeEventListener('wheel', onWheel); window.clearTimeout(idle); };
+  }, [href]);
+
+  if (!next || !href) return null;
+
+  return <a
+    className="next-page"
+    href={next.href}
+    aria-label={`${lang === 'en' ? 'Next page' : 'পরবর্তী পৃষ্ঠা'}: ${next.label}`}
+    onTouchStart={event => { startY.current = event.touches[0]?.clientY ?? 0; }}
+    onTouchMove={event => {
+      const y = event.touches[0]?.clientY ?? 0;
+      setPull(Math.max(0, Math.min(120, startY.current - y)));
+    }}
+    onTouchEnd={() => {
+      if (pull >= 90) window.location.assign(next.href);
+      setPull(0);
+    }}
+  >
+    <span className="next-page-inner">
+      <span className="next-page-step">{lang === 'en' ? 'NEXT' : 'পরবর্তী'} · {next.step}</span>
+      <span className="next-page-body">
+        <b>{next.title}</b>
+        <em>{lang === 'en' ? 'Keep scrolling or tap to continue' : 'স্ক্রল করুন বা ট্যাপ করুন'}</em>
+      </span>
+      <span className="next-page-arrow"><ArrowRight size={22} aria-hidden="true" /></span>
+      <span className="next-page-pull" style={{ transform: `scaleX(${Math.min(1, pull / 90)})` }} aria-hidden="true" />
+    </span>
+  </a>;
+}
+
 function App() {
   const route = useMemo(readRoute, []);
   const { lang, kind } = route;
@@ -547,7 +620,7 @@ function App() {
   else if (kind === 'contact') content = <div className="page-shell"><ContactPage lang={lang} copy={locale.contact} /></div>;
   else content = <div className="page-shell"><NotFound lang={lang} /></div>;
 
-  return <><a className="skip-link" href="#main">{lang === 'en' ? 'Skip to content' : 'মূল কনটেন্টে যান'}</a><span className="scroll-progress" aria-hidden="true" /><Header lang={lang} path={route.path} /><main id="main">{content}</main><Footer lang={lang} /></>;
+  return <><a className="skip-link" href="#main">{lang === 'en' ? 'Skip to content' : 'মূল কনটেন্টে যান'}</a><span className="scroll-progress" aria-hidden="true" /><Header lang={lang} path={route.path} /><main id="main">{content}<NextPage lang={lang} kind={kind} /></main><Footer lang={lang} /></>;
 }
 
 export default App;
