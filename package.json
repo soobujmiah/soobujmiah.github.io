@@ -3,7 +3,7 @@
   "version": "3.0.0",
   "private": true,
   "type": "module",
-  "description": "Sobuj Miah — bilingual portfolio for software, Linux on Android, local AI, and operations",
+  "description": "Sobuj Miah \u2014 bilingual portfolio for software, Linux on Android, local AI, and operations",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 4173",
     "build": "tsc --noEmit && vite build && node scripts/create-routes.mjs && node scripts/verify-portfolio.mjs",
@@ -13,8 +13,9 @@
     "check": "npm run typecheck && npm run lint && npm run test",
     "make:og": "python3 scripts/make-og.py",
     "make:icons": "python3 scripts/make-icons.py",
-    "make:assets": "python3 scripts/make-og.py && python3 scripts/make-icons.py",
-    "preview": "vite preview --host 0.0.0.0 --port 4173"
+    "make:assets": "python3 scripts/make-og.py && python3 scripts/make-icons.py && node scripts/make-social-sprite.mjs",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "make:social": "node scripts/make-social-sprite.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
@@ -26,6 +27,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "simple-icons": "^16.38.1",
     "typescript": "^5.6.3",
     "vite": "^6.4.5"
   }

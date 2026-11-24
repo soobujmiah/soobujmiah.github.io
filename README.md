@@ -12,7 +12,7 @@ npm run build
 npm run preview
 ```
 
-`npm run build` typechecks, builds the client, generates 50 static route entries under `dist/`, writes the bilingual sitemap and robots file, and runs the 62-check verification suite.
+`npm run build` typechecks, builds the client, generates 50 static route entries under `dist/`, writes the bilingual sitemap and robots file, and runs the 66-check verification suite.
 
 ## Content model
 

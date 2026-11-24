@@ -205,6 +205,12 @@ Ternux and ADT each ship their own GitHub Pages site. The content model carries 
 
 Only projects that really have a live site get the field — linking a repository to a page that does not exist would be worse than not linking at all.
 
+## Profiles and entity signals
+
+The contact page lists 21 profiles in five typed groups. Every one of them also lands in the `Person` node's `sameAs`, which is the strongest available hint that these scattered accounts belong to the same person — useful for a name that shares space with other people.
+
+Only real, resolvable profile URLs are listed. A `sameAs` entry pointing at a page that does not exist is worse than omitting it.
+
 ## Measurement
 
 - Search Console: filter queries for `linux on android`, `termux`, `llama.cpp android`, `web developer dhaka`, and `office administrator dhaka`.

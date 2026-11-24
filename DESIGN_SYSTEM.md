@@ -90,6 +90,12 @@ Structured data describes the person, website, profile page, service catalog, se
 
 Between selected work and contact, the home page carries a short "how it goes" section: three process promises — scope in writing, checkpoints you can open, handover with notes. It describes how an engagement runs rather than claiming results, so it stays accurate for a portfolio with self-reported history.
 
+## Social profiles
+
+The contact page lists every profile in five typed groups — Social, Messaging, Code & writing, Profiles & publishing, Support & identity — rather than one undifferentiated row. Each link carries its brand mark in a dark rounded badge (`--icon-badge` / `--icon-ink`), tinted per theme.
+
+The marks live in `public/social-icons.svg`, an external `<symbol>` sprite generated from `simple-icons` by `npm run make:social`. Keeping them out of the React bundle means the logos cost the JavaScript nothing; the browser only fetches the sprite on pages that render an icon, and caches it afterwards. LinkedIn is hand-written because `simple-icons` does not ship it.
+
 ## Footer
 
 The footer is intentionally one line of metadata (year, location, timezone) plus the social profiles and a link to the claims page. It repeats neither the name nor the page title — those already sit in the hero — and carries no page navigation, because the fixed dock is always on screen.

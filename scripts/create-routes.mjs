@@ -88,7 +88,7 @@ function schemaGraph(route, meta) {
     address: { '@type': 'PostalAddress', addressLocality: 'Savar, Dhaka', addressCountry: 'BD' },
     areaServed: ['Bangladesh', 'Remote'],
     knowsAbout: unique(['Linux on Android', 'Termux', 'Debian', 'Termux:X11', 'PRoot', 'ARM64', 'llama.cpp', 'Local AI', 'Android development', 'Web development', 'Office administration', 'Data entry', 'SEO']),
-    sameAs: data.site.social.map(item => item.href),
+    sameAs: data.site.social.flatMap(group => group.items.map(item => item.href)),
     hasOfferCatalog: {
       '@type': 'OfferCatalog', name: 'Services',
       itemListElement: data.services.map(service => ({
@@ -258,7 +258,7 @@ function fallbackContent(route, meta) {
   if (route.kind === 'evidence') {
     return `<section><p class="eyebrow">${esc(page.eyebrow)}</p><h1>${esc(page.headline)}</h1><p>${esc(page.lede)}</p><p>${esc(page.note)}</p><h2>${esc(page.howTitle)}</h2><ol>${page.how.map(v => `<li>${esc(v)}</li>`).join('')}</ol><ul>${data.projects.map(item => `<li><h2>${esc(item.name)}</h2><p>${esc(item.evidence[lang])}</p><p><strong>${esc(page.limitLabel)}:</strong> ${esc(item.boundary[lang])}</p><p><a href="${esc(item.url)}">${esc(page.sourceLabel)}</a></p></li>`).join('')}</ul><p><a href="${localePath('research', lang)}">${esc(page.researchLink)}</a></p></section>`;
   }
-  return `<section><p class="eyebrow">${esc(page.eyebrow)}</p><h1>${esc(page.headline)}</h1><p>${esc(page.lede)}</p><p><a href="mailto:${esc(data.site.email)}">${esc(data.site.email)}</a></p><p><a href="tel:${esc(data.site.phoneHref)}">${esc(data.site.phone)}</a></p><h2>${esc(page.briefTitle)}</h2><ol>${page.brief.map(v => `<li>${esc(v)}</li>`).join('')}</ol><p>${esc(page.responseLabel)}: ${esc(page.responseValue)}</p><ul>${data.site.social.map(link => `<li><a href="${esc(link.href)}">${esc(link.label)}</a></li>`).join('')}</ul></section>`;
+  return `<section><p class="eyebrow">${esc(page.eyebrow)}</p><h1>${esc(page.headline)}</h1><p>${esc(page.lede)}</p><p><a href="mailto:${esc(data.site.email)}">${esc(data.site.email)}</a></p><p><a href="tel:${esc(data.site.phoneHref)}">${esc(data.site.phone)}</a></p><h2>${esc(page.briefTitle)}</h2><ol>${page.brief.map(v => `<li>${esc(v)}</li>`).join('')}</ol><p>${esc(page.responseLabel)}: ${esc(page.responseValue)}</p><ul>${data.site.social.flatMap(group => group.items).map(link => `<li><a href="${esc(link.href)}">${esc(link.label)}</a></li>`).join('')}</ul></section>`;
 }
 
 function replaceMeta(html, key, value, property = 'name') {

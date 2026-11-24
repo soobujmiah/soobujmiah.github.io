@@ -67,7 +67,7 @@ interface SiteData {
     roles: Record<Lang, string[]>;
     process: Array<{ title: Localized; body: Localized }>;
     languages: Array<{ en: string; bn: string; levelEn: string; levelBn: string }>;
-    social: Array<{ label: string; href: string }>;
+    social: Array<{ id: string; label: Localized; items: Array<{ label: string; href: string; icon: string }> }>;
   };
   serviceGroups: Array<{ id: string; title: Localized; lede: Localized }>;
   pages: Record<Lang, Record<'home' | 'about' | 'services' | 'experience' | 'projects' | 'research' | 'evidence' | 'contact', PageText>>;
@@ -79,6 +79,8 @@ interface SiteData {
 }
 
 const site = rawSite as unknown as SiteData;
+const socialLinks = site.site.social.flatMap(group => group.items);
+const socialGroups = site.site.social;
 
 const navigation: Array<{ key: 'about' | 'services' | 'projects' | 'experience' | 'research' | 'evidence' | 'contact'; label: Localized }> = [
   { key: 'about', label: { en: 'About', bn: 'পরিচিতি' } },
@@ -234,7 +236,7 @@ function Footer({ lang }: { lang: Lang }) {
   return <footer className="site-footer">
     <p className="footer-meta">© {new Date().getFullYear()} · {site.site.location[lang]} · {site.site.timezone[lang]}</p>
     <nav className="footer-links" aria-label={lang === 'en' ? 'Profiles and evidence' : 'প্রোফাইল ও প্রমাণ'}>
-      {site.site.social.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.label}</a>)}
+      {socialLinks.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.label}</a>)}
       <a className="footer-evidence" href={routePath('evidence', lang)}>{lang === 'en' ? 'Claims & limits' : 'দাবি ও সীমাবদ্ধতা'}</a>
     </nav>
   </footer>;
@@ -300,7 +302,7 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
   const contact = site.pages[lang].contact;
   const verified = site.research[lang].verified;
   const roles = site.site.roles[lang];
-  const { typed, complete } = useTypewriter(roles);
+  const { typed, complete, index } = useTypewriter(roles);
   const featuredServices = (home.featuredServices as string[]).map(slug => site.services.find(service => service.slug === slug)).filter((service): service is Service => Boolean(service));
   const featuredProjects = (home.featuredProjects as string[]).map(slug => site.projects.find(project => project.slug === slug)).filter((project): project is Project => Boolean(project));
   const focus = home.focus as string[];
@@ -312,7 +314,13 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
         <h1 className="source-name" id="hero-title" data-reveal><span>{lang === 'en' ? 'Sobuj ' : 'সবুজ '}</span><span className="name-accent">{lang === 'en' ? 'Miah' : 'মিয়া'}</span></h1>
         <p className="source-role" data-reveal>
           <span className="sr-only">{roles.join(' · ')}</span>
-          <span className="role-line" aria-hidden="true"><b>&gt;</b>{typed}<i className={complete ? 'role-caret is-idle' : 'role-caret'} /></span>
+          {/* The invisible ghost reserves the width of the whole sentence, so the
+              block is the same size for every frame of the type/delete cycle.
+              The visible line is laid over it, left-anchored on the prompt. */}
+          <span className="role-line" aria-hidden="true">
+            <span className="role-ghost"><b>&gt;</b>{roles[index]}</span>
+            <span className="role-live"><b>&gt;</b>{typed}<i className={complete ? 'role-caret is-idle' : 'role-caret'} /></span>
+          </span>
         </p>
         <p className="source-intro" data-reveal>{home.deck as string}</p>
         <div className="hero-actions" data-reveal><a className="button button-primary" href={routePath('contact', lang)}>{lang === 'en' ? 'Discuss a project' : 'কাজ নিয়ে কথা বলুন'}<ArrowUpRight size={16} /></a><a className="button button-quiet" href={routePath('projects', lang)}>{lang === 'en' ? 'View projects' : 'প্রকল্প দেখুন'}<ArrowDown size={15} /></a></div>
@@ -386,7 +394,7 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
     <section className="source-section source-contact" id="contact" aria-labelledby="home-contact-title">
       <div className="source-wrap"><SectionHeading number="05" label={lang === 'en' ? 'CONTACT' : 'যোগাযোগ'} title={contact.headline} lede={contact.lede} id="home-contact-title" />
         <div className="source-contact-links" data-reveal><a href={`mailto:${site.site.email}`}><span>{contact.emailLabel as string}</span><b>{site.site.email}</b><ArrowUpRight size={17} /></a><a href={`tel:${site.site.phoneHref}`}><span>{contact.phoneLabel as string}</span><b>{site.site.phone}</b><ArrowUpRight size={17} /></a><a href="https://t.me/soobujmiah" target="_blank" rel="noopener noreferrer"><span>Telegram</span><b>@soobujmiah</b><ArrowUpRight size={17} /></a></div>
-        <div className="source-socials">{site.site.social.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.label}<ArrowUpRight size={13} /></a>)}</div>
+        <div className="source-socials">{socialLinks.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.label}<ArrowUpRight size={13} /></a>)}</div>
       </div>
     </section>
   </div>;
@@ -518,9 +526,12 @@ function EvidencePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang
   </div>;
 }
 
+function SocialIcon({ name }: { name: string }) {
+  return <svg className="social-icon" aria-hidden="true" focusable="false"><use href={`/social-icons.svg#si-${name}`} /></svg>;
+}
+
 function ContactPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['contact'] }) {
   return <div className="page-wrap contact-page"><PageHeading copy={copy} />
-    <p className="contact-lede" data-reveal>{copy.lede}</p>
     <div className="contact-grid" data-reveal>
       <a href={`mailto:${site.site.email}`}><span>{copy.emailLabel as string}</span><strong>{site.site.email}</strong><ArrowUpRight size={17} /></a>
       <a href={`tel:${site.site.phoneHref}`}><span>{copy.phoneLabel as string}</span><strong>{site.site.phone}</strong><ArrowUpRight size={17} /></a>
@@ -530,7 +541,27 @@ function ContactPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]
       <section className="contact-brief" data-reveal><h2>{copy.briefTitle as string}</h2><ol>{(copy.brief as string[]).map(item => <li key={item}>{item}</li>)}</ol></section>
       <aside className="contact-meta" data-reveal><div><span>{copy.responseLabel as string}</span><b>{copy.responseValue as string}</b></div><div><span>{lang === 'en' ? 'Time zone' : 'সময় অঞ্চল'}</span><b>{site.site.timezone[lang]}</b></div><div><span>{lang === 'en' ? 'Location' : 'অবস্থান'}</span><b>{site.site.location[lang]}</b></div></aside>
     </div>
-    <div className="social-list" data-reveal>{site.site.social.filter(link => !['WhatsApp', 'Telegram'].includes(link.label)).map(link => <a href={link.href} target="_blank" rel="noopener noreferrer" key={link.label}>{link.label}<ArrowUpRight size={14} /></a>)}</div>
+    <section className="social-section" aria-labelledby="social-title">
+      <div className="subsection-heading" data-reveal>
+        <p className="eyebrow"><span />{lang === 'en' ? 'EVERYWHERE ELSE' : 'আরও যেখানে'}</p>
+        <h2 id="social-title">{lang === 'en' ? 'Find me on' : 'আমাকে খুঁজুন'}</h2>
+        <p className="social-note">{lang === 'en' ? 'Grouped by what each one is for.' : 'কোনটা কী কাজে, সেই অনুযায়ী সাজানো।'}</p>
+      </div>
+      <div className="social-groups">
+        {socialGroups.map(group => <div className="social-group" key={group.id} data-reveal>
+          <h3>{group.label[lang]}</h3>
+          <ul>
+            {group.items.map(item => <li key={item.label}>
+              <a href={item.href} target="_blank" rel="noopener noreferrer">
+                <SocialIcon name={item.icon} />
+                <span>{item.label}</span>
+                <ArrowUpRight size={13} aria-hidden="true" />
+              </a>
+            </li>)}
+          </ul>
+        </div>)}
+      </div>
+    </section>
   </div>;
 }
 

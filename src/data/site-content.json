@@ -121,36 +121,170 @@
     ],
     "social": [
       {
-        "label": "GitHub",
-        "href": "https://github.com/soobujmiah"
+        "id": "social",
+        "label": {
+          "en": "Social",
+          "bn": "সোশ্যাল"
+        },
+        "items": [
+          {
+            "label": "X",
+            "href": "https://x.com/soobujmiah",
+            "icon": "x"
+          },
+          {
+            "label": "Instagram",
+            "href": "https://instagram.com/soobujmiah",
+            "icon": "instagram"
+          },
+          {
+            "label": "Threads",
+            "href": "https://threads.net/@soobujmiah",
+            "icon": "threads"
+          },
+          {
+            "label": "Facebook",
+            "href": "https://facebook.com/soobujmiah",
+            "icon": "facebook"
+          },
+          {
+            "label": "YouTube",
+            "href": "https://youtube.com/@soobujmiah",
+            "icon": "youtube"
+          },
+          {
+            "label": "LinkedIn",
+            "href": "https://linkedin.com/in/soobujmiah",
+            "icon": "linkedin"
+          }
+        ]
       },
       {
-        "label": "LinkedIn",
-        "href": "https://linkedin.com/in/soobujmiah"
+        "id": "messaging",
+        "label": {
+          "en": "Messaging",
+          "bn": "মেসেজিং"
+        },
+        "items": [
+          {
+            "label": "Telegram",
+            "href": "https://t.me/soobujmiah",
+            "icon": "telegram"
+          },
+          {
+            "label": "WhatsApp",
+            "href": "https://wa.me/8801617040846",
+            "icon": "whatsapp"
+          }
+        ]
       },
       {
-        "label": "Telegram",
-        "href": "https://t.me/soobujmiah"
+        "id": "code",
+        "label": {
+          "en": "Code & writing",
+          "bn": "কোড ও লেখা"
+        },
+        "items": [
+          {
+            "label": "GitHub",
+            "href": "https://github.com/soobujmiah",
+            "icon": "github"
+          },
+          {
+            "label": "Dev.to",
+            "href": "https://dev.to/soobujmiah",
+            "icon": "devdotto"
+          },
+          {
+            "label": "Medium",
+            "href": "https://medium.com/@soobujmiah",
+            "icon": "medium"
+          },
+          {
+            "label": "Hashnode",
+            "href": "https://hashnode.com/@soobujmiah",
+            "icon": "hashnode"
+          },
+          {
+            "label": "Stack Overflow",
+            "href": "https://stackoverflow.com/users/33137111/soobujmiah",
+            "icon": "stackoverflow"
+          },
+          {
+            "label": "Hugging Face",
+            "href": "https://huggingface.co/soobujmiah",
+            "icon": "huggingface"
+          }
+        ]
       },
       {
-        "label": "WhatsApp",
-        "href": "https://wa.me/8801617040846"
+        "id": "profiles",
+        "label": {
+          "en": "Profiles & publishing",
+          "bn": "প্রোফাইল ও প্রকাশনা"
+        },
+        "items": [
+          {
+            "label": "About.me",
+            "href": "https://about.me/soobujmiah",
+            "icon": "aboutme"
+          },
+          {
+            "label": "PeerList",
+            "href": "https://peerlist.io/soobujmiah",
+            "icon": "peerlist"
+          },
+          {
+            "label": "WordPress",
+            "href": "https://soobujmiah.wordpress.com",
+            "icon": "wordpress"
+          },
+          {
+            "label": "Product Hunt",
+            "href": "https://www.producthunt.com/@soobujmiah",
+            "icon": "producthunt"
+          }
+        ]
+      },
+      {
+        "id": "support",
+        "label": {
+          "en": "Support & identity",
+          "bn": "সহায়তা ও পরিচিতি"
+        },
+        "items": [
+          {
+            "label": "Buy Me a Coffee",
+            "href": "https://buymeacoffee.com/soobujmiah",
+            "icon": "buymeacoffee"
+          },
+          {
+            "label": "Patreon",
+            "href": "https://www.patreon.com/soobujmiah",
+            "icon": "patreon"
+          },
+          {
+            "label": "Gravatar",
+            "href": "https://gravatar.com/soobujmiah",
+            "icon": "gravatar"
+          }
+        ]
       }
     ],
     "roles": {
       "en": [
-        "Independent Software & AI Systems Engineer · Web Developer · Operations Support",
         "Linux on Android & Termux desktop specialist",
-        "Local AI on-device inference with llama.cpp and GGUF",
+        "Local AI on-device inference with llama.cpp",
         "Flutter, web and Android developer in Dhaka",
-        "Office operations, records and business technology"
+        "Office operations, records and business technology",
+        "Independent Software & AI Systems Engineer · Web Developer · Operations Support"
       ],
       "bn": [
-        "স্বতন্ত্র সফটওয়্যার ও এআই সিস্টেম প্রকৌশলী · ওয়েব ডেভেলপার · পরিচালনা সহায়তা",
         "অ্যান্ড্রয়েডে লিনাক্স ও টার্মাক্স ডেস্কটপ বিশেষজ্ঞ",
-        "llama.cpp ও GGUF দিয়ে অন-ডিভাইস লোকাল এআই",
+        "llama.cpp দিয়ে অন-ডিভাইস লোকাল এআই",
         "ঢাকার ফ্লাটার, ওয়েব ও অ্যান্ড্রয়েড ডেভেলপার",
-        "অফিস পরিচালনা, রেকর্ড ও ব্যবসায়িক প্রযুক্তি"
+        "অফিস পরিচালনা, রেকর্ড ও ব্যবসায়িক প্রযুক্তি",
+        "স্বতন্ত্র সফটওয়্যার ও এআই সিস্টেম প্রকৌশলী · ওয়েব ডেভেলপার · পরিচালনা সহায়তা"
       ]
     },
     "process": [
