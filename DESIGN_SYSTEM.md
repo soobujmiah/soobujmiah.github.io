@@ -54,7 +54,9 @@ Because the dock is the only navigation, every entry stays visible at every brea
 
 Every top-level page ends in a **next-page band**: the next page's title, a large arrow, and a thin lime progress line. It is a real link, so it is keyboard reachable and crawlable.
 
-Scrolling past the end of a page continues the flow rather than dead-ending: a sustained overscroll (520px of accumulated wheel delta at the bottom) or a 90px upward drag on the band opens the next page.
+Scrolling past the end of a page continues the flow rather than dead-ending: a sustained overscroll (520px of accumulated wheel delta at the bottom) or a 90px upward drag on the band opens the next page. A tap on the band always works.
+
+The band is **armed** only once the reader has earned it. A fresh page is armed from the start; a page reached through the browser's Back or Forward button starts **cold** — wheel spin and drags on the band do nothing until the reader has climbed at least 240px away from the end and come back. This is what makes Back work: a history restore lands exactly where the reader left off, on the band, usually with the wheel or a thumb still moving, and an armed band would push straight forward again — which readers experienced as "back doesn't work, it just refreshes". The rule holds for both kinds of restore (a fresh `back_forward` load and a bfcache restore, which keeps the old listeners alive — hence the `pageshow` reset), and the band's caption changes to "Scroll up to keep reading, or tap to continue" while it is cold. A drag that does navigate cancels the synthesised tap, so a single gesture never pushes two history entries.
 
 Three guards keep that from misfiring:
 
@@ -69,7 +71,7 @@ A downward drag on the band is the reader asking to scroll back up, so it never 
 ## Motion
 
 - The hero role line is a **rotating typewriter**: it types one trade, holds three seconds, deletes it, pauses, and types the next. Five roles cycle in both languages (`site.roles`). It splits on grapheme clusters with `Intl.Segmenter` so Bengali conjuncts and vowel marks are never torn mid-character. All five roles are always present for assistive tech in an `.sr-only` span, joined with `·`; the animated copy is `aria-hidden`.
-- The line never moves the page. `.source-role` reserves a fixed height (two lines on phones, one on desktop) so the block below it cannot jump as text is added and removed, and `.role-line` is a fixed-width (`min(80ch, 100%)`), left-aligned inner block. Because its width is constant, the `>` prompt stays pinned to the same left edge for the whole cycle instead of re-centring with every character.
+- The line never moves the page. `.source-role` reserves one fixed line of height so the block below it cannot jump as text is added and removed, and every role is kept short enough to actually fit that line on a 320px phone (≤ 40 Latin characters, ≤ 30 Bengali graphemes). The block is centred: a hidden `.role-ghost` copy of the finished sentence fixes the `.role-line` width, the visible `.role-live` sits absolutely on top of it, so short roles sit in the middle of the page while the `>` prompt stays pinned to the left edge of that line for the whole cycle instead of re-centring with every character. The primary title (`Software & AI systems engineer`) opens the cycle; the specialist trades follow.
 - A 2px scroll-progress bar along the top edge reports page position in the lime/mint gradient.
 - The four hero stats count up from zero over 900ms once they enter the viewport, with an ease-out curve. Reduced motion renders the final number immediately.
 - `html { scroll-behavior: smooth }` makes anchor and focus jumps glide; reduced motion resets it to instant.
@@ -100,12 +102,12 @@ Structured data describes the person, website, profile page, service catalog, se
 
 Between selected work and contact, the home page carries a short "how it goes" section: three process promises — scope in writing, checkpoints you can open, handover with notes. It describes how an engagement runs rather than claiming results, so it stays accurate for a portfolio with self-reported history.
 
-## Social profiles
+## Contact chips
 
-The contact page lists every profile in five typed groups — Social, Messaging, Code & writing, Profiles & publishing, Support & identity — rather than one undifferentiated row. Each link carries its brand mark in a dark rounded badge (`--icon-badge` / `--icon-ink`), tinted per theme.
+Every way to reach the owner lives on the contact page and nowhere else, as one compact chip directory in the spirit of Stack Overflow's profile links: 22 small chips in five labelled rows — **Direct** (email, phone, Telegram — outlined in the accent because they are the fastest routes), **Social**, **Code & writing**, **Profiles & publishing**, **Support & identity**. Telegram and WhatsApp are not repeated in the Social row, since the Direct row already reaches them. A chip is a real link with a 20px brand badge and a short label; the group label is an 8.5px monospace caption. Density is deliberate — this is a directory, not a set of feature cards.
 
-The marks live in `public/social-icons.svg`, an external `<symbol>` sprite generated from `simple-icons` by `npm run make:social`. Keeping them out of the React bundle means the logos cost the JavaScript nothing; the browser only fetches the sprite on pages that render an icon, and caches it afterwards. LinkedIn is hand-written because `simple-icons` does not ship it.
+The marks live in `public/social-icons.svg`, an external `<symbol>` sprite generated from `simple-icons` by `npm run make:social` (23 symbols: 21 brands plus hand-written `mail` and `phone`). Keeping them out of the React bundle means the logos cost the JavaScript nothing; the browser only fetches the sprite on pages that render an icon, and caches it afterwards. LinkedIn is hand-written because `simple-icons` does not ship it.
 
 ## Footer
 
-The footer is intentionally one line of metadata (year, location, timezone) plus the social profiles and a link to the claims page. On the contact page it drops the profiles, because the page body already lists all 21 of them — repeating them was pure duplication. It repeats neither the name nor the page title — those already sit in the hero — and carries no page navigation, because the fixed dock is always on screen.
+The footer is the same one line on every page: copyright year, place, time zone, and the **Claims & limits** link. Nothing else. It carries no social profiles (they all live on the contact page, which the fixed dock reaches from anywhere), no page navigation (the dock is always on screen), and neither the name nor the page title (those already sit in the hero).

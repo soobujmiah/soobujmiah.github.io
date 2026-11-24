@@ -273,18 +273,18 @@
     ],
     "roles": {
       "en": [
-        "Linux on Android & Termux desktop specialist",
-        "Local AI on-device inference with llama.cpp",
-        "Flutter, web and Android developer in Dhaka",
-        "Office operations, records and business technology",
-        "Independent Software & AI Systems Engineer · Web Developer · Operations Support"
+        "Software & AI systems engineer",
+        "Termux & Linux on Android specialist",
+        "On-device local AI with llama.cpp",
+        "Flutter, web & Android developer, Dhaka",
+        "Office operations & business technology"
       ],
       "bn": [
-        "অ্যান্ড্রয়েডে লিনাক্স ও টার্মাক্স ডেস্কটপ বিশেষজ্ঞ",
+        "সফটওয়্যার ও এআই সিস্টেম প্রকৌশলী",
+        "অ্যান্ড্রয়েডে লিনাক্স ও টার্মাক্স বিশেষজ্ঞ",
         "llama.cpp দিয়ে অন-ডিভাইস লোকাল এআই",
-        "ঢাকার ফ্লাটার, ওয়েব ও অ্যান্ড্রয়েড ডেভেলপার",
-        "অফিস পরিচালনা, রেকর্ড ও ব্যবসায়িক প্রযুক্তি",
-        "স্বতন্ত্র সফটওয়্যার ও এআই সিস্টেম প্রকৌশলী · ওয়েব ডেভেলপার · পরিচালনা সহায়তা"
+        "ফ্লাটার, ওয়েব ও অ্যান্ড্রয়েড ডেভেলপার",
+        "অফিস পরিচালনা ও ব্যবসায়িক প্রযুক্তি"
       ]
     },
     "process": [

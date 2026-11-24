@@ -22,8 +22,22 @@ const LINKEDIN = {
   path: 'M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45Z',
 };
 
+/** Non-brand glyphs used alongside the profiles on the contact page. */
+const GLYPHS = {
+  mail: {
+    title: 'Email',
+    path: 'M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4.24-8 5-8-5V6l8 5 8-5v2.24Z',
+  },
+  phone: {
+    title: 'Phone',
+    path: 'M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.85 21 3 13.15 3 3.5A1 1 0 0 1 4 2.5h3.5a1 1 0 0 1 1 1c0 1.24.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2Z',
+  },
+};
+
 /** id in the sprite -> simple-icons export name */
 const WANTED = [
+  ['mail', GLYPHS.mail],
+  ['phone', GLYPHS.phone],
   ['x', 'siX'],
   ['instagram', 'siInstagram'],
   ['threads', 'siThreads'],
