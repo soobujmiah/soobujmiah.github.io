@@ -286,7 +286,7 @@ html[data-theme="light"] .nav-contact { background: var(--accent-bg); color: #0b
    centred and exactly as wide as the finished sentence, short roles sit in the
    middle of the page instead of hanging off to the left — and because the
    width never changes, the ">" prompt never slides. */
-.role-line { position: relative; display: inline-block; max-width: 100%; vertical-align: top; text-align: left; }
+.role-line { position: relative; display: inline-block; max-width: 100%; vertical-align: top; text-align: left; white-space: nowrap; }
 .role-ghost { visibility: hidden; }
 .role-ghost::after { content: '\00a0'; }  /* room for the caret */
 .role-live { position: absolute; inset: 0; }
@@ -497,16 +497,60 @@ html[data-theme="light"] .nav-contact { background: var(--accent-bg); color: #0b
 .contact-button > svg:last-child { flex: none; color: var(--mint); }
 .contact-button .social-icon { width: 24px; height: 24px; padding: 5px; border-radius: 7px; }
 .contact-button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* ---------- next page band ---------- */
+.next-page {
+  position: relative; display: block; overflow: hidden;
+  border-top: 1px solid var(--line); background: var(--bg-soft);
+  transition: background .3s ease;
+}
+.next-page:hover, .next-page:focus-visible { background: linear-gradient(100deg, var(--accent-soft), transparent 62%); }
+.next-page-inner {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 34px; align-items: center; gap: 18px;
+  width: min(100%, var(--page-width)); margin-inline: auto;
+  padding: 30px var(--side-pad) 34px;
+}
+.next-page-step {
+  grid-column: 1 / -1;
+  color: var(--dim); font: 500 9px var(--font-mono); letter-spacing: .16em; text-transform: uppercase;
+}
+.next-page-body { display: grid; gap: 6px; min-width: 0; }
+.next-page-body b {
+  color: var(--ink); font: 600 clamp(22px, 4.2vw, 40px)/1.1 var(--font-display); letter-spacing: -.045em;
+  transition: color .25s ease, transform .35s cubic-bezier(.22, 1, .36, 1);
+}
+.next-page:hover .next-page-body b, .next-page:focus-visible .next-page-body b { color: var(--accent); transform: translateX(6px); }
+.next-page-body em { color: var(--muted); font: 400 11.5px/1.5 var(--font-body); font-style: normal; }
+.next-page-arrow {
+  display: grid; place-items: center; justify-self: end;
+  width: 44px; height: 44px; border: 1px solid var(--line-strong); border-radius: 50%; color: var(--accent);
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1), background .3s ease;
+}
+.next-page:hover .next-page-arrow, .next-page:focus-visible .next-page-arrow { background: var(--accent-bg); color: var(--accent-ink); transform: translateX(4px); }
+.next-page-pull {
+  position: absolute; inset: auto 0 0 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--mint));
+  transform-origin: left center; transform: scaleX(0); pointer-events: none;
+}
+html[lang="bn"] .next-page-body b { letter-spacing: 0; line-height: 1.25; }
+
+/* ---------- footer ---------- */
 .site-footer {
+  position: relative; z-index: 5;
   display: flex; align-items: center; justify-content: center;
-  padding: 20px var(--side-pad) 104px;
+  padding: 22px var(--side-pad) calc(86px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--line); background: var(--bg-soft);
 }
+/* A pill, not a scrap of 10px text: the one link in the footer has to be a
+   comfortable tap on a phone, well clear of the fixed dock below it. */
 .footer-evidence {
-  color: var(--accent); font: 500 10px var(--font-mono); letter-spacing: .02em;
-  text-decoration: underline; text-decoration-color: rgba(205, 255, 87, .35); text-underline-offset: 4px;
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 42px; padding: 0 18px;
+  border: 1px solid var(--line-strong); border-radius: 999px;
+  background: var(--panel); color: var(--accent);
+  font: 500 11px var(--font-mono); letter-spacing: .02em; text-align: center;
+  transition: border-color .18s ease, color .18s ease, transform .18s ease;
 }
-.footer-evidence:hover { color: var(--ink); }
+.footer-evidence:hover, .footer-evidence:focus-visible { border-color: var(--accent); color: var(--ink); transform: translateY(-1px); }
 
 /* ---------- no-JS fallback ---------- */
 .fallback-header {
@@ -1010,7 +1054,7 @@ html[lang="bn"] .project-main p { line-height: 1.95; }
   .experience-item h2 { font-size: 28px; }
   .project-card { min-height: 0; }
   .all-projects .project-card { min-height: 0; }
-  .site-footer { padding-bottom: 88px; padding-top: 18px; }
+  .site-footer { padding-top: 18px; }
 }
 
 @media (max-width: 430px) {

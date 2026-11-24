@@ -538,7 +538,6 @@
           "GGEN Flutter",
           "Songjog",
           "Ternux project",
-          "Ternuxx project",
           "ADT toolchain",
           "Songjog app",
           "open source projects Bangladesh"
@@ -1826,87 +1825,6 @@
       },
       "url": "https://github.com/soobujmiah/ternux",
       "website": "https://soobujmiah.github.io/ternux/"
-    },
-    {
-      "slug": "ternuxx",
-      "name": "Ternuxx",
-      "category": {
-        "en": "Native Termux · Workstation tools",
-        "bn": "Native Termux · Workstation tool"
-      },
-      "role": {
-        "en": "Creator & maintainer",
-        "bn": "নির্মাতা ও রক্ষণাবেক্ষক"
-      },
-      "metaTitle": {
-        "en": "Ternuxx — Native Termux Workstation Control Plane",
-        "bn": "Ternuxx — Native Termux Workstation নিয়ন্ত্রণ ব্যবস্থা"
-      },
-      "metaDescription": {
-        "en": "Ternuxx manages a native Termux workstation with one tx command, keeping optional PRoot guests separate and the desktop lifecycle explicit.",
-        "bn": "Ternuxx একটি tx command দিয়ে native Termux workstation পরিচালনা করে; optional PRoot guest আলাদা রাখে এবং desktop lifecycle স্পষ্ট রাখে।"
-      },
-      "keywords": [
-        "Termux workstation",
-        "native Termux",
-        "Termux desktop",
-        "PRoot",
-        "tx command",
-        "Termux control",
-        "native Termux workstation",
-        "Termux CLI tool",
-        "Android Linux automation",
-        "Termux scripts",
-        "systemd Termux",
-        "Termux desktop manager",
-        "Android workstation setup"
-      ],
-      "summary": {
-        "en": "A native Termux workstation control plane managed with the tx command, with optional PRoot guests kept as separate providers.",
-        "bn": "tx command দিয়ে পরিচালিত Native Termux workstation control plane। Optional PRoot guest আলাদা provider।"
-      },
-      "overview": {
-        "en": "Ternuxx is the native companion to Ternux. It manages a Termux-first workstation from a single tx command: install the native toolchain, start and stop the desktop session, and keep optional PRoot guests separate from the host. The design keeps the control plane explicit, so a guest root filesystem is never created by accident.",
-        "bn": "Ternuxx হলো Ternux-এর native সঙ্গী। এটি একটি tx command থেকে Termux-first workstation পরিচালনা করে: native toolchain ইনস্টল, desktop session চালু ও বন্ধ, এবং optional PRoot guest-কে host থেকে আলাদা রাখা। ডিজাইনটি control plane স্পষ্ট রাখে, তাই guest root filesystem ভুলবশত তৈরি হয় না।"
-      },
-      "highlights": {
-        "en": [
-          "Single tx command for the native Termux workstation.",
-          "Native Termux host separated from optional PRoot guests.",
-          "Desktop lifecycle and tooling documented in one place.",
-          "No implicit guest root filesystem during install."
-        ],
-        "bn": [
-          "Native Termux workstation-এর জন্য একটি tx command।",
-          "Native Termux host এবং optional PRoot guest আলাদা।",
-          "Desktop lifecycle ও tooling এক জায়গায় নথিবদ্ধ।",
-          "Install-এর সময় ভুলবশত guest root filesystem তৈরি হয় না।"
-        ]
-      },
-      "stack": [
-        "Bash",
-        "Termux",
-        "Native Termux",
-        "PRoot",
-        "Termux:X11",
-        "Android"
-      ],
-      "state": {
-        "en": "Public source",
-        "bn": "পাবলিক সোর্স"
-      },
-      "boundary": {
-        "en": "The Native Termux host is the control plane; installing the Native workstation does not create a guest root filesystem. Desktop launch and graphics validation are separate steps.",
-        "bn": "Native Termux host-ই control plane; Native workstation install করলে guest root filesystem তৈরি হয় না। Desktop চালু ও graphics যাচাই আলাদা ধাপ।"
-      },
-      "evidence": {
-        "en": "Public source documents the native workstation control plane, desktop lifecycle, and separation between Native Termux and optional PRoot guests.",
-        "bn": "পাবলিক সোর্সে Native workstation control plane, desktop lifecycle, এবং Native Termux ও optional PRoot guest-এর পৃথক ভূমিকা নথিবদ্ধ।"
-      },
-      "repo": {
-        "license": "custom", "language": "Python", "created": "2026-10-17", "pushed": "2026-11-05", "release": "@prerelease"
-      },
-      "url": "https://github.com/soobujmiah/ternuxx"
     },
     {
       "slug": "adt",
