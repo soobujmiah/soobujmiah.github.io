@@ -8,6 +8,7 @@ The home page is a concise introduction: hero, profile preview, an index of feat
 
 ## What changed in the latest pass
 
+- Added scroll-back. Scrolling up past the top of a page (sustained upward wheel after a pause, or a 90px downward pull on touch) returns to the previous page in reading order and lands at its end, mirroring the next-page band. A fixed hint at the top names the destination and fills with the gesture. Arrival is flagged through `sessionStorage` so the destination page opens at its end before first paint and with its next-page band cold.
 - Reduced the footer to a single centred **Claims & limits** link on every page; the place, time-zone and hours line is gone.
 - Enriched the Claims & limits page with real repository data: a table of all six public repositories (license, primary language, created and last-push dates, latest release, live site where one exists), read from the GitHub API on 24 November 2026 and stored per project as `repo` in the content model, plus a claim / evidence / limit column set per project built from the project's own highlights, evidence and boundary. Two genuine limits are now visible in the table: Songjog declares no license and Ternuxx ships only a pre-release and a custom license.
 - Home page contact section now offers only email, phone and Telegram as three equal dark buttons in one row; the 21-link profile row is gone from the home page.
@@ -37,7 +38,7 @@ The home page is a concise introduction: hero, profile preview, an index of feat
 - Added more motion: count-up hero stats, a breathing hero grid and drifting glow, a blur-resolve on section headings, and a cursor-following radial glow on service and project cards. Every one of them is disabled under `prefers-reduced-motion`.
 - Enabled `scroll-behavior: smooth` for anchor and focus jumps.
 - Added a next-page band to every top-level page: the next page's title, an arrow, and a lime progress line. Overscrolling at the bottom of a page, or dragging up on the band, continues to the next page in reading order, so the site reads as one continuous scroll while every page keeps its own URL. Detail pages keep their existing prev/next project navigation.
-- Added regression checks covering the hamburger removal, the rotating typewriter, the home index rows, the footer, the progress bar, the pinned role line, the next-page band, the project website links, the process strip, the contact circle cluster, the sprite, the single-page-only profiles, the one-line roles, the scroll-back guard, the once-only drag navigation, the repository facts, and the footer (72 checks in total).
+- Added regression checks covering the hamburger removal, the rotating typewriter, the home index rows, the footer, the progress bar, the pinned role line, the next-page band, the project website links, the process strip, the contact circle cluster, the sprite, the single-page-only profiles, the one-line roles, the scroll-back guard, the once-only drag navigation, the repository facts, the footer, and scroll-back (74 checks in total).
 
 ## What changed in the earlier polish
 
@@ -92,7 +93,7 @@ See [SEO.md](SEO.md) for the keyword research and placement plan.
 
 ## Validation
 
-`npm run build` runs TypeScript, Vite, route generation, and a 72-check verification suite covering:
+`npm run build` runs TypeScript, Vite, route generation, and a 74-check verification suite covering:
 
 - Bilingual content completeness and project/service metadata.
 - Route matrix, unique titles, canonical tags, and one `h1` per route.

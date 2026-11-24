@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import {
   ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, BriefcaseBusiness, Check,
   Code2, Cpu, Database, FlaskConical, FolderGit2, Globe2, Home, Mail, Monitor,
@@ -637,9 +637,13 @@ function nextPageFor(kind: Kind, lang: Lang) {
   };
 }
 
+/** Session flag set just before a scroll-back: the previous page should land at its end. */
+const FLOW_ARRIVAL = 'soobuj:flow-arrival';
+let arrivedFromNext = false;
+
 /**
- * Distances (px) and timings (ms) that separate a deliberate "continue" from
- * a stray gesture at the end of a page.
+ * Distances (px) and timings (ms) that separate a deliberate "continue" or
+ * "go back" from a stray gesture at either end of a page.
  */
 const END_SLACK = 4;          // viewport bottom this close to the document end counts as "at the end"
 const LEAVE_DISTANCE = 240;   // a restored page re-arms only after the reader climbs this far up
@@ -686,8 +690,9 @@ function NextPage({ lang, kind }: { lang: Lang; kind: Kind }) {
     };
 
     // "Ready" means the reader has earned the overscroll: a fresh load is ready
-    // at once, a history restore only once it has climbed away from the end.
-    let ready = navigationType() !== 'back_forward' || away();
+    // at once; a history restore or a scroll-back arrival — both of which land
+    // on this band — only once the reader has climbed away from the end.
+    let ready = !(navigationType() === 'back_forward' || arrivedFromNext) || away();
     let accumulated = 0;
     let lastY = window.scrollY;
     let settleUntil = performance.now() + SETTLE_MS;
@@ -727,6 +732,7 @@ function NextPage({ lang, kind }: { lang: Lang; kind: Kind }) {
       if (accumulated >= WHEEL_DISTANCE) { accumulated = 0; ready = false; navigate(); }
     };
 
+    setCold(!ready);
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('wheel', onWheel, { passive: true });
     window.addEventListener('pageshow', onPageShow);
@@ -773,6 +779,110 @@ function NextPage({ lang, kind }: { lang: Lang; kind: Kind }) {
   </a>;
 }
 
+function prevPageFor(kind: Kind, lang: Lang) {
+  const index = pageOrder.indexOf(kind);
+  if (index <= 0) return null;
+  const prev = pageOrder[index - 1];
+  const entry = navigation.find(item => item.key === prev);
+  const copy = site.pages[lang] as unknown as Record<string, { headline?: string }>;
+  return {
+    href: routePath(prev, lang),
+    label: prev === 'home' ? (lang === 'en' ? 'Home' : 'হোম') : (entry?.label[lang] ?? prev),
+    title: prev === 'home' ? site.site.name : (copy[prev]?.headline ?? entry?.label[lang] ?? prev),
+  };
+}
+
+/**
+ * The mirror of the next-page band. Scrolling up past the top of a page — a
+ * sustained upward wheel turn on desktop, a downward pull on touch — returns to
+ * the previous page in reading order and lands at its end, so the pages read as
+ * one strip that can be scrolled in both directions. A hint at the top of the
+ * viewport names the page you would return to and fills as you pull.
+ *
+ * The same "deliberate only" rules apply as at the bottom end: a wheel turn
+ * only counts when it starts after a pause (not as the tail of the scroll that
+ * reached the top), nothing fires during the settle window after a load or a
+ * history restore, and touches that begin on the dock, a link or a control are
+ * ignored.
+ */
+function ScrollBack({ lang, kind }: { lang: Lang; kind: Kind }) {
+  const prev = useMemo(() => prevPageFor(kind, lang), [kind, lang]);
+  const [pull, setPull] = useState(0);
+  const startY = useRef(Number.NaN);
+  const drag = useRef(0);
+  const navigating = useRef(false);
+
+  useEffect(() => {
+    if (!prev) return;
+    let accumulated = 0;
+    let lastWheelAt = 0;
+    let idle: number | undefined;
+    let settleUntil = performance.now() + SETTLE_MS;
+    navigating.current = false;
+    const atTop = () => window.scrollY <= 0;
+    const go = () => {
+      if (navigating.current) return;
+      navigating.current = true;
+      try { sessionStorage.setItem(FLOW_ARRIVAL, 'end'); } catch { /* storage unavailable: the previous page simply opens at its top */ }
+      window.location.assign(prev.href);
+    };
+    const onWheel = (event: WheelEvent) => {
+      const now = performance.now();
+      if (now - lastWheelAt > 400) accumulated = 0; // a fresh turn, not the tail of the previous one
+      lastWheelAt = now;
+      if (!atTop() || event.deltaY >= 0 || now < settleUntil) { accumulated = 0; setPull(0); return; }
+      accumulated += -event.deltaY;
+      setPull(Math.min(1, accumulated / WHEEL_DISTANCE));
+      window.clearTimeout(idle);
+      idle = window.setTimeout(() => { accumulated = 0; setPull(0); }, 900);
+      if (accumulated >= WHEEL_DISTANCE) { accumulated = 0; setPull(0); go(); }
+    };
+    const onControl = (target: EventTarget | null) =>
+      (target as Element | null)?.closest?.('.site-header, a, button, input, textarea, select') != null;
+    const onTouchStart = (event: TouchEvent) => {
+      startY.current = atTop() && !onControl(event.target) ? event.touches[0].clientY : Number.NaN;
+      drag.current = 0;
+    };
+    const onTouchMove = (event: TouchEvent) => {
+      if (Number.isNaN(startY.current) || !atTop()) return;
+      drag.current = Math.max(0, event.touches[0].clientY - startY.current);
+      setPull(Math.min(1, drag.current / PULL_DISTANCE));
+    };
+    const onTouchEnd = () => {
+      const fire = drag.current >= PULL_DISTANCE && atTop();
+      startY.current = Number.NaN;
+      drag.current = 0;
+      setPull(0);
+      if (fire) go();
+    };
+    const onPageShow = () => {
+      accumulated = 0;
+      navigating.current = false;
+      settleUntil = performance.now() + SETTLE_MS;
+      setPull(0);
+    };
+    window.addEventListener('wheel', onWheel, { passive: true });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onTouchEnd, { passive: true });
+    window.addEventListener('pageshow', onPageShow);
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('pageshow', onPageShow);
+      window.clearTimeout(idle);
+    };
+  }, [prev]);
+
+  if (!prev) return null;
+  return <div className="back-hint" style={{ '--pull': pull } as CSSProperties} aria-hidden="true">
+    <i className="back-hint-line" />
+    <span className="back-hint-pill"><ArrowLeft size={14} />{prev.label}</span>
+  </div>;
+}
+
 function App() {
   const route = useMemo(readRoute, []);
   const { lang, kind } = route;
@@ -797,6 +907,20 @@ function App() {
     setMeta('meta[name="twitter:description"]', 'content', meta.description);
     setMeta('link[rel="canonical"]', 'href', `${site.site.url}${route.path}`);
   }, [lang, meta, route.path]);
+
+  useLayoutEffect(() => {
+    // Coming back by scroll: land where the reader left this page — at its end —
+    // before the first paint, so nothing flashes at the top.
+    let arrival: string | null = null;
+    try { arrival = sessionStorage.getItem(FLOW_ARRIVAL); sessionStorage.removeItem(FLOW_ARRIVAL); } catch { arrival = null; }
+    if (arrival !== 'end') return;
+    arrivedFromNext = true;
+    const toEnd = () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' as ScrollBehavior });
+    toEnd();
+    const timer = window.setTimeout(toEnd, 250);   // late layout (fonts, images)
+    window.addEventListener('load', toEnd);
+    return () => { window.clearTimeout(timer); window.removeEventListener('load', toEnd); };
+  }, []);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -866,7 +990,7 @@ function App() {
   else if (kind === 'contact') content = <div className="page-shell"><ContactPage lang={lang} copy={locale.contact} /></div>;
   else content = <div className="page-shell"><NotFound lang={lang} /></div>;
 
-  return <><a className="skip-link" href="#main">{lang === 'en' ? 'Skip to content' : 'মূল কনটেন্টে যান'}</a><span className="scroll-progress" aria-hidden="true" /><Header lang={lang} path={route.path} /><main id="main">{content}<NextPage lang={lang} kind={kind} /></main><Footer lang={lang} /></>;
+  return <><a className="skip-link" href="#main">{lang === 'en' ? 'Skip to content' : 'মূল কনটেন্টে যান'}</a><span className="scroll-progress" aria-hidden="true" /><Header lang={lang} path={route.path} /><main id="main">{content}<NextPage lang={lang} kind={kind} /></main><ScrollBack lang={lang} kind={kind} /><Footer lang={lang} /></>;
 }
 
 export default App;
