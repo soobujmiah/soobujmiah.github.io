@@ -1,47 +1,97 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
-  ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, BriefcaseBusiness, Code2,
-  Cpu, Database, FlaskConical, FolderGit2, Globe2, Home, Mail, Monitor,
-  PenTool, Smartphone, UserRound, Clock3, Moon, Sun, Menu, X,
+  ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, BriefcaseBusiness, Check,
+  Code2, Cpu, Database, FlaskConical, FolderGit2, Globe2, Home, Mail, Menu, Monitor,
+  Moon, PenTool, Smartphone, Sun, UserRound, Clock3, X,
 } from 'lucide-react';
 import rawSite from './data/site-content.json';
 
 type Lang = 'en' | 'bn';
 type Localized = Record<Lang, string>;
+type LocalizedList = Record<Lang, string[]>;
 type Kind = 'home' | 'about' | 'services' | 'service' | 'experience' | 'projects' | 'project' | 'research' | 'evidence' | 'contact';
-interface PageText { title: string; description: string; eyebrow: string; headline: string; lede?: string; visualCaption?: string; [key: string]: string | string[] | undefined; }
+
+interface PageText {
+  title: string;
+  description: string;
+  keywords?: string[];
+  eyebrow: string;
+  headline: string;
+  lede?: string;
+  [key: string]: unknown;
+}
+
+interface Service {
+  slug: string;
+  icon: string;
+  group: string;
+  title: Localized;
+  summary: Localized;
+  detail: Localized;
+  keywords?: string[];
+  deliverables: Record<Lang, string[]>;
+}
+
+interface Project {
+  slug: string;
+  name: string;
+  category: Localized;
+  role: Localized;
+  metaTitle: Localized;
+  metaDescription: Localized;
+  keywords: string[];
+  summary: Localized;
+  overview: Localized;
+  highlights: LocalizedList;
+  stack: string[];
+  state: Localized;
+  boundary: Localized;
+  evidence: Localized;
+  url: string;
+}
+
 interface SiteData {
   site: {
-    name: string; url: string; email: string; phone: string; phoneHref: string;
-    location: Localized; timezone: Localized;
+    name: string;
+    alternateName: string;
+    url: string;
+    email: string;
+    phone: string;
+    phoneHref: string;
+    location: Localized;
+    timezone: Localized;
+    availability: Localized;
+    description: Localized;
+    keywords: Record<Lang, string[]>;
     languages: Array<{ en: string; bn: string; levelEn: string; levelBn: string }>;
     social: Array<{ label: string; href: string }>;
   };
+  serviceGroups: Array<{ id: string; title: Localized; lede: Localized }>;
   pages: Record<Lang, Record<'home' | 'about' | 'services' | 'experience' | 'projects' | 'research' | 'evidence' | 'contact', PageText>>;
-  services: Array<{
-    slug: string; icon: string; title: Localized; summary: Localized; detail: Localized;
-    deliverables: Record<Lang, string[]>;
-  }>;
+  services: Service[];
   experience: Array<{ role: Localized; period: string; organisation: string; location: Localized; work: Record<Lang, string[]> }>;
   skills: Array<{ title: Localized; items: Record<Lang, string[]> }>;
-  projects: Array<{ slug: string; name: string; category: Localized; summary: Localized; evidence?: Localized; boundary: Localized; url: string; state: string }>;
+  projects: Project[];
   research: Record<Lang, { verified: string[]; experimental: string[]; notClaimed: string[] }>;
 }
 
 const site = rawSite as unknown as SiteData;
-const navigation: Array<{ key: 'about' | 'services' | 'projects' | 'experience' | 'research' | 'evidence' | 'contact'; label: Localized }> = [
+
+const navigation: Array<{ key: 'about' | 'services' | 'projects' | 'experience' | 'research' | 'evidence' | 'contact'; label: Localized; secondary?: boolean }> = [
   { key: 'about', label: { en: 'About', bn: 'পরিচিতি' } },
   { key: 'services', label: { en: 'Services', bn: 'সেবা' } },
   { key: 'projects', label: { en: 'Projects', bn: 'প্রকল্প' } },
-  { key: 'experience', label: { en: 'Experience', bn: 'অভিজ্ঞতা' } },
-  { key: 'research', label: { en: 'Research', bn: 'গবেষণা' } },
-  { key: 'evidence', label: { en: 'Evidence', bn: 'প্রমাণ' } },
+  { key: 'experience', label: { en: 'Experience', bn: 'অভিজ্ঞতা' }, secondary: true },
+  { key: 'research', label: { en: 'Research', bn: 'গবেষণা' }, secondary: true },
+  { key: 'evidence', label: { en: 'Evidence', bn: 'প্রমাণ' }, secondary: true },
   { key: 'contact', label: { en: 'Contact', bn: 'যোগাযোগ' } },
 ];
+
 const routePath = (kind: string, lang: Lang, slug?: string) => {
   const suffix = kind === 'home' ? '' : kind === 'service' ? `services/${slug}/` : kind === 'project' ? `projects/${slug}/` : `${kind}/`;
   return lang === 'bn' ? `/bn/${suffix}` : `/${suffix}`;
 };
+
 function readRoute() {
   const pathname = `/${window.location.pathname.split('/').filter(Boolean).join('/')}${window.location.pathname.endsWith('/') ? '' : '/'}`;
   const parts = pathname.split('/').filter(Boolean);
@@ -55,10 +105,12 @@ function readRoute() {
   if (allowed.has(path[0])) return { lang, kind: path[0] as Kind, path: routePath(path[0], lang) };
   return { lang, kind: 'home' as Kind, path: lang === 'bn' ? '/bn/' : '/' };
 }
+
 function setMeta(selector: string, attribute: string, value: string) {
   const element = document.head.querySelector<HTMLMetaElement | HTMLLinkElement>(selector);
   if (element) element.setAttribute(attribute, value);
 }
+
 function IconFor({ name, size = 18 }: { name: string; size?: number }) {
   const icons: Record<string, typeof Code2> = {
     web: Monitor, software: Code2, computer: Monitor, android: Smartphone,
@@ -72,79 +124,149 @@ function IconFor({ name, size = 18 }: { name: string; size?: number }) {
 function Header({ lang, path }: { lang: Lang; path: string }) {
   const [light, setLight] = useState(() => document.documentElement.dataset.theme === 'light');
   const [menuOpen, setMenuOpen] = useState(false);
+  const panelRef = useRef<HTMLElement | null>(null);
   const base = path.replace(/^\/bn(?=\/|$)/, '') || '/';
   const languagePath = lang === 'en' ? `/bn${base === '/' ? '/' : base}` : base;
   const icons: Record<string, typeof Home> = { about: UserRound, services: BriefcaseBusiness, projects: FolderGit2, experience: Clock3, research: FlaskConical, evidence: BadgeCheck, contact: Mail };
+  const homePath = routePath('home', lang);
+
   useEffect(() => {
     if (!menuOpen) return;
-    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setMenuOpen(false); };
-    window.addEventListener('keydown', closeOnEscape);
-    return () => window.removeEventListener('keydown', closeOnEscape);
+    const previous = document.activeElement as HTMLElement | null;
+    const body = document.body;
+    const previousOverflow = body.style.overflow;
+    body.style.overflow = 'hidden';
+    const panel = panelRef.current;
+    const focusables = panel?.querySelectorAll<HTMLElement>('a[href], button:not([disabled])');
+    focusables?.[0]?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { setMenuOpen(false); return; }
+      if (event.key !== 'Tab' || !panel) return;
+      const items = Array.from(panel.querySelectorAll<HTMLElement>('a[href], button:not([disabled])'));
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      body.style.overflow = previousOverflow;
+      previous?.focus();
+    };
   }, [menuOpen]);
+
   const toggleTheme = () => {
     const next = !light;
     document.documentElement.dataset.theme = next ? 'light' : 'dark';
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', next ? '#fafaf9' : '#06070a');
+    document.querySelectorAll('meta[name="theme-color"]').forEach(element => element.setAttribute('content', next ? '#f6f7f3' : '#06070a'));
     try { localStorage.setItem('sm-theme', next ? 'light' : 'dark'); } catch { /* storage can be disabled */ }
     setLight(next);
   };
+
+  const closeMenuLabel = lang === 'en' ? 'Close navigation menu' : 'নেভিগেশন মেনু বন্ধ করুন';
+  const openMenuLabel = lang === 'en' ? 'Open navigation menu' : 'নেভিগেশন মেনু খুলুন';
+
   return <>
-    <button className="menu-trigger" type="button" aria-label={lang === 'en' ? (menuOpen ? 'Close navigation menu' : 'Open navigation menu') : (menuOpen ? 'মেনু বন্ধ করুন' : 'নেভিগেশন মেনু খুলুন')} aria-expanded={menuOpen} aria-controls="site-menu" onClick={() => setMenuOpen(open => !open)}>
+    <button className="menu-trigger" type="button" aria-label={menuOpen ? closeMenuLabel : openMenuLabel} aria-expanded={menuOpen} aria-controls="site-menu" onClick={() => setMenuOpen(open => !open)}>
       {menuOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
     </button>
     {menuOpen && <>
-      <button className="menu-backdrop" type="button" aria-label={lang === 'en' ? 'Close navigation menu' : 'মেনু বন্ধ করুন'} onClick={() => setMenuOpen(false)} />
-      <aside className="menu-panel" id="site-menu" role="dialog" aria-modal="true" aria-label={lang === 'en' ? 'Site navigation' : 'সাইট নেভিগেশন'}>
-        <div className="menu-panel-heading"><a href={routePath('home', lang)} onClick={() => setMenuOpen(false)}>{lang === 'en' ? 'Sobuj Miah' : 'সবুজ মিয়া'}<span>{lang === 'en' ? 'Portfolio' : 'পোর্টফোলিও'}</span></a><button type="button" aria-label={lang === 'en' ? 'Close menu' : 'মেনু বন্ধ করুন'} onClick={() => setMenuOpen(false)}><X size={19} /></button></div>
+      <button className="menu-backdrop" type="button" aria-label={closeMenuLabel} onClick={() => setMenuOpen(false)} />
+      <aside className="menu-panel" id="site-menu" ref={panelRef} role="dialog" aria-modal="true" aria-label={lang === 'en' ? 'Site navigation' : 'সাইট নেভিগেশন'}>
+        <div className="menu-panel-heading">
+          <a href={homePath} onClick={() => setMenuOpen(false)}>{lang === 'en' ? 'Sobuj Miah' : 'সবুজ মিয়া'}<span>{lang === 'en' ? 'Portfolio' : 'পোর্টফোলিও'}</span></a>
+          <button type="button" aria-label={closeMenuLabel} onClick={() => setMenuOpen(false)}><X size={19} /></button>
+        </div>
         <nav className="menu-links" aria-label={lang === 'en' ? 'Pages' : 'পৃষ্ঠাসমূহ'}>
-          <a href={routePath('home', lang)} onClick={() => setMenuOpen(false)}><Home size={17} aria-hidden="true" /><span>{lang === 'en' ? 'Home' : 'হোম'}</span><ArrowUpRight size={15} aria-hidden="true" /></a>
-          {navigation.map(item => { const Icon = icons[item.key]; const target = routePath(item.key, lang); return <a key={item.key} href={target} aria-current={path === target ? 'page' : undefined} onClick={() => setMenuOpen(false)}><Icon size={17} aria-hidden="true" /><span>{item.label[lang]}</span><ArrowUpRight size={15} aria-hidden="true" /></a>; })}
+          <a href={homePath} aria-current={path === homePath ? 'page' : undefined} onClick={() => setMenuOpen(false)}><Home size={17} aria-hidden="true" /><span>{lang === 'en' ? 'Home' : 'হোম'}</span><ArrowUpRight size={15} aria-hidden="true" /></a>
+          {navigation.map(item => {
+            const Icon = icons[item.key];
+            const target = routePath(item.key, lang);
+            return <a key={item.key} href={target} aria-current={path === target ? 'page' : undefined} onClick={() => setMenuOpen(false)}><Icon size={17} aria-hidden="true" /><span>{item.label[lang]}</span><ArrowUpRight size={15} aria-hidden="true" /></a>;
+          })}
         </nav>
         <a className="menu-language" href={languagePath} lang={lang === 'en' ? 'bn' : 'en'} onClick={() => setMenuOpen(false)}><Globe2 size={16} aria-hidden="true" />{lang === 'en' ? 'বাংলা সংস্করণ' : 'English version'}</a>
+        <p className="menu-meta">{site.site.location[lang]} · {site.site.timezone[lang]}</p>
       </aside>
     </>}
     <header className="site-header">
       <nav id="primary-nav" className="primary-nav" aria-label={lang === 'en' ? 'Main navigation' : 'প্রধান নেভিগেশন'}>
-        {navigation.map(item => { const Icon = icons[item.key]; return <a key={item.key} href={routePath(item.key, lang)} aria-label={item.label[lang]} title={item.label[lang]}><Icon size={18} strokeWidth={1.7} aria-hidden="true" /><span className="dock-tip">{item.label[lang]}</span></a>; })}
+        <a className="dock-home-link" href={homePath} aria-label={lang === 'en' ? 'Home' : 'হোম'} title={lang === 'en' ? 'Home' : 'হোম'} aria-current={path === homePath ? 'page' : undefined}>
+          <Home size={18} strokeWidth={1.7} aria-hidden="true" /><span className="dock-tip">{lang === 'en' ? 'Home' : 'হোম'}</span>
+        </a>
+        {navigation.filter(item => item.key !== 'contact').map(item => {
+          const Icon = icons[item.key];
+          const target = routePath(item.key, lang);
+          return <a key={item.key} className={item.secondary ? 'dock-secondary' : undefined} href={target} aria-label={item.label[lang]} title={item.label[lang]} aria-current={path === target ? 'page' : undefined}>
+            <Icon size={18} strokeWidth={1.7} aria-hidden="true" /><span className="dock-tip">{item.label[lang]}</span>
+          </a>;
+        })}
       </nav>
       <span className="dock-separator" aria-hidden="true" />
       <button className="theme-toggle" type="button" onClick={toggleTheme} aria-label={light ? (lang === 'en' ? 'Switch to dark theme' : 'ডার্ক থিম চালু করুন') : (lang === 'en' ? 'Switch to light theme' : 'লাইট থিম চালু করুন')} title={light ? 'Dark theme' : 'Light theme'}>{light ? <Moon size={16} /> : <Sun size={16} />}</button>
       <a className="language-switch" href={languagePath} lang={lang === 'en' ? 'bn' : 'en'} aria-label={lang === 'en' ? 'View this page in Bangla' : 'এই পৃষ্ঠাটি ইংরেজিতে দেখুন'}><Globe2 size={15} aria-hidden="true" /><span>{lang === 'en' ? 'বাংলা' : 'EN'}</span></a>
-      <a className="nav-contact" href={routePath('contact', lang)} aria-label={lang === 'en' ? 'Contact Sobuj' : 'যোগাযোগ'} title={lang === 'en' ? 'Contact Sobuj' : 'যোগাযোগ'}><ArrowUpRight size={18} aria-hidden="true" /></a>
+      <a className="nav-contact" href={routePath('contact', lang)} aria-label={lang === 'en' ? 'Contact Sobuj' : 'যোগাযোগ'} title={lang === 'en' ? 'Contact Sobuj' : 'যোগাযোগ'} aria-current={path === routePath('contact', lang) ? 'page' : undefined}><ArrowUpRight size={18} aria-hidden="true" /></a>
     </header>
   </>;
 }
 
 function Footer({ lang }: { lang: Lang }) {
   return <footer className="site-footer">
-    <a href={routePath('home', lang)} className="footer-name">{lang === 'bn' ? 'সবুজ মিয়া' : 'Sobuj Miah'}</a>
-    <span>{site.site.location[lang]}</span>
-    <nav aria-label={lang === 'en' ? 'Footer navigation' : 'ফুটার নেভিগেশন'}>
-      {navigation.map(item => <a key={item.key} href={routePath(item.key, lang)}>{item.label[lang]}</a>)}
-    </nav>
-    <a className="footer-evidence" href={routePath('evidence', lang)}>{lang === 'en' ? 'Claims, Evidence & Limits' : 'দাবি, প্রমাণ ও সীমাবদ্ধতা'}</a>
-    <span>© {new Date().getFullYear()} Sobuj Miah</span>
+    <div className="footer-top">
+      <div className="footer-brand">
+        <a href={routePath('home', lang)} className="footer-name">{lang === 'bn' ? 'সবুজ মিয়া' : 'Sobuj Miah'}</a>
+        <p>{lang === 'en' ? 'Independent software & AI systems engineer · web developer · operations support.' : 'স্বতন্ত্র সফটওয়্যার ও এআই সিস্টেম প্রকৌশলী · ওয়েব ডেভেলপার · পরিচালনা সহায়তা।'}</p>
+      </div>
+      <nav className="footer-nav" aria-label={lang === 'en' ? 'Footer navigation' : 'ফুটার নেভিগেশন'}>
+        {navigation.map(item => <a key={item.key} href={routePath(item.key, lang)}>{item.label[lang]}</a>)}
+      </nav>
+      <div className="footer-social">
+        {site.site.social.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.label}<ArrowUpRight size={13} aria-hidden="true" /></a>)}
+      </div>
+    </div>
+    <div className="footer-bottom">
+      <span>© {new Date().getFullYear()} {lang === 'en' ? 'Sobuj Miah' : 'সবুজ মিয়া'}</span>
+      <span>{site.site.location[lang]} · {site.site.timezone[lang]}</span>
+      <a className="footer-evidence" href={routePath('evidence', lang)}>{lang === 'en' ? 'Claims, Evidence & Limits' : 'দাবি, প্রমাণ ও সীমাবদ্ধতা'}</a>
+    </div>
   </footer>;
 }
 
 function PageHeading({ copy }: { copy: PageText }) {
-  return <header className="page-heading"><p className="eyebrow"><span />{copy.eyebrow}</p><h1>{copy.headline}</h1>{copy.lede && <p className="page-lede">{copy.lede}</p>}</header>;
+  return <header className="page-heading" data-reveal><p className="eyebrow"><span />{copy.eyebrow}</p><h1>{copy.headline}</h1>{copy.lede && <p className="page-lede">{copy.lede}</p>}</header>;
 }
 
-function ServiceCard({ service, lang, index }: { service: SiteData['services'][number]; lang: Lang; index: number }) {
-  return <a className="service-card" href={routePath('service', lang, service.slug)}>
+function SectionHeading({ number, label, title, lede, id }: { number: string; label: string; title: string; lede?: string; id: string }) {
+  const [first, ...rest] = title.split(/(?<=\s)/);
+  return <header className="source-section-heading" data-reveal><p className="source-eyebrow"><span>{number}</span>{label}</p><h2 id={id}>{first}<em>{rest.join('')}</em></h2>{lede && <p>{lede}</p>}</header>;
+}
+
+function Stack({ items, label }: { items: string[]; label: string }) {
+  return <ul className="stack-row" aria-label={label}>{items.map(item => <li key={item}>{item}</li>)}</ul>;
+}
+
+function ServiceCard({ service, lang, index }: { service: Service; lang: Lang; index: number }) {
+  return <a className="service-card" href={routePath('service', lang, service.slug)} data-reveal>
     <span className="card-top"><span className="card-index">{String(index + 1).padStart(2, '0')}</span><span className="card-icon"><IconFor name={service.icon} /></span><ArrowUpRight className="card-arrow" size={17} /></span>
     <h2>{service.title[lang]}</h2><p>{service.summary[lang]}</p><span className="card-more">{lang === 'en' ? 'Explore service' : 'সেবাটি দেখুন'}<ArrowRight size={14} /></span>
   </a>;
 }
 
-function ProjectCard({ project, lang, index }: { project: SiteData['projects'][number]; lang: Lang; index: number }) {
-  return <article className="project-card">
-    <div className="project-top"><span className="project-index">PROJECT / {String(index + 1).padStart(2, '0')}</span><span className="project-state">{project.state}</span></div>
-    <p className="project-category">{project.category[lang]}</p><h2>{project.name}</h2><p className="project-summary">{project.summary[lang]}</p>
+function ProjectCard({ project, lang, index }: { project: Project; lang: Lang; index: number }) {
+  return <article className="project-card" data-reveal>
+    <div className="project-top"><span className="project-index">PROJECT / {String(index + 1).padStart(2, '0')}</span><span className="project-state">{project.state[lang]}</span></div>
+    <p className="project-category">{project.category[lang]}</p>
+    <h2>{project.name}</h2>
+    <p className="project-summary">{project.summary[lang]}</p>
+    <Stack items={project.stack.slice(0, 4)} label={lang === 'en' ? 'Technologies used' : 'ব্যবহৃত প্রযুক্তি'} />
+    {project.evidence && <p className="project-evidence">{project.evidence[lang]}</p>}
     <div className="project-boundary"><span>{lang === 'en' ? 'BOUNDARY' : 'সীমা'}</span><p>{project.boundary[lang]}</p></div>
-    <a href={routePath('project', lang, project.slug)} className="text-link">{lang === 'en' ? 'Project details' : 'প্রকল্পের বিবরণ'}<ArrowRight size={14} /></a>
-    <a href={project.url} target="_blank" rel="noopener noreferrer" className="text-link">{lang === 'en' ? 'Open source repository' : 'Source repository খুলুন'}<ArrowUpRight size={14} /></a>
+    <div className="project-links">
+      <a href={routePath('project', lang, project.slug)} className="text-link">{lang === 'en' ? 'Project details' : 'প্রকল্পের বিবরণ'}<ArrowRight size={14} /></a>
+      <a href={project.url} target="_blank" rel="noopener noreferrer" className="text-link">{lang === 'en' ? 'Open repository' : 'Source repository খুলুন'}<ArrowUpRight size={14} /></a>
+    </div>
   </article>;
 }
 
@@ -153,47 +275,49 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
   const about = site.pages[lang].about;
   const contact = site.pages[lang].contact;
   const verified = site.research[lang].verified;
-  const featuredServices = ['software-development', 'android-support', 'office-administration']
-    .map(slug => site.services.find(service => service.slug === slug))
-    .filter((service): service is SiteData['services'][number] => Boolean(service));
+  const featuredServices = (home.featuredServices as string[]).map(slug => site.services.find(service => service.slug === slug)).filter((service): service is Service => Boolean(service));
+  const featuredProjects = (home.featuredProjects as string[]).map(slug => site.projects.find(project => project.slug === slug)).filter((project): project is Project => Boolean(project));
+  const focus = home.focus as string[];
   const ticker = site.services.map(service => service.title[lang]);
   return <div className="source-home">
     <section className="hero source-hero" aria-labelledby="hero-title">
       <div className="hero-inner">
-        <span className="tagline"><span className="pulse" />{lang === 'en' ? 'Available for freelance & remote work' : 'ফ্রিল্যান্স ও রিমোট কাজের জন্য উন্মুক্ত'}</span>
+        <span className="tagline"><span className="pulse" />{site.site.availability[lang]}</span>
         <h1 className="source-name" id="hero-title"><span>{lang === 'en' ? 'Sobuj ' : 'সবুজ '}</span><span className="name-accent">{lang === 'en' ? 'Miah' : 'মিয়া'}</span></h1>
-        <p className="source-role"><span aria-hidden="true">&gt;</span>{home.identity}<i aria-hidden="true" /></p>
-        <p className="source-intro">{home.deck}</p>
+        <p className="source-role"><span aria-hidden="true">&gt;</span>{home.identity as string}<i aria-hidden="true" /></p>
+        <p className="source-intro">{home.deck as string}</p>
         <div className="hero-actions"><a className="button button-primary" href={routePath('contact', lang)}>{lang === 'en' ? 'Discuss a project' : 'কাজ নিয়ে কথা বলুন'}<ArrowUpRight size={16} /></a><a className="button button-quiet" href={routePath('projects', lang)}>{lang === 'en' ? 'View projects' : 'প্রকল্প দেখুন'}<ArrowDown size={15} /></a></div>
+        <ul className="focus-chips" aria-label={lang === 'en' ? 'Current focus areas' : 'বর্তমান কাজের ক্ষেত্র'}>{focus.map(item => <li key={item}>{item}</li>)}</ul>
         <div className="source-stats">
           <div><strong>8+</strong><span>{lang === 'en' ? 'Years · self-reported' : 'বছর · স্ব-প্রতিবেদিত'}</span></div>
           <div><strong>2</strong><span>{lang === 'en' ? 'Countries worked' : 'দেশে কাজের অভিজ্ঞতা'}</span></div>
+          <div><strong>{site.projects.length}</strong><span>{lang === 'en' ? 'Public projects' : 'পাবলিক প্রকল্প'}</span></div>
           <div><strong>{site.site.languages.length}</strong><span>{lang === 'en' ? 'Languages' : 'টি ভাষা'}</span></div>
-          <div><strong>{site.services.length}</strong><span>{lang === 'en' ? 'Practical services' : 'টি ব্যবহারিক সেবা'}</span></div>
         </div>
       </div>
       <span className="scroll-hint" aria-hidden="true">{lang === 'en' ? 'SCROLL TO EXPLORE' : 'আরও দেখতে স্ক্রল করুন'}<i /></span>
     </section>
 
-    <div className="source-marquee" aria-label={lang === 'en' ? 'Services and capabilities' : 'সেবা ও দক্ষতা'}><div>{[...ticker, ...ticker].map((item, index) => <span key={`${item}-${index}`}>{item}<b>◆</b></span>)}</div></div>
+    <div className="source-marquee" aria-hidden="true"><div>{[...ticker, ...ticker].map((item, index) => <span key={`${item}-${index}`}>{item}<b>◆</b></span>)}</div></div>
 
     <section className="source-section" id="about" aria-labelledby="home-about-title">
       <div className="source-wrap">
         <SectionHeading number="01" label={lang === 'en' ? 'PROFILE' : 'পরিচিতি'} title={about.headline} lede={about.lede} id="home-about-title" />
         <div className="source-about-grid">
-          <div className="source-prose">{(about.paragraphs as string[]).slice(0, 2).map(paragraph => <p key={paragraph}>{paragraph}</p>)}<a className="text-link" href={routePath('about', lang)}>{lang === 'en' ? 'Full profile' : 'সম্পূর্ণ পরিচিতি'}<ArrowRight size={15} /></a></div>
-          <div className="source-side">
+          <div className="source-prose" data-reveal>{(about.paragraphs as string[]).slice(0, 2).map(paragraph => <p key={paragraph}>{paragraph}</p>)}<a className="text-link" href={routePath('about', lang)}>{lang === 'en' ? 'Full profile' : 'সম্পূর্ণ পরিচিতি'}<ArrowRight size={15} /></a></div>
+          <div className="source-side" data-reveal>
             <aside className="quick-facts"><h3>{lang === 'en' ? 'QUICK FACTS' : 'সংক্ষেপে'}</h3><dl>
               <div><dt>{lang === 'en' ? 'Location' : 'অবস্থান'}</dt><dd>{site.site.location[lang]}</dd></div>
               <div><dt>{lang === 'en' ? 'Timezone' : 'সময় অঞ্চল'}</dt><dd>{site.site.timezone[lang]}</dd></div>
               <div><dt>{about.educationLabel as string}</dt><dd>{about.educationValue as string}</dd></div>
               <div><dt>{lang === 'en' ? 'Availability' : 'কাজের সুযোগ'}</dt><dd>{about.availabilityValue as string}</dd></div>
             </dl></aside>
-            <div className="terminal-card" aria-label={lang === 'en' ? 'Verified profile and technology summary' : 'যাচাইকৃত পরিচিতি ও প্রযুক্তির সারাংশ'}>
+            <div className="terminal-card" aria-label={lang === 'en' ? 'Profile and project summary' : 'পরিচিতি ও প্রকল্পের সারাংশ'}>
               <div className="terminal-bar"><i /><i /><i /><span>sobuj@portfolio: ~/work</span></div>
               <div className="terminal-body">
-                <p><b>$</b> whoami --summary</p><p><span>Role</span> {lang === 'en' ? 'Office admin · systems builder' : 'অফিস প্রশাসন · সিস্টেম নির্মাতা'}</p><p><span>Base</span> {site.site.location[lang]}</p><p><span>Languages</span> EN · BN · HI · UR · AR</p>
-                <p className="terminal-gap"><b>$</b> research --verified</p>{verified.slice(0, 3).map(item => <p className="terminal-result" key={item}><b>✓</b> {item}</p>)}
+                <p><b>$</b> whoami --summary</p><p><span>Role</span> {lang === 'en' ? 'Office admin · systems builder' : 'অফিস প্রশাসন · সিস্টেম নির্মাতা'}</p><p><span>Base</span> {site.site.location[lang]}</p><p><span>Focus</span> {lang === 'en' ? 'Linux on Android · local AI' : 'Android-এ Linux · লোকাল AI'}</p>
+                <p className="terminal-gap"><b>$</b> ls projects/</p>{featuredProjects.map(project => <p className="terminal-result" key={project.slug}><b>›</b> {project.name.toLowerCase()}</p>)}
+                <p className="terminal-gap"><b>$</b> research --verified</p>{verified.slice(0, 2).map(item => <p className="terminal-result" key={item}><b>✓</b> {item}</p>)}
               </div>
             </div>
           </div>
@@ -204,7 +328,7 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
     <section className="source-section source-section-alt" id="services" aria-labelledby="home-services-title">
       <div className="source-wrap">
         <SectionHeading number="02" label={lang === 'en' ? 'SERVICES' : 'সেবা'} title={home.servicesTitle as string} lede={home.servicesIntro as string} id="home-services-title" />
-        <div className="service-accordion">{featuredServices.map((service, index) => <details className="service-disclosure" key={service.slug}>
+        <div className="service-accordion">{featuredServices.map((service, index) => <details className="service-disclosure" key={service.slug} open={index === 0}>
           <summary><span className="disclosure-number">{String(index + 1).padStart(2, '0')}</span><span className="disclosure-title">{service.title[lang]}</span><span className="disclosure-plus" aria-hidden="true" /></summary>
           <div className="disclosure-body"><p>{service.detail[lang]}</p><div className="source-tags">{service.deliverables[lang].map(item => <span key={item}>{item}</span>)}</div><a href={routePath('service', lang, service.slug)} className="text-link">{lang === 'en' ? 'Service details' : 'সেবার বিবরণ'}<ArrowRight size={14} /></a></div>
         </details>)}</div>
@@ -215,31 +339,30 @@ function HomePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['h
     <section className="source-section source-section-alt" id="work" aria-labelledby="home-projects-title">
       <div className="source-wrap">
         <SectionHeading number="03" label={lang === 'en' ? 'PROJECTS' : 'প্রকল্প'} title={home.selectedTitle as string} lede={home.selectedIntro as string} id="home-projects-title" />
-        <div className="source-project-grid">{site.projects.slice(0, 3).map((project, index) => <article className="source-project" key={project.slug}>
-          <div className="source-project-top"><span>{String(index + 1).padStart(2, '0')} / {project.category[lang]}</span><span>{project.state}</span></div>
-          <h3>{project.name}</h3><p>{project.summary[lang]}</p>{project.evidence && <p className="project-evidence">{project.evidence[lang]}</p>}<p className="project-limit"><b>{lang === 'en' ? 'BOUNDARY' : 'সীমা'}</b>{project.boundary[lang]}</p>
+        <div className="source-project-grid">{featuredProjects.map((project, index) => <article className="source-project" key={project.slug} data-reveal>
+          <div className="source-project-top"><span>{String(index + 1).padStart(2, '0')} / {project.category[lang]}</span><span>{project.state[lang]}</span></div>
+          <h3>{project.name}</h3><p>{project.summary[lang]}</p>
+          <Stack items={project.stack.slice(0, 4)} label={lang === 'en' ? 'Technologies used' : 'ব্যবহৃত প্রযুক্তি'} />
+          {project.evidence && <p className="project-evidence">{project.evidence[lang]}</p>}
+          <p className="project-limit"><b>{lang === 'en' ? 'BOUNDARY' : 'সীমা'}</b>{project.boundary[lang]}</p>
           <div className="source-project-links"><a href={routePath('project', lang, project.slug)}>{lang === 'en' ? 'Details' : 'বিস্তারিত'}<ArrowRight size={14} /></a><a href={project.url} target="_blank" rel="noopener noreferrer">GitHub<ArrowUpRight size={14} /></a></div>
         </article>)}</div>
+        <a className="section-link" href={routePath('projects', lang)}>{lang === 'en' ? 'All projects' : 'সব প্রকল্প'}<ArrowUpRight size={14} /></a>
       </div>
     </section>
     <section className="source-section source-contact" id="contact" aria-labelledby="home-contact-title">
       <div className="source-wrap"><SectionHeading number="04" label={lang === 'en' ? 'CONTACT' : 'যোগাযোগ'} title={contact.headline} lede={contact.lede} id="home-contact-title" />
-        <div className="source-contact-links"><a href={`mailto:${site.site.email}`}><span>{contact.emailLabel as string}</span><b>{site.site.email}</b><ArrowUpRight size={17} /></a><a href={`tel:${site.site.phoneHref}`}><span>{contact.phoneLabel as string}</span><b>{site.site.phone}</b><ArrowUpRight size={17} /></a><a href="https://t.me/soobujmiah" target="_blank" rel="noopener noreferrer"><span>Telegram</span><b>@soobujmiah</b><ArrowUpRight size={17} /></a></div>
+        <div className="source-contact-links" data-reveal><a href={`mailto:${site.site.email}`}><span>{contact.emailLabel as string}</span><b>{site.site.email}</b><ArrowUpRight size={17} /></a><a href={`tel:${site.site.phoneHref}`}><span>{contact.phoneLabel as string}</span><b>{site.site.phone}</b><ArrowUpRight size={17} /></a><a href="https://t.me/soobujmiah" target="_blank" rel="noopener noreferrer"><span>Telegram</span><b>@soobujmiah</b><ArrowUpRight size={17} /></a></div>
         <div className="source-socials">{site.site.social.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.label}<ArrowUpRight size={13} /></a>)}</div>
       </div>
     </section>
   </div>;
 }
 
-function SectionHeading({ number, label, title, lede, id }: { number: string; label: string; title: string; lede?: string; id: string }) {
-  const [first, ...rest] = title.split(/(?<=\s)/);
-  return <header className="source-section-heading"><p className="source-eyebrow">{number} — {label}</p><h2 id={id}>{first}<em>{rest.join('')}</em></h2>{lede && <p>{lede}</p>}</header>;
-}
-
 function AboutPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['about'] }) {
   const c = copy;
   return <div className="page-wrap"><PageHeading copy={c} />
-    <section className="about-layout"><div className="prose">{(c.paragraphs as string[]).map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
+    <section className="about-layout" data-reveal><div className="prose">{(c.paragraphs as string[]).map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
       <aside className="profile-aside"><p className="eyebrow"><span />{c.factsTitle as string}</p><dl>
         <div><dt>{lang === 'en' ? 'Based in' : 'অবস্থান'}</dt><dd>{site.site.location[lang]}</dd></div>
         <div><dt>{lang === 'en' ? 'Time zone' : 'সময় অঞ্চল'}</dt><dd>{site.site.timezone[lang]}</dd></div>
@@ -248,30 +371,50 @@ function AboutPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['
         <div><dt>{c.availabilityLabel as string}</dt><dd>{c.availabilityValue as string}</dd></div>
       </dl><div className="principle-aside"><span>{c.principleTitle as string}</span><p>{c.principle as string}</p></div></aside>
     </section>
-    <section className="subsection"><div className="subsection-heading"><p className="eyebrow"><span />{lang === 'en' ? 'CAPABILITIES' : 'দক্ষতা'}</p><h2>{lang === 'en' ? 'A wide, practical toolkit.' : 'ব্যবহারিক দক্ষতার বিস্তৃত পরিসর।'}</h2></div><div className="skill-grid">{site.skills.map((group, i) => <article className="skill-card" key={group.title.en}><span className="skill-number">0{i + 1}</span><h3>{group.title[lang]}</h3><ul>{group.items[lang].map(item => <li key={item}>{item}</li>)}</ul></article>)}</div></section>
-    <section className="subsection"><div className="subsection-heading"><p className="eyebrow"><span />{c.languagesTitle as string}</p></div><div className="language-list">{site.site.languages.map(item => <div key={item.en}><span>{item[lang]}</span><span>{lang === 'en' ? item.levelEn : item.levelBn}</span></div>)}</div></section>
+    <section className="subsection"><div className="subsection-heading" data-reveal><p className="eyebrow"><span />{c.capabilitiesEyebrow as string}</p><h2>{c.capabilitiesTitle as string}</h2></div><div className="skill-grid">{site.skills.map((group, i) => <article className="skill-card" key={group.title.en} data-reveal><span className="skill-number">0{i + 1}</span><h3>{group.title[lang]}</h3><ul>{group.items[lang].map(item => <li key={item}>{item}</li>)}</ul></article>)}</div></section>
+    <section className="subsection"><div className="subsection-heading" data-reveal><p className="eyebrow"><span />{c.languagesTitle as string}</p></div><div className="language-list" data-reveal>{site.site.languages.map(item => <div key={item.en}><span>{item[lang]}</span><span>{lang === 'en' ? item.levelEn : item.levelBn}</span></div>)}</div></section>
+    <div className="detail-cta" data-reveal><a className="button button-primary" href={routePath('contact', lang)}>{lang === 'en' ? 'Discuss a project' : 'কাজ নিয়ে কথা বলুন'}<ArrowRight size={16} /></a></div>
   </div>;
 }
 
 function ServicesPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['services'] }) {
-  return <div className="page-wrap"><PageHeading copy={copy} /><div className="service-grid">{site.services.map((service, index) => <ServiceCard key={service.slug} service={service} lang={lang} index={index} />)}</div></div>;
+  const faq = copy.faq as Array<{ question: string; answer: string }>;
+  return <div className="page-wrap"><PageHeading copy={copy} />
+    {site.serviceGroups.map(group => {
+      const services = site.services.filter(service => service.group === group.id);
+      if (!services.length) return null;
+      return <section className="service-group" key={group.id} aria-labelledby={`group-${group.id}`}>
+        <div className="service-group-heading" data-reveal><p className="eyebrow"><span />{group.title[lang]}</p><p>{group.lede[lang]}</p></div>
+        <div className="service-grid">{services.map((service, index) => <ServiceCard key={service.slug} service={service} lang={lang} index={index} />)}</div>
+      </section>;
+    })}
+    <section className="faq-section" aria-labelledby="faq-title">
+      <div className="subsection-heading" data-reveal><p className="eyebrow"><span />FAQ</p><h2 id="faq-title">{copy.faqTitle as string}</h2><p className="faq-intro">{copy.faqIntro as string}</p></div>
+      <div className="faq-list">{faq.map(item => <details className="faq-item" key={item.question}><summary>{item.question}<span className="disclosure-plus" aria-hidden="true" /></summary><p>{item.answer}</p></details>)}</div>
+    </section>
+    <div className="detail-cta" data-reveal><a className="button button-primary" href={routePath('contact', lang)}>{lang === 'en' ? 'Discuss your project' : 'আপনার কাজ নিয়ে কথা বলুন'}<ArrowRight size={16} /></a></div>
+  </div>;
 }
 
 function ServiceDetail({ lang, copy, slug }: { lang: Lang; copy: SiteData['pages'][Lang]['services']; slug: string }) {
   const service = site.services.find(item => item.slug === slug);
   if (!service) return <NotFound lang={lang} />;
   const index = site.services.indexOf(service);
+  const related = site.services.filter(item => item.group === service.group && item.slug !== service.slug).slice(0, 3);
   return <div className="page-wrap detail-wrap"><a className="back-link" href={routePath('services', lang)}><ArrowLeft size={15} />{copy.backLabel as string}</a>
     <PageHeading copy={{ title: service.title[lang], description: service.summary[lang], eyebrow: `${copy.eyebrow} · ${String(index + 1).padStart(2, '0')}`, headline: service.title[lang], lede: service.summary[lang] }} />
-    <div className="service-detail-layout"><section className="prose"><p>{service.detail[lang]}</p></section><aside className="deliverables"><p className="eyebrow"><span />{copy.deliverablesLabel as string}</p><ul>{service.deliverables[lang].map(item => <li key={item}>{item}</li>)}</ul></aside></div>
-    <div className="detail-cta"><a className="button button-primary" href={routePath('contact', lang)}>{copy.contactLabel as string}<ArrowRight size={16} /></a></div>
+    <div className="service-detail-layout" data-reveal><section className="prose"><p>{service.detail[lang]}</p><ul className="inline-keywords">{(service.keywords ?? []).map(keyword => <li key={keyword}>{keyword}</li>)}</ul></section><aside className="deliverables"><p className="eyebrow"><span />{copy.deliverablesLabel as string}</p><ul>{service.deliverables[lang].map(item => <li key={item}>{item}</li>)}</ul></aside></div>
+    <div className="detail-cta" data-reveal><a className="button button-primary" href={routePath('contact', lang)}>{copy.contactLabel as string}<ArrowRight size={16} /></a></div>
+    {related.length > 0 && <section className="related-section"><p className="eyebrow"><span />{lang === 'en' ? 'Related services' : 'সম্পর্কিত সেবা'}</p><div className="related-grid">{related.map(item => <a key={item.slug} href={routePath('service', lang, item.slug)}><span>{item.title[lang]}</span><ArrowUpRight size={15} /></a>)}</div></section>}
   </div>;
 }
 
 function ExperiencePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['experience'] }) {
-  return <div className="page-wrap"><PageHeading copy={copy} /><div className="experience-list">{site.experience.map((item, index) => <article className="experience-item" key={`${item.role.en}-${item.organisation}`}>
-    <span className="experience-index">0{index + 1}</span><div><div className="experience-heading"><div><p className="experience-place">{item.organisation} · {item.location[lang]}</p><h2>{item.role[lang]}</h2></div><time className="experience-period">{item.period}</time></div><ul>{item.work[lang].map(task => <li key={task}>{task}</li>)}</ul></div>
-  </article>)}</div><p className="quiet-note">{copy.experienceNote as string}</p></div>;
+  return <div className="page-wrap"><PageHeading copy={copy} />
+    <p className="page-summary" data-reveal>{copy.summary as string}</p>
+    <div className="experience-list">{site.experience.map((item, index) => <article className="experience-item" key={`${item.role.en}-${item.organisation}`} data-reveal>
+      <span className="experience-index">{String(index + 1).padStart(2, '0')}</span><div><div className="experience-heading"><div><p className="experience-place">{item.organisation} · {item.location[lang]}</p><h2>{item.role[lang]}</h2></div><time className="experience-period">{item.period}</time></div><ul>{item.work[lang].map(task => <li key={task}>{task}</li>)}</ul></div>
+    </article>)}</div><p className="quiet-note">{copy.experienceNote as string}</p></div>;
 }
 
 function ProjectsPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['projects'] }) {
@@ -281,9 +424,30 @@ function ProjectsPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang
 function ProjectDetail({ lang, copy, slug }: { lang: Lang; copy: SiteData['pages'][Lang]['projects']; slug: string }) {
   const project = site.projects.find(item => item.slug === slug);
   if (!project) return <NotFound lang={lang} />;
+  const index = site.projects.indexOf(project);
+  const previous = site.projects[(index - 1 + site.projects.length) % site.projects.length];
+  const next = site.projects[(index + 1) % site.projects.length];
   return <div className="page-wrap detail-wrap"><a className="back-link" href={routePath('projects', lang)}><ArrowLeft size={15} />{lang === 'en' ? 'All projects' : 'সব প্রকল্প'}</a>
-    <PageHeading copy={{ title: `${project.name} — ${copy.title}`, description: project.summary[lang], eyebrow: `${copy.eyebrow} · ${project.category[lang]}`, headline: project.name, lede: project.summary[lang] }} />
-    <div className="project-detail-box">{project.evidence && <><p className="eyebrow"><span />{lang === 'en' ? 'ENGINEERING EVIDENCE' : 'প্রকৌশলগত প্রমাণ'}</p><p>{project.evidence[lang]}</p></>}<p className="eyebrow"><span />{copy.statusLabel as string}</p><p>{project.boundary[lang]}</p><a className="button button-primary" href={project.url} target="_blank" rel="noopener noreferrer">{copy.repoLabel as string}<ArrowUpRight size={16} /></a><a className="text-link" href={routePath('evidence', lang)}>{lang === 'en' ? 'Evidence and claim limits' : 'প্রমাণ ও দাবির সীমা'}<ArrowRight size={14} /></a></div>
+    <PageHeading copy={{ title: project.metaTitle[lang], description: project.metaDescription[lang], eyebrow: `${copy.eyebrow} · ${project.category[lang]}`, headline: project.name, lede: project.summary[lang] }} />
+    <div className="project-meta" data-reveal><div><span>{copy.roleLabel as string}</span><b>{project.role[lang]}</b></div><div><span>{copy.stateLabel as string}</span><b>{project.state[lang]}</b></div><div><span>{copy.stackLabel as string}</span><Stack items={project.stack.slice(0, 4)} label={copy.stackLabel as string} /></div></div>
+    <div className="project-detail-layout">
+      <div className="project-main">
+        <section data-reveal><h2>{copy.overviewLabel as string}</h2><p>{project.overview[lang]}</p></section>
+        <section data-reveal><h2>{copy.highlightsLabel as string}</h2><ul className="highlight-list">{project.highlights[lang].map(item => <li key={item}><Check size={15} aria-hidden="true" />{item}</li>)}</ul></section>
+        <section className="project-evidence-block" data-reveal><h2>{copy.evidenceLabel as string}</h2><p>{project.evidence[lang]}</p></section>
+        <div className="project-links" data-reveal><a className="button button-primary" href={project.url} target="_blank" rel="noopener noreferrer">{copy.repoLabel as string}<ArrowUpRight size={16} /></a><a className="text-link" href={routePath('evidence', lang)}>{lang === 'en' ? 'Evidence and claim limits' : 'প্রমাণ ও দাবির সীমা'}<ArrowRight size={14} /></a></div>
+      </div>
+      <aside className="project-aside" data-reveal>
+        <p className="eyebrow"><span />{copy.statusLabel as string}</p>
+        <p className="project-aside-boundary">{project.boundary[lang]}</p>
+        <dl><div><dt>{copy.roleLabel as string}</dt><dd>{project.role[lang]}</dd></div><div><dt>{copy.stateLabel as string}</dt><dd>{project.state[lang]}</dd></div><div><dt>{copy.stackLabel as string}</dt><dd>{project.stack.slice(0, 6).join(' · ')}</dd></div></dl>
+        <a className="text-link" href={project.url} target="_blank" rel="noopener noreferrer">{copy.repoLabelShort as string}<ArrowUpRight size={14} /></a>
+      </aside>
+    </div>
+    <nav className="project-nav" aria-label={lang === 'en' ? 'More projects' : 'আরও প্রকল্প'}>
+      <a href={routePath('project', lang, previous.slug)}><span>{lang === 'en' ? 'Previous' : 'আগের'}</span><b><ArrowLeft size={14} />{previous.name}</b></a>
+      <a href={routePath('project', lang, next.slug)}><span>{lang === 'en' ? 'Next' : 'পরবর্তী'}</span><b>{next.name}<ArrowRight size={14} /></b></a>
+    </nav>
   </div>;
 }
 
@@ -294,29 +458,43 @@ function ResearchPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang
     { title: copy.experimentalTitle as string, items: data.experimental, className: 'research-experimental' },
     { title: copy.plannedTitle as string, items: data.notClaimed, className: 'research-boundary' },
   ];
-  return <div className="page-wrap"><PageHeading copy={copy} /><div className="research-grid">{groups.map(group => <section className={`research-card ${group.className}`} key={group.title}><h2>{group.title}</h2><ul>{group.items.map(item => <li key={item}>{item}</li>)}</ul></section>)}</div></div>;
+  return <div className="page-wrap"><PageHeading copy={copy} />
+    <p className="page-summary" data-reveal>{copy.lastReviewed as string}</p>
+    <p className="quiet-note" data-reveal>{copy.researchNote as string}</p>
+    <div className="research-grid">{groups.map(group => <section className={`research-card ${group.className}`} key={group.title} data-reveal><h2>{group.title}</h2><ul>{group.items.map(item => <li key={item}>{item}</li>)}</ul></section>)}</div>
+    <a className="text-link evidence-research-link" href={routePath('evidence', lang)}>{lang === 'en' ? 'Read the evidence page' : 'প্রমাণের পৃষ্ঠা দেখুন'}<ArrowRight size={15} /></a>
+  </div>;
 }
 
 function EvidencePage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['evidence'] }) {
   return <div className="page-wrap"><PageHeading copy={copy} />
-    <p className="evidence-note">{copy.note}</p>
-    <div className="evidence-list">{site.projects.map((project, index) => <article className="evidence-entry" key={project.slug}>
-      <div className="evidence-entry-head"><span>{String(index + 1).padStart(2, '0')} · {project.category[lang]}</span><span>{project.state}</span></div>
+    <p className="evidence-note" data-reveal>{copy.note as string}</p>
+    <section className="evidence-how" data-reveal><h2>{copy.howTitle as string}</h2><ol>{(copy.how as string[]).map(item => <li key={item}>{item}</li>)}</ol></section>
+    <div className="evidence-list">{site.projects.map((project, index) => <article className="evidence-entry" key={project.slug} data-reveal>
+      <div className="evidence-entry-head"><span>{String(index + 1).padStart(2, '0')} · {project.category[lang]}</span><span>{project.state[lang]}</span></div>
       <h2>{project.name}</h2>
-      <p>{project.evidence?.[lang] ?? project.summary[lang]}</p>
-      <div className="evidence-boundary"><strong>{copy.limitLabel}</strong><p>{project.boundary[lang]}</p></div>
-      <a className="text-link" href={project.url} target="_blank" rel="noopener noreferrer">{copy.sourceLabel}<ArrowUpRight size={14} /></a>
+      <p>{project.evidence[lang]}</p>
+      <div className="evidence-boundary"><strong>{copy.limitLabel as string}</strong><p>{project.boundary[lang]}</p></div>
+      <a className="text-link" href={project.url} target="_blank" rel="noopener noreferrer">{copy.sourceLabel as string}<ArrowUpRight size={14} /></a>
     </article>)}</div>
-    <a className="text-link evidence-research-link" href={routePath('research', lang)}>{copy.researchLink}<ArrowRight size={15} /></a>
+    <a className="text-link evidence-research-link" href={routePath('research', lang)}>{copy.researchLink as string}<ArrowRight size={15} /></a>
   </div>;
 }
 
-function ContactPage({ copy }: { lang: Lang; copy: SiteData['pages'][Lang]['contact'] }) {
-  return <div className="page-wrap contact-page"><PageHeading copy={copy} /><p className="contact-lede">{copy.lede}</p><div className="contact-grid">
-    <a href={`mailto:${site.site.email}`}><span>{copy.emailLabel as string}</span><strong>{site.site.email}</strong><ArrowUpRight size={17} /></a>
-    <a href={`tel:${site.site.phoneHref}`}><span>{copy.phoneLabel as string}</span><strong>{site.site.phone}</strong><ArrowUpRight size={17} /></a>
-    <a href="https://t.me/soobujmiah" target="_blank" rel="noopener noreferrer"><span>{copy.telegramLabel as string}</span><strong>@soobujmiah</strong><ArrowUpRight size={17} /></a>
-  </div><div className="social-list">{site.site.social.filter(link => !['WhatsApp', 'Telegram'].includes(link.label)).map(link => <a href={link.href} target="_blank" rel="noopener noreferrer" key={link.label}>{link.label}<ArrowUpRight size={14} /></a>)}</div></div>;
+function ContactPage({ lang, copy }: { lang: Lang; copy: SiteData['pages'][Lang]['contact'] }) {
+  return <div className="page-wrap contact-page"><PageHeading copy={copy} />
+    <p className="contact-lede" data-reveal>{copy.lede}</p>
+    <div className="contact-grid" data-reveal>
+      <a href={`mailto:${site.site.email}`}><span>{copy.emailLabel as string}</span><strong>{site.site.email}</strong><ArrowUpRight size={17} /></a>
+      <a href={`tel:${site.site.phoneHref}`}><span>{copy.phoneLabel as string}</span><strong>{site.site.phone}</strong><ArrowUpRight size={17} /></a>
+      <a href="https://t.me/soobujmiah" target="_blank" rel="noopener noreferrer"><span>{copy.telegramLabel as string}</span><strong>@soobujmiah</strong><ArrowUpRight size={17} /></a>
+    </div>
+    <div className="contact-detail-grid">
+      <section className="contact-brief" data-reveal><h2>{copy.briefTitle as string}</h2><ol>{(copy.brief as string[]).map(item => <li key={item}>{item}</li>)}</ol></section>
+      <aside className="contact-meta" data-reveal><div><span>{copy.responseLabel as string}</span><b>{copy.responseValue as string}</b></div><div><span>{lang === 'en' ? 'Time zone' : 'সময় অঞ্চল'}</span><b>{site.site.timezone[lang]}</b></div><div><span>{lang === 'en' ? 'Location' : 'অবস্থান'}</span><b>{site.site.location[lang]}</b></div></aside>
+    </div>
+    <div className="social-list" data-reveal>{site.site.social.filter(link => !['WhatsApp', 'Telegram'].includes(link.label)).map(link => <a href={link.href} target="_blank" rel="noopener noreferrer" key={link.label}>{link.label}<ArrowUpRight size={14} /></a>)}</div>
+  </div>;
 }
 
 function NotFound({ lang }: { lang: Lang }) {
@@ -329,15 +507,17 @@ function App() {
   const locale = site.pages[lang];
   const homeCopy = locale.home;
   const meta = kind === 'service'
-    ? (() => { const service = site.services.find(item => item.slug === route.slug); return service ? { title: `${service.title[lang]} | ${locale.services.title}`, description: service.summary[lang] } : { title: '404 | Sobuj Miah', description: 'Page not found.' }; })()
+    ? (() => { const service = site.services.find(item => item.slug === route.slug); return service ? { title: `${service.title[lang]} — ${lang === 'en' ? 'Sobuj Miah' : 'সবুজ মিয়া'}`, description: service.summary[lang], keywords: service.keywords } : { title: '404 | Sobuj Miah', description: 'Page not found.' }; })()
     : kind === 'project'
-      ? (() => { const project = site.projects.find(item => item.slug === route.slug); return project ? { title: `${project.name} | ${locale.projects.title}`, description: project.summary[lang] } : { title: '404 | Sobuj Miah', description: 'Page not found.' }; })()
-      : locale[kind];
+      ? (() => { const project = site.projects.find(item => item.slug === route.slug); return project ? { title: project.metaTitle[lang], description: project.metaDescription[lang], keywords: project.keywords } : { title: '404 | Sobuj Miah', description: 'Page not found.' }; })()
+      : { title: locale[kind].title, description: locale[kind].description, keywords: locale[kind].keywords };
+
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dataset.locale = lang;
     document.title = meta.title;
     setMeta('meta[name="description"]', 'content', meta.description);
+    setMeta('meta[name="keywords"]', 'content', meta.keywords?.join(', ') ?? site.site.keywords[lang].join(', '));
     setMeta('meta[property="og:title"]', 'content', meta.title);
     setMeta('meta[property="og:description"]', 'content', meta.description);
     setMeta('meta[property="og:url"]', 'content', `${site.site.url}${route.path}`);
@@ -345,6 +525,21 @@ function App() {
     setMeta('meta[name="twitter:description"]', 'content', meta.description);
     setMeta('link[rel="canonical"]', 'href', `${site.site.url}${route.path}`);
   }, [lang, meta, route.path]);
+
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    root.classList.add('reveal-ready');
+    const nodes = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+    if (!('IntersectionObserver' in window)) { nodes.forEach(node => node.classList.add('is-visible')); return; }
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
+    nodes.forEach(node => observer.observe(node));
+    return () => observer.disconnect();
+  }, []);
 
   let content;
   if (kind === 'home') content = <HomePage lang={lang} copy={homeCopy} />;

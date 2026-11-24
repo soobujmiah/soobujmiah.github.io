@@ -19,6 +19,7 @@ for (const lang of ['en', 'bn']) {
 }
 const publicSource = ['index.html', 'src/App.tsx', 'src/styles.css', 'src/data/site-content.json', 'scripts/create-routes.mjs'].map(read).join('\n');
 const expectedProjects = ['ternux', 'ternuxx', 'adt', 'lai', 'ggen', 'songjog'];
+const baseUrl = data.site.url.replace(/\/$/, '');
 
 assert('Bilingual content covers all profile pages', ['en', 'bn'].every(lang => ['home', 'about', 'services', 'experience', 'projects', 'research', 'evidence', 'contact'].every(page => data.pages[lang][page]?.title && data.pages[lang][page]?.description)));
 assert('Requested public projects are represented and removed projects stay absent', expectedProjects.every(slug => data.projects.some(project => project.slug === slug)) && !data.projects.some(project => ['datakhoj', 'iqra-online-mart'].includes(project.slug)));
@@ -31,17 +32,34 @@ assert('Search Console verification meta preserved', publicSource.includes('Z7hO
 assert('Search Console verification HTML preserved', fs.existsSync(path.join(root, 'public/google7974d87a16aa1b38.html')) && read('public/google7974d87a16aa1b38.html').includes('google-site-verification: google7974d87a16aa1b38.html'));
 assert('3D scene, WebGL canvas, and motion control have been removed', !publicSource.includes('WorkbenchScene') && !publicSource.includes('scene-motion-toggle') && !read('src/styles.css').includes('workbench-canvas') && !fs.existsSync(path.join(root, 'src/scene/WorkbenchScene.ts')));
 assert('Homepage follows the source index visual system without 3D artwork', read('src/App.tsx').includes('source-hero') && read('src/styles.css').includes('--lime: #cdff57') && read('src/styles.css').includes('--mint: #57e8ff') && !publicSource.includes('WorkbenchScene'));
-assert('Portfolio remains multi-page with focused service and work previews', read('src/App.tsx').includes("'software-development', 'android-support', 'office-administration'") && read('src/App.tsx').includes('site.projects.slice(0, 3)') && read('src/App.tsx').includes("key: 'experience'") && read('src/App.tsx').includes('Claims, Evidence & Limits'));
+assert('Portfolio remains multi-page with focused service and work previews', read('src/App.tsx').includes('featuredProjects') && read('src/App.tsx').includes("key: 'experience'") && read('src/App.tsx').includes('Claims, Evidence & Limits') && read('src/data/site-content.json').includes('"featuredServices"'));
 assert('Reduced-motion preference disables decorative motion', read('src/styles.css').includes('@media (prefers-reduced-motion: reduce)') && read('src/styles.css').includes('.source-marquee > div'));
 assert('Hero and page spacing use the compact source-index rhythm', read('src/styles.css').includes('.source-hero { display: grid') && read('src/styles.css').includes('padding: clamp(43px,6vw,76px)') && read('src/styles.css').includes('min-height: 58px'));
 assert('Bilingual evidence page links all public project sources and limits', ['en', 'bn'].every(lang => data.pages[lang].evidence?.title && data.pages[lang].evidence?.description) && data.projects.every(project => /^https:\/\/github\.com\//.test(project.url)) && read('src/App.tsx').includes('EvidencePage'));
-assert('Evidence from the public profile README appears on project pages', ['ternux', 'adt', 'lai', 'ggen', 'songjog'].every(slug => data.projects.some(project => project.slug === slug && project.evidence?.en && project.evidence?.bn)) && read('src/App.tsx').includes('ENGINEERING EVIDENCE'));
+assert('Evidence from the public profile README appears on project pages', ['ternux', 'adt', 'lai', 'ggen', 'songjog'].every(slug => data.projects.some(project => project.slug === slug && project.evidence?.en && project.evidence?.bn)) && read('src/App.tsx').includes('project.evidence[lang]') && read('src/App.tsx').includes('copy.evidenceLabel'));
 assert('Search metadata and route generation are configured', read('scripts/create-routes.mjs').includes('hreflang="x-default"') && read('scripts/create-routes.mjs').includes('application/ld+json') && read('index.html').includes('<!-- ROUTE_LINKS -->'));
 assert('Only one canonical URL is emitted per generated route', !read('scripts/create-routes.mjs').includes('return `<link rel="canonical"') && read('scripts/create-routes.mjs').includes('rel="canonical"'));
 assert('Public 404 and robots/sitemap are produced', read('scripts/create-routes.mjs').includes('404.html') && read('scripts/create-routes.mjs').includes('sitemap.xml') && read('scripts/create-routes.mjs').includes('robots.txt'));
 const workflowPath = path.join(root, '.github/workflows/deploy.yml');
 assert('GitHub Pages deploy workflow is present', fs.existsSync(workflowPath) && /push:\s*\n\s*branches:\s*\[main\]/.test(fs.readFileSync(workflowPath, 'utf8')));
 assert('Legacy Pocket Systems Lab copy is removed from active site source', !/Pocket Systems Lab|The workshop begins in your hand|station=work/.test(publicSource));
+
+assert('Projects include localized search metadata, overview, highlights, and stack', data.projects.every(project => ['en', 'bn'].every(lang => project.metaTitle?.[lang] && project.metaDescription?.[lang] && project.overview?.[lang] && project.highlights?.[lang]?.length >= 3 && project.role?.[lang] && project.state?.[lang]) && project.stack?.length >= 4));
+assert('Services are grouped and carry search keywords', data.serviceGroups.length === 3 && data.services.every(service => service.group && service.keywords?.length >= 2 && ['en', 'bn'].every(lang => service.title[lang] && service.summary[lang] && service.detail[lang] && service.deliverables[lang]?.length >= 3)));
+assert('Bilingual FAQ covers the services page', ['en', 'bn'].every(lang => data.pages[lang].services.faq?.length === 6 && data.pages[lang].services.faq.every(item => item.question && item.answer)));
+assert('Contact page includes a message brief and response expectation', ['en', 'bn'].every(lang => data.pages[lang].contact.brief?.length === 3 && data.pages[lang].contact.responseValue));
+assert('Evidence page includes verification steps', ['en', 'bn'].every(lang => data.pages[lang].evidence.how?.length === 3));
+assert('Home features the requested projects and services', data.pages.en.home.featuredProjects?.join(',') === 'ternux,lai,adt' && data.pages.bn.home.featuredProjects?.join(',') === 'ternux,lai,adt' && data.pages.en.home.featuredServices?.length === 3 && data.pages.bn.home.featuredServices?.length === 3);
+assert('Every profile page has a keyword set', ['en', 'bn'].every(lang => Object.values(data.pages[lang]).every(page => page.keywords?.length >= 5)));
+assert('Social preview, manifest, and icon assets exist', ['public/og.png', 'public/icon.svg', 'public/icon-192.png', 'public/icon-512.png', 'public/apple-touch-icon.png', 'public/site.webmanifest'].every(file => fs.existsSync(path.join(root, file))));
+assert('HTML head includes social image alt text and manifest', read('index.html').includes('og:image:alt') && read('index.html').includes('twitter:image:alt') && read('index.html').includes('site.webmanifest') && read('index.html').includes('apple-touch-icon'));
+assert('Public sitemap mirror matches the route matrix', (() => {
+  const locs = [...read('public/sitemap.xml').matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
+  return locs.length === routes.length && routes.every(route => locs.includes(`${baseUrl}${route}`)) && !locs.some(url => /datakhoj|iqra-online-mart/.test(url));
+})());
+assert('Robots file points to the sitemap', read('public/robots.txt').includes(`${baseUrl}/sitemap.xml`));
+assert('Sitemap generation includes lastmod and hreflang alternates', read('scripts/create-routes.mjs').includes('<lastmod>') && read('scripts/create-routes.mjs').includes('xhtml:link'));
+assert('Structured data generation covers the main entity types', ['Person', 'WebSite', 'ProfilePage', 'Service', 'SoftwareApplication', 'SoftwareSourceCode', 'BreadcrumbList', 'FAQPage', 'knowsAbout', 'hasOfferCatalog'].every(token => read('scripts/create-routes.mjs').includes(token)));
 
 if (!sourceOnly) {
   const dist = path.join(root, 'dist');
@@ -51,17 +69,29 @@ if (!sourceOnly) {
     const routeHtml = routes.map(route => ({ route, file: path.join(dist, route.replace(/^\//, ''), 'index.html') }));
     assert('Every English and Bangla route has a static HTML entry', routeHtml.every(item => fs.existsSync(item.file)));
     const pages = routeHtml.filter(item => fs.existsSync(item.file)).map(({ route, file }) => ({ route, html: fs.readFileSync(file, 'utf8') }));
-    assert('Each generated route has unique title, canonical and one h1', pages.every(({ route, html }) => html.includes(`<link rel="canonical" href="${data.site.url.replace(/\/$/, '')}${route}"`) && (html.match(/<link rel="canonical"/g) ?? []).length === 1 && (html.match(/<h1\b/g) ?? []).length === 1 && /<title>[^<]+<\/title>/.test(html)));
+    const titles = pages.map(({ html }) => html.match(/<title>([^<]*)<\/title>/)?.[1] ?? '');
+    assert('Each generated route has unique title, canonical and one h1', pages.every(({ route, html }) => html.includes(`<link rel="canonical" href="${baseUrl}${route}"`) && (html.match(/<link rel="canonical"/g) ?? []).length === 1 && (html.match(/<h1\b/g) ?? []).length === 1 && /<title>[^<]+<\/title>/.test(html)));
+    assert('Meta titles are unique across the route matrix', new Set(titles).size === routes.length);
     assert('Every generated route has Google verification and localized alternate links', pages.every(({ html }) => html.includes('name="google-site-verification"') && html.includes('hreflang="en"') && html.includes('hreflang="bn"') && html.includes('hreflang="x-default"')));
     assert('Every generated route has a route-aware JSON-LD record', pages.every(({ html }) => html.includes('id="route-schema"') && html.includes('application/ld+json')));
-    assert('Sitemap lists every route exactly once', fs.existsSync(path.join(dist, 'sitemap.xml')) && routes.every(route => readDist('sitemap.xml').includes(`<loc>${data.site.url.replace(/\/$/, '')}${route}</loc>`)) && (readDist('sitemap.xml').match(/<url>/g) ?? []).length === routes.length);
-    assert('Robots points to the generated sitemap', readDist('robots.txt').includes(`${data.site.url.replace(/\/$/, '')}/sitemap.xml`));
+    assert('Every generated route publishes meta keywords and a substantial description', pages.every(({ html }) => /<meta name="keywords" content="[^"]{20,}"/.test(html) && (html.match(/<meta name="description" content="([^"]+)"/)?.[1]?.length ?? 0) >= 60));
+    assert('Sitemap lists every route exactly once', fs.existsSync(path.join(dist, 'sitemap.xml')) && routes.every(route => readDist('sitemap.xml').includes(`<loc>${baseUrl}${route}</loc>`)) && (readDist('sitemap.xml').match(/<url>/g) ?? []).length === routes.length);
+    assert('Robots points to the generated sitemap', readDist('robots.txt').includes(`${baseUrl}/sitemap.xml`));
+    assert('Generated sitemap includes lastmod and reciprocal hreflang', readDist('sitemap.xml').includes('<lastmod>') && readDist('sitemap.xml').includes('hreflang="bn"') && readDist('sitemap.xml').includes('xhtml:link'));
     const about = fs.readFileSync(path.join(dist, 'about/index.html'), 'utf8');
     const bnAbout = fs.readFileSync(path.join(dist, 'bn/about/index.html'), 'utf8');
     assert('English and Bangla about routes have separate metadata and content', about.includes('About Sobuj Miah') && bnAbout.includes('সবুজ মিয়া') && about !== bnAbout);
     const experience = fs.readFileSync(path.join(dist, 'experience/index.html'), 'utf8');
     const bnExperience = fs.readFileSync(path.join(dist, 'bn/experience/index.html'), 'utf8');
     assert('English and Bangla experience fallback includes all seven source dates', ['Mar 2023 — Present', 'Sep 2022 — Feb 2023', '2015 — 2017'].every(date => experience.includes(date) && bnExperience.includes(date)) && (experience.match(/<article>/g) ?? []).length === 7);
+    const home = readDist('index.html');
+    assert('Generated home defines Person, WebSite, ProfilePage, and BreadcrumbList', home.includes('"@type":"Person"') && home.includes('"@type":"WebSite"') && home.includes('"@type":"ProfilePage"') && home.includes('"@type":"BreadcrumbList"') && home.includes('"knowsAbout"') && home.includes('"hasOfferCatalog"'));
+    const servicesPage = readDist('services/index.html');
+    assert('Generated services page defines CollectionPage and FAQPage', servicesPage.includes('"@type":"CollectionPage"') && servicesPage.includes('"@type":"FAQPage"'));
+    const servicePage = readDist('services/linux-systems/index.html');
+    assert('Generated service page defines a Service with a provider', servicePage.includes('"@type":"Service"') && servicePage.includes('"provider"'));
+    const projectPage = readDist('projects/ternux/index.html');
+    assert('Generated project page defines SoftwareSourceCode with a repository', projectPage.includes('"@type":"SoftwareSourceCode"') && projectPage.includes('"codeRepository"'));
     assert('Complete application JS stays under 80 KiB gzipped without a 3D renderer', totalJsSize() < 80 && !jsFiles().some(file => /three|workbench/i.test(file)), `${totalJsSize().toFixed(1)} KiB`);
   }
 }
